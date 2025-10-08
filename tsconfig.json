@@ -1,6 +1,22 @@
 {
-    "extends": "./tsconfig.base.json",
-    "compileOnSave": false,
-    "files": [],
-    "references": []
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/frontend"
+    },
+    {
+      "path": "./apps/admin"
+    },
+    {
+      "path": "./apps/backend"
+    },
+    {
+      "path": "./apps/bot"
+    },
+    {
+      "path": "./libs/shared"
+    }
+  ]
 }
