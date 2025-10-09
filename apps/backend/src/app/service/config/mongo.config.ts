@@ -4,7 +4,10 @@ import { MongooseModuleAsyncOptions } from '@nestjs/mongoose';
 export const getMongoConfig = (): MongooseModuleAsyncOptions => {
   return {
     useFactory: (configService: ConfigService) => ({
-      uri: getMongoString(configService),
+      uri: (() => {
+        console.log(getMongoString(configService));
+        return getMongoString(configService);
+      })(),
     }),
     inject: [ConfigService],
     imports: [ConfigModule],

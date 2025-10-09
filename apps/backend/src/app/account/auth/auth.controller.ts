@@ -25,6 +25,6 @@ export class AuthController {
   async login(@Body() { tgId, pin }: LoginDto) {
     const { id } = await this.authService.validateUser(tgId, pin);
 
-    this.authService.login(id);
+    return this.authService.login(id);
   }
 }
