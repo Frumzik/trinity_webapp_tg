@@ -28,7 +28,7 @@ services:
   backend:
     build: ./apps/backend
     env_file:
-      - ./apps/backend/.${ENVIRONMENT:-dev}.env
+      - ./apps/backend/.${ENVIRONMENT:-test}.env
     depends_on:
       - postgres
     ports:
@@ -37,7 +37,7 @@ services:
   bot:
     build: ./apps/bot
     env_file:
-      - ./apps/bot/.${ENVIRONMENT:-dev}.env
+      - ./apps/bot/.${ENVIRONMENT:-test}.env
     depends_on:
       - postgres
     ports:
@@ -46,14 +46,14 @@ services:
   frontend:
     build: ./apps/frontend
     env_file:
-      - ./apps/frontend/.${ENVIRONMENT:-dev}.env
+      - ./apps/frontend/.${ENVIRONMENT:-test}.env
     ports:
       - "4200:4200"
 
   admin:
     build: ./apps/admin
     env_file:
-      - ./apps/admin/.${ENVIRONMENT:-dev}.env
+      - ./apps/admin/.${ENVIRONMENT:-test}.env
     ports:
       - "4201:4201"
 
