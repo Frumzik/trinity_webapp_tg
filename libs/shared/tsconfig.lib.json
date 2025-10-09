@@ -1,14 +1,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "paths": {
+      "@trinity/shared": ["./src/index.ts"]
+    },
+    "composite": true,
     "rootDir": "src",
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
     "types": ["node"],
-    "ignoreDeprecations": "6.0"
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "include": ["src/**/*.ts"],
   "references": []

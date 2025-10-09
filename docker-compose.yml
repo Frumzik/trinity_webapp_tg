@@ -28,7 +28,7 @@ services:
   backend:
     build: ./apps/backend
     env_file:
-      - ./apps/backend/.${ENVIRONMENT:-test}.env
+      - ./apps/backend/envs/.${ENVIRONMENT:-test}.env
     depends_on:
       - postgres
     ports:
