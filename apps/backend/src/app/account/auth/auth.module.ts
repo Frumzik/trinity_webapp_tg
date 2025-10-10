@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from '../user';
-import { getJwtConfig } from '../../service';
+import { UsersModule } from '../users';
+import { CountersModule, getJwtConfig } from '../../service';
 
 @Module({
-  imports: [UserModule, JwtModule.registerAsync(getJwtConfig())],
+  imports: [UsersModule, JwtModule.registerAsync(getJwtConfig()), CountersModule],
   providers: [AuthService],
   controllers: [AuthController],
 })

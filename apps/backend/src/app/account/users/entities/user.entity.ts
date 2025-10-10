@@ -3,7 +3,9 @@ import { compare, genSalt, hash } from 'bcryptjs';
 
 export class UserEntity implements IUser {
   _id?: string;
-  displayName!: string;
+  userId: number;
+  name!: string;
+  username!: string;
   tgId!: number;
   pinHash!: string;
   email?: string;
@@ -12,8 +14,10 @@ export class UserEntity implements IUser {
 
   constructor(user: IUser) {
     this._id = user._id;
-    this.displayName = user.displayName;
+    this.userId = user.userId;
+    this.name = user.name;
     this.tgId = user.tgId;
+    this.username = user.username;
     this.pinHash = user.pinHash;
     this.email = user.email;
     this.passwordHash = user.passwordHash;

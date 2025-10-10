@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UserModule } from './account/user';
+import { UsersModule } from './account/users';
 import { AuthModule } from './account/auth';
-import { getMongoConfig } from './service';
+import { CountersModule, getMongoConfig } from './service';
 
 @Module({
   imports: [
@@ -13,8 +13,9 @@ import { getMongoConfig } from './service';
       envFilePath: 'apps/backend/src/envs/.dev.env',
     }),
     MongooseModule.forRootAsync(getMongoConfig()),
-    UserModule,
+    UsersModule,
     AuthModule,
+    CountersModule,
   ],
   controllers: [],
   providers: [],

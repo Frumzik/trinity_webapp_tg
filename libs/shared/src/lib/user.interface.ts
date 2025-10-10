@@ -6,7 +6,9 @@ export enum UserRole {
 
 export interface IUser {
   _id?: string;
-  displayName: string;
+  userId: number;
+  name: string;
+  username: string;
   tgId: number;
   pinHash: string;
   email?: string;

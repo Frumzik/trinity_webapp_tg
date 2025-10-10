@@ -2,15 +2,28 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 export class RegisterDto {
-  tgId!: number;
-  pin!: string;
-  displayName!: string;
-}
+    tgId!: number;
 
-export class LoginDto {
-  tgId!: number;
-  pin!: string;
-}
+    pin!: string;
+
+    name!: string;
+
+    username!: string;
+  }
+
+  export class LoginDto {
+    tgId!: number;
+
+    pin!: string;
+  }
+
+  export class RegisterResponseDto {
+    tgId!: number;
+  }
+
+   export class LoginResponseDto {
+    access_token!: string;
+  }
 
 @Controller('auth')
 export class AuthController {
@@ -22,9 +35,9 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() { tgId, pin }: LoginDto) {
-    const { id } = await this.authService.validateUser(tgId, pin);
+  async loginByTgId(@Body() { tgId, pin }: LoginDto) {
+    const validatedUser = await this.authService.validateUserByTgId(tgId, pin);
 
-    return this.authService.login(id);
+    return this.authService.login(validatedUser.userId);
   }
 }

@@ -1,38 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterDto } from './auth.controller';
-import { UserRepository } from '../user/repositories/user.repository';
-import { UserEntity } from '../user/entities/user.entity';
-import { UserRole } from '@trinity/shared';
+import { UsersRepository } from '../users/repositories/users.repository';
+import { UserEntity } from '../users/entities/user.entity';
+import { CounterType, UserRole } from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
+import { CountersService } from '../../service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly jwtService: JwtService
+    private readonly usersRepository: UsersRepository,
+    private readonly jwtService: JwtService,
+    private readonly countersService: CountersService
   ) {}
 
-  async register({ displayName, tgId, pin }: RegisterDto) {
-    const oldUser = await this.userRepository.findUserByTgId(tgId);
+  async register({ name, tgId, pin, username }: RegisterDto) {
+    const oldUser = await this.usersRepository.findUserByTgId(tgId);
 
     if (oldUser) {
       throw new Error('Такой пользователь уже зарегистрирован');
     }
 
     const newUserEntity = await new UserEntity({
+      userId: await this.countersService.getNextSequence(CounterType.USER_ID),
       tgId,
-      displayName,
+      name,
+      username,
       role: UserRole.User,
       pinHash: '',
     }).setPin(pin);
 
-    const newUser = await this.userRepository.createUser(newUserEntity);
+    const newUser = await this.usersRepository.createUser(newUserEntity);
 
-    return { email: newUser.email };
+    if(newUser) {
+      await this.countersService.saveNextSequence(CounterType.USER_ID)
+    }
+
+    return { userId: newUser.userId };
   }
 
-  async validateUser(tgId: number, pin: string) {
-    const user = await this.userRepository.findUserByTgId(tgId);
+  async validateUserByTgId(tgId: number, pin: string) {
+    const user = await this.usersRepository.findUserByTgId(tgId);
 
     if (!user) {
       throw new Error('Неверный логин или пароль');
@@ -46,12 +54,12 @@ export class AuthService {
       throw new Error('Неверный логин или пароль');
     }
 
-    return { id: user._id };
+    return { userId: user.userId };
   }
 
-  async login(id: string) {
+  async login(userId: number) {
     return {
-      access_token: await this.jwtService.signAsync({ id })
+      access_token: await this.jwtService.signAsync({ userId })
     }
   }
 }

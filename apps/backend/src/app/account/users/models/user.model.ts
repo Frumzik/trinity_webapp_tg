@@ -5,9 +5,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 @Schema()
 export class User extends Document<string> implements IUser {
   @Prop()
-  displayName!: string;
+  name!: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
+  userId!: number;
+
+  @Prop({ required: true, unique: true })
+  username!: string;
+
+  @Prop({ required: true, unique: true })
   tgId!: number;
 
   @Prop({ required: true })
@@ -17,10 +23,10 @@ export class User extends Document<string> implements IUser {
   email?: string;
 
   @Prop()
-  passwordHas?: string;
+  passwordHash?: string;
 
   @Prop({ required: true, enum: UserRole, type: String })
   role!: UserRole;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User)
+export const UserSchema = SchemaFactory.createForClass(User);
