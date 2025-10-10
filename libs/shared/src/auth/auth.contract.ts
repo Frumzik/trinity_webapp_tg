@@ -20,6 +20,7 @@ export class AuthRegisterDto {
   // Для TG
   @ValidateIf((o) => o.type === AuthType.TG)
   @IsNumber()
+  @IsNotEmpty()
   tgId!: number;
 
   @ValidateIf((o) => o.type === AuthType.TG)
@@ -30,10 +31,12 @@ export class AuthRegisterDto {
   // Для Email
   @ValidateIf((o) => o.type === AuthType.EMAIL)
   @IsEmail()
+  @IsNotEmpty()
   email!: string;
 
   @ValidateIf((o) => o.type === AuthType.EMAIL)
   @IsString()
+  @IsNotEmpty()
   @IsNotEmpty()
   password!: string;
 

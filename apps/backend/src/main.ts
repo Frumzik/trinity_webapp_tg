@@ -3,15 +3,29 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
+import { AllExceptionsFilter } from './app/service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
   const port = process.env.PORT || 3000;
+
+  const app = await NestFactory.create(AppModule);
+
+  app.setGlobalPrefix(globalPrefix);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // удаляет поля, которых нет в DTO
+      forbidNonWhitelisted: true, // выбрасывает ошибку, если есть лишние поля
+      transform: true, // автоматически преобразует типы (например, string → number),
+      errorHttpStatusCode: 400,   // возвращаем BadRequest при ошибках
+    })
+  );
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`

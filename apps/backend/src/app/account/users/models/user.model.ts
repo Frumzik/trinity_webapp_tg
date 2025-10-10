@@ -25,8 +25,8 @@ export class User extends Document<string> implements IUser {
   @Prop()
   name?: string;
 
-  @Prop({ unique: true })
-  username!: string;
+  @Prop()
+  username?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
