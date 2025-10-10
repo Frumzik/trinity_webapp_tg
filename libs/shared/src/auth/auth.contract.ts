@@ -7,11 +7,7 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator';
-
-export enum AuthType {
-  TG = 'TG',
-  EMAIL = 'EMAIL',
-}
+import { AuthType } from './auth.interface.js';
 
 export class AuthRegisterDto {
   @IsEnum(AuthType)
@@ -46,6 +42,7 @@ export class AuthRegisterDto {
 
   @ValidateIf((o) => o.type === AuthType.TG)
   @IsString()
+  @IsOptional()
   username?: string;
 }
 
