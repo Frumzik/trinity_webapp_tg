@@ -4,22 +4,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
 export class User extends Document<string> implements IUser {
-  @Prop()
-  name!: string;
-
   @Prop({ required: true, unique: true })
   userId!: number;
 
-  @Prop({ required: true, unique: true })
-  username!: string;
-
-  @Prop({ required: true, unique: true })
-  tgId!: number;
-
-  @Prop({ required: true })
-  pinHash!: string;
+  @Prop({ unique: true, sparse: true })
+  tgId?: number;
 
   @Prop()
+  pinHash?: string;
+
+  @Prop({ unique: true, sparse: true })
   email?: string;
 
   @Prop()
@@ -27,6 +21,12 @@ export class User extends Document<string> implements IUser {
 
   @Prop({ required: true, enum: UserRole, type: String })
   role!: UserRole;
+
+  @Prop()
+  name?: string;
+
+  @Prop({ unique: true })
+  username!: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

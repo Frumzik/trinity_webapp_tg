@@ -1,2 +1,3 @@
-export * from './lib/user.interface.js';
-export * from './lib/counter.interface.js';
+export * from './user/user.interface.js';
+export * from './counter/counter.interface.js';
+export * from './auth/auth.contract.js'

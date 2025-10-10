@@ -4,10 +4,10 @@ import { compare, genSalt, hash } from 'bcryptjs';
 export class UserEntity implements IUser {
   _id?: string;
   userId: number;
-  name!: string;
-  username!: string;
-  tgId!: number;
-  pinHash!: string;
+  name?: string;
+  username?: string;
+  tgId?: number;
+  pinHash?: string;
   email?: string;
   passwordHash?: string;
   role!: UserRole;
@@ -45,6 +45,10 @@ export class UserEntity implements IUser {
   }
 
   public validatePin(pin: string) {
+    if (!this.pinHash) {
+      return false; // нет пина — сразу false
+    }
+
     return compare(pin, this.pinHash);
   }
 }

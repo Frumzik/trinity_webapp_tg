@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RegisterDto } from './auth.controller';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { UserEntity } from '../users/entities/user.entity';
-import { CounterType, UserRole } from '@trinity/shared';
+import {
+  AuthRegisterDto,
+  CounterType,
+  UserRole,
+} from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
 import { CountersService } from '../../service';
 
@@ -14,29 +17,29 @@ export class AuthService {
     private readonly countersService: CountersService
   ) {}
 
-  async register({ name, tgId, pin, username }: RegisterDto) {
-    const oldUser = await this.usersRepository.findUserByTgId(tgId);
+  async registerByTgId({tgId, pin, name, username }: AuthRegisterDto) {
+      const oldUser = await this.usersRepository.findUserByTgId(tgId);
 
-    if (oldUser) {
-      throw new Error('Такой пользователь уже зарегистрирован');
-    }
+      if (oldUser) {
+        throw new Error('Такой пользователь уже зарегистрирован');
+      }
 
-    const newUserEntity = await new UserEntity({
-      userId: await this.countersService.getNextSequence(CounterType.USER_ID),
-      tgId,
-      name,
-      username,
-      role: UserRole.User,
-      pinHash: '',
-    }).setPin(pin);
+      const newUserEntity = await new UserEntity({
+        userId: await this.countersService.getNextSequence(CounterType.USER_ID),
+        tgId,
+        name,
+        username,
+        role: UserRole.User,
+        pinHash: '',
+      }).setPin(pin);
 
-    const newUser = await this.usersRepository.createUser(newUserEntity);
+      const newUser = await this.usersRepository.createUser(newUserEntity);
 
-    if(newUser) {
-      await this.countersService.saveNextSequence(CounterType.USER_ID)
-    }
+      if (newUser) {
+        await this.countersService.saveNextSequence(CounterType.USER_ID);
+      }
 
-    return { userId: newUser.userId };
+      return { userId: newUser.userId };
   }
 
   async validateUserByTgId(tgId: number, pin: string) {
@@ -57,9 +60,51 @@ export class AuthService {
     return { userId: user.userId };
   }
 
+  async registerByEmail({email, password, name }: AuthRegisterDto) {
+      const oldUser = await this.usersRepository.findUserByEmail(email);
+
+      if (oldUser) {
+        throw new Error('Такой пользователь уже зарегистрирован');
+      }
+
+      const newUserEntity = await new UserEntity({
+        userId: await this.countersService.getNextSequence(CounterType.USER_ID),
+        email,
+        name,
+        role: UserRole.User,
+        passwordHash: '',
+      }).setPassword(password);
+
+      const newUser = await this.usersRepository.createUser(newUserEntity);
+
+      if (newUser) {
+        await this.countersService.saveNextSequence(CounterType.USER_ID);
+      }
+
+      return { userId: newUser.userId };
+  }
+
+  async validateUserByEmail(email: string, password: string) {
+    const user = await this.usersRepository.findUserByEmail(email);
+
+    if (!user) {
+      throw new Error('Неверный логин или пароль');
+    }
+
+    const userEntity = new UserEntity(user);
+
+    const isCorrectPassword = await userEntity.validatePassword(password);
+
+    if (!isCorrectPassword) {
+      throw new Error('Неверный логин или пароль');
+    }
+
+    return { userId: user.userId };
+  }
+
   async login(userId: number) {
     return {
-      access_token: await this.jwtService.signAsync({ userId })
-    }
+      access_token: await this.jwtService.signAsync({ userId }),
+    };
   }
 }
