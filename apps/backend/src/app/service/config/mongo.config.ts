@@ -5,7 +5,6 @@ export const getMongoConfig = (): MongooseModuleAsyncOptions => {
   return {
     useFactory: (configService: ConfigService) => ({
       uri: (() => {
-        console.log(getMongoString(configService));
         return getMongoString(configService);
       })(),
     }),
