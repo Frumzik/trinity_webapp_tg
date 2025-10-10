@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { AuthType } from './auth.interface.js';
 
-export class AuthRegisterDto {
+export class AuthRegisterRequestDto {
   @IsEnum(AuthType)
   type!: AuthType;
 
@@ -46,7 +46,11 @@ export class AuthRegisterDto {
   username?: string;
 }
 
-export class AuthLoginDto {
+export class AuthRegisterResponseDto {
+  userId!: number;
+}
+
+export class AuthLoginRequestDto {
   @IsEnum(AuthType)
   type!: AuthType;
 
@@ -71,10 +75,6 @@ export class AuthLoginDto {
   password!: string;
 }
 
-export class RegisterResponseDto {
-  tgId!: number;
-}
-
-export class LoginResponseDto {
+export class AuthLoginResponseDto {
   access_token!: string;
 }

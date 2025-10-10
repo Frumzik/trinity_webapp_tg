@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { UserEntity } from '../users/entities/user.entity';
-import { AuthRegisterDto, CounterType, UserRole } from '@trinity/shared';
+import {
+  AuthLoginResponseDto,
+  AuthRegisterRequestDto,
+  AuthRegisterResponseDto,
+  CounterType,
+  UserRole,
+} from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
 import {
   CountersService,
@@ -20,7 +26,12 @@ export class AuthService {
     private eventEmitter: EventEmitter2
   ) {}
 
-  async registerByTgId({ tgId, pin, name, username }: AuthRegisterDto) {
+  async registerByTgId({
+    tgId,
+    pin,
+    name,
+    username,
+  }: AuthRegisterRequestDto): Promise<AuthRegisterResponseDto> {
     const oldUser = await this.usersRepository.findUserByTgId(tgId);
 
     if (oldUser) {
@@ -50,7 +61,10 @@ export class AuthService {
     return { userId: newUser.userId };
   }
 
-  async validateUserByTgId(tgId: number, pin: string) {
+  async validateUserByTgId(
+    tgId: number,
+    pin: string
+  ): Promise<{ userId: number }> {
     const user = await this.usersRepository.findUserByTgId(tgId);
 
     if (!user) {
@@ -68,7 +82,11 @@ export class AuthService {
     return { userId: user.userId };
   }
 
-  async registerByEmail({ email, password, name }: AuthRegisterDto) {
+  async registerByEmail({
+    email,
+    password,
+    name,
+  }: AuthRegisterRequestDto): Promise<AuthRegisterResponseDto> {
     const oldUser = await this.usersRepository.findUserByEmail(email);
 
     if (oldUser) {
@@ -97,7 +115,10 @@ export class AuthService {
     return { userId: newUser.userId };
   }
 
-  async validateUserByEmail(email: string, password: string) {
+  async validateUserByEmail(
+    email: string,
+    password: string
+  ): Promise<{ userId: number }> {
     const user = await this.usersRepository.findUserByEmail(email);
 
     if (!user) {
@@ -115,7 +136,7 @@ export class AuthService {
     return { userId: user.userId };
   }
 
-  async login(userId: number) {
+  async login(userId: number): Promise<AuthLoginResponseDto> {
     this.eventEmitter.emit(UserEvents.LOGGED_IN, new UserLoggedInEvent(userId));
 
     return {

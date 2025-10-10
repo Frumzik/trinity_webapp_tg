@@ -1,13 +1,13 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthLoginDto, AuthRegisterDto, AuthType } from '@trinity/shared';
+import { AuthLoginRequestDto, AuthLoginResponseDto, AuthRegisterRequestDto, AuthRegisterResponseDto, AuthType } from '@trinity/shared';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async registerByTgId(@Body() dto: AuthRegisterDto) {
+  async registerByTgId(@Body() dto: AuthRegisterRequestDto): Promise<AuthRegisterResponseDto> {
     switch(dto.type) {
       case AuthType.TG:
         return this.authService.registerByTgId(dto);
@@ -19,7 +19,7 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() dto: AuthLoginDto) {
+  async login(@Body() dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
     let validatedUser;
 
     switch(dto.type) {
