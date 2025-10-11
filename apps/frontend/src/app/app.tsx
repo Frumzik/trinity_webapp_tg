@@ -1,6 +1,7 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.scss';
 import NxWelcome from './nx-welcome';
+import { UserRole } from '@trinity/shared';
 
 import { Route, Routes, Link } from 'react-router-dom';
 
@@ -8,7 +9,6 @@ export function App() {
   return (
     <div>
       <NxWelcome title="@trinity/frontend" />
-
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}
       {/* Feel free to move and update them to fit your needs */}
@@ -18,7 +18,7 @@ export function App() {
       <div role="navigation">
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">{UserRole.Admin}</Link>
           </li>
           <li>
             <Link to="/page-2">Page 2</Link>
