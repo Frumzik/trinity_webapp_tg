@@ -4,7 +4,7 @@ import { User } from '../models/user.model';
 import { FilterQuery, Model } from 'mongoose';
 import { UserEntity } from '../entities/user.entity';
 import { SubscriptionEntity } from '../../../billing';
-import { UserRole } from '@trinity/shared';
+import { IUser, UserRole } from '@trinity/shared';
 
 @Injectable()
 export class UsersRepository {
@@ -23,6 +23,12 @@ export class UsersRepository {
   // Поиск пользователя
   async findUser(condition: FilterQuery<User>): Promise<UserEntity | null> {
     const user = await this.userModel.findOne(condition).exec();
+    return user ? new UserEntity(user) : null;
+  }
+
+  // Поиск пользователя
+  async findUserAll(condition: FilterQuery<User>): Promise<IUser | null> {
+    const user = await this.userModel.findOne(condition).populate('_subscriptionId').exec();
     return user ? new UserEntity(user) : null;
   }
 

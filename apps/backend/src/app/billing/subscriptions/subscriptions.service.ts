@@ -47,6 +47,24 @@ export class SubscriptionsService {
     }
   }
 
+    async findSubscriptionAll(
+    condition: FilterQuery<Subscription>
+  ): Promise<SubscriptionEntity> {
+    try {
+      const subscription = await this.subscriptionsRepository.findSubscriptionAll(
+        condition
+      );
+      if (!subscription) {
+        throw new NotFoundException('Подписка не найдена');
+      }
+      return subscription;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async deleteSubscription(
     condition: FilterQuery<Subscription>
   ): Promise<{ deleted: boolean }> {

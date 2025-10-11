@@ -1,10 +1,10 @@
-import { ISubscription } from '@trinity/shared';
+import { ISubscription, IUser } from '@trinity/shared';
 import { Types } from 'mongoose';
 import { UserEntity } from '../../../account';
 
 export class SubscriptionEntity implements ISubscription {
   _id?: Types.ObjectId;
-  _userId?: Types.ObjectId;
+  _userId?: Types.ObjectId | IUser;
   userId?: number;
   subscriptionId!: number;
 

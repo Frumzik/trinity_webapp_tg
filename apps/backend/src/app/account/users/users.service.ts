@@ -7,7 +7,7 @@ import { UsersRepository } from './repositories/users.repository';
 import { FilterQuery } from 'mongoose';
 import { User } from './models/user.model';
 import { UserEntity } from './entities/user.entity';
-import { UserRole } from '@trinity/shared';
+import { IUser, UserRole } from '@trinity/shared';
 import { SubscriptionEntity } from '../../billing';
 
 @Injectable()
@@ -29,6 +29,22 @@ export class UsersService {
   async findUser(condition: FilterQuery<User>): Promise<UserEntity> {
     try {
       const user = await this.usersRepository.findUser(condition);
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+      return user;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async findUserAll(condition: FilterQuery<User>): Promise<IUser> {
+    try {
+      const user = await this.usersRepository.findUserAll(condition);
       if (!user) {
         throw new NotFoundException('Пользователь не найден');
       }

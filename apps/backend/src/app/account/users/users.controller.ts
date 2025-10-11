@@ -2,7 +2,7 @@ import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { UsersService } from './users.service';
 import {
-  UserInfoResponseDto,
+  IUser,
   UserUpdateProfileRequestDto,
 } from '@trinity/shared';
 
@@ -12,18 +12,18 @@ export class UsersController {
 
   @Get('info')
   @UseGuards(JWTAuthGuard)
-  async info(@UserId() userId: number): Promise<UserInfoResponseDto> {
+  async info(@UserId() userId: number): Promise<IUser> {
     const user = await this.usersService.findUser({ userId });
 
-    return {
-      userId: user.userId,
-      name: user.name,
-      username: user.username,
-      tgId: user.tgId,
-      email: user.email,
-      role: user.role,
-      balance: user.balance,
-    };
+    return user
+  }
+
+  @Get('info-all')
+  @UseGuards(JWTAuthGuard)
+  async infoAll(@UserId() userId: number): Promise<IUser> {
+    const user = await this.usersService.findUserAll({ userId });
+
+    return user;
   }
 
   @Patch('update-profile')
@@ -31,7 +31,7 @@ export class UsersController {
   async update(
     @UserId() userId: number,
     @Body() updateData: UserUpdateProfileRequestDto
-  ): Promise<UserInfoResponseDto> {
+  ): Promise<IUser> {
     const user = await this.usersService.updateUserProfile(
       { userId },
       updateData

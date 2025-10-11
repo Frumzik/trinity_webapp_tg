@@ -1,8 +1,9 @@
 import { Types } from 'mongoose';
+import { IUser } from '../user/user.interface.js';
 
 export interface ISubscription {
   _id?: Types.ObjectId;
-  _userId?: Types.ObjectId;
+  _userId?: Types.ObjectId | IUser;
   userId?: number;
   subscriptionId: number;
 }

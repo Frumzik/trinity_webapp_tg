@@ -1,11 +1,11 @@
-import { IUser, UserRole } from '@trinity/shared';
+import { ISubscription, IUser, UserRole } from '@trinity/shared';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { Types } from 'mongoose';
 import { SubscriptionEntity } from '../../../billing';
 
 export class UserEntity implements IUser {
   _id?: Types.ObjectId;
-  _subscriptionId?: Types.ObjectId;
+  _subscriptionId?: Types.ObjectId | ISubscription;
   userId: number;
   name?: string;
   username?: string;

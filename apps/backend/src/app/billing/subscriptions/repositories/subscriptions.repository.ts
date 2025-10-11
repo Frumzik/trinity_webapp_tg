@@ -30,6 +30,14 @@ export class SubscriptionsRepository {
     return subscription ? new SubscriptionEntity(subscription) : null;
   }
 
+   // Поиск подписки
+  async findSubscriptionAll(
+    condition: FilterQuery<Subscription>
+  ): Promise<SubscriptionEntity | null> {
+    const subscription = await this.subscriptionModel.findOne(condition).populate("_userId").exec();
+    return subscription ? new SubscriptionEntity(subscription) : null;
+  }
+
   // Удаление подписки
   async deleteSubscription(
     condition: FilterQuery<Subscription>

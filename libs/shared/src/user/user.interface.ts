@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { ISubscription } from '../subscription/subscription.interface.js';
 
 export enum UserRole {
   User = 'User',
@@ -8,7 +9,7 @@ export enum UserRole {
 
 export interface IUser {
   _id?: Types.ObjectId;
-  _subscriptionId?: Types.ObjectId;
+  _subscriptionId?: Types.ObjectId | ISubscription;
   userId: number;
   subscriptionId?: number;
   name?: string;
