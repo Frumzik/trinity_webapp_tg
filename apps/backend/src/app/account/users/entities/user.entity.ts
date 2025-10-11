@@ -5,7 +5,7 @@ import { SubscriptionEntity } from '../../../billing';
 
 export class UserEntity implements IUser {
   _id?: Types.ObjectId;
-  _subscriptionId?: Types.ObjectId | ISubscription;
+  subscription?: Types.ObjectId | ISubscription;
   userId: number;
   name?: string;
   username?: string;
@@ -19,7 +19,7 @@ export class UserEntity implements IUser {
 
   constructor(user: IUser) {
     this._id = user._id;
-    this._subscriptionId = user._subscriptionId;
+    this.subscription = user.subscription;
     this.userId = user.userId;
     this.name = user.name;
     this.tgId = user.tgId;
@@ -89,7 +89,7 @@ export class UserEntity implements IUser {
 
   public bindSubscription(subscription: SubscriptionEntity) {
     this.subscriptionId = subscription.subscriptionId;
-    this._subscriptionId = subscription._id;
+    this.subscription = subscription._id;
 
     return this;
   }

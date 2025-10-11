@@ -34,7 +34,7 @@ export class SubscriptionsRepository {
   async findSubscriptionAll(
     condition: FilterQuery<Subscription>
   ): Promise<SubscriptionEntity | null> {
-    const subscription = await this.subscriptionModel.findOne(condition).populate("_userId").exec();
+    const subscription = await this.subscriptionModel.findOne(condition).populate("user").exec();
     return subscription ? new SubscriptionEntity(subscription) : null;
   }
 

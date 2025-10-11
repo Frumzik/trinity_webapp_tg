@@ -28,7 +28,7 @@ export class UsersRepository {
 
   // Поиск пользователя
   async findUserAll(condition: FilterQuery<User>): Promise<IUser | null> {
-    const user = await this.userModel.findOne(condition).populate('_subscriptionId').exec();
+    const user = await this.userModel.findOne(condition).populate('subscription').exec();
     return user ? new UserEntity(user) : null;
   }
 

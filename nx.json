@@ -41,6 +41,13 @@
       "options": {
         "targetName": "lint"
       }
+    },
+    {
+      "plugin": "@nx/docker",
+      "options": {
+        "buildTarget": "docker:build",
+        "runTarget": "docker:run"
+      }
     }
   ],
   "generators": {

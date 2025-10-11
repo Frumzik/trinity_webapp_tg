@@ -4,19 +4,19 @@ import { UserEntity } from '../../../account';
 
 export class SubscriptionEntity implements ISubscription {
   _id?: Types.ObjectId;
-  _userId?: Types.ObjectId | IUser;
+  user?: Types.ObjectId | IUser;
   userId?: number;
   subscriptionId!: number;
 
   constructor(subscription: ISubscription) {
     this._id = subscription._id;
-    this._userId = subscription._userId;
+    this.user = subscription.user;
     this.userId = subscription.userId;
     this.subscriptionId = subscription.subscriptionId;
   }
 
   public bindUser(user: UserEntity) {
     this.userId = user.userId;
-    this._userId = user._id;
+    this.user = user._id;
   }
 }

@@ -9,7 +9,7 @@ export enum UserRole {
 
 export interface IUser {
   _id?: Types.ObjectId;
-  _subscriptionId?: Types.ObjectId | ISubscription;
+  subscription?: Types.ObjectId | ISubscription;
   userId: number;
   subscriptionId?: number;
   name?: string;

@@ -12,7 +12,7 @@ import { SubscriptionsModule } from './billing';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // чтобы ConfigModule был доступен везде
-      envFilePath: 'apps/backend/src/envs/.dev.env',
+      envFilePath: 'apps/backend/envs/.dev.env',
     }),
     MongooseModule.forRootAsync(getMongoConfig()),
     PassportModule,

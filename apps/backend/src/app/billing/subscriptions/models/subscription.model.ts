@@ -5,7 +5,7 @@ import { Document, Types } from 'mongoose';
 @Schema()
 export class Subscription extends Document<Types.ObjectId> implements ISubscription {
   @Prop({ type: Types.ObjectId, ref: 'User'})
-  _userId?: Types.ObjectId | IUser;
+  user?: Types.ObjectId | IUser;
 
   @Prop()
   userId?: number;
