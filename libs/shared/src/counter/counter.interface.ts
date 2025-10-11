@@ -1,5 +1,6 @@
 export enum CounterType {
-  USER_ID = 'USER_ID'
+  USER_ID = 'USER_ID',
+  SUBSCRIPTION_ID = 'SUBSCRIPTION_ID',
 }
 
 export interface ICounter {

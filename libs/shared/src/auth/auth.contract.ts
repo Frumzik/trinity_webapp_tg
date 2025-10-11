@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MinLength,
   ValidateIf,
 } from 'class-validator';
 import { AuthType } from './auth.interface.js';
@@ -22,6 +23,7 @@ export class AuthRegisterRequestDto {
   @ValidateIf((o) => o.type === AuthType.TG)
   @IsString()
   @IsNotEmpty()
+  @MinLength(4)
   pin!: string;
 
   // Для Email
@@ -34,6 +36,7 @@ export class AuthRegisterRequestDto {
   @IsString()
   @IsNotEmpty()
   @IsNotEmpty()
+  @MinLength(6)
   password!: string;
 
   @IsOptional()

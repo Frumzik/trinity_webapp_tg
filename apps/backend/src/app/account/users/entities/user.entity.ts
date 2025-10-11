@@ -1,8 +1,11 @@
 import { IUser, UserRole } from '@trinity/shared';
 import { compare, genSalt, hash } from 'bcryptjs';
+import { Types } from 'mongoose';
+import { SubscriptionEntity } from '../../../billing';
 
 export class UserEntity implements IUser {
-  _id?: string;
+  _id?: Types.ObjectId;
+  _subscriptionId?: Types.ObjectId;
   userId: number;
   name?: string;
   username?: string;
@@ -11,9 +14,12 @@ export class UserEntity implements IUser {
   email?: string;
   passwordHash?: string;
   role!: UserRole;
+  balance!: number;
+  subscriptionId?: number;
 
   constructor(user: IUser) {
     this._id = user._id;
+    this._subscriptionId = user._subscriptionId;
     this.userId = user.userId;
     this.name = user.name;
     this.tgId = user.tgId;
@@ -22,6 +28,8 @@ export class UserEntity implements IUser {
     this.email = user.email;
     this.passwordHash = user.passwordHash;
     this.role = user.role;
+    this.balance = user.balance;
+    this.subscriptionId = user.subscriptionId;
   }
 
   public async setPassword(password: string) {
@@ -71,5 +79,10 @@ export class UserEntity implements IUser {
     Object.assign(this, data);
 
     return this;
+  }
+
+  public bindSubscription(subscription: SubscriptionEntity) {
+    this.subscriptionId = subscription.subscriptionId;
+    this._subscriptionId = subscription._id;
   }
 }

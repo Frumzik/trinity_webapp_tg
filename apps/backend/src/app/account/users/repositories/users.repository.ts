@@ -14,6 +14,7 @@ export class UsersRepository {
   async createUser(userEntity: UserEntity): Promise<UserEntity> {
     const newUser = new this.userModel(userEntity);
     const saved = await newUser.save();
+    
     return new UserEntity(saved);
   }
 

@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export enum UserRole {
   User = 'User',
   Moderator = 'Moderator',
@@ -5,8 +7,10 @@ export enum UserRole {
 }
 
 export interface IUser {
-  _id?: string;
+  _id?: Types.ObjectId;
+  _subscriptionId?: Types.ObjectId;
   userId: number;
+  subscriptionId?: number;
   name?: string;
   username?: string;
   tgId?: number;
@@ -14,5 +18,5 @@ export interface IUser {
   email?: string;
   passwordHash?: string;
   role: UserRole;
-
+  balance: number;
 }

@@ -1,9 +1,12 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IUser, UserRole } from '@trinity/shared';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
-export class User extends Document<string> implements IUser {
+export class User extends Document<Types.ObjectId> implements IUser {
+  @Prop({ type: Types.ObjectId, ref: 'Subscription' })
+  _subscriptionId?: Types.ObjectId;
+
   @Prop({ required: true, unique: true })
   userId!: number;
 
@@ -27,6 +30,12 @@ export class User extends Document<string> implements IUser {
 
   @Prop()
   username?: string;
+
+  @Prop({ required: true })
+  balance!: number;
+
+  @Prop()
+  subscriptionId?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

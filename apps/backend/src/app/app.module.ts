@@ -3,10 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
-import { UsersModule } from './account/users';
-import { AuthModule } from './account/auth';
-import { CountersModule, getMongoConfig } from './service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CountersModule, getMongoConfig } from './service';
+import { AuthModule, UsersModule } from './account';
+import { SubscriptionsModule } from './billing';
 
 @Module({
   imports: [
@@ -15,14 +15,15 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       envFilePath: 'apps/backend/src/envs/.dev.env',
     }),
     MongooseModule.forRootAsync(getMongoConfig()),
+    PassportModule,
+    EventEmitterModule.forRoot(),
     UsersModule,
     AuthModule,
     CountersModule,
-    PassportModule,
-    EventEmitterModule.forRoot(),
+    SubscriptionsModule,
   ],
   controllers: [],
   providers: [],
-  exports: [EventEmitterModule]
+  exports: [EventEmitterModule],
 })
 export class AppModule {}
