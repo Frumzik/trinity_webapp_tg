@@ -3,25 +3,25 @@ import { IUser, UserRole } from './user.interface.js';
 
 export class UserUpdateRequestDto {
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'Имя должно быть строкой' })
   name?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'Username должен быть строкой' })
   username?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: 'Неверный формат email' })
   email?: string;
 
   @IsOptional()
-  @IsString()
-  @MinLength(6)
+  @IsString({ message: 'Пароль должен быть строкой' })
+  @MinLength(6, { message: 'Пароль должен быть не менее 6 символов' })
   password?: string;
 
   @IsOptional()
-  @IsString()
-  @MinLength(4)
+  @IsString({ message: 'PIN должен быть строкой' })
+  @MinLength(4, { message: 'PIN должен быть не менее 4 символов' })
   pin?: string;
 }
 
