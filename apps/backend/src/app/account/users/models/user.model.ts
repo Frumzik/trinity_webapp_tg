@@ -30,3 +30,4 @@ export class User extends Document<string> implements IUser {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.index({ userId: 1 }, { unique: true });
