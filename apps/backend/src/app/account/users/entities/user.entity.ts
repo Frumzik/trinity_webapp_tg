@@ -41,6 +41,7 @@ export class UserEntity implements IUser {
   public async setPin(pin: string) {
     const salt = await genSalt(10);
     this.pinHash = await hash(pin, salt);
+
     return this;
   }
 
@@ -50,5 +51,25 @@ export class UserEntity implements IUser {
     }
 
     return compare(pin, this.pinHash);
+  }
+
+  public async updateUser(
+    data: Partial<UserEntity> & { password?: string; pin?: string }
+  ) {
+    // Хэшируем password и pin отдельно
+    if (data.password) {
+      await this.setPassword(data.password);
+      delete data.password;
+    }
+
+    if (data.pin) {
+      await this.setPin(data.pin);
+      delete data.pin;
+    }
+
+    // Копируем все остальные свойства динамически
+    Object.assign(this, data);
+
+    return this;
   }
 }

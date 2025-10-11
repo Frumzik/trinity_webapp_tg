@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from '../users/repositories/users.repository';
 import { UserEntity } from '../users/entities/user.entity';
 import {
   AuthLoginResponseDto,
@@ -16,11 +15,12 @@ import {
   UserRegisteredEvent,
 } from '../../service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UsersService } from '../users';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly countersService: CountersService,
     private eventEmitter: EventEmitter2
@@ -32,7 +32,9 @@ export class AuthService {
     name,
     username,
   }: AuthRegisterRequestDto): Promise<AuthRegisterResponseDto> {
-    const oldUser = await this.usersRepository.findUserByTgId(tgId);
+    const oldUser = await this.usersService
+      .findUser({ tgId })
+      .catch(() => null);
 
     if (oldUser) {
       throw new Error('Такой пользователь уже зарегистрирован');
@@ -47,16 +49,14 @@ export class AuthService {
       pinHash: '',
     }).setPin(pin);
 
-    const newUser = await this.usersRepository.createUser(newUserEntity);
+    const newUser = await this.usersService.createUser(newUserEntity);
 
-    if (newUser) {
-      await this.countersService.saveNextSequence(CounterType.USER_ID);
+    await this.countersService.saveNextSequence(CounterType.USER_ID);
 
-      this.eventEmitter.emit(
-        UserEvents.REGISTERED,
-        new UserRegisteredEvent(newUser.userId)
-      );
-    }
+    this.eventEmitter.emit(
+      UserEvents.REGISTERED,
+      new UserRegisteredEvent(newUser.userId)
+    );
 
     return { userId: newUser.userId };
   }
@@ -65,15 +65,9 @@ export class AuthService {
     tgId: number,
     pin: string
   ): Promise<{ userId: number }> {
-    const user = await this.usersRepository.findUserByTgId(tgId);
+    const user = await this.usersService.findUser({ tgId });
 
-    if (!user) {
-      throw new Error('Неверный логин или пароль');
-    }
-
-    const userEntity = new UserEntity(user);
-
-    const isCorrectPin = await userEntity.validatePin(pin);
+    const isCorrectPin = await user.validatePin(pin);
 
     if (!isCorrectPin) {
       throw new Error('Неверный логин или пароль');
@@ -87,7 +81,9 @@ export class AuthService {
     password,
     name,
   }: AuthRegisterRequestDto): Promise<AuthRegisterResponseDto> {
-    const oldUser = await this.usersRepository.findUserByEmail(email);
+    const oldUser = await this.usersService
+      .findUser({ email })
+      .catch(() => null);
 
     if (oldUser) {
       throw new Error('Такой пользователь уже зарегистрирован');
@@ -101,16 +97,14 @@ export class AuthService {
       passwordHash: '',
     }).setPassword(password);
 
-    const newUser = await this.usersRepository.createUser(newUserEntity);
+    const newUser = await this.usersService.createUser(newUserEntity);
 
-    if (newUser) {
-      await this.countersService.saveNextSequence(CounterType.USER_ID);
+    await this.countersService.saveNextSequence(CounterType.USER_ID);
 
-      this.eventEmitter.emit(
-        UserEvents.REGISTERED,
-        new UserRegisteredEvent(newUser.userId)
-      );
-    }
+    this.eventEmitter.emit(
+      UserEvents.REGISTERED,
+      new UserRegisteredEvent(newUser.userId)
+    );
 
     return { userId: newUser.userId };
   }
@@ -119,15 +113,9 @@ export class AuthService {
     email: string,
     password: string
   ): Promise<{ userId: number }> {
-    const user = await this.usersRepository.findUserByEmail(email);
+    const user = await this.usersService.findUser({ email });
 
-    if (!user) {
-      throw new Error('Неверный логин или пароль');
-    }
-
-    const userEntity = new UserEntity(user);
-
-    const isCorrectPassword = await userEntity.validatePassword(password);
+    const isCorrectPassword = await user.validatePassword(password);
 
     if (!isCorrectPassword) {
       throw new Error('Неверный логин или пароль');
