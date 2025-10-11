@@ -58,7 +58,7 @@ export class AuthService {
       await newUserEntity.setPassword(dto.password);
     }
 
-    const newUser = await this.usersService.createUser(newUserEntity);
+    let newUser = await this.usersService.createUser(newUserEntity);
 
     // Создаем SubscriptionEntity
     const newSubscriptionEntity = new SubscriptionEntity({
@@ -71,14 +71,13 @@ export class AuthService {
       newSubscriptionEntity
     );
 
-    // Связываем User и Subscription
-    newUser.bindSubscription(newSubscription);
-    newSubscription.bindUser(newUser);
-
-    await this.usersService.updateUser({ _id: newUser._id }, newUser);
-    await this.subscriptionsService.updateSubscription(
+    newUser = await this.usersService.bindSubscription(
+      { _id: newUser._id },
+      { subscription: newSubscription }
+    );
+    await this.subscriptionsService.bindUser(
       { _id: newSubscription._id },
-      newSubscription
+      { user: newUser }
     );
 
     await this.countersService.saveNextSequence(CounterType.USER_ID);
@@ -94,28 +93,31 @@ export class AuthService {
   }
 
   // AuthService
-async validate(dto: AuthLoginRequestDto): Promise<UserEntity> {
-  const condition =
-    dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
-  const user = await this.usersService.findUser(condition);
+  async validate(dto: AuthLoginRequestDto): Promise<UserEntity> {
+    const condition =
+      dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
+    const user = await this.usersService.findUser(condition);
 
-  const isValid =
-    dto.type === AuthType.TG
-      ? await user.validatePin(dto.pin)
-      : await user.validatePassword(dto.password);
+    const isValid =
+      dto.type === AuthType.TG
+        ? await user.validatePin(dto.pin)
+        : await user.validatePassword(dto.password);
 
-  if (!isValid) throw new Error('Неверный логин или пароль');
+    if (!isValid) throw new Error('Неверный логин или пароль');
 
-  return user;
-}
+    return user;
+  }
 
-async login(dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
-  const user = await this.validate(dto);
+  async login(dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
+    const user = await this.validate(dto);
 
-  this.eventEmitter.emit(UserEvents.LOGGED_IN, new UserLoggedInEvent(user.userId));
+    this.eventEmitter.emit(
+      UserEvents.LOGGED_IN,
+      new UserLoggedInEvent(user.userId)
+    );
 
-  return {
-    access_token: await this.jwtService.signAsync({ userId: user.userId }),
-  };
-}
+    return {
+      access_token: await this.jwtService.signAsync({ userId: user.userId }),
+    };
+  }
 }

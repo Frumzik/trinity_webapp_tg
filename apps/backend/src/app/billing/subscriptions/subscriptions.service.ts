@@ -7,6 +7,7 @@ import { FilterQuery } from 'mongoose';
 import { SubscriptionEntity } from '../../billing';
 import { Subscription } from 'rxjs';
 import { SubscriptionsRepository } from './repositories';
+import { UserEntity } from '../../account';
 
 @Injectable()
 export class SubscriptionsService {
@@ -64,12 +65,12 @@ export class SubscriptionsService {
     }
   }
 
-  async updateSubscription(
+  async bindUser(
     condition: FilterQuery<Subscription>,
-    updateData: Partial<SubscriptionEntity>
+    updateData: { user: UserEntity }
   ): Promise<SubscriptionEntity> {
     try {
-      const updated = await this.subscriptionsRepository.updateSubscription(
+      const updated = await this.subscriptionsRepository.bindUser(
         condition,
         updateData
       );

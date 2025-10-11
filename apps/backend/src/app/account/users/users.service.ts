@@ -7,6 +7,8 @@ import { UsersRepository } from './repositories/users.repository';
 import { FilterQuery } from 'mongoose';
 import { User } from './models/user.model';
 import { UserEntity } from './entities/user.entity';
+import { UserRole } from '@trinity/shared';
+import { SubscriptionEntity } from '../../billing';
 
 @Injectable()
 export class UsersService {
@@ -40,7 +42,9 @@ export class UsersService {
     }
   }
 
-  async deleteUser(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
+  async deleteUser(
+    condition: FilterQuery<User>
+  ): Promise<{ deleted: boolean }> {
     try {
       const result = await this.usersRepository.deleteUser(condition);
       if (!result.deleted) {
@@ -56,12 +60,15 @@ export class UsersService {
     }
   }
 
-  async updateUser(
+  async updateUserProfile(
     condition: FilterQuery<User>,
-    updateData: Partial<UserEntity> & { password?: string; pin?: string }
+    updateData: { name?: string; username?: string }
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUser(condition, updateData);
+      const updated = await this.usersRepository.updateUserProfile(
+        condition,
+        updateData
+      );
 
       if (!updated) {
         throw new NotFoundException('Пользователь не найден для обновления');
@@ -72,7 +79,127 @@ export class UsersService {
       const message =
         error instanceof Error
           ? error.message
-          : 'Ошибка при обновлении пользователя';
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateUserPin(
+    condition: FilterQuery<User>,
+    updateData: { pin: string }
+  ): Promise<UserEntity> {
+    try {
+      const updated = await this.usersRepository.updateUserPin(
+        condition,
+        updateData
+      );
+
+      if (!updated) {
+        throw new NotFoundException('Пользователь не найден для обновления');
+      }
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateUserPassword(
+    condition: FilterQuery<User>,
+    updateData: { password: string }
+  ): Promise<UserEntity> {
+    try {
+      const updated = await this.usersRepository.updateUserPassword(
+        condition,
+        updateData
+      );
+
+      if (!updated) {
+        throw new NotFoundException('Пользователь не найден для обновления');
+      }
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateUserBalance(
+    condition: FilterQuery<User>,
+    updateData: { balance: number }
+  ): Promise<UserEntity> {
+    try {
+      const updated = await this.usersRepository.updateUserBalance(
+        condition,
+        updateData
+      );
+
+      if (!updated) {
+        throw new NotFoundException('Пользователь не найден для обновления');
+      }
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateUserRole(
+    condition: FilterQuery<User>,
+    updateData: { role: UserRole }
+  ): Promise<UserEntity> {
+    try {
+      const updated = await this.usersRepository.updateUserRole(
+        condition,
+        updateData
+      );
+
+      if (!updated) {
+        throw new NotFoundException('Пользователь не найден для обновления');
+      }
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async bindSubscription(
+    condition: FilterQuery<User>,
+    updateData: { subscription: SubscriptionEntity }
+  ): Promise<UserEntity> {
+    try {
+      const updated = await this.usersRepository.bindSubscription(
+        condition,
+        updateData
+      );
+
+      if (!updated) {
+        throw new NotFoundException('Пользователь не найден для обновления');
+      }
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
       throw new InternalServerErrorException(message);
     }
   }

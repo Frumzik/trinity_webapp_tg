@@ -15,12 +15,6 @@ export class SubscriptionEntity implements ISubscription {
     this.subscriptionId = subscription.subscriptionId;
   }
 
-  public updateSubscription(data: Partial<SubscriptionEntity>) {
-    // Обновляем все свойства динамически
-    Object.assign(this, data);
-    return this;
-  }
-
   public bindUser(user: UserEntity) {
     this.userId = user.userId;
     this._userId = user._id;

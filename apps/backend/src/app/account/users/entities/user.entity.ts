@@ -61,22 +61,28 @@ export class UserEntity implements IUser {
     return compare(pin, this.pinHash);
   }
 
-  public async updateUser(
-    data: Partial<UserEntity> & { password?: string; pin?: string }
-  ) {
-    // Хэшируем password и pin отдельно
-    if (data.password) {
-      await this.setPassword(data.password);
-      delete data.password;
+  public updateUserProfile(data: { username?: string; name?: string }) {
+    if (data.name !== undefined) {
+      this.name = data.name;
+    }
+    if (data.username !== undefined) {
+      this.username = data.username;
+    }
+    return this;
+  }
+
+  public async updateUserPin(pin: string) {
+    if (pin) {
+      await this.setPin(pin);
     }
 
-    if (data.pin) {
-      await this.setPin(data.pin);
-      delete data.pin;
-    }
+    return this;
+  }
 
-    // Копируем все остальные свойства динамически
-    Object.assign(this, data);
+  public async updateUserPassword(password: string) {
+    if (password) {
+      await this.setPassword(password);
+    }
 
     return this;
   }
@@ -84,5 +90,19 @@ export class UserEntity implements IUser {
   public bindSubscription(subscription: SubscriptionEntity) {
     this.subscriptionId = subscription.subscriptionId;
     this._subscriptionId = subscription._id;
+
+    return this;
+  }
+
+  public updateUserBalance(balance: number) {
+    this.balance = balance;
+
+    return this;
+  }
+
+  public updateUserRole(role: UserRole) {
+    this.role = role;
+
+    return this;
   }
 }

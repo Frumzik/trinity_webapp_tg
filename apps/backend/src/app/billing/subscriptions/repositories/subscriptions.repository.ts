@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Subscription } from '../models/subscription.model';
 import { FilterQuery, Model } from 'mongoose';
 import { SubscriptionEntity } from '../entities/subscription.entity';
+import { UserEntity } from '../../../account';
 
 @Injectable()
 export class SubscriptionsRepository {
@@ -17,7 +18,7 @@ export class SubscriptionsRepository {
   ): Promise<SubscriptionEntity> {
     const newSubscription = new this.subscriptionModel(subscriptionEntity);
     const saved = await newSubscription.save();
-    
+
     return new SubscriptionEntity(saved);
   }
 
@@ -38,16 +39,16 @@ export class SubscriptionsRepository {
   }
 
   // Обновление подписки
-  async updateSubscription(
+  async bindUser(
     condition: FilterQuery<Subscription>,
-    update: Partial<SubscriptionEntity>
+    update: {user: UserEntity}
   ): Promise<SubscriptionEntity | null> {
     const subscription = await this.subscriptionModel.findOne(condition).exec();
     if (!subscription) return null;
 
     // Применяем изменения через SubscriptionEntity
     const subscriptionEntity = new SubscriptionEntity(subscription);
-    await subscriptionEntity.updateSubscription(update); // если есть async методы внутри
+    await subscriptionEntity.bindUser(update.user); // если есть async методы внутри
 
     const updated = await this.subscriptionModel
       .findOneAndUpdate(condition, subscriptionEntity, { new: true })

@@ -3,8 +3,7 @@ import { JWTAuthGuard, UserId } from '../../service';
 import { UsersService } from './users.service';
 import {
   UserInfoResponseDto,
-  UserUpdateRequestDto,
-  UserUpdateResponseDto,
+  UserUpdateProfileRequestDto,
 } from '@trinity/shared';
 
 @Controller('user')
@@ -27,13 +26,16 @@ export class UsersController {
     };
   }
 
-  @Patch('update')
+  @Patch('update-profile')
   @UseGuards(JWTAuthGuard)
   async update(
     @UserId() userId: number,
-    @Body() updateData: UserUpdateRequestDto
-  ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updateUser({ userId }, updateData);
+    @Body() updateData: UserUpdateProfileRequestDto
+  ): Promise<UserInfoResponseDto> {
+    const user = await this.usersService.updateUserProfile(
+      { userId },
+      updateData
+    );
 
     return {
       userId: user.userId,
