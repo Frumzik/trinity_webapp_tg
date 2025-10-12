@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 RUN npm install -g serve
 
 # Копируем билд React приложения
-COPY ./dist ./
+COPY apps/frontend/dist ./
 
 # Настройка порта (можно переопределять через Docker)
 ENV PORT=4200

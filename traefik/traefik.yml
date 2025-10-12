@@ -1,24 +1,14 @@
+# traefik.yml
 api:
-  dashboard: true
+  dashboard: true       # включаем дашборд
+
+log:
+  level: INFO
 
 entryPoints:
-  http:
-    address: ":80"
-  https:
-    address: ":443"
-
-        
+  web:
+    address: ":80"      # HTTP
 
 providers:
   docker:
-    endpoint: "unix:///var/run/docker.sock"
-    exposedByDefault: false
-
-# certificatesResolvers:
-#   letsEncrypt:
-#     acme:
-#       email: tov.kessler@yandex.ru
-#       storage: acme.json
-#       #caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
-#       httpChallenge:
-#         entryPoint: http
+    exposedByDefault: false  # по умолчанию Traefik не будет проксировать все контейнеры, только те, где явно указаны labels

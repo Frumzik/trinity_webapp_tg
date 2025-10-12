@@ -7,7 +7,7 @@ RUN apk add --no-cache dumb-init
 WORKDIR /usr/src/app
 
 # Копируем готовый билд NestJS
-COPY dist ./
+COPY apps/bot/dist ./
 RUN npm install --omit=dev
 
 # Настройки окружения

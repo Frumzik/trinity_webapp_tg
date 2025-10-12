@@ -45,3 +45,6 @@ Thumbs.db
 
 #db
 /mongo-data-*
+
+#logs
+*.log

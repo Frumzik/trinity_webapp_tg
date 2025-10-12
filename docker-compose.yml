@@ -1,4 +1,21 @@
 services:
+
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.insecure=true"               # включаем дашборд
+      - "--providers.docker=true"           # читаем конфигурацию из docker labels
+      - "--entrypoints.web.address=:80"     # HTTP
+    ports:
+      - "80:80"      # HTTP для пользователей
+      - "8080:8080"  # дашборд Traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - default
+
   mongo:
     image: mongo:7.0
     container_name: mongo
@@ -10,53 +27,93 @@ services:
       - 27017:27017
     volumes:
       - ./mongo-data-7.0:/data/db
+    networks:
+      - default
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3101:3000"
+    networks:
+      - default
 
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
+    networks:
+      - default
 
   loki:
     image: grafana/loki:2.8.0
     ports:
       - "3100:3100"
+    networks:
+      - default
 
   backend:
-    build: ./apps/backend
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
     env_file:
       - ./apps/backend/envs/.${ENVIRONMENT:-test}.env
     depends_on:
       - mongo
     ports:
       - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.middlewares.backend-strip-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=backend-strip-prefix"
+    networks:
+      - default
 
   bot:
-    build: ./apps/bot
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
     env_file:
       - ./apps/bot/envs/.${ENVIRONMENT:-test}.env
     depends_on:
       - mongo
     ports:
       - "3001:3001"
+    networks:
+      - default
 
   frontend:
-    build: ./apps/frontend
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
     env_file:
       - ./apps/frontend/envs/.${ENVIRONMENT:-test}.env
     ports:
       - "4200:4200"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+    networks:
+      - default
 
   admin:
-    build: ./apps/admin
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
     env_file:
       - ./apps/admin/envs/.${ENVIRONMENT:-test}.env
     ports:
       - "4201:4201"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=PathPrefix(`/admin`)"
+      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.middlewares.admin-strip-prefix.stripprefix.prefixes=/admin"
+      - "traefik.http.routers.admin.middlewares=admin-strip-prefix"
+    networks:
+      - default
 
 volumes:
   mongo-data:
