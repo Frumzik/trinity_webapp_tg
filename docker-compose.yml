@@ -4,15 +4,38 @@ services:
     image: traefik:v3.1
     container_name: traefik
     restart: always
-    command:
-      - "--api.insecure=true"               # включаем дашборд
-      - "--providers.docker=true"           # читаем конфигурацию из docker labels
-      - "--entrypoints.web.address=:80"     # HTTP
     ports:
-      - "80:80"      # HTTP для пользователей
-      - "8080:8080"  # дашборд Traefik
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/acme.json:/acme.json
+    command:
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+
+      # global redirect to https
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=http"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+
+      # middleware redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
     networks:
       - default
 
@@ -64,8 +87,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.3nity.space`)"
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.entrypoints=https"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
     networks:
       - default
 
@@ -93,8 +117,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.entrypoints=https"
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
+      - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
 
     networks:
       - default
@@ -110,8 +135,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.admin.rule=Host(`admin.3nity.space`)"
-      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.routers.admin.entrypoints=https"
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
+      - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
     networks:
       - default
 
