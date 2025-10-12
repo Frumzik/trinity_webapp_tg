@@ -1,0 +1,51 @@
+name: CI/CD
+on:
+  push:
+    branches: [ main ]
+
+# Needed for nx-set-shas when run on the main branch
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm i
+      - run: npm ci
+  cd:
+    needs: [ci]
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Deploy using ssh
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}  # вместо ключа
+        port: 22
+        script: |
+          cd /home/trinity
+          git fetch
+          git switch main
+          git pull
+          npm install
+          npx nx run-many --target=build --all --prod
+          npx nx run backend:copy-workspace-modules
+          docker-compose down
+          docker-compose build
+          docker-compose up -d
+          docker image prune --filter="dangling=true" --force
+              
