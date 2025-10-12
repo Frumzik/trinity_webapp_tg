@@ -1,0 +1,114 @@
+.levelCard {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 115px;
+}
+
+
+.levelCard__img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+  height: 115px;
+
+}
+
+.levelCard__panel {
+  position: relative;
+  z-index: 1;
+  padding: 6px 10px;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+}
+
+.levelCard__title {
+  display: inline-grid;
+  place-items: center;
+  width: 108px;
+  height: 29px;
+  padding: 0 16px;
+  border-radius: 15px;
+  background: rgba(11, 50, 90, 0.54);
+  backdrop-filter: blur(5.699999809265137px);
+  color: #FFF;
+  font-family: Arial;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.levelCard__box {
+  display: grid;
+  gap: 14px;
+  padding: 10px;
+  width: 108px;
+  height: 69px;
+  border-radius: 15px;
+  background: rgba(11, 50, 90, 0.54);
+  backdrop-filter: blur(5.699999809265137px);
+}
+
+.levelCard__subtitle {
+  color: #FFF;
+  font-family: Tahoma;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 300;
+}
+
+.levelCard__scale-container{
+  display: flex;
+  justify-content: space-between;
+}
+.levelCard__mark {
+  display: inline-block;
+  text-align: center;
+  color: #FFF;
+  font-family: Tahoma;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 300;
+}
+
+.levelCard__bar {
+  margin-top: 3px;
+  position: relative;
+  width: 89px;
+  height: 3px;
+  border-radius: 11.749px;
+  background: #984852;
+  backdrop-filter: blur(2.4476048946380615px);
+  overflow: hidden;
+}
+
+.levelCard__fill {
+  height: 3px;
+  border-radius: 11.749px;
+  background: rgba(227, 227, 227, 0.49);
+  backdrop-filter: blur(2.4476048946380615px);
+}
+.levelCard__mark {
+  display: inline-block;
+  text-align: center;
+  color: #FFF;
+  font-family: Tahoma;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 300;
+}
+
+.levelCard__mark--active {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.levelCard__mark--muted {
+  color: #7E8A94;
+  font-weight: 400;
+}
+
+.levelCard.is-clickable { cursor: pointer; }

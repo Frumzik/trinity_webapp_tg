@@ -1,0 +1,25 @@
+.trx-list {
+  margin-top: 18px;
+  border-radius: 16px 16px 0 0;
+  background: var(--White, #FFF);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.08), 0 2px 24px 0 rgba(0, 0, 0, 0.08);
+  padding: 0;
+  overflow: hidden;
+}
+.trx-list__day {
+  padding: 12px 16px 16px;
+  color: var(--Gray-500, #667085);
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+
+}
+.trx-list-title{
+  padding: 16px 16px 24px;
+  color: var(--Black, #000);
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+}

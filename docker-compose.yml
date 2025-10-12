@@ -88,8 +88,8 @@ services:
       dockerfile: apps/frontend/Dockerfile
     env_file:
       - ./apps/frontend/envs/.${ENVIRONMENT:-test}.env
-    expose:
-      - "4200"
+    ports:
+      - "4200:4200"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
@@ -106,8 +106,8 @@ services:
       dockerfile: apps/admin/Dockerfile
     env_file:
       - ./apps/admin/envs/.${ENVIRONMENT:-test}.env
-    expose:
-      - "4201"
+    ports:
+      - "4201:4201"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.admin.rule=Host(`admin.3nity.space`)"

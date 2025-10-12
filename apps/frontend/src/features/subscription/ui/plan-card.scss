@@ -1,0 +1,15 @@
+.plan {
+  display:grid; gap: 10px;
+}
+.plan__panel {
+  display:flex; justify-content:space-between; align-items:center;
+  background:#0C1230; color:#fff; border-radius:14px; padding:14px;
+}
+.plan__left { display:grid; gap:4px }
+.plan__badge { font-size:12px; opacity:.85 }
+.plan__name { font-family:var(--ff-display,inherit); font-size:20px; font-weight:800 }
+.plan__action {
+  height:32px; padding:0 12px; border:0; border-radius:10px;
+  background: linear-gradient(180deg, #DEB571 0%, #C78A4F 100%);
+  color:#fff; font-weight:800;
+}

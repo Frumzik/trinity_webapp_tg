@@ -1,0 +1,54 @@
+/* Alegreya Sans */
+@font-face {
+  font-family: "Alegreya_Sans";
+  src: url("./fonts/Alegreya_Sans/AlegreyaSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Alegreya_Sans";
+  src: url("./fonts/Alegreya_Sans/AlegreyaSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Alegreya_Sans";
+  src: url("./fonts/Alegreya_Sans/AlegreyaSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* SF Pro Display */
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("./fonts/SF_Pro_Display/SF-Pro-Display-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("./fonts/SF_Pro_Display/SF-Pro-Display-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "SF Pro Display";
+  src: url("./fonts/SF_Pro_Display/SF-Pro-Display-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* SF Pro Text */
+@font-face {
+  font-family: "SF Pro Text";
+  src: url("./fonts/SF_Pro_Text/SFProText-Medium.ttf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

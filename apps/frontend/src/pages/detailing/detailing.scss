@@ -1,0 +1,150 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 25px;
+}
+
+.scrollBox {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 16px;
+  background: #fff;
+  min-height: 220px;
+}
+
+.scrollBox__title-det {
+  color: var(--Text-Black, #121826);
+  font-family: Arial;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+}
+.scrollBox__title-cont-det{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.scrollBox__icon-det{
+  a{
+    padding: 10px 10px 10px 10px;
+    img{
+      margin-top: 3px;
+      width: 10.5px;
+      height: 10.5px;
+    }
+  }
+
+
+}
+.list {
+  display: grid;
+  gap: 8px;
+  background: #F0F0F0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 26px;
+  border-radius: 15px;
+  background: #E7E7E7;
+  width: 97%;
+  &__num{
+    color: #575757;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    border-radius: 15px;
+    background: #D9D9D9;
+    width: 47px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__count{
+    color: #575757;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+
+    border-radius: 15px;
+    background: #D9D9D9;
+    width: 82px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding-right: 20px;
+  }
+}
+
+.tiles {
+  display: grid;
+  gap: 14px;
+}
+
+.list__referals-det{
+  height: 94px;
+  border-radius: 19.36px 19.36px 0px 0px;
+  background: #F0F0F0;
+  margin-bottom: -32px;
+}
+.list__referals-title-det{
+  height: 46px;
+  display: flex;
+  background: #E4E4E4;
+  border-radius: 19.36px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  }
+  .list__referals-title-up-det{
+    color: #000;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  .list__referals-title-balance-det{
+    color: #000;
+    text-align: right;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  .list__referals-title-levels-det{
+    color: #000;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  .list__referals-title-levels-count{
+    color: #000;
+
+    text-align: right;
+    font-family: Tahoma;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+
+.list__referals-subtitle{
+  margin-top: 16px;
+  border-radius: 19.36px;
+  background: #E4E4E4;
+  height: 46px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+.t1{
+  font-size: 27px;
+}

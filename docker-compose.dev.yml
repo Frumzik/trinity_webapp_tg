@@ -11,6 +11,52 @@ services:
     volumes:
       - ./mongo-data-7.0:/data/db
 
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    depends_on:
+      - mongo
+    env_file:
+      - ./apps/backend/envs/.${ENVIRONMENT:-dev}.env
+    expose:
+      - "3000"
+    networks:
+      - default
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    env_file:
+      - ./apps/bot/envs/.${ENVIRONMENT:-dev}.env
+    ports:
+      - "3001:3001"
+    networks:
+      - default
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    env_file:
+      - ./apps/frontend/envs/.${ENVIRONMENT:-dev}.env
+    ports:
+      - "4200:4200"
+    networks:
+      - default
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    env_file:
+      - ./apps/admin/envs/.${ENVIRONMENT:-dev}.env
+    ports:
+      - "4201:4201"
+    networks:
+      - default
+
 volumes:
   mongo-data:
 

@@ -1,0 +1,143 @@
+.session {
+  position: relative;
+  min-height: 100dvh;
+  color: #fff;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.session--blur {
+  background-size: cover;
+  background-position: center;
+}
+.session--blur .session__shade {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: radial-gradient(120% 120% at 50% 65%, rgba(0,0,0,.05) 0%, rgba(0,0,0,.6) 70%);
+}
+
+.session__center {
+  z-index: 1;
+  align-self: end;
+  text-align: center;
+  padding: 0 20px 24px;
+}
+.session__title {
+  color: var(--Text-Secondary, #252D41);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+}
+.session__subtitle {
+  margin-top: 10px;
+  color: var(--Text-Secondary, #252D41);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+.session__chip {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 10px;
+  color: var(--Text-Black, #121826);
+  font-family: "SF Pro Display";
+  font-size: 13.55px;
+  font-style: normal;
+  font-weight: 500;
+  border-radius: 8.13px;
+  background: var(--Input-Field, #F1F5F9);
+  box-shadow: 0 5.42px 27.1px 0 rgba(15, 23, 42, 0.04);
+  backdrop-filter: blur(5.419917106628418px);
+}
+
+.session__actions {
+  z-index: 1;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+.session__link {
+  color: var(--Grayscale-White, #FFF);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+}
+
+/* completed */
+.session--complete {
+  background: #fff;
+  color: #121826;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.session__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px;
+}
+.session__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 0;
+  background: #F1F3F5;
+  font-size: 18px;
+  line-height: 1;
+}
+.session__header-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.session__main {
+  margin-top: 30px;
+  display: grid;
+  height: 0px;
+  place-items: center;
+  gap: 8px;
+  padding: 10px 16px 0;
+}
+.cont-session{
+  margin-top: 45px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.session__thumb {
+  width: 152px;
+  height: 152px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+.session__footer {
+  padding: 48px 24px 48px 24px;
+  display: grid;
+  gap: 32px;
+  background: #F6F7FB;
+  border-top-left-radius: 48px;
+  border-top-right-radius: 48px;
+}
+.session__done-banner {
+  color: var(--Text-Secondary, #252D41);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+}
+.session__footer .gbtn {
+  width: 100%;
+}

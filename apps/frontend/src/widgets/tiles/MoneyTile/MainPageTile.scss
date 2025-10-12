@@ -1,0 +1,158 @@
+.incomeCard {
+  position: relative;
+  display: grid;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 115px;
+}
+
+.incomeCard__img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: .95;
+  height: 115px;
+}
+
+.incomeCard__panel {
+  position: relative;
+  width: 62%;
+  padding: 6px 10px;
+  display: grid;
+  gap: 3px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  height: 115px;
+}
+
+.incomeCard__title {
+  color: #FFF;
+  font-family: Arial;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  border-radius: 15px;
+  background: rgba(91, 34, 41, 0.60);
+  backdrop-filter: blur(5.699999809265137px);
+  width: 120px;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.amount-container{
+
+}
+.incomeCard__amount {
+  color: #fff;
+  font-family: Tahoma;
+  font-size: 11.521px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.incomeCard__btn {
+  width: 81px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  color: #010D19;
+  text-align: center;
+  font-family: Tahoma;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.incomeCard--empty .incomeCard__img {
+  display: none;
+}
+
+.incomeCard--empty .incomeCard__panel {
+  background: rgba(64, 25, 29, .55);
+}
+
+.incomeMini {
+  position: relative;
+  display: grid;
+}
+
+.incomeMini__tally {
+  position: relative;
+  z-index: 2;
+  width: 120px;
+  height: 21px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0 12px;
+  margin-top: -22px;
+  color: rgba(255,255,255,.55);
+  overflow: hidden;
+  border-radius: 15px 15px 1.885px 1.885px;
+  border: 0.754px solid #FFF;
+  background: rgba(166, 79, 90);
+  box-shadow: 0 1.508px 3.769px 0 rgba(0, 0, 0, 0.25) inset;
+}
+.incomeMini__cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+
+  color: #FFF;
+
+  text-align: center;
+  font-family:Tahoma;
+  font-size: 11.521px;
+  font-style: normal;
+  font-weight: 700;
+  border-right: 1px solid rgba(255,255,255,.35);
+}
+
+.incomeMini__cell:last-child { border-right: 0; }
+
+.incomeMini__cell--active {
+  color: #fff;
+}
+
+.incomeMini__unit {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  color: #FFF;
+  text-align: right;
+  font-family: Tahoma;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.incomeMini__panel {
+  position: relative;
+  z-index: 1;
+  margin-top: -20px;
+  padding: 30px 16px 0 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+  width: 120px;
+  background: rgba(91, 34, 41, 0.60);
+  backdrop-filter: blur(5.699999809265137px);
+  border-radius: 0px 0px 15px 15px;
+}
+.incomeMini__btn {
+  width:100%;
+  height: 20px;
+  border: 0;
+  background: #fff;
+  border-radius: 7px;
+  backdrop-filter: blur(5.699999809265137px);
+  color: #010D19;
+  text-align: center;
+  font-family: Tahoma;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 500;
+}
+.incomeCard.is-clickable { cursor: pointer; }

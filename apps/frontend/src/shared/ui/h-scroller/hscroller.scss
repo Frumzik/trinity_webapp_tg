@@ -1,0 +1,18 @@
+/* hscroller.scss */
+.hscroll {
+  position: relative;
+  width: 100%;
+}
+
+.hscroll__track {
+  display: flex;
+  align-items: stretch;
+  overflow: auto hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: auto;
+}
+
+.hscroll__track::-webkit-scrollbar {
+  display: none;
+}

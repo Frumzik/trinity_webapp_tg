@@ -1,0 +1,72 @@
+.ptile {
+  position: relative;
+  width: 140px;
+  height: 170px;
+  flex: 0 0 140px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  &__fade {
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+  }
+
+  &__body {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    display: grid;
+    gap: 6px;
+    color: #fff;
+    height: 59px;
+    border-radius: 0 0 12px 12px;
+    background: rgba(15, 23, 42, 0.20);
+    backdrop-filter: blur(7.5px);
+  }
+
+  &__title {
+    position: absolute;
+    left: 8px;
+    top: 10px;
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  &__meta {
+    position: absolute;
+    left: 8px;
+    top: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: Tahoma;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: .95;
+  }
+
+  &__time-ico {
+    width: 16px;
+    height: 16px;
+    color: #fff;
+    opacity: .95;
+  }
+}

@@ -1,0 +1,38 @@
+.deposit {
+  padding: 0 12px;
+  display: grid;
+  gap: 12px;
+}
+.deposit__head {
+  display:grid; justify-items:center; gap:8px; margin-top: 6px;
+}
+.deposit__avatar {
+  width: 64px; height: 64px; border-radius: 999px; overflow: hidden;
+}
+.deposit__title {
+  font-family: var(--ff-display, inherit);
+  font-size: 20px; font-weight:800; color:#0F172A;
+}
+.deposit__sub { color:#9AA5B1; font-size:13px; text-align:center }
+.deposit__warn {
+  margin-top: 8px;
+  padding: 12px 0;
+  border-top: 1px solid #EEF2F6;
+  border-bottom: 1px solid #EEF2F6;
+  color:#0F172A; font-size:13px; text-align:center;
+}
+.deposit__note { color:#6B7280; font-size:12px; text-align:center }
+.deposit__addr {
+  border-top: 1px solid #EEF2F6;
+  border-bottom: 1px solid #EEF2F6;
+}
+.deposit__cta {
+  position: sticky;
+  bottom: 8px;
+  margin-top: 4px;
+}
+.deposit__cta .gbtn {
+  width: 100%;
+  border-radius: 14px;
+  height: 48px;
+}

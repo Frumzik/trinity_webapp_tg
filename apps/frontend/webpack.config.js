@@ -32,4 +32,16 @@ module.exports = {
       // svgr: false
     }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.(mp3|wav|ogg)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]',
+        },
+      },
+      // другие правила...
+    ],
+  },
 };

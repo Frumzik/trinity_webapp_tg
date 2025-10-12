@@ -1,0 +1,56 @@
+.wform { padding: 0 12px; display:grid; gap: 12px }
+.wform__title {
+  font-family: var(--ff-display, inherit);
+  font-size: 20px; font-weight:800; color:#0F172A; text-align:center
+}
+.wform__amount {
+  display:flex; justify-content:center; align-items:baseline; gap:6px;
+}
+.wform__input {
+  width: 100%;
+  height: 54px;
+  border: 0;
+  border-bottom: 1px solid #E5E7EB;
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: 2px;
+}
+.wform__unit { font-size: 18px; color:#9AA5B1 }
+.wform__chips { }
+.wform .qamounts {
+  justify-content: center;
+  gap: 8px;
+}
+.wform .qamounts__btn {
+  height: 30px;
+  border-radius: 14px;
+  background: #F7F9FC;
+  border: 1px solid #E6ECF2;
+  font-weight: 700;
+  color: #556070;
+}
+.wform__fee {
+  margin-top: 4px;
+  font-size: 13px; color:#0F172A; text-align:left; padding: 0 2px;
+}
+.wform__addr {
+  height: 48px;
+  border: 0;
+  border-bottom: 1px solid #E5E7EB;
+  background: transparent;
+  padding: 0 2px;
+  font-size: 14px;
+  color:#0F172A;
+}
+.wform__agree {
+  margin-top: 2px;
+  font-size: 12px; color:#8A94A6; text-align:center;
+}
+.wform__agree a { color:#C78A4F; text-decoration: underline }
+.wform .gbtn {
+  width: 100%; height: 48px; border-radius: 14px;
+}

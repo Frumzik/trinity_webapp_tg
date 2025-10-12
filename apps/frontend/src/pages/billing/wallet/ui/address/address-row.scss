@@ -1,0 +1,18 @@
+.addr {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+}
+.addr__text {
+  display: block;
+  padding: 10px 12px;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px dashed #D7DEE7;
+  background: #fff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: #0F172A;
+  word-break: break-all;
+}
