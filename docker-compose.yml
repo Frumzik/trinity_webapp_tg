@@ -14,11 +14,13 @@ services:
       - ./traefik/traefik.yml:/traefik.yml:ro
       - ./traefik/acme.json:/acme.json
     command:
-      - "--entrypoints.websecure.address=:443"
+      - "--api=true"                 # включаем Dashboard
+      - "--api.dashboard=true"       # explicit Dashboard
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
@@ -29,13 +31,14 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
       - "traefik.http.routers.traefik.middlewares=traefik-auth"
 
-      # global redirect to https
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=http"
+        # глобальный Router для всех HTTP запросов
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
       - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
 
       # middleware redirect
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
     networks:
       - default
 
