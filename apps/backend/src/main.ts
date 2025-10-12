@@ -9,7 +9,7 @@ import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './app/service';
 
 async function bootstrap() {
-  const globalPrefix = 'api';
+  const globalPrefix = '';
   const port = process.env.PORT || 3000;
 
   const app = await NestFactory.create(AppModule);
