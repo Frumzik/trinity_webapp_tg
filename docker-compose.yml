@@ -63,11 +63,9 @@ services:
       - "3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`3nity.space`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`api.3nity.space`)"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/api"
-      - "traefik.http.routers.backend.middlewares=backend-strip"
     networks:
       - default
 
@@ -94,7 +92,7 @@ services:
       - "4200"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`3nity.space`)"
+      - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
 
