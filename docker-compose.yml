@@ -48,20 +48,6 @@ services:
     networks:
       - default
 
-  mongo:
-    image: mongo:7.0
-    container_name: mongo
-    restart: always
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=trinity
-      - MONGO_INITDB_ROOT_PASSWORD=Z8jGw190M
-    ports:
-      - 27017:27017
-    volumes:
-      - ./mongo-data-7.0:/data/db
-    networks:
-      - default
-
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -89,8 +75,6 @@ services:
       dockerfile: apps/backend/Dockerfile
     env_file:
       - ./apps/backend/envs/.${ENVIRONMENT:-test}.env
-    depends_on:
-      - mongo
     expose:
       - "3000"
     labels:
@@ -109,8 +93,6 @@ services:
       dockerfile: apps/bot/Dockerfile
     env_file:
       - ./apps/bot/envs/.${ENVIRONMENT:-test}.env
-    depends_on:
-      - mongo
     ports:
       - "3001:3001"
     networks:
@@ -131,8 +113,6 @@ services:
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
       - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.frontend.tls=true"
-
-
     networks:
       - default
 
@@ -151,12 +131,8 @@ services:
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
       - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.admin.tls=true"
-
     networks:
       - default
-
-volumes:
-  mongo-data:
 
 networks:
   default:
