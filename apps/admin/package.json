@@ -1,6 +1,5 @@
 {
   "name": "@trinity/admin",
   "version": "0.0.1",
-  "private": true,
-  "homepage": "/admin"
+  "private": true
 }
