@@ -95,8 +95,14 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-      - "traefik.http.services.admin.loadbalancer.server.port=4200"
       - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4200"
+      # StripPrefix, чтобы убрать префикс (если нужен)
+      - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/"
+      # SPA fallback: любые пути возвращают index.html
+      - "traefik.http.middlewares.frontend-spa.replacepathregex.regex=^/(.*)"
+      - "traefik.http.middlewares.frontend-spa.replacepathregex.replacement=/index.html"
+      - "traefik.http.routers.frontend.middlewares=frontend-strip,frontend-spa"
     networks:
       - default
 
@@ -113,12 +119,12 @@ services:
       - "traefik.http.routers.admin.rule=PathPrefix(`/admin`)"
       - "traefik.http.routers.admin.entrypoints=web"
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
-      # Убираем префикс /admin, чтобы SPA корректно обрабатывал маршруты
-      - "traefik.http.middlewares.admin-stripprefix.stripprefix.prefixes=/admin"
-      # SPA fallback: любые пути после /admin возвращают index.html
-      - "traefik.http.middlewares.admin-spa.replacepathregex.regex=^/admin/.*"
+      # Убираем /admin
+      - "traefik.http.middlewares.admin-strip.stripprefix.prefixes=/admin"
+      # SPA fallback
+      - "traefik.http.middlewares.admin-spa.replacepathregex.regex=^/admin/(.*)"
       - "traefik.http.middlewares.admin-spa.replacepathregex.replacement=/index.html"
-      - "traefik.http.routers.admin.middlewares=admin-stripprefix,admin-spa"
+      - "traefik.http.routers.admin.middlewares=admin-strip,admin-spa"
 
     networks:
       - default
