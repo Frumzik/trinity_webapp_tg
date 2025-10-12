@@ -22,6 +22,8 @@ jobs:
 
       - run: npm i
       - run: npm ci
+      - run: npx nx run-many --target=build --all --prod
+      - run: npx nx run backend:copy-workspace-modules
   cd:
     needs: [ci]
     # The type of runner that the job will run on
