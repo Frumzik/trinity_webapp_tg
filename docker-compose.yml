@@ -94,9 +94,11 @@ services:
       - "4200:4200"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/app`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
+      - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/app"
+      - "traefik.http.routers.frontend.middlewares=frontend-strip"
     networks:
       - default
 
@@ -115,7 +117,6 @@ services:
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
       - "traefik.http.middlewares.admin-strip.stripprefix.prefixes=/admin"
       - "traefik.http.routers.admin.middlewares=admin-strip"
-
     networks:
       - default
 
