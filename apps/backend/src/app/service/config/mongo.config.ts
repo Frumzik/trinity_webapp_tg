@@ -25,4 +25,6 @@ const getMongoString = (configService: ConfigService) =>
   '/' +
   configService.get('MONGO_DATABASE') +
   '?authSource=' +
-  configService.get('MONGO_AUTHDATABASE');
+  configService.get('MONGO_AUTHDATABASE') +
+  "&directConnection=" +
+  configService.get('MONGO_DIRECTCONNECTION') 
