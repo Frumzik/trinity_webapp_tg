@@ -44,6 +44,7 @@ jobs:
           npm install
           npx nx run-many --target=build --all --prod
           npx nx run backend:copy-workspace-modules
+          chmod 600 traefik/acme.json
           docker-compose down
           docker-compose build
           docker-compose up -d
