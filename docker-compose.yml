@@ -20,7 +20,6 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.letsEncrypt.acme.email=tov.kessler@yandex.ru"
       - "--certificatesresolvers.letsEncrypt.acme.storage=/acme.json"
-      - "--certificatesresolvers.letsEncrypt.acme.tlschallenge=true"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
