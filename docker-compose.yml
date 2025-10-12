@@ -18,6 +18,9 @@ services:
       - "--api.dashboard=true"       # explicit Dashboard
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsEncrypt.acme.email=tov.kessler@yandex.ru"
+      - "--certificatesresolvers.letsEncrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsEncrypt.acme.tlschallenge=true"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
@@ -27,24 +30,6 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
       - "traefik.http.routers.traefik.middlewares=traefik-auth"
-
-        # Middleware для редиректа на HTTPS
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
-
-      # Router для ACME (чтобы LetsEncrypt мог работать)
-      - "traefik.http.routers.acme-challenge.rule=PathPrefix(`/.well-known/acme-challenge/`)"
-      - "traefik.http.routers.acme-challenge.entrypoints=web"
-      - "traefik.http.routers.acme-challenge.tls=false"
-      - "traefik.http.routers.acme-challenge.priority=1000"
-
-
-      # Router для всего остального HTTP трафика (редирект на HTTPS)
-      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-      - "traefik.http.routers.http-catchall.priority=1"
-    
     networks:
       - default
 
