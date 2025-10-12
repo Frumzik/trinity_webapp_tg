@@ -59,15 +59,15 @@ services:
       - ./apps/backend/envs/.${ENVIRONMENT:-test}.env
     depends_on:
       - mongo
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`3nity.space`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.middlewares.backend-strip-prefix.stripprefix.prefixes=/api"
-      - "traefik.http.routers.backend.middlewares=backend-strip-prefix"
+      - "traefik.http.middlewares.backend-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=backend-strip"
     networks:
       - default
 
@@ -90,16 +90,13 @@ services:
       dockerfile: apps/frontend/Dockerfile
     env_file:
       - ./apps/frontend/envs/.${ENVIRONMENT:-test}.env
-    ports:
-      - "4200:4200"
+    expose:
+      - "4200"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/app`)"
+      - "traefik.http.routers.frontend.rule=Host(`3nity.space`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
-      - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/app"
-      - "traefik.http.routers.frontend.middlewares=frontend-strip"
-
     networks:
       - default
 
@@ -109,17 +106,13 @@ services:
       dockerfile: apps/admin/Dockerfile
     env_file:
       - ./apps/admin/envs/.${ENVIRONMENT:-test}.env
-    ports:
-      - "4201:4201"
+    expose:
+      - "4201"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.admin.rule=PathPrefix(`/admin`)"
+      - "traefik.http.routers.admin.rule=Host(`admin.3nity.space`)"
       - "traefik.http.routers.admin.entrypoints=web"
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
-      - "traefik.http.middlewares.admin-strip.stripprefix.prefixes=/admin"
-      - "traefik.http.routers.admin.middlewares=admin-strip"
-
-
     networks:
       - default
 
