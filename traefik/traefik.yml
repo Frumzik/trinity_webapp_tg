@@ -2,9 +2,9 @@ api:
   dashboard: true
 
 entryPoints:
-  http:
+  web:
     address: ":80"
-  https:
+  websecure:
     address: ":443"
 
         
@@ -17,8 +17,8 @@ providers:
 certificatesResolvers:
   letsEncrypt:
     acme:
-      email: tolamed@yandex.ru
+      email: tov.kessler@yandex.ru
       storage: acme.json
       #caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       httpChallenge:
-        entryPoint: http
+        entryPoint: web

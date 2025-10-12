@@ -22,7 +22,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
-      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.traefik.service=api@internal"
@@ -87,7 +87,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.3nity.space`)"
-      - "traefik.http.routers.backend.entrypoints=https"
+      - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
     networks:
@@ -117,7 +117,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
-      - "traefik.http.routers.frontend.entrypoints=https"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.services.frontend.loadbalancer.server.port=4200"
       - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
 
@@ -135,7 +135,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.admin.rule=Host(`admin.3nity.space`)"
-      - "traefik.http.routers.admin.entrypoints=https"
+      - "traefik.http.routers.admin.entrypoints=websecure"
       - "traefik.http.services.admin.loadbalancer.server.port=4201"
       - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
     networks:
