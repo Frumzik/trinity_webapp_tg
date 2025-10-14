@@ -1,1 +1,1 @@
-export { default as HScroller } from './HScroller.tsx'
+export { default as HScroller } from "./HScroller.tsx";

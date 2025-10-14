@@ -4,8 +4,8 @@
 }
 
 .psm__title {
-  color: #FFF;
-  font-family: Arial;
+  color: #fff;
+  font-family: "Alegreya_Sans";
   font-size: 23.311px;
   font-style: italic;
   font-weight: 700;
@@ -30,34 +30,32 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-
 }
-.psm__fileMain{
+.psm__fileMain {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 .psm__fileName {
-  color: #FFF;
-  font-family: Verdana;
+  color: #fff;
+  font-family:  "SF Pro Text";
   font-size: 10.459px;
   font-style: normal;
   font-weight: 500;
 }
 
 .psm__fileMeta {
-  color: #9B9B9B;
-  font-family: Verdana;
+  color: #9b9b9b;
+  font-family:  "SF Pro Text";
   font-size: 8.716px;
   font-style: normal;
   font-weight: 400;
 }
 
 .psm__fileTime {
-  color: #9B9B9B;
-  font-family: Verdana;
+  color: #9b9b9b;
+  font-family:  "SF Pro Text";
   font-size: 8.716px;
   font-style: normal;
   font-weight: 400;
 }
-

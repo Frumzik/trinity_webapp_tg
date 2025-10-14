@@ -2,54 +2,66 @@
   padding: 8px 14px 24px;
   display: grid;
   gap: 14px;
-  background: #F6F7FA;
+  background-color: #fff;
 }
 
 .wform__head {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding-top: 6px
+  gap: 10px;
+  padding-top: 6px;
 }
 
 .wform__avatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 999px;
-  object-fit: cover
+  object-fit: cover;
 }
 
 .wform__title {
-  font-family: var(--ff-display, inherit);
+  color: var(--Gray-gray-900, #24292E);
+  text-align: center;
+  font-family: "SF Pro Display";
   font-size: 20px;
-  font-weight: 800;
-  color: #0F172A
+  font-style: normal;
+  font-weight: 700;
 }
 
 .wform__sub {
-  color: #9AA5B1;
-  font-size: 13px
+  color: var(--Gray-500, #667085);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.56;
+
 }
 
 .wform__amount {
   display: grid;
   gap: 8px;
-  padding-top: 6px
+  padding-top: 48px;
 }
 
 .wform__label {
+  color: var(--Gray-gray-900, #24292E);
   text-align: center;
-  color: #9AA5B1;
-  font-size: 13px
+  opacity: 0.56;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .wform__input-wrap {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: baseline;
-  gap: 4px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #E5E7EB;
+  //gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E4E7EC;
 }
 
 .wform__input {
@@ -57,86 +69,116 @@
   text-align: right;
   border: 0;
   background: transparent;
-  font-size: 40px;
-  font-weight: 800;
-  color: #0F172A;
-  letter-spacing: 2px;
+  color: #24292E;
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .wform__cents {
-  font-size: 28px;
-  font-weight: 800;
-  color: #B8C0CE
+  color: rgba(36, 41, 46, 0.32);
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+
 }
 
 .wform__usd {
-  font-size: 26px;
-  font-weight: 800;
-  color: #0F172A;
-  margin-left: 4px
+  color: #24292E;
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  margin-left: 4px;
 }
 
 .wform__chips {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  justify-content: center
+  justify-content: center;
 }
 
 .wform__chip {
   height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #F7F9FC;
-  border: 1px solid #E6ECF2;
-  color: #556070;
-  font-weight: 700;
-  font-size: 12px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  background-color: #fff;
+  border: 0.5px solid var(--Gray-400, #98A2B3);
+  color: var(--Gray-400, #98A2B3);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .wform__fee {
   text-align: center;
-  color: #0F172A;
-  font-size: 14px
+  color: var(--Gray-500, #667085);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  margin-top: 25px;
+  b{
+    color: var(--Gray-900, #101828);
+    font-family: "SF Pro Display";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+  }
 }
 
 .wform__fee-sub {
-  color: #8A94A6;
-  font-size: 12px
+  color: var(--Gray-500, #667085);
+  /* Text style/text-normal */
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  margin-top: 6px;
+  font-weight: 400;
 }
 
 .wform__addr {
-  padding: 10px 0;
-  border-top: 1px solid #E9EDF3;
-  border-bottom: 1px solid #E9EDF3;
+  margin-top: 50px;
+  border-bottom: 1px solid #e9edf3;
   display: grid;
-  gap: 6px
+  gap: 6px;
 }
 
-.wform__addr-label {
-  text-align: center;
-  color: #9AA5B1;
-  font-size: 13px
-}
 
 .wform__addr-input {
   height: 36px;
   border: 0;
   background: transparent;
+  color: var(--Gray-gray-900, #24292E);
   text-align: center;
-  color: #0F172A;
-  font-size: 14px
+  opacity: 0.56;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .wform__agree {
+  margin-top: 42px;
+  color: #667085;
   text-align: center;
-  color: #8A94A6;
-  font-size: 12px;
-  line-height: 1.4
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.56;
+  line-height: 17px;
 }
 
 .wform__agree a {
-  color: #C9854A;
+  color: #c9854a;
   text-decoration: underline;
 }
 
@@ -144,16 +186,16 @@
   position: sticky;
   bottom: 0;
   padding-bottom: env(safe-area-inset-bottom);
-  background: linear-gradient(180deg, rgba(246, 247, 250, 0) 0%, #F6F7FA 40%);
+  background: linear-gradient(180deg, rgba(246, 247, 250, 0) 0%, #f6f7fa 40%);
   display: grid;
   gap: 8px;
-  padding-top: 6px
+  padding-top: 6px;
 }
 
 .wform__btn {
   height: 50px;
   border-radius: 14px;
-  width: 100%
+  width: 100%;
 }
 
 .wform__pill {
@@ -162,5 +204,5 @@
   height: 6px;
   border-radius: 999px;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, .06) inset
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06) inset;
 }

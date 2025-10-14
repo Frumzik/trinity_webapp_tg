@@ -12,7 +12,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: .95;
+  opacity: 0.95;
   height: 115px;
 }
 
@@ -28,13 +28,13 @@
 }
 
 .incomeCard__title {
-  color: #FFF;
-  font-family: Arial;
+  color: #fff;
+  font-family: "Alegreya_Sans";
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
   border-radius: 15px;
-  background: rgba(91, 34, 41, 0.60);
+  background: rgba(91, 34, 41, 0.6);
   backdrop-filter: blur(5.699999809265137px);
   width: 120px;
   height: 29px;
@@ -42,12 +42,11 @@
   align-items: center;
   justify-content: center;
 }
-.amount-container{
-
+.amount-container {
 }
 .incomeCard__amount {
   color: #fff;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 11.521px;
   font-style: normal;
   font-weight: 700;
@@ -58,9 +57,9 @@
   height: 20px;
   border: 0;
   border-radius: 999px;
-  color: #010D19;
+  color: #010d19;
   text-align: center;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 8px;
   font-style: normal;
   font-weight: 500;
@@ -71,7 +70,7 @@
 }
 
 .incomeCard--empty .incomeCard__panel {
-  background: rgba(64, 25, 29, .55);
+  background: rgba(64, 25, 29, 0.55);
 }
 
 .incomeMini {
@@ -89,10 +88,10 @@
   align-items: center;
   padding: 0 12px;
   margin-top: -22px;
-  color: rgba(255,255,255,.55);
+  color: rgba(255, 255, 255, 0.55);
   overflow: hidden;
   border-radius: 15px 15px 1.885px 1.885px;
-  border: 0.754px solid #FFF;
+  border: 0.754px solid #fff;
   background: rgba(166, 79, 90);
   box-shadow: 0 1.508px 3.769px 0 rgba(0, 0, 0, 0.25) inset;
 }
@@ -102,17 +101,19 @@
   justify-content: space-around;
   height: 100%;
 
-  color: #FFF;
+  color: #fff;
 
   text-align: center;
-  font-family:Tahoma;
+  font-family: "SF Pro Display";
   font-size: 11.521px;
   font-style: normal;
   font-weight: 700;
-  border-right: 1px solid rgba(255,255,255,.35);
+  border-right: 1px solid rgba(255, 255, 255, 0.35);
 }
 
-.incomeMini__cell:last-child { border-right: 0; }
+.incomeMini__cell:last-child {
+  border-right: 0;
+}
 
 .incomeMini__cell--active {
   color: #fff;
@@ -122,9 +123,9 @@
   position: absolute;
   bottom: 3px;
   right: 3px;
-  color: #FFF;
+  color: #fff;
   text-align: right;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 8px;
   font-style: normal;
   font-weight: 700;
@@ -135,24 +136,26 @@
   z-index: 1;
   margin-top: -20px;
   padding: 30px 16px 0 16px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
   width: 120px;
-  background: rgba(91, 34, 41, 0.60);
+  background: rgba(91, 34, 41, 0.6);
   backdrop-filter: blur(5.699999809265137px);
   border-radius: 0px 0px 15px 15px;
 }
 .incomeMini__btn {
-  width:100%;
+  width: 100%;
   height: 20px;
   border: 0;
   background: #fff;
   border-radius: 7px;
   backdrop-filter: blur(5.699999809265137px);
-  color: #010D19;
+  color: #010d19;
   text-align: center;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 8px;
   font-style: normal;
   font-weight: 500;
 }
-.incomeCard.is-clickable { cursor: pointer; }
+.incomeCard.is-clickable {
+  cursor: pointer;
+}

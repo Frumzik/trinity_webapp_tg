@@ -36,7 +36,7 @@
     color: #fff;
     height: 59px;
     border-radius: 0 0 12px 12px;
-    background: rgba(15, 23, 42, 0.20);
+    background: rgba(15, 23, 42, 0.2);
     backdrop-filter: blur(7.5px);
   }
 
@@ -44,7 +44,7 @@
     position: absolute;
     left: 8px;
     top: 10px;
-    font-family: Tahoma;
+    font-family: "SF Pro Display";
     font-size: 16px;
     font-weight: 700;
     line-height: 1.15;
@@ -57,16 +57,16 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-family: Tahoma;
+    font-family: "SF Pro Display";
     font-size: 12px;
     font-weight: 500;
-    opacity: .95;
+    opacity: 0.95;
   }
 
   &__time-ico {
     width: 16px;
     height: 16px;
     color: #fff;
-    opacity: .95;
+    opacity: 0.95;
   }
 }

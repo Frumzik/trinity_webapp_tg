@@ -1,4 +1,6 @@
-.promoWrap { overflow: visible; }
+.promoWrap {
+  overflow: visible;
+}
 
 .hscroll__track.promo__track,
 .promo .hscroll__track.promo__track {
@@ -13,7 +15,9 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.hscroll__track.promo__track::-webkit-scrollbar { display: none; }
+.hscroll__track.promo__track::-webkit-scrollbar {
+  display: none;
+}
 
 .promo__tile {
   position: relative;
@@ -25,7 +29,6 @@
   background: transparent;
   border-radius: 24px;
   overflow: hidden;
-
 }
 
 .promo__bg {
@@ -37,7 +40,6 @@
   pointer-events: none;
   z-index: 0;
   border-radius: 24px;
-
 }
 
 .promo__fg {
@@ -51,7 +53,6 @@
   pointer-events: none;
   z-index: 1;
   border-radius: 18px;
-
 }
 
 .promo__label {
@@ -65,17 +66,18 @@
   display: grid;
   place-items: center;
 
-  color: #FFF;
+  color: #fff;
   text-align: center;
-  font-family: Arial;
+  font-family: "Alegreya_Sans";
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
 
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.21) 0%, rgba(0, 0, 0, 0.21) 100%), rgba(255, 255, 255, 0.04);
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.21) 0%, rgba(0, 0, 0, 0.21) 100%),
+    rgba(255, 255, 255, 0.04);
   border-radius: 15px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(7.2px);
   -webkit-backdrop-filter: blur(7.2px);
 }
-

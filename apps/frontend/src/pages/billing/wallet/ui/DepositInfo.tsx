@@ -17,10 +17,27 @@ type Props = {
 
 export default function DepositInfo(p: Props) {
     const [copied, setCopied] = useState(false)
+
     const copy = async () => {
-        await navigator.clipboard.writeText(p.address)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1500)
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(p.address)
+            } else {
+                const ta = document.createElement('textarea')
+                ta.value = p.address
+                ta.style.position = 'fixed'
+                ta.style.top = '0'
+                ta.style.left = '0'
+                ta.style.opacity = '0'
+                document.body.appendChild(ta)
+                ta.focus()
+                ta.select()
+                document.execCommand('copy')
+                document.body.removeChild(ta)
+            }
+            setCopied(true)
+            setTimeout(() => setCopied(false), 1500)
+        } catch {}
     }
 
     return (
@@ -46,9 +63,12 @@ export default function DepositInfo(p: Props) {
                 <div className="dep__hint">{copied ? 'Скопировано' : 'Нажмите на адрес, чтобы его скопировать'}</div>
             </div>
 
-            <div className="dep__cta">
-                <GradientButton className="dep__btn" onClick={copy}>{p.cta}</GradientButton>
-                <span className="dep__pill" />
+            <div className="gbtn-bar rectangle-btn">
+                <div className="gbtn-bar__inner rectangle-btn-inner">
+                    <GradientButton className="egd" onClick={copy}>
+                        {copied ? 'Скопировано' : 'Скопировать адрес'}
+                    </GradientButton>
+                </div>
             </div>
         </div>
     )

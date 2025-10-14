@@ -36,12 +36,14 @@
   place-items: center;
   border: 0;
   border-radius: 10px;
-  background: rgba(255,255,255,.24);
+  background: rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(6px);
   color: #fff;
 }
 
-.spacer { flex: 1 }
+.spacer {
+  flex: 1;
+}
 
 .preview__title {
   position: absolute;
@@ -50,8 +52,8 @@
   margin: 0;
   line-height: 1.1;
   z-index: 1;
-  color: var(--Grayscale-White, #FFF);
-  font-family: Tahoma;
+  color: var(--Grayscale-White, #fff);
+  font-family: "SF Pro Display";
   font-size: 32px;
   font-style: normal;
   font-weight: 700;
@@ -65,16 +67,16 @@
   border-top-right-radius: 24px;
   padding: 25px;
   min-height: calc(56dvh + 20px);
-  h2{
+  h2 {
     color: var(--Text-Black, #121826);
-    font-family: Tahoma;
+    font-family: "SF Pro Display";
     font-size: 14px;
     font-style: normal;
     font-weight: 500;
   }
-  p{
+  p {
     color: var(--Text-Black, #121826);
-    font-family: Tahoma;
+    font-family: "SF Pro Display";
     font-size: 12px;
     font-style: normal;
     font-weight: 300;
@@ -83,7 +85,7 @@
 
 .preview__sheet-head {
   color: var(--Text-Black, #121826);
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 18px;
   font-style: normal;
   font-weight: 700;
@@ -101,8 +103,8 @@
 
 .preview__price {
   color: var(--Text-Black, #121826);
-  font-family: Tahoma;
-  font-size: 14px!important;
+  font-family: "SF Pro Display";
+  font-size: 14px !important;
   font-style: normal;
   font-weight: 500;
   margin-top: 23px;

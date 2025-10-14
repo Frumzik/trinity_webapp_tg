@@ -1,4 +1,6 @@
-.ptileWrap { overflow: visible; }
+.ptileWrap {
+  overflow: visible;
+}
 
 .hscroll__track.ptile__track,
 .ptileWrap .hscroll__track.ptile__track {
@@ -13,4 +15,6 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.hscroll__track.ptile__track::-webkit-scrollbar { display: none; }
+.hscroll__track.ptile__track::-webkit-scrollbar {
+  display: none;
+}

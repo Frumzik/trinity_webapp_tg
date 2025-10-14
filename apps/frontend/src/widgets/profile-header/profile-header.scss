@@ -19,8 +19,8 @@
 }
 
 .profileHeader__name {
-  color: #1F1F1F;
-  font-family: Tahoma;
+  color: #1f1f1f;
+  font-family: "SF Pro Display";
   font-size: 16px;
   font-style: normal;
   font-weight: 500;
@@ -28,7 +28,7 @@
 
 .profileHeader__username {
   color: #797979;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -43,18 +43,18 @@
 .profileHeader__status {
   color: #797979;
   text-align: right;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 12px;
   font-style: italic;
   font-weight: 300;
 }
 
 .profileHeader__statusValue {
-  background: var(--Linear, linear-gradient(180deg, #B4713D 0%, #D1AF68 100%));
+  background: var(--Linear, linear-gradient(180deg, #b4713d 0%, #d1af68 100%));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 12px;
   font-style: italic;
   font-weight: 600;
@@ -70,7 +70,6 @@
   padding: 0 10px;
   border-radius: 29px;
   background: #000333;
-
 }
 
 .profileHeader__balanceIcon {
@@ -79,9 +78,9 @@
 }
 
 .profileHeader__balanceText {
-  color: #FFF;
+  color: #fff;
   text-align: right;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 12px;
   font-style: normal;
   font-weight: 700;

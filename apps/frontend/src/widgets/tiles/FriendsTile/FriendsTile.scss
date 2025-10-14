@@ -30,7 +30,7 @@
   z-index: 1;
   padding: 14px 16px;
   color: #000;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 14px;
   font-weight: 300;
 }
@@ -50,38 +50,41 @@
 }
 
 .refCard__label {
-  color: #FFF;
-  font-family: Tahoma;
+  color: #fff;
+  font-family: "SF Pro Display";
   font-size: 14px;
   font-weight: 700;
 }
 
 .refCard__count {
-  color: #FFF;
+  color: #fff;
   text-align: right;
-  font-family: Tahoma;
+  font-family: "SF Pro Display";
   font-size: 10px;
   font-weight: 500;
 }
 
-.refCard.is-clickable { cursor: pointer; }
-
-
-
-
+.refCard.is-clickable {
+  cursor: pointer;
+}
 
 /* размеры тайла */
-.refCard--166x123 { width: 100%; height: 123px; }
+.refCard--166x123 {
+  width: 100%;
+  height: 123px;
+}
 
 /* картинка строго справа, текст слева, нижняя плашка на всю ширину */
-.refCard--imgRight { position: relative; }
+.refCard--imgRight {
+  position: relative;
+}
 
 .refCard--imgRight .refCard__img {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  left: auto;          /* критично: переопределяем inset->left */
+  left: auto; /* критично: переопределяем inset->left */
   width: 100%;
   height: 100%;
   background-position: right center;

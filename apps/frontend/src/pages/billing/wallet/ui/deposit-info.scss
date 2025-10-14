@@ -2,98 +2,96 @@
   padding: 8px 14px 24px;
   display: grid;
   gap: 14px;
-  background: #F6F7FA;
+  background: #fff;
 }
 
 .dep__head {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding-top: 6px
+  gap: 10px;
+  padding-top: 6px;
 }
 
 .dep__avatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 999px;
-  object-fit: cover
+  object-fit: cover;
 }
 
 .dep__title {
-  font-family: var(--ff-display, inherit);
+  color: var(--Gray-gray-900, #24292E);
+  text-align: center;
+  font-family: "SF Pro Display";
   font-size: 20px;
-  font-weight: 800;
-  color: #0F172A
+  font-style: normal;
+  font-weight: 700;
 }
 
 .dep__caption {
   white-space: pre-line;
-  color: #9AA5B1;
-  font-size: 13px;
+  color: var(--Gray-500, #667085);
   text-align: center;
-  line-height: 1.35
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .dep__block {
-  padding: 12px 0;
-  border-top: 1px solid #E9EDF3;
+  padding: 24px 16px 12px;
 }
 
 .dep__block:first-of-type {
-  margin-top: 6px
+  margin-top: 6px;
+}
+.dep__block:nth-of-type(2) {
+  border-bottom:1px solid  var(--Gray-200, #E4E7EC);
+}
+.dep__block:nth-of-type(3) {
+  padding-top: 0px;
 }
 
 .dep__warn {
-  color: #0F172A;
-  font-size: 13px;
+  color: var(--Gray-gray-900, #24292E);
   text-align: center;
-  line-height: 1.35
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.78;
 }
 
 .dep__strong {
-  font-weight: 800
+  color: #000;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
 }
 
 .dep__note {
+
   white-space: pre-line;
-  color: #6B7280;
-  font-size: 13px;
+  color: var(--Gray-500, #667085);
   text-align: center;
-  line-height: 1.35
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .dep__addr {
   display: grid;
-  gap: 10px
+  gap: 10px;
 }
 
 .dep__hint {
-  color: #9AA5B1;
-  font-size: 12px;
-  text-align: center
+  color: #667085;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
 }
 
-.dep__cta {
-  position: sticky;
-  bottom: 0;
-  padding-bottom: env(safe-area-inset-bottom);
-  background: linear-gradient(180deg, rgba(246, 247, 250, 0) 0%, #F6F7FA 40%);
-  display: grid;
-  gap: 8px;
-  padding-top: 6px
-}
-
-.dep__btn {
-  height: 50px;
-  border-radius: 14px;
-  width: 100%
-}
-
-.dep__pill {
-  justify-self: center;
-  width: 110px;
-  height: 6px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, .06) inset
-}

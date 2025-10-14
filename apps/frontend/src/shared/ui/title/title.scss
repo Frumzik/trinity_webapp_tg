@@ -7,20 +7,19 @@
 .title_everywhere {
   margin: 0;
   color: var(--Text-Black, #121826);
-  font-family: Arial;
+  font-family: "Alegreya_Sans";
   font-size: 22px;
   font-style: normal;
   font-weight: 700;
 }
 
 .title_right {
-
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  button{
+  button {
     all: unset;
-    img{
+    img {
       width: 16.5px;
       height: 17.5px;
     }

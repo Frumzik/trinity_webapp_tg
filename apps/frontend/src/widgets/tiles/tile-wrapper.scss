@@ -14,5 +14,10 @@
   padding: 0;
   background: transparent;
 }
-.tileWrapper { display: block; width: 100%; }
-.tileWrapper.is-clickable { cursor: pointer; }
+.tileWrapper {
+  display: block;
+  width: 100%;
+}
+.tileWrapper.is-clickable {
+  cursor: pointer;
+}

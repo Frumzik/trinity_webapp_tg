@@ -9,19 +9,19 @@
 
 .trx__left {
   display: grid;
-  place-items: center
+  place-items: center;
 }
 
 .trx__avatar {
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  background: #EFF3F7;
+  background: #eff3f7;
   display: grid;
   place-items: center;
 }
-.trx__cents{
-  color: rgba(16, 24, 40, 0.40);
+.trx__cents {
+  color: rgba(16, 24, 40, 0.4);
 
   font-family: "SF Pro Display";
   font-size: 20px;
@@ -32,7 +32,7 @@
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #80C0FF;
+  background: #80c0ff;
   position: absolute;
   left: 10px;
   top: 37%;
@@ -40,7 +40,7 @@
 
 .trx__mid {
   display: grid;
-  gap: 2px
+  gap: 2px;
 }
 
 .trx__sum {
@@ -68,4 +68,3 @@
   font-style: normal;
   font-weight: 400;
 }
-

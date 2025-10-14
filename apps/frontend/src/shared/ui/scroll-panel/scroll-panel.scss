@@ -5,8 +5,8 @@
   --sp-rail-top: 4px;
   --sp-rail-bottom: 4px;
   --sp-rail-width: 8px;
-  --sp-rail-color: #E8E8E8;
-  --sp-thumb-color: #C7C7C7;
+  --sp-rail-color: #e8e8e8;
+  --sp-thumb-color: #c7c7c7;
   --sp-z: 10;
   margin-top: 25px;
 }
@@ -21,14 +21,17 @@
   background: #fff;
   scrollbar-width: none;
 }
-.sp__box::-webkit-scrollbar { width: 0; height: 0; }
+.sp__box::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
 
 .sp__content {
   display: grid;
   gap: 20px;
   min-width: 0;
 }
-.gg:last-child{
+.gg:last-child {
   margin-top: 0;
 }
 
@@ -53,5 +56,7 @@
   background: var(--sp-thumb-color);
   pointer-events: none;
   z-index: calc(var(--sp-z) + 2);
-  transition: transform .06s linear, height .06s linear;
+  transition:
+    transform 0.06s linear,
+    height 0.06s linear;
 }

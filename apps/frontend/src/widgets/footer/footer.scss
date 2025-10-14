@@ -16,10 +16,9 @@
     width: 100%;
     height: 65px;
     border-radius: 17.973px;
-    border: 1px solid #FFF;
+    border: 1px solid #fff;
     background: rgba(36, 36, 36, 0.69);
     backdrop-filter: blur(3.5946667194366455px);
-
   }
 }
 .footer__item {
@@ -37,26 +36,24 @@
   gap: 4px;
   text-decoration: none;
 
-  color: #FFF;
+  color: #fff;
   text-align: center;
   font-family: Roboto;
   font-size: 8.987px;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-  opacity: .45;
+  opacity: 0.45;
 
   -webkit-tap-highlight-color: transparent;
 }
 
-.footer__item .icon
-{
+.footer__item .icon {
   width: 24px;
   height: 24px;
   display: block;
 }
-.footer__item.is-active
-{
+.footer__item.is-active {
   opacity: 1;
   color: #ffffff;
 }
