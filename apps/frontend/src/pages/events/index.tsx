@@ -2,9 +2,9 @@ import "./events.scss";
 import { useState } from "react";
 
 import Title from "../../shared/ui/title/Title";
-import TopBar from "../../widgets/topbar/topbar.tsx";
-import Footer from "../../widgets/footer/footer.tsx";
-import BurgerMenu from "../../widgets/menuBurger/burger.tsx";
+import TopBar from "../../widgets/topbar/topbar";
+import Footer from "../../widgets/footer/footer";
+import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Bg1 from "../../assets/icons/bg1.svg";

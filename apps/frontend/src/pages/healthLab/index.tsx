@@ -1,8 +1,8 @@
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
-import TopBar from "../../widgets/topbar/topbar.tsx";
-import Footer from "../../widgets/footer/footer.tsx";
-import BurgerMenu from "../../widgets/menuBurger/burger.tsx";
+import TopBar from "../../widgets/topbar/topbar";
+import Footer from "../../widgets/footer/footer";
+import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import { useState } from "react";
@@ -13,7 +13,7 @@ import Card1 from "../../assets/icons/products/card1.svg";
 import Card2 from "../../assets/icons/products/card2.svg";
 
 import "./health-lab.scss";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel.tsx";
+import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);

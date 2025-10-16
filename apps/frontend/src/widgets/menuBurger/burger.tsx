@@ -18,10 +18,10 @@ export default function BurgerMenu({ open, onClose }: Props) {
       <div className="drawer__overlay" />
       <aside className="drawer__panel" onClick={(e) => e.stopPropagation()}>
         <nav className="drawer__list">
-          <a className="drawer__item" href="#">
+          <a className="drawer__item" href="/settings">
             Настройки
           </a>
-          <a className="drawer__item" href="#">
+          <a className="drawer__item" href="/about">
             О проекте
           </a>
           <a className="drawer__item" href="#" onClick={onDownload}>

@@ -49,9 +49,10 @@ export function Index() {
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-        <TopBar onMenu={() => navigate("/settings")} />
+      <TopBar onMenu={() => setMenuOpen(true)} />
 
-        <main className="screen favorites">
+
+      <main className="screen favorites">
         <Title>Избранное</Title>
         <h3 className="fav__sectionTitle">Фильмы</h3>
         <PromoSlider bgSrc={Bgmini} items={films} />

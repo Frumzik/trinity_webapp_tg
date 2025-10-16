@@ -13,13 +13,12 @@ import {useNavigate} from "react-router-dom";
 
 export default function Index() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const nav = useNavigate()
 
     return (
         <div className="app" style={{["--gbutton-h" as any]: "60px"}}>
-            <TopBar onMenu={() => nav("/settings")}/>
+          <TopBar onMenu={() => setMenuOpen(true)} />
 
-            <main className="screen">
+          <main className="screen">
                 <div className="supportPage">
                     <Title>Магазин</Title>
 

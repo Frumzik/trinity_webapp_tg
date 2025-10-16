@@ -22,7 +22,8 @@ export default function Index() {
   const navigate = useNavigate();
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-      <TopBar onMenu={() => navigate("/settings")} />
+      <TopBar onMenu={() => setMenuOpen(true)} />
+
 
       <main className="screen">
         <div className="supportPage">

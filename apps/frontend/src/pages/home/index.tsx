@@ -10,8 +10,9 @@ import FeatureTile from "../../widgets/tiles/FeatureTile";
 import Bg2 from "../../assets/icons/bgblue.svg";
 import HimicalImg from "../../assets/icons/himical.svg";
 import WhiteImg from "../../assets/icons/WhiteImg.svg";
-import Card1 from "../../assets/image/image_1.svg";
-import Card4 from "../../assets/image/image_4.svg";
+import Card1 from "../../assets/image/image_3.png";
+import Card2 from "../../assets/image/image_4.svg";
+import Card3 from "../../assets/icons/products/cardHeadphone.svg";
 
 import "./home.scss";
 import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
@@ -31,7 +32,7 @@ export default function SupportPage() {
     }
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-      <TopBar onMenu={() => nav("/settings")} />
+      <TopBar onMenu={() => setMenuOpen(true)} />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <MiniCardSlider onItemClick={handleCardClick} />
@@ -59,18 +60,17 @@ export default function SupportPage() {
               style={{ display: "flex", gap: "11px" }}
             >
               <ReferralsCard
-                imageUrl={Card4}
+                imageUrl={Card2}
                 titleTop="Пройти практику"
-                labelBottom="2 ступень"
+                labelBottom=""
                 count={4}
                 href="/practice"
                 className="refCard--imgRight refCard--166x123"
               />
               <ReferralsCard
-                imageUrl={Card4}
+                imageUrl={Card3}
                 titleTop="Ступени духа"
                 labelBottom="2 ступень"
-                count={4}
                 href="/levels"
                 className="refCard--imgRight refCard--166x123"
               />

@@ -1,22 +1,21 @@
 import {useState} from "react";
-import Footer from "../../widgets/footer/footer.tsx";
-import TopBar from "../../widgets/topbar/topbar.tsx";
-import BurgerMenu from "../../widgets/menuBurger/burger.tsx";
-import Title from "../../shared/ui/title/Title.tsx";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel.tsx";
-import GradientButton from "../../shared/ui/gradient-button/index.tsx";
+import Footer from "../../widgets/footer/footer";
+import TopBar from "../../widgets/topbar/topbar";
+import BurgerMenu from "../../widgets/menuBurger/burger";
+import Title from "../../shared/ui/title/Title";
+import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
+import GradientButton from "../../shared/ui/gradient-button/index";
 
 import "./detailing.scss";
-import {useNavigate} from "react-router-dom";
-
 const Index = () => {
     const [menuOpen, setMenuOpen] = useState(false);
-    const nav = useNavigate()
+
     return (
         <div className="app">
-            <TopBar onMenu={() => nav("/settings")}/>
+          <TopBar onMenu={() => setMenuOpen(true)} />
 
-            <main className="screen">
+
+          <main className="screen">
                 <Title right={<button className="icon-btn"></button>}>
                     <div style={{fontSize: "27px"}}>Детализация</div>
                 </Title>

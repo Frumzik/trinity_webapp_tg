@@ -21,6 +21,7 @@ import Card4 from "../../assets/image/image_4.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
 import {useNavigate} from "react-router-dom";
+import BurgerMenu from '../../widgets/menuBurger/burger';
 
 const Index = () => {
     const [openModal, setOpenModal] = useState(false);
@@ -28,12 +29,15 @@ const Index = () => {
         e?.preventDefault();
         setOpenModal(true);
     }
+  const [menuOpen, setMenuOpen] = useState(false);
+
     const nav = useNavigate()
     return (
         <div className="app">
-            <TopBar onMenu={() => nav("/settings")}/>
+          <TopBar onMenu={() => setMenuOpen(true)} />
 
-            <main className="screen">
+
+          <main className="screen">
                 <Title
                     right={
                         <button className="icon-btn">
@@ -161,6 +165,7 @@ const Index = () => {
                 fileSizeText="9.1 MB"
                 durationText="00:00"
             />
+          <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
             <Footer/>
         </div>
     );
