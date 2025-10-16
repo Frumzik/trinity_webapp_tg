@@ -1,5 +1,5 @@
-import { forwardRef, useRef } from "react";
-import { useInertiaDragScroll } from "../../lib/hooks/useInertiaDragScroll.ts";
+import { forwardRef, useRef, useMemo } from "react";
+import { useInertiaDragScroll } from "../../lib/hooks/useInertiaDragScroll";
 import "./hscroller.scss";
 
 type Props = {
@@ -11,18 +11,28 @@ type Props = {
   gap?: number;
 };
 
+const isTouch = () =>
+  typeof window !== "undefined" &&
+  (("ontouchstart" in window) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+
 const HScroller = forwardRef<HTMLDivElement, Props>(function HScroller(
   { className, trackClassName, children, friction, minVelocity, gap = 12 },
-  refFromParent,
+  refFromParent
 ) {
   const innerRef = useRef<HTMLDivElement>(null);
   const ref = (refFromParent as React.RefObject<HTMLDivElement>) || innerRef;
-  const bind = useInertiaDragScroll(ref, {
-    axis: "x",
-    wheelToAxis: "auto",
-    friction,
-    minVelocity,
-  });
+
+  const bind = useMemo(() => {
+    if (isTouch()) return {};
+    return useInertiaDragScroll(ref, {
+      axis: "x",
+      wheelToAxis: "auto",
+      friction,
+      minVelocity,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref, friction, minVelocity]);
 
   return (
     <div className={["hscroll", className].filter(Boolean).join(" ")}>
@@ -39,3 +49,4 @@ const HScroller = forwardRef<HTMLDivElement, Props>(function HScroller(
 });
 
 export default HScroller;
+export { default as HScroller } from "./HScroller";

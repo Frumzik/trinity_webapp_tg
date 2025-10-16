@@ -35,7 +35,7 @@ export default function Index() {
 
       <Sheet head="Описание">
         <ScrollPanel
-          maxHeight="38dvh"
+          maxHeight="33dvh"
           vars={{
             railRight: "-15px",
             railTop: "4px",

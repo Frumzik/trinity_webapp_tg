@@ -20,12 +20,17 @@
   border-radius: 12px;
   background: #fff;
   scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
 }
 .sp__box::-webkit-scrollbar {
   width: 0;
   height: 0;
+  display: none;
 }
-
+.sp__box::-webkit-scrollbar-thumb { background: transparent; }
+.sp__box::-webkit-scrollbar-track { background: transparent; }
 .sp__content {
   display: grid;
   gap: 20px;

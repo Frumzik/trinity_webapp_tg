@@ -1,4 +1,4 @@
-import TextRenderer from "../../../shared/ui/TextPage/index.tsx";
+import TextRenderer from "../../../shared/ui/TextPage/index";
 
 type Props = {
   title: string;

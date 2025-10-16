@@ -1,6 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./app/App";
+import { initTelegram } from './telegram/init';
+
+if (typeof window !== "undefined" && (window as any).Telegram?.WebApp) {
+  initTelegram();
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
