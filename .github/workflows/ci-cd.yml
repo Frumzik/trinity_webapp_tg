@@ -37,6 +37,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}  # вместо ключа
         port: 22
         script: |
+          export NVM_DIR=~/.nvm
+          source ~/.nvm/nvm.sh
           cd /home/trinity
           git fetch
           git switch main
