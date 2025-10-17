@@ -46,7 +46,7 @@ export class UsersService {
     try {
       const user = await this.usersRepository.findUserAll(condition);
       if (!user) {
-        throw new NotFoundException('Пользователь не найден');
+        throw new NotFoundException('Пользователь не найден!');
       }
       return user;
     } catch (error: unknown) {
