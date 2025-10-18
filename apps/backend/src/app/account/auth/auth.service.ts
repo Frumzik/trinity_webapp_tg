@@ -43,7 +43,7 @@ export class AuthService {
 
     // Создаем UserEntity
     const newUserEntity = new UserEntity({
-      userId: await this.countersService.getNextSequence(CounterType.USER_ID),
+      userId: await this.countersService.saveNextSequence(CounterType.USER_ID),
       name: dto.name,
       username: dto.username,
       tgId: dto.tgId,
@@ -62,7 +62,7 @@ export class AuthService {
 
     // Создаем SubscriptionEntity
     const newSubscriptionEntity = new SubscriptionEntity({
-      subscriptionId: await this.countersService.getNextSequence(
+      subscriptionId: await this.countersService.saveNextSequence(
         CounterType.SUBSCRIPTION_ID
       ),
     });
@@ -79,9 +79,6 @@ export class AuthService {
       { _id: newSubscription._id },
       { user: newUser }
     );
-
-    await this.countersService.saveNextSequence(CounterType.USER_ID);
-    await this.countersService.saveNextSequence(CounterType.SUBSCRIPTION_ID);
 
     // Событие регистрации
     this.eventEmitter.emit(
@@ -117,7 +114,10 @@ export class AuthService {
     );
 
     return {
-      access_token: await this.jwtService.signAsync({ userId: user.userId }),
+      access_token: await this.jwtService.signAsync({
+        userId: user.userId,
+        role: user.role,
+      }),
     };
   }
 }

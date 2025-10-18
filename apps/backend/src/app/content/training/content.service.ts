@@ -25,23 +25,32 @@ export class ContentService {
     dto: ContentAddTrainingRequestDto
   ): Promise<ContentAddTrainingResponseDto> {
     try {
-      // Создаем TrainingEntity
+      // 1️⃣ Получаем новый ID
+      const newTrainingId = await this.countersService.saveNextSequence(
+        CounterType.TRAINING_ID
+      );
+
+      // 2️⃣ Создаём сущность
       const newTrainingEntity = new TrainingEntity({
-        trainingId: await this.countersService.getNextSequence(
-          CounterType.TRAINING_ID
-        ),
+        trainingId: newTrainingId,
         title: dto.title,
+        description: dto.description,
+        parentId: dto.parentId || null,
+        isRoot: !dto.parentId, // если нет parentId → корневой
       });
 
-      const trainingEntity = await this.trainingRepository.createTraining(
+      // 3️⃣ Сохраняем в базу
+      const createdTraining = await this.trainingRepository.createTraining(
         newTrainingEntity
       );
 
-      await this.countersService.saveNextSequence(CounterType.TRAINING_ID);
+      // 5️⃣ Если указан parentId — связываем
+      await this.trainingRepository.bindParentAndChild(
+          dto.parentId || null,
+          createdTraining.trainingId
+        );
 
-      return {
-        trainingId: trainingEntity.trainingId,
-      };
+      return { trainingId: createdTraining.trainingId };
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при создании тренинга';

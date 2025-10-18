@@ -22,7 +22,7 @@ export class User extends Document<Types.ObjectId> implements IUser {
   @Prop()
   passwordHash?: string;
 
-  @Prop({ required: true, enum: UserRole, type: String })
+  @Prop({ required: true, enum: UserRole, type: String, default: UserRole.User })
   role!: UserRole;
 
   @Prop()
