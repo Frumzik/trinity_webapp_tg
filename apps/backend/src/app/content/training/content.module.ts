@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentController } from './content.controller';
-import { TrainingRepository } from './repositories';
+import { LessonRepository, TrainingRepository } from './repositories';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Training, TrainingSchema } from './models';
+import { Lesson, LessonSchema, Training, TrainingSchema } from './models';
 import { CountersModule } from '../../service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Training.name, schema: TrainingSchema },
+      { name: Lesson.name, schema: LessonSchema },
     ]),
-    CountersModule
+    CountersModule,
   ],
-  providers: [ContentService, TrainingRepository],
+  providers: [ContentService, TrainingRepository, LessonRepository],
   controllers: [ContentController],
   exports: [ContentService],
 })

@@ -14,13 +14,13 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
   description!: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Lesson' }], default: () => [] })
-  lessons!: (Types.ObjectId | ILesson)[];
+  lessons!: Types.ObjectId[] | ILesson[];
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Training' }],
     default: () => [],
   })
-  childrens!: (Types.ObjectId | ITraining)[];
+  childrens!: Types.ObjectId[] | ITraining[];
 
   @Prop({ type: Types.ObjectId, ref: 'Training', default: null })
   parent!: Types.ObjectId | ITraining | null;

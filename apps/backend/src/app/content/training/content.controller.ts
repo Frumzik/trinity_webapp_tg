@@ -2,11 +2,13 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
 import {
+  ContentAddLessonRequestDto,
+  ContentAddLessonResponseDto,
   ContentAddTrainingRequestDto,
   ContentAddTrainingResponseDto,
   UserRole,
 } from '@trinity/shared';
-import { TrainingEntity } from './entities';
+import { LessonEntity, TrainingEntity } from './entities';
 
 @Controller('content')
 @UseGuards(JWTAuthGuard, RolesGuard)
@@ -28,5 +30,29 @@ export class ContentController {
     const training = await this.contentService.findTraining({ trainingId });
 
     return training;
+  }
+
+  @Get('training/:id/structure')
+  async infoStructureTraining(@Param('id') trainingId: number): Promise<TrainingEntity> {
+    const training = await this.contentService.findStructureTraining({ trainingId });
+
+    return training;
+  }
+
+  @Post('lesson/add')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  async addLesson(
+    @Body() dto: ContentAddLessonRequestDto
+  ): Promise<ContentAddLessonResponseDto> {
+    const lessson = await this.contentService.createLesson(dto);
+
+    return lessson;
+  }
+
+  @Get('lesson/:id')
+  async infoLesson(@Param('id') lessonId: number): Promise<LessonEntity> {
+    const lessson = await this.contentService.findLesson({ lessonId });
+
+    return lessson;
   }
 }

@@ -6,11 +6,11 @@ export class TrainingEntity implements ITraining {
   trainingId: number;
   title: string;
   description?: string;
-  lessons?: (Types.ObjectId | ILesson)[];
-  childrens?: (Types.ObjectId | ITraining)[];
+  lessons?: Types.ObjectId[] | ILesson[];
+  childrens?: Types.ObjectId[] | ITraining[];
   parent?: Types.ObjectId | ITraining | null;
-  lessonsId?: number[];
-  childrensId?: number[];
+  lessonsId: number[];
+  childrensId: number[];
   parentId: number | null;
   isRoot: boolean;
 
@@ -26,17 +26,5 @@ export class TrainingEntity implements ITraining {
     this.childrensId = training.childrensId;
     this.parentId = training.parentId;
     this.isRoot = training.isRoot;
-  }
-
-  bindParent(parent: Types.ObjectId | ITraining, parentId: number) {
-    this.parent = parent;
-    this.parentId = parentId;
-  }
-
-  bindChildren(children: (Types.ObjectId | ITraining), childrenId: number) {
-    this.childrens ??= [];
-    this.childrensId ??= [];
-    this.childrens?.push(children);
-    this.childrensId?.push(childrenId);
   }
 }

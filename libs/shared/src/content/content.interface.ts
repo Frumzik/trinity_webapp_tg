@@ -6,14 +6,14 @@ export interface ITraining {
   title: string;
   description?: string;
   // Уроки, входящие в тренинг
-  lessons?: (Types.ObjectId | ILesson)[];
+  lessons?: Types.ObjectId[] | ILesson[];
   // Вложенные блоки (дочерние тренинги)
-  childrens?: (Types.ObjectId | ITraining)[];
+  childrens?: Types.ObjectId[] | ITraining[];
   // Ссылка на родителя (если есть)
   parent?: Types.ObjectId | ITraining | null;
 
-  lessonsId?: number[];
-  childrensId?: number[];
+  lessonsId: number[];
+  childrensId: number[];
   parentId: number | null;
   isRoot: boolean;
 }
@@ -24,6 +24,6 @@ export interface ILesson {
   title: string;
   description?: string;
 
-  parentTraining?: Types.ObjectId | ITraining;
-  parentTrainingId: number;
+  parent?: Types.ObjectId | ITraining;
+  parentId: number;
 }
