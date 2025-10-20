@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
+import { JWTAuthGuard, Roles, RolesGuard, S3Service } from '../../service';
 import {
   ContentAddLessonRequestDto,
   ContentAddLessonResponseDto,
@@ -13,7 +13,7 @@ import { LessonEntity, TrainingEntity } from './entities';
 @Controller('content')
 @UseGuards(JWTAuthGuard, RolesGuard)
 export class ContentController {
-  constructor(private readonly contentService: ContentService) {}
+  constructor(private readonly contentService: ContentService, private readonly s3Service: S3Service) {}
 
   @Post('training/add')
   @Roles(UserRole.Admin, UserRole.Moderator)

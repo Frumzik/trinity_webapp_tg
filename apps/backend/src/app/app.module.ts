@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CountersModule, getMongoConfig } from './service';
+import { CountersModule, getMongoConfig, S3ProviderModule } from './service';
 import { AuthModule, UsersModule } from './account';
 import { SubscriptionsModule } from './billing';
 import { ContentModule } from './content';
@@ -23,6 +23,7 @@ import { ContentModule } from './content';
     CountersModule,
     SubscriptionsModule,
     ContentModule,
+    S3ProviderModule
   ],
   controllers: [],
   providers: [],
