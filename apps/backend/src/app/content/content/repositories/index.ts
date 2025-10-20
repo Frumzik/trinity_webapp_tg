@@ -1,2 +1,2 @@
-export * from './training.repository';
-export * from './lesson.repository';
+export * from './trainings.repository';
+export * from './lessons.repository';

@@ -6,7 +6,7 @@ import { TrainingEntity } from '../entities';
 import { ITraining } from '@trinity/shared';
 
 @Injectable()
-export class TrainingRepository {
+export class TrainingsRepository {
   constructor(
     @InjectModel(Training.name)
     private readonly trainingModel: Model<Training>

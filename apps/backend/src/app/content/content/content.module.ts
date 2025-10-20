@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentController } from './content.controller';
-import { LessonRepository, TrainingRepository } from './repositories';
+import { LessonsRepository, TrainingsRepository } from './repositories';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Lesson, LessonSchema, Training, TrainingSchema } from './models';
 import { CountersModule, S3ProviderModule } from '../../service';
@@ -15,7 +15,7 @@ import { CountersModule, S3ProviderModule } from '../../service';
     CountersModule,
     S3ProviderModule
   ],
-  providers: [ContentService, TrainingRepository, LessonRepository],
+  providers: [ContentService, TrainingsRepository, LessonsRepository],
   controllers: [ContentController],
   exports: [ContentService],
 })

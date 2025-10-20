@@ -5,7 +5,7 @@ import { Lesson } from '../models';
 import { LessonEntity } from '../entities';
 
 @Injectable()
-export class LessonRepository {
+export class LessonsRepository {
   constructor(
     @InjectModel(Lesson.name)
     private readonly lessonModel: Model<Lesson>

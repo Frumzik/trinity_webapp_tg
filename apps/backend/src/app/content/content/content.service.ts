@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { LessonEntity, TrainingEntity } from './entities';
-import { LessonRepository, TrainingRepository } from './repositories';
+import { LessonsRepository, TrainingsRepository } from './repositories';
 import { FilterQuery } from 'mongoose';
 import { Lesson, Training } from './models';
 import {
@@ -16,9 +16,9 @@ import { CountersService } from '../../service';
 @Injectable()
 export class ContentService {
   constructor(
-    private readonly trainingRepository: TrainingRepository,
-    private readonly countersService: CountersService,
-    private readonly lessonRepository: LessonRepository
+    private readonly trainingsRepository: TrainingsRepository,
+    private readonly lessonsRepository: LessonsRepository,
+    private readonly countersService: CountersService
   ) {}
 
   async createTraining(
@@ -32,17 +32,17 @@ export class ContentService {
         ...dto,
       });
 
-      const createdTraining = await this.trainingRepository.create(newTraining);
+      const createdTraining = await this.trainingsRepository.create(newTraining);
 
       if (dto.parentId) {
-        const parentTraining = await this.trainingRepository.find({
+        const parentTraining = await this.trainingsRepository.find({
           trainingId: dto.parentId,
         });
 
-        this.trainingRepository.update(
+        this.trainingsRepository.update(
           createdTraining.bindParent(parentTraining)
         );
-        this.trainingRepository.update(
+        this.trainingsRepository.update(
           parentTraining.bindChildren(createdTraining)
         );
       }
@@ -59,7 +59,7 @@ export class ContentService {
     condition: FilterQuery<Training>
   ): Promise<TrainingEntity> {
     try {
-      const training = await this.trainingRepository.find(condition);
+      const training = await this.trainingsRepository.find(condition);
 
       return training;
     } catch (error: unknown) {
@@ -75,10 +75,10 @@ export class ContentService {
     trainingId: number;
   }): Promise<ITraining> {
     try {
-      const trainingEntity = await this.trainingRepository.find({ trainingId });
+      const trainingEntity = await this.trainingsRepository.find({ trainingId });
 
       const trainingEntityPopulated =
-        await this.trainingRepository.getNeighbors(trainingEntity);
+        await this.trainingsRepository.getNeighbors(trainingEntity);
 
       return trainingEntityPopulated;
     } catch (error: unknown) {
@@ -98,21 +98,21 @@ export class ContentService {
       ...dto,
     });
 
-    const createdLesson = await this.lessonRepository.create(newLesson);
+    const createdLesson = await this.lessonsRepository.create(newLesson);
 
-    const training = await this.trainingRepository.find({
+    const training = await this.trainingsRepository.find({
       trainingId: dto.parentId,
     });
 
-    await this.trainingRepository.update(training.bindLesson(createdLesson));
-    await this.lessonRepository.update(createdLesson.bindParent(training));
+    await this.trainingsRepository.update(training.bindLesson(createdLesson));
+    await this.lessonsRepository.update(createdLesson.bindParent(training));
 
     return { lessonId: createdLesson.lessonId };
   }
 
   async findLesson(condition: FilterQuery<Lesson>): Promise<LessonEntity> {
     try {
-      const lesson = await this.lessonRepository.find(condition);
+      const lesson = await this.lessonsRepository.find(condition);
 
       return lesson;
     } catch (error: unknown) {
