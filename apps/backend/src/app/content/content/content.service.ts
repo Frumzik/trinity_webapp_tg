@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { LessonEntity, TrainingEntity } from './entities';
 import { LessonRepository, TrainingRepository } from './repositories';
 import { FilterQuery } from 'mongoose';
@@ -13,6 +9,7 @@ import {
   ContentAddTrainingRequestDto,
   ContentAddTrainingResponseDto,
   CounterType,
+  ITraining,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 
@@ -28,32 +25,27 @@ export class ContentService {
     dto: ContentAddTrainingRequestDto
   ): Promise<ContentAddTrainingResponseDto> {
     try {
-      // 1️⃣ Получаем новый ID
-      const newTrainingId = await this.countersService.saveNextSequence(
-        CounterType.TRAINING_ID
-      );
-
-      // 2️⃣ Создаём сущность
-      const newTrainingEntity = new TrainingEntity({
-        trainingId: newTrainingId,
-        title: dto.title,
-        description: dto.description,
-        parentId: dto.parentId || null,
-        isRoot: !dto.parentId, // если нет parentId → корневой,
-        lessonsId: [],
-        childrensId: [],
+      const newTraining = new TrainingEntity({
+        trainingId: await this.countersService.saveNextSequence(
+          CounterType.TRAINING_ID
+        ),
+        ...dto,
       });
 
-      // 3️⃣ Сохраняем в базу
-      const createdTraining = await this.trainingRepository.createTraining(
-        newTrainingEntity
-      );
+      const createdTraining = await this.trainingRepository.create(newTraining);
 
-      // 5️⃣ Если указан parentId — связываем
-      await this.trainingRepository.bindParentAndChild(
-        dto.parentId || null,
-        createdTraining.trainingId
-      );
+      if (dto.parentId) {
+        const parentTraining = await this.trainingRepository.find({
+          trainingId: dto.parentId,
+        });
+
+        this.trainingRepository.update(
+          createdTraining.bindParent(parentTraining)
+        );
+        this.trainingRepository.update(
+          parentTraining.bindChildren(createdTraining)
+        );
+      }
 
       return { trainingId: createdTraining.trainingId };
     } catch (error: unknown) {
@@ -67,10 +59,8 @@ export class ContentService {
     condition: FilterQuery<Training>
   ): Promise<TrainingEntity> {
     try {
-      const training = await this.trainingRepository.findTraining(condition);
-      if (!training) {
-        throw new NotFoundException('Тренинг не найден');
-      }
+      const training = await this.trainingRepository.find(condition);
+
       return training;
     } catch (error: unknown) {
       const message =
@@ -83,15 +73,14 @@ export class ContentService {
     trainingId,
   }: {
     trainingId: number;
-  }): Promise<TrainingEntity> {
+  }): Promise<ITraining> {
     try {
-      const training = await this.trainingRepository.getFullStructure(
-        trainingId
-      );
-      if (!training) {
-        throw new NotFoundException('Тренинг не найден');
-      }
-      return training;
+      const trainingEntity = await this.trainingRepository.find({ trainingId });
+
+      const trainingEntityPopulated =
+        await this.trainingRepository.getNeighbors(trainingEntity);
+
+      return trainingEntityPopulated;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
@@ -102,36 +91,29 @@ export class ContentService {
   async createLesson(
     dto: ContentAddLessonRequestDto
   ): Promise<ContentAddLessonResponseDto> {
-    const lessonId = await this.countersService.getNextSequence(
-      CounterType.LESSON_ID
-    );
-
     const newLesson = new LessonEntity({
-      lessonId,
-      title: dto.title,
-      description: dto.description,
-      parentId: dto.parentId,
+      lessonId: await this.countersService.saveNextSequence(
+        CounterType.LESSON_ID
+      ),
+      ...dto,
     });
 
-    const created = await this.lessonRepository.createLesson(newLesson);
+    const createdLesson = await this.lessonRepository.create(newLesson);
 
-    await this.countersService.saveNextSequence(CounterType.LESSON_ID);
+    const training = await this.trainingRepository.find({
+      trainingId: dto.parentId,
+    });
 
-    // ✅ Привязываем, если parentTrainingId указан
-    await this.lessonRepository.bindTraining(created.lessonId, dto.parentId);
+    await this.trainingRepository.update(training.bindLesson(createdLesson));
+    await this.lessonRepository.update(createdLesson.bindParent(training));
 
-    // ✅ Привязываем, если parentTrainingId указан
-    await this.trainingRepository.bindLesson(dto.parentId, created.lessonId);
-
-    return { lessonId: created.lessonId };
+    return { lessonId: createdLesson.lessonId };
   }
 
   async findLesson(condition: FilterQuery<Lesson>): Promise<LessonEntity> {
     try {
-      const lesson = await this.lessonRepository.findLesson(condition);
-      if (!lesson) {
-        throw new NotFoundException('Урок не найден');
-      }
+      const lesson = await this.lessonRepository.find(condition);
+
       return lesson;
     } catch (error: unknown) {
       const message =

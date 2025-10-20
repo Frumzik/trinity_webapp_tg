@@ -1,46 +1,39 @@
 import { Types } from 'mongoose';
 
-
-
-
 // Тренинги
 export enum TrainingType {
   COURSE = 'course',
 }
 
 interface ITrainingBase {
-  trainingId: number;
   _id?: Types.ObjectId;
 
-  title: string;
-  description?: string;
-  // type: TrainingType;
-  coverUrl?: string;
+  trainingId: number;
+  type: TrainingType;
 
-  // Уроки, входящие в тренинг
-  lessons?: Types.ObjectId[] | ILesson[];
-  // Вложенные блоки (дочерние тренинги)
-  childrens?: Types.ObjectId[] | ITraining[];
-  // Ссылка на родителя (если есть)
-  parent?: Types.ObjectId | ITraining | null;
+  // Вложенность
+  lessons: Types.ObjectId[] | ILesson[];
+  childrens: Types.ObjectId[] | ITraining[];
+  parent: Types.ObjectId | ITraining | null;
 
   lessonsId: number[];
   childrensId: number[];
   parentId: number | null;
-  isRoot: boolean;
-  
-  // accessRules?: IContentAccess[];
+
+  // Метаданные
+  title: string | null;
+  description: string | null;
+  coverUrl: string | null;
+
+  // Условия доступности
+  accessRules: IContentAccess[];
 }
 
 export interface ITrainingCourse extends ITrainingBase {
   type: TrainingType.COURSE;
 }
 
-// export type ITraining = ITrainingCourse;
-export type ITraining = ITrainingBase;
-
-
-
+export type ITraining = ITrainingCourse;
 
 // Уроки
 export enum LessonType {
@@ -50,45 +43,60 @@ export enum LessonType {
 }
 
 interface ILessonBase {
-  lessonId: number;
   _id?: Types.ObjectId;
-  title: string;
-  description?: string;
 
-  parent?: Types.ObjectId | ITraining;
-  parentId: number;
+  lessonId: number;
+  type: LessonType;
 
-  // type: LessonType
-  // accessRules?: IContentAccess[];
+  // Вложенность
+  parent: Types.ObjectId | ITraining | null;
+  parentId: number | null;
+
+  // Метаданные
+  title: string | null;
+  description: string | null;
+  content: ILessonContent | null;
+
+  // Условия доступности
+  accessRules: IContentAccess[];
 }
+
+export interface ILessonVideoContent {
+  videoUrl: string;
+  duration?: number;
+  previewImage?: string;
+}
+
+export interface ILessonAudioContent {
+  audioUrl: string;
+  duration?: number;
+}
+
+export interface ILessonTextContent {
+  html: string;
+}
+
+export type ILessonContent =
+  | ILessonVideoContent
+  | ILessonAudioContent
+  | ILessonTextContent;
 
 export interface ILessonVideo extends ILessonBase {
   type: LessonType.VIDEO;
-  content: {
-    videoUrl: string;
-    duration?: number;
-    previewImage?: string;
-  };
+  content: ILessonVideoContent;
 }
 export interface ILessonAudio extends ILessonBase {
   type: LessonType.AUDIO;
-  content: {
-    audioUrl: string;
-    duration?: number;
-  };
+  content: ILessonAudioContent;
 }
 
 export interface ILessonText extends ILessonBase {
   type: LessonType.AUDIO;
-  content: {
-    html: string;
-  };
+  content: ILessonTextContent;
 }
 
 // export type ILesson = ILessonVideo | ILessonAudio | ILessonText;
 export type ILesson = ILessonBase;
-
-
 
 // Условия доступности
 export enum ContentAccessType {
@@ -136,4 +144,4 @@ export type IContentAccess =
   | IContentAccessSubscription
   | IContentAccessOneTimePayment
   | IContentAccessFree
-  | IContentAccessDateUnlock
+  | IContentAccessDateUnlock;

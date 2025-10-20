@@ -1,19 +1,22 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { JWTAuthGuard, Roles, RolesGuard, S3Service } from '../../service';
+import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
 import {
   ContentAddLessonRequestDto,
   ContentAddLessonResponseDto,
   ContentAddTrainingRequestDto,
   ContentAddTrainingResponseDto,
+  ILesson,
+  ITraining,
   UserRole,
 } from '@trinity/shared';
-import { LessonEntity, TrainingEntity } from './entities';
 
 @Controller('content')
 @UseGuards(JWTAuthGuard, RolesGuard)
 export class ContentController {
-  constructor(private readonly contentService: ContentService, private readonly s3Service: S3Service) {}
+  constructor(
+    private readonly contentService: ContentService
+  ) {}
 
   @Post('training/add')
   @Roles(UserRole.Admin, UserRole.Moderator)
@@ -26,15 +29,19 @@ export class ContentController {
   }
 
   @Get('training/:id')
-  async infoTraining(@Param('id') trainingId: number): Promise<TrainingEntity> {
+  async infoTraining(@Param('id') trainingId: number): Promise<ITraining> {
     const training = await this.contentService.findTraining({ trainingId });
 
     return training;
   }
 
   @Get('training/:id/structure')
-  async infoStructureTraining(@Param('id') trainingId: number): Promise<TrainingEntity> {
-    const training = await this.contentService.findStructureTraining({ trainingId });
+  async infoStructureTraining(
+    @Param('id') trainingId: number
+  ): Promise<ITraining> {
+    const training = await this.contentService.findStructureTraining({
+      trainingId,
+    });
 
     return training;
   }
@@ -50,7 +57,7 @@ export class ContentController {
   }
 
   @Get('lesson/:id')
-  async infoLesson(@Param('id') lessonId: number): Promise<LessonEntity> {
+  async infoLesson(@Param('id') lessonId: number): Promise<ILesson> {
     const lessson = await this.contentService.findLesson({ lessonId });
 
     return lessson;

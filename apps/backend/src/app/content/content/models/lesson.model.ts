@@ -1,23 +1,46 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { ILesson, ITraining } from '@trinity/shared';
+import {
+  type ILesson,
+  type IContentAccess,
+  type ILessonContent,
+  LessonType,
+} from '@trinity/shared';
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class Lesson extends Document<Types.ObjectId> implements ILesson {
   @Prop({ required: true, unique: true })
   lessonId!: number;
 
-  @Prop({ required: true })
-  title!: string;
+  @Prop({
+    type: String,
+    required: true,
+    enum: LessonType,
+    default: LessonType.TEXT,
+  })
+  type!: LessonType;
 
-  @Prop({ default: '' })
-  description?: string;
-
+  // Вложенность
   @Prop({ type: Types.ObjectId, ref: 'Training', default: null })
-  parent?: Types.ObjectId | ITraining;
+  parent!: Types.ObjectId | null;
 
   @Prop({ type: Number, default: null })
-  parentId!: number;
+  parentId!: number | null;
+
+  // Метаданные
+  @Prop({ type: String, default: null })
+  title!: string | null;
+
+  @Prop({ type: String, default: null })
+  description!: string | null;
+
+  // Контент (в зависимости от типа урока)
+  @Prop({ type: Object, default: { html: '' } })
+  content!: ILessonContent;
+
+  // Условия доступности
+  @Prop({ type: Array, default: [] })
+  accessRules!: IContentAccess[];
 }
 
 export const LessonSchema = SchemaFactory.createForClass(Lesson);

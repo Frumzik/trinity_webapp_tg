@@ -1,20 +1,43 @@
-import { ILesson, ITraining } from '@trinity/shared';
+import {
+  IContentAccess,
+  ILesson,
+  ILessonContent,
+  ILessonTextContent,
+  ITraining,
+  LessonType,
+} from '@trinity/shared';
 import { Types } from 'mongoose';
 
 export class LessonEntity implements ILesson {
   _id?: Types.ObjectId;
-  lessonId: number;
-  title: string;
-  description?: string;
-  parent?: Types.ObjectId | ITraining;
-  parentId: number;
 
-  constructor(lesson: ILesson) {
-    this._id = lesson._id;
-    this.lessonId = lesson.lessonId;
-    this.title = lesson.title;
-    this.description = lesson.description;
-    this.parent = lesson.parent;
-    this.parentId = lesson.parentId;
+  lessonId!: number;
+  type: LessonType = LessonType.TEXT;
+
+  // Вложенность
+  parent: Types.ObjectId| null = null;
+  parentId: number | null = null;
+
+  // Метаданные
+  title: string | null = null;
+  description: string | null = null;
+  content: ILessonContent = { html: '' } as ILessonTextContent;
+
+  // Условия доступности
+  accessRules: IContentAccess[] = [];
+
+  constructor(lesson: Partial<ILesson> = {}) {
+    Object.assign(this, lesson);
+  }
+
+  bindParent(training: ITraining) {
+    if (!training._id) {
+      throw new Error('Тренинг не имеет _id');
+    }
+  
+    this.parent = training._id;
+    this.parentId = training.trainingId;
+
+    return this;
   }
 }

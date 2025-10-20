@@ -1,41 +1,57 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ILesson, ITraining } from '@trinity/shared';
+import {
+  type IContentAccess,
+  ILesson,
+  type ITraining,
+  TrainingType,
+} from '@trinity/shared';
 import { Document, Types } from 'mongoose';
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class Training extends Document<Types.ObjectId> implements ITraining {
   @Prop({ required: true, unique: true })
   trainingId!: number;
 
-  @Prop({ required: true })
-  title!: string;
+  @Prop({
+    type: String,
+    required: true,
+    enum: TrainingType,
+    default: TrainingType.COURSE,
+  })
+  type!: TrainingType;
 
-  @Prop({ default: '' })
-  description!: string;
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Lesson' }], default: () => [] })
+  // Вложенность
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Lesson' }], default: [] })
   lessons!: Types.ObjectId[] | ILesson[];
 
-  @Prop({
-    type: [{ type: Types.ObjectId, ref: 'Training' }],
-    default: () => [],
-  })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Training' }], default: [] })
   childrens!: Types.ObjectId[] | ITraining[];
 
   @Prop({ type: Types.ObjectId, ref: 'Training', default: null })
-  parent!: Types.ObjectId | ITraining | null;
+  parent!: Types.ObjectId | null;
 
-  @Prop({ type: [Number], default: () => [] })
+  @Prop({ type: [Number], default: [] })
   lessonsId!: number[];
 
-  @Prop({ type: [Number], default: () => [] })
+  @Prop({ type: [Number], default: [] })
   childrensId!: number[];
 
   @Prop({ type: Number, default: null })
   parentId!: number | null;
 
-  @Prop({ default: true })
-  isRoot!: boolean;
+  // Метаданные
+  @Prop({ type: String, default: null })
+  title!: string | null;
+
+  @Prop({ type: String, default: null })
+  description!: string | null;
+
+  @Prop({ type: String, default: null })
+  coverUrl!: string | null;
+
+  // Условия доступности
+  @Prop({ type: Array, default: [] })
+  accessRules!: IContentAccess[];
 }
 
 export const TrainingSchema = SchemaFactory.createForClass(Training);

@@ -1,59 +1,64 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Lesson } from '../models';
 import { LessonEntity } from '../entities';
-import { TrainingRepository } from './training.repository';
 
 @Injectable()
 export class LessonRepository {
   constructor(
     @InjectModel(Lesson.name)
-    private readonly lessonModel: Model<Lesson>,
-    @Inject(forwardRef(() => TrainingRepository))
-    private readonly trainingRepository: TrainingRepository
+    private readonly lessonModel: Model<Lesson>
   ) {}
 
-  async createLesson(lessonEntity: LessonEntity): Promise<LessonEntity> {
+  // Создание урока
+  async create(lessonEntity: LessonEntity): Promise<LessonEntity> {
     const created = await new this.lessonModel(lessonEntity).save();
-    return new LessonEntity(created);
+    return new LessonEntity(created.toObject());
   }
 
-  async findLesson(
-    condition: FilterQuery<Lesson>
-  ): Promise<LessonEntity | null> {
+  // Поиск урока
+  async find(condition: FilterQuery<Lesson>): Promise<LessonEntity> {
     const lesson = await this.lessonModel.findOne(condition).exec();
-    return lesson ? new LessonEntity(lesson) : null;
+
+    if (!lesson) {
+      throw new NotFoundException(`Урок по условию ${condition} не найден`);
+    }
+
+    return new LessonEntity(lesson.toObject());
   }
 
-  // ✅ Привязка урока к тренингу или отвязка (если parentId = null)
-  async bindTraining(
-    lessonId: number,
-    parentId: number
-  ): Promise<LessonEntity> {
-    const lesson = await this.lessonModel.findOne({ lessonId });
-    if (!lesson) throw new Error('Урок не найден');
+  // Обновление урока
+  async update(lessonEntity: LessonEntity): Promise<LessonEntity> {
+    if (!lessonEntity._id) {
+      throw new Error('Урок не имеет _id');
+    }
 
-    // Находим тренинг
-    const parent = await this.trainingRepository.findTraining({
-      trainingId: parentId,
-    });
-    if (!parent) throw new Error('Тренинг не найден');
+    const updated = await this.lessonModel
+      .findOneAndUpdate(
+        { _id: lessonEntity._id },
+        { $set: lessonEntity },
+        { new: true } // вернуть обновлённый документ
+      )
+      .exec();
 
-    // Привязываем урок к тренингу
-    await this.lessonModel.updateOne(
-      { _id: lesson._id },
-      {
-        $set: {
-          parent: parent._id,
-          parentId: parent.trainingId,
-        },
-      }
-    );
+    if (!updated) {
+      throw new NotFoundException(`Урок с id ${lessonEntity._id} не найден`);
+    }
 
-    const updated = await this.lessonModel.findById(lesson._id).exec();
-    if (!updated) throw new Error('Ошибка при обновлении урока');
+    return new LessonEntity(updated.toObject());
+  }
 
-    return new LessonEntity(updated);
+  // Удаление урока
+  async delete(condition: FilterQuery<Lesson>): Promise<{deleted: boolean}> {
+    const result = await this.lessonModel.deleteOne(condition).exec();
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(
+        `Урок по условию ${JSON.stringify(condition)} не найден`
+      );
+    }
+
+    return {deleted: true};
   }
 }
