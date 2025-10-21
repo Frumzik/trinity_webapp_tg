@@ -29,9 +29,9 @@ export class UsersService {
       const condition =
         dto.type === 'TG' ? { tgId: dto.tgId } : { email: dto.email };
 
-      try {
-        await this.usersRepository.find(condition);
-      } catch (error: unknown) {
+      const oldUser = await this.usersRepository.find(condition);
+
+      if (oldUser) {
         throw new Error('Такой пользователь уже зарегистрирован');
       }
 
