@@ -35,11 +35,12 @@ export class S3Service {
     }
   }
 
-  async uploadFile(
-    key: string,
-    file: Express.Multer.File | { buffer: Buffer; mimetype: string }
-  ): Promise<string> {
+  async uploadFile(file: Express.Multer.File, key?: string): Promise<string> {
     try {
+      if (!key) {
+        key = `uploads/${Date.now()}-${file.originalname}`;
+      }
+
       await this.s3.send(
         new PutObjectCommand({
           Bucket: this.bucket,

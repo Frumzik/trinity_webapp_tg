@@ -34,6 +34,9 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
   @Prop({ type: String, default: null })
   description!: string | null;
 
+  @Prop({ type: String, default: null })
+  coverUrl!: string | null;
+
   // Контент (в зависимости от типа урока)
   @Prop({ type: Object, default: { html: '' } })
   content!: ILessonContent;
@@ -41,6 +44,9 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
   // Условия доступности
   @Prop({ type: Array, default: [] })
   accessRules!: IContentAccess[];
+
+  @Prop({ type: Number, default: 0 })
+  price!: number;
 }
 
 export const LessonSchema = SchemaFactory.createForClass(Lesson);

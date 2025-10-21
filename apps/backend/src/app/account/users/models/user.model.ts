@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 import { IUser, UserRole } from '@trinity/shared';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class User extends Document<Types.ObjectId> implements IUser {
   @Prop({ type: Types.ObjectId, ref: 'Subscription' })
   subscription!: Types.ObjectId | null;

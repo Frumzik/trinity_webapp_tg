@@ -52,6 +52,9 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
   // Условия доступности
   @Prop({ type: Array, default: [] })
   accessRules!: IContentAccess[];
+
+  @Prop({ type: Number, default: 0 })
+  price!: number;
 }
 
 export const TrainingSchema = SchemaFactory.createForClass(Training);

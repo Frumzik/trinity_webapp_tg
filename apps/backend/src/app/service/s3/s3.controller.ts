@@ -22,9 +22,8 @@ export class S3Controller {
       return { message: 'Файл не получен' };
     }
 
-    const key = `uploads/${Date.now()}-${file.originalname}`;
-    const url = await this.s3Service.uploadFile(key, file);
-    return { key, url };
+    const url = await this.s3Service.uploadFile(file);
+    return { url };
   }
 
   // 🗑 Удаление файла

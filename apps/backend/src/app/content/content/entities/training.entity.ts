@@ -28,6 +28,7 @@ export class TrainingEntity implements ITraining {
 
   // Условия доступности
   accessRules: IContentAccess[] = [];
+  price: number | null = null;
 
   constructor(training: Partial<ITraining> = {}) {
     Object.assign(this, training);

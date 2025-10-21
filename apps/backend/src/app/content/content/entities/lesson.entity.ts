@@ -22,9 +22,11 @@ export class LessonEntity implements ILesson {
   title: string | null = null;
   description: string | null = null;
   content: ILessonContent = { html: '' } as ILessonTextContent;
+  coverUrl: string | null = null;
 
   // Условия доступности
   accessRules: IContentAccess[] = [];
+  price: number | null = null;
 
   constructor(lesson: Partial<ILesson> = {}) {
     Object.assign(this, lesson);

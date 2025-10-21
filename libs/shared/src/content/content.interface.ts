@@ -27,6 +27,7 @@ interface ITrainingBase {
 
   // Условия доступности
   accessRules: IContentAccess[];
+  price: number | null;
 }
 
 export interface ITrainingCourse extends ITrainingBase {
@@ -59,12 +60,12 @@ interface ILessonBase {
 
   // Условия доступности
   accessRules: IContentAccess[];
+  price: number | null;
 }
 
 export interface ILessonVideoContent {
   videoUrl: string;
   duration?: number;
-  previewImage?: string;
 }
 
 export interface ILessonAudioContent {

@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ISubscription, IUser } from '@trinity/shared';
 import { Document, Types } from 'mongoose';
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class Subscription
   extends Document<Types.ObjectId>
   implements ISubscription
