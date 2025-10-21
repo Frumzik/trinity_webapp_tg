@@ -1,14 +1,11 @@
 import {
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { Subscription, SubscriptionEntity } from '../../billing';
 import { SubscriptionsRepository } from './repositories';
-import { User, UsersService } from '../../account';
+import {  UserEntity } from '../../account';
 import { CounterType } from '@trinity/shared';
 import { CountersService } from '../../service';
 
@@ -17,8 +14,6 @@ export class SubscriptionsService {
   constructor(
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly countersService: CountersService,
-    @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService
   ) {}
 
   async create(): Promise<SubscriptionEntity> {
@@ -66,23 +61,10 @@ export class SubscriptionsService {
   }
 
   async bindUser(
-    subscriptionCondition: FilterQuery<Subscription>,
-    userCondition: FilterQuery<User>
+    subscription: SubscriptionEntity,
+    user: UserEntity
   ): Promise<SubscriptionEntity> {
     try {
-      const subscription = await this.subscriptionsRepository.find(
-        subscriptionCondition
-      );
-      const user = await this.usersService.find(userCondition);
-
-      if (!subscription) {
-        throw new NotFoundException('Подписка не найдена');
-      }
-
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
-
       const updated = await this.subscriptionsRepository.update(
         subscription.bindUser(user)
       );

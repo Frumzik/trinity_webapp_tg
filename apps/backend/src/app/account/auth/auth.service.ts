@@ -32,18 +32,8 @@ export class AuthService {
     const newUser = await this.usersService.create(dto);
     const newSubscription = await this.subscriptionsService.create();
 
-    await this.usersService.bindSubscription(
-      {
-        _id: newUser._id,
-      },
-      {
-        _id: newSubscription._id,
-      }
-    );
-    await this.subscriptionsService.bindUser(
-      { _id: newSubscription._id },
-      { _id: newUser._id }
-    );
+    await this.usersService.bindSubscription(newUser, newSubscription);
+    await this.subscriptionsService.bindUser(newSubscription, newUser);
 
     // Событие регистрации
     this.eventEmitter.emit(

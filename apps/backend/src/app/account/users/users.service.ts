@@ -1,6 +1,4 @@
 import {
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -15,15 +13,13 @@ import {
   IUser,
   UserRole,
 } from '@trinity/shared';
-import { Subscription, SubscriptionsService } from '../../billing';
+import { SubscriptionEntity } from '../../billing';
 import { CountersService } from '../../service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    @Inject(forwardRef(() => SubscriptionsService))
-    private readonly subscriptionsService: SubscriptionsService,
     private readonly countersService: CountersService
   ) {}
 
@@ -79,7 +75,7 @@ export class UsersService {
     }
   }
 
-    async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
+  async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
     try {
       const user = await this.usersRepository.populate(condition);
 
@@ -165,7 +161,7 @@ export class UsersService {
       const user = await this.usersRepository.find(condition);
 
       if (!user) {
-        throw new NotFoundException("Пользователь не найден");
+        throw new NotFoundException('Пользователь не найден');
       }
 
       const updated = await this.usersRepository.update(
@@ -190,9 +186,9 @@ export class UsersService {
       const user = await this.usersRepository.find(condition);
 
       if (!user) {
-        throw new NotFoundException("Пользователь не найден");
+        throw new NotFoundException('Пользователь не найден');
       }
-      
+
       const updated = await this.usersRepository.update(
         await user.updateUserBalance(updateData.balance)
       );
@@ -215,9 +211,9 @@ export class UsersService {
       const user = await this.usersRepository.find(condition);
 
       if (!user) {
-        throw new NotFoundException("Пользователь не найден");
+        throw new NotFoundException('Пользователь не найден');
       }
-      
+
       const updated = await this.usersRepository.update(
         await user.updateUserRole(updateData.role)
       );
@@ -233,23 +229,10 @@ export class UsersService {
   }
 
   async bindSubscription(
-    userCondition: FilterQuery<User>,
-    subscriptionCondition: FilterQuery<Subscription>
+    user: UserEntity,
+    subscription: SubscriptionEntity
   ): Promise<UserEntity> {
     try {
-      const user = await this.usersRepository.find(userCondition);
-      const subscription = await this.subscriptionsService.find(
-        subscriptionCondition
-      );
-
-      if (!user) {
-        throw new NotFoundException("Пользователь не найден");
-      }
-
-      if (!subscription) {
-        throw new NotFoundException("Подписка не найдена");
-      }
-
       const updated = await this.usersRepository.update(
         await user.bindSubscription(subscription)
       );
