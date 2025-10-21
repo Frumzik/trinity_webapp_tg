@@ -1,6 +1,13 @@
 import { Types } from 'mongoose';
 import { IUser } from '../user/user.interface.js';
 
+export enum SubscriptionType {
+  FREE = 'free',
+  TRIAL = 'trial',
+  PAID = 'paid',
+  EXPIRED = 'expired',
+}
+
 export interface ISubscription {
   _id?: Types.ObjectId;
   subscriptionId: number;
@@ -8,4 +15,11 @@ export interface ISubscription {
   // Ссылки
   user: Types.ObjectId | IUser | null;
   userId: number | null;
+
+  // Тип подписки
+  type: SubscriptionType;
+
+  // Сроки действия
+  startDate: Date;
+  endDate: Date | null; // null = бессрочная (например, free)
 }
