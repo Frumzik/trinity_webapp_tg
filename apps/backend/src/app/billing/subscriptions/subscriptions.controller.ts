@@ -18,4 +18,16 @@ export class SubscriptionsController {
 
     return subscription;
   }
+
+  @Get('info/populate')
+  @UseGuards(JWTAuthGuard)
+  async infoPopulate(@UserId() userId: number): Promise<ISubscription> {
+    const subscription = await this.subscriptionsService.populate({ userId });
+
+    if (!subscription) {
+      throw new NotFoundException('Подписка не найдена');
+    }
+
+    return subscription;
+  }
 }

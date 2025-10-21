@@ -23,6 +23,18 @@ export class UsersController {
     return user;
   }
 
+  @Get('info/populate')
+  @UseGuards(JWTAuthGuard)
+  async infoPopulate(@UserId() userId: number): Promise<IUser> {
+    const user = await this.usersService.populate({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    return user;
+  }
+
   @Patch('update-profile')
   @UseGuards(JWTAuthGuard)
   async updateProfile(

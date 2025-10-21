@@ -25,7 +25,9 @@ export class SubscriptionsRepository {
   ): Promise<SubscriptionEntity | null> {
     const subscription = await this.subscriptionModel.findOne(condition).exec();
 
-    return subscription ? new SubscriptionEntity(subscription.toObject()) : null;
+    return subscription
+      ? new SubscriptionEntity(subscription.toObject())
+      : null;
   }
 
   // Обновление подписки
@@ -59,12 +61,25 @@ export class SubscriptionsRepository {
   ): Promise<{ deleted: boolean }> {
     const result = await this.subscriptionModel.deleteOne(condition).exec();
 
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(
-        `Подписка по условию ${JSON.stringify(condition)} не найдена`
-      );
-    }
+    return { deleted: result.deletedCount !== 0 };
+  }
 
-    return { deleted: true };
+  // Получение с пользователем
+  async populate(
+    condition: FilterQuery<Subscription>
+  ): Promise<SubscriptionEntity | null> {
+    const subscription = await this.subscriptionModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'user',
+        },
+      ])
+      .lean()
+      .exec();
+
+    return subscription
+      ? new SubscriptionEntity(subscription)
+      : null;
   }
 }

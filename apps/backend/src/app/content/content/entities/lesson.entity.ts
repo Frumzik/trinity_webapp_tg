@@ -15,7 +15,7 @@ export class LessonEntity implements ILesson {
   type: LessonType = LessonType.TEXT;
 
   // Вложенность
-  parent: Types.ObjectId| null = null;
+  parent: Types.ObjectId | ITraining | null = null;
   parentId: number | null = null;
 
   // Метаданные

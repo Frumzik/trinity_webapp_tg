@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Training } from '../models';
 import { TrainingEntity } from '../entities';
-import { ITraining } from '@trinity/shared';
 
 @Injectable()
 export class TrainingsRepository {
@@ -50,11 +49,22 @@ export class TrainingsRepository {
     return new TrainingEntity(updated.toObject());
   }
 
+  // Удаление тренинга
+  async delete(
+    condition: FilterQuery<Training>
+  ): Promise<{ deleted: boolean }> {
+    const result = await this.trainingModel.deleteOne(condition).exec();
+
+    return { deleted: result.deletedCount !== 0 };
+  }
+
   // Получение соседей (родителя, детей и уроков)
-  async getNeighbors(trainingEntity: TrainingEntity): Promise<ITraining> {
+  async populate(
+    condition: FilterQuery<Training>
+  ): Promise<TrainingEntity | null> {
     // Находим тренинг и сразу подтягиваем родителя, детей и уроки
     const training = await this.trainingModel
-      .findOne({ _id: trainingEntity._id })
+      .findOne(condition)
       .populate([
         {
           path: 'lessons', // подтянуть уроки тренинга
@@ -69,10 +79,6 @@ export class TrainingsRepository {
       .lean()
       .exec();
 
-    if (!training) {
-      throw new NotFoundException(`Тренинг с _id=${trainingEntity._id} не найден`);
-    }
-
-    return training;
+    return training ? new TrainingEntity(training) : null;
   }
 }

@@ -96,4 +96,18 @@ export class SubscriptionsService {
       throw new InternalServerErrorException(message);
     }
   }
+
+   async populate(
+    condition: FilterQuery<Subscription>
+  ): Promise<SubscriptionEntity | null> {
+    try {
+      const subscription = await this.subscriptionsRepository.populate(condition);
+
+      return subscription;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
 }

@@ -45,13 +45,17 @@ export class ContentController {
     return training;
   }
 
-  @Get('training/:id/structure')
+  @Get('training/:id/populate')
   async infoStructureTraining(
     @Param('id') trainingId: number
   ): Promise<ITraining> {
-    const training = await this.contentService.findStructureTraining({
+    const training = await this.contentService.populateTraining({
       trainingId,
     });
+
+    if (!training) {
+      throw new NotFoundException("Тренинг не найден")
+    }
 
     return training;
   }

@@ -1,4 +1,4 @@
-import { IUser, UserRole } from '@trinity/shared';
+import { ISubscription, IUser, UserRole } from '@trinity/shared';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { Types } from 'mongoose';
 import { SubscriptionEntity } from '../../../billing';
@@ -8,7 +8,7 @@ export class UserEntity implements IUser {
   userId!: number;
 
   // Ссылки
-  subscription: Types.ObjectId | null = null;
+  subscription: Types.ObjectId | ISubscription | null = null;
   subscriptionId: number | null = null;
 
   // Credentials
@@ -86,7 +86,7 @@ export class UserEntity implements IUser {
 
   public bindSubscription(subscription: SubscriptionEntity) {
     if (!subscription._id) {
-      throw new Error("Подписка не имеет _id")
+      throw new Error('Подписка не имеет _id');
     }
 
     this.subscriptionId = subscription.subscriptionId;

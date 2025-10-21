@@ -52,12 +52,21 @@ export class UsersRepository {
   async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     const result = await this.userModel.deleteOne(condition).exec();
 
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(
-        `Пользователь по условию ${JSON.stringify(condition)} не найден`
-      );
-    }
+    return { deleted: result.deletedCount !== 0 };
+  }
 
-    return { deleted: true };
+  // Получение с подпиской
+  async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
+    const user = await this.userModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'subscription',
+        },
+      ])
+      .lean()
+      .exec();
+
+    return user ? new UserEntity(user) : null;
   }
 }

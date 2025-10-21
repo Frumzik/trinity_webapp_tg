@@ -79,6 +79,20 @@ export class UsersService {
     }
   }
 
+    async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
+    try {
+      const user = await this.usersRepository.populate(condition);
+
+      return user;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     try {
       const result = await this.usersRepository.delete(condition);

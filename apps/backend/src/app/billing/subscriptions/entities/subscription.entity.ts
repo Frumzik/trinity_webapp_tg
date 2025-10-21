@@ -1,4 +1,4 @@
-import { ISubscription } from '@trinity/shared';
+import { ISubscription, IUser } from '@trinity/shared';
 import { Types } from 'mongoose';
 import { UserEntity } from '../../../account';
 
@@ -7,7 +7,7 @@ export class SubscriptionEntity implements ISubscription {
   subscriptionId!: number;
 
   // Ссылки
-  user: Types.ObjectId | null = null;
+  user: Types.ObjectId | IUser | null = null;
   userId: number | null = null;
 
   constructor(subscription: Partial<ISubscription> = {}) {

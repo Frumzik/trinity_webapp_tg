@@ -13,7 +13,6 @@ import {
   ContentAddTrainingRequestDto,
   ContentAddTrainingResponseDto,
   CounterType,
-  ITraining,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 
@@ -79,20 +78,12 @@ export class ContentService {
     }
   }
 
-  async findStructureTraining({
-    trainingId,
-  }: {
-    trainingId: number;
-  }): Promise<ITraining> {
+  async populateTraining(
+    condition: FilterQuery<Training>
+  ): Promise<TrainingEntity | null> {
     try {
-      const training = await this.trainingsRepository.find({ trainingId });
-
-      if (!training) {
-          throw new NotFoundException('Тренинг не найден');
-        }
-
-      const trainingPopulated = await this.trainingsRepository.getNeighbors(
-        training
+      const trainingPopulated = await this.trainingsRepository.populate(
+        condition
       );
 
       return trainingPopulated;
@@ -129,7 +120,9 @@ export class ContentService {
     return { lessonId: createdLesson.lessonId };
   }
 
-  async findLesson(condition: FilterQuery<Lesson>): Promise<LessonEntity | null> {
+  async findLesson(
+    condition: FilterQuery<Lesson>
+  ): Promise<LessonEntity | null> {
     try {
       const lesson = await this.lessonsRepository.find(condition);
 

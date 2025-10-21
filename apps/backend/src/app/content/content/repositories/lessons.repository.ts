@@ -49,12 +49,6 @@ export class LessonsRepository {
   async delete(condition: FilterQuery<Lesson>): Promise<{deleted: boolean}> {
     const result = await this.lessonModel.deleteOne(condition).exec();
 
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(
-        `Урок по условию ${JSON.stringify(condition)} не найден`
-      );
-    }
-
-    return {deleted: true};
+    return { deleted: result.deletedCount !== 0 };
   }
 }
