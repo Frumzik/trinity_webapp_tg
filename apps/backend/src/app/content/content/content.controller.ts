@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ContentService } from './content.service';
 import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
 import {
@@ -14,9 +22,7 @@ import {
 @Controller('content')
 @UseGuards(JWTAuthGuard, RolesGuard)
 export class ContentController {
-  constructor(
-    private readonly contentService: ContentService
-  ) {}
+  constructor(private readonly contentService: ContentService) {}
 
   @Post('training/add')
   @Roles(UserRole.Admin, UserRole.Moderator)
@@ -31,6 +37,10 @@ export class ContentController {
   @Get('training/:id')
   async infoTraining(@Param('id') trainingId: number): Promise<ITraining> {
     const training = await this.contentService.findTraining({ trainingId });
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
 
     return training;
   }
@@ -59,6 +69,10 @@ export class ContentController {
   @Get('lesson/:id')
   async infoLesson(@Param('id') lessonId: number): Promise<ILesson> {
     const lessson = await this.contentService.findLesson({ lessonId });
+
+    if (!lessson) {
+      throw new NotFoundException('Урок не найден');
+    }
 
     return lessson;
   }

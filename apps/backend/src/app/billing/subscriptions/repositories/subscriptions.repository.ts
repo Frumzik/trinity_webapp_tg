@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Subscription } from '../models/subscription.model';
 import { FilterQuery, Model } from 'mongoose';
-import { SubscriptionEntity } from '../entities/subscription.entity';
-import { UserEntity } from '../../../account';
+import { Subscription } from '../models';
+import { SubscriptionEntity } from '../entities';
 
 @Injectable()
 export class SubscriptionsRepository {
@@ -13,55 +12,59 @@ export class SubscriptionsRepository {
   ) {}
 
   // Создание подписки
-  async createSubscription(
+  async create(
     subscriptionEntity: SubscriptionEntity
   ): Promise<SubscriptionEntity> {
-    const newSubscription = new this.subscriptionModel(subscriptionEntity);
-    const saved = await newSubscription.save();
-
-    return new SubscriptionEntity(saved);
+    const created = await new this.subscriptionModel(subscriptionEntity).save();
+    return new SubscriptionEntity(created.toObject());
   }
 
   // Поиск подписки
-  async findSubscription(
+  async find(
     condition: FilterQuery<Subscription>
   ): Promise<SubscriptionEntity | null> {
     const subscription = await this.subscriptionModel.findOne(condition).exec();
-    return subscription ? new SubscriptionEntity(subscription) : null;
-  }
 
-   // Поиск подписки
-  async findSubscriptionAll(
-    condition: FilterQuery<Subscription>
-  ): Promise<SubscriptionEntity | null> {
-    const subscription = await this.subscriptionModel.findOne(condition).populate("user").exec();
-    return subscription ? new SubscriptionEntity(subscription) : null;
-  }
-
-  // Удаление подписки
-  async deleteSubscription(
-    condition: FilterQuery<Subscription>
-  ): Promise<{ deleted: boolean }> {
-    const result = await this.subscriptionModel.deleteOne(condition).exec();
-    return { deleted: result.deletedCount > 0 };
+    return subscription ? new SubscriptionEntity(subscription.toObject()) : null;
   }
 
   // Обновление подписки
-  async bindUser(
-    condition: FilterQuery<Subscription>,
-    update: {user: UserEntity}
-  ): Promise<SubscriptionEntity | null> {
-    const subscription = await this.subscriptionModel.findOne(condition).exec();
-    if (!subscription) return null;
-
-    // Применяем изменения через SubscriptionEntity
-    const subscriptionEntity = new SubscriptionEntity(subscription);
-    await subscriptionEntity.bindUser(update.user); // если есть async методы внутри
+  async update(
+    subscriptionEntity: SubscriptionEntity
+  ): Promise<SubscriptionEntity> {
+    if (!subscriptionEntity._id) {
+      throw new Error('Подписка не имеет _id');
+    }
 
     const updated = await this.subscriptionModel
-      .findOneAndUpdate(condition, subscriptionEntity, { new: true })
+      .findOneAndUpdate(
+        { _id: subscriptionEntity._id },
+        { $set: subscriptionEntity },
+        { new: true } // вернуть обновлённый документ
+      )
       .exec();
 
-    return updated ? new SubscriptionEntity(updated) : null;
+    if (!updated) {
+      throw new NotFoundException(
+        `Подписка с id ${subscriptionEntity._id} не найдена`
+      );
+    }
+
+    return new SubscriptionEntity(updated.toObject());
+  }
+
+  // Удаление подписки
+  async delete(
+    condition: FilterQuery<Subscription>
+  ): Promise<{ deleted: boolean }> {
+    const result = await this.subscriptionModel.deleteOne(condition).exec();
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(
+        `Подписка по условию ${JSON.stringify(condition)} не найдена`
+      );
+    }
+
+    return { deleted: true };
   }
 }

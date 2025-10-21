@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -7,16 +9,53 @@ import { UsersRepository } from './repositories/users.repository';
 import { FilterQuery } from 'mongoose';
 import { User } from './models/user.model';
 import { UserEntity } from './entities/user.entity';
-import { IUser, UserRole } from '@trinity/shared';
-import { SubscriptionEntity } from '../../billing';
+import {
+  AuthRegisterRequestDto,
+  CounterType,
+  IUser,
+  UserRole,
+} from '@trinity/shared';
+import { Subscription, SubscriptionsService } from '../../billing';
+import { CountersService } from '../../service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    @Inject(forwardRef(() => SubscriptionsService))
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly countersService: CountersService
+  ) {}
 
-  async createUser(userEntity: UserEntity): Promise<UserEntity> {
+  async create(dto: AuthRegisterRequestDto): Promise<UserEntity> {
     try {
-      return await this.usersRepository.createUser(userEntity);
+      // Проверяем существующего пользователя
+      const condition =
+        dto.type === 'TG' ? { tgId: dto.tgId } : { email: dto.email };
+
+      try {
+        await this.usersRepository.find(condition);
+      } catch (error: unknown) {
+        throw new Error('Такой пользователь уже зарегистрирован');
+      }
+
+      // Создаем UserEntity
+      const newUser = new UserEntity({
+        userId: await this.countersService.saveNextSequence(
+          CounterType.USER_ID
+        ),
+        ...dto,
+      });
+
+      if (dto.type === 'TG' && dto.pin) {
+        await newUser.setPin(dto.pin);
+      } else if (dto.type === 'EMAIL' && dto.password) {
+        await newUser.setPassword(dto.password);
+      }
+
+      const createdUser = await this.usersRepository.create(newUser);
+
+      return createdUser;
     } catch (error: unknown) {
       const message =
         error instanceof Error
@@ -26,12 +65,10 @@ export class UsersService {
     }
   }
 
-  async findUser(condition: FilterQuery<User>): Promise<UserEntity> {
+  async find(condition: FilterQuery<User>): Promise<UserEntity | null> {
     try {
-      const user = await this.usersRepository.findUser(condition);
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
+      const user = await this.usersRepository.find(condition);
+
       return user;
     } catch (error: unknown) {
       const message =
@@ -42,30 +79,10 @@ export class UsersService {
     }
   }
 
-  async findUserAll(condition: FilterQuery<User>): Promise<IUser> {
+  async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     try {
-      const user = await this.usersRepository.findUserAll(condition);
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден!');
-      }
-      return user;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Ошибка при поиске пользователя';
-      throw new InternalServerErrorException(message);
-    }
-  }
+      const result = await this.usersRepository.delete(condition);
 
-  async deleteUser(
-    condition: FilterQuery<User>
-  ): Promise<{ deleted: boolean }> {
-    try {
-      const result = await this.usersRepository.deleteUser(condition);
-      if (!result.deleted) {
-        throw new NotFoundException('Пользователь не найден для удаления');
-      }
       return result;
     } catch (error: unknown) {
       const message =
@@ -76,19 +93,20 @@ export class UsersService {
     }
   }
 
-  async updateUserProfile(
+  async updateProfile(
     condition: FilterQuery<User>,
-    updateData: { name?: string; username?: string }
+    updateData: Partial<Pick<IUser, 'name' | 'username'>>
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUserProfile(
-        condition,
-        updateData
-      );
+      const user = await this.usersRepository.find(condition);
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
       }
+
+      const updated = await this.usersRepository.update(
+        await user.updateUserProfile(updateData)
+      );
 
       return updated;
     } catch (error: unknown) {
@@ -100,19 +118,20 @@ export class UsersService {
     }
   }
 
-  async updateUserPin(
+  async updatePin(
     condition: FilterQuery<User>,
     updateData: { pin: string }
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUserPin(
-        condition,
-        updateData
-      );
+      const user = await this.usersRepository.find(condition);
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
       }
+
+      const updated = await this.usersRepository.update(
+        await user.updateUserPin(updateData.pin)
+      );
 
       return updated;
     } catch (error: unknown) {
@@ -124,19 +143,20 @@ export class UsersService {
     }
   }
 
-  async updateUserPassword(
+  async updatePassword(
     condition: FilterQuery<User>,
     updateData: { password: string }
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUserPassword(
-        condition,
-        updateData
-      );
+      const user = await this.usersRepository.find(condition);
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException("Пользователь не найден");
       }
+
+      const updated = await this.usersRepository.update(
+        await user.updateUserPassword(updateData.password)
+      );
 
       return updated;
     } catch (error: unknown) {
@@ -148,19 +168,20 @@ export class UsersService {
     }
   }
 
-  async updateUserBalance(
+  async updateBalance(
     condition: FilterQuery<User>,
     updateData: { balance: number }
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUserBalance(
-        condition,
-        updateData
-      );
+      const user = await this.usersRepository.find(condition);
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException("Пользователь не найден");
       }
+      
+      const updated = await this.usersRepository.update(
+        await user.updateUserBalance(updateData.balance)
+      );
 
       return updated;
     } catch (error: unknown) {
@@ -172,19 +193,20 @@ export class UsersService {
     }
   }
 
-  async updateUserRole(
+  async updateRole(
     condition: FilterQuery<User>,
     updateData: { role: UserRole }
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.updateUserRole(
-        condition,
-        updateData
-      );
+      const user = await this.usersRepository.find(condition);
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException("Пользователь не найден");
       }
+      
+      const updated = await this.usersRepository.update(
+        await user.updateUserRole(updateData.role)
+      );
 
       return updated;
     } catch (error: unknown) {
@@ -197,18 +219,26 @@ export class UsersService {
   }
 
   async bindSubscription(
-    condition: FilterQuery<User>,
-    updateData: { subscription: SubscriptionEntity }
+    userCondition: FilterQuery<User>,
+    subscriptionCondition: FilterQuery<Subscription>
   ): Promise<UserEntity> {
     try {
-      const updated = await this.usersRepository.bindSubscription(
-        condition,
-        updateData
+      const user = await this.usersRepository.find(userCondition);
+      const subscription = await this.subscriptionsService.find(
+        subscriptionCondition
       );
 
-      if (!updated) {
-        throw new NotFoundException('Пользователь не найден для обновления');
+      if (!user) {
+        throw new NotFoundException("Пользователь не найден");
       }
+
+      if (!subscription) {
+        throw new NotFoundException("Подписка не найдена");
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.bindSubscription(subscription)
+      );
 
       return updated;
     } catch (error: unknown) {

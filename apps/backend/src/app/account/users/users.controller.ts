@@ -1,7 +1,11 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Patch, UseGuards } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { UsersService } from './users.service';
-import { IUser, UserUpdateProfileRequestDto, UserUpdateRoleRequestDto } from '@trinity/shared';
+import {
+  IUser,
+  UserUpdateProfileRequestDto,
+  UserUpdateRoleRequestDto,
+} from '@trinity/shared';
 
 @Controller('user')
 export class UsersController {
@@ -10,15 +14,11 @@ export class UsersController {
   @Get('info')
   @UseGuards(JWTAuthGuard)
   async info(@UserId() userId: number): Promise<IUser> {
-    const user = await this.usersService.findUser({ userId });
+    const user = await this.usersService.find({ userId });
 
-    return user;
-  }
-
-  @Get('info-all')
-  @UseGuards(JWTAuthGuard)
-  async infoAll(@UserId() userId: number): Promise<IUser> {
-    const user = await this.usersService.findUserAll({ userId });
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
 
     return user;
   }
@@ -29,10 +29,7 @@ export class UsersController {
     @UserId() userId: number,
     @Body() updateData: UserUpdateProfileRequestDto
   ): Promise<IUser> {
-    const user = await this.usersService.updateUserProfile(
-      { userId },
-      updateData
-    );
+    const user = await this.usersService.updateProfile({ userId }, updateData);
 
     return user;
   }
@@ -43,7 +40,7 @@ export class UsersController {
     @UserId() userId: number,
     @Body() updateData: UserUpdateRoleRequestDto
   ): Promise<IUser> {
-    const user = await this.usersService.updateUserRole({ userId }, updateData);
+    const user = await this.usersService.updateRole({ userId }, updateData);
 
     return user;
   }

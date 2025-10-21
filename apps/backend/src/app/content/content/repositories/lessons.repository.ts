@@ -18,14 +18,10 @@ export class LessonsRepository {
   }
 
   // Поиск урока
-  async find(condition: FilterQuery<Lesson>): Promise<LessonEntity> {
+  async find(condition: FilterQuery<Lesson>): Promise<LessonEntity | null> {
     const lesson = await this.lessonModel.findOne(condition).exec();
 
-    if (!lesson) {
-      throw new NotFoundException(`Урок по условию ${condition} не найден`);
-    }
-
-    return new LessonEntity(lesson.toObject());
+    return lesson ? new LessonEntity(lesson.toObject()) : null;
   }
 
   // Обновление урока

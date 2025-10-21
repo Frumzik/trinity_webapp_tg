@@ -3,7 +3,9 @@ import { IUser } from '../user/user.interface.js';
 
 export interface ISubscription {
   _id?: Types.ObjectId;
-  user?: Types.ObjectId | IUser;
-  userId?: number;
   subscriptionId: number;
+
+  // Ссылки
+  user: Types.ObjectId | IUser | null;
+  userId: number | null;
 }

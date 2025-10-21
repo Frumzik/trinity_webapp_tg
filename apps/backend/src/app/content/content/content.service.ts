@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { LessonEntity, TrainingEntity } from './entities';
 import { LessonsRepository, TrainingsRepository } from './repositories';
 import { FilterQuery } from 'mongoose';
@@ -32,12 +36,18 @@ export class ContentService {
         ...dto,
       });
 
-      const createdTraining = await this.trainingsRepository.create(newTraining);
+      const createdTraining = await this.trainingsRepository.create(
+        newTraining
+      );
 
       if (dto.parentId) {
         const parentTraining = await this.trainingsRepository.find({
           trainingId: dto.parentId,
         });
+
+        if (!parentTraining) {
+          throw new NotFoundException('Родительский тренинг не найден');
+        }
 
         this.trainingsRepository.update(
           createdTraining.bindParent(parentTraining)
@@ -57,7 +67,7 @@ export class ContentService {
 
   async findTraining(
     condition: FilterQuery<Training>
-  ): Promise<TrainingEntity> {
+  ): Promise<TrainingEntity | null> {
     try {
       const training = await this.trainingsRepository.find(condition);
 
@@ -75,12 +85,17 @@ export class ContentService {
     trainingId: number;
   }): Promise<ITraining> {
     try {
-      const trainingEntity = await this.trainingsRepository.find({ trainingId });
+      const training = await this.trainingsRepository.find({ trainingId });
 
-      const trainingEntityPopulated =
-        await this.trainingsRepository.getNeighbors(trainingEntity);
+      if (!training) {
+          throw new NotFoundException('Тренинг не найден');
+        }
 
-      return trainingEntityPopulated;
+      const trainingPopulated = await this.trainingsRepository.getNeighbors(
+        training
+      );
+
+      return trainingPopulated;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
@@ -104,13 +119,17 @@ export class ContentService {
       trainingId: dto.parentId,
     });
 
+    if (!training) {
+      throw new NotFoundException('Родительский тренинг не найден');
+    }
+
     await this.trainingsRepository.update(training.bindLesson(createdLesson));
     await this.lessonsRepository.update(createdLesson.bindParent(training));
 
     return { lessonId: createdLesson.lessonId };
   }
 
-  async findLesson(condition: FilterQuery<Lesson>): Promise<LessonEntity> {
+  async findLesson(condition: FilterQuery<Lesson>): Promise<LessonEntity | null> {
     try {
       const lesson = await this.lessonsRepository.find(condition);
 

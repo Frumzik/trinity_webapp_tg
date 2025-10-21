@@ -21,14 +21,10 @@ export class TrainingsRepository {
   }
 
   // Поиск тренинга
-  async find(condition: FilterQuery<Training>): Promise<TrainingEntity> {
+  async find(condition: FilterQuery<Training>): Promise<TrainingEntity | null> {
     const training = await this.trainingModel.findOne(condition).exec();
 
-    if (!training) {
-      throw new NotFoundException(`Тренинг ${condition} не найден`);
-    }
-
-    return new TrainingEntity(training.toObject());
+    return training ? new TrainingEntity(training.toObject()) : null;
   }
 
   // Обонлвение тренинга
