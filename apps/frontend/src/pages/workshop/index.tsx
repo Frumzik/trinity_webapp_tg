@@ -1,8 +1,8 @@
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
-import TopBar from "../../widgets/topbar/topbar.tsx";
-import Footer from "../../widgets/footer/footer.tsx";
-import BurgerMenu from "../../widgets/menuBurger/burger.tsx";
+import TopBar from "../../widgets/topbar/topbar";
+import Footer from "../../widgets/footer/footer";
+import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import { useState } from "react";
@@ -12,7 +12,7 @@ import Bg1 from "../../assets/icons/bg1.svg";
 import Card1 from "../../assets/image/level/genkeys.svg";
 
 import "./workshop.scss";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel.tsx";
+import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
