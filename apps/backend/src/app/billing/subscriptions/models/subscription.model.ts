@@ -19,6 +19,7 @@ export class Subscription
 
   // Тип подписки
   @Prop({
+    type: String,
     enum: SubscriptionType,
     required: true,
     default: SubscriptionType.FREE,
@@ -26,10 +27,10 @@ export class Subscription
   type!: SubscriptionType;
 
   // Сроки действия
-  @Prop({ required: true, default: new Date() })
+  @Prop({ type: Date, required: true, default: new Date() })
   startDate!: Date;
 
-  @Prop({ required: true, default: null })
+  @Prop({ type: Date, required: true, default: null })
   endDate!: Date | null;
 }
 
