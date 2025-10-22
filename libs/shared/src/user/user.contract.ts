@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { IUser, UserRole } from './user.interface.js';
 
 export class UserUpdateProfileRequestDto {
@@ -19,4 +19,9 @@ export class UserInfoResponseDto implements Partial<IUser> {
   email?: string;
   role!: UserRole;
   balance!: number;
+}
+
+export class UserUpdateRoleRequestDto {
+  @IsEnum(UserRole, { message: 'Роль должна быть USER or MODERATOR or ADMIN' })
+  role!: UserRole;
 }

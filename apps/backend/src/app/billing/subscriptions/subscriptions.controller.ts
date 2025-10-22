@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotFoundException, UseGuards } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { SubscriptionsService } from './subscriptions.service';
 import { ISubscription } from '@trinity/shared';
@@ -10,17 +10,23 @@ export class SubscriptionsController {
   @Get('info')
   @UseGuards(JWTAuthGuard)
   async info(@UserId() userId: number): Promise<ISubscription> {
-    const subscription = await this.subscriptionsService.findSubscription({ userId });
+    const subscription = await this.subscriptionsService.find({ userId });
+
+    if (!subscription) {
+      throw new NotFoundException('Подписка не найдена');
+    }
 
     return subscription;
   }
 
-  @Get('info-all')
+  @Get('info/populate')
   @UseGuards(JWTAuthGuard)
-  async infoAll(
-    @UserId() userId: number
-  ): Promise<ISubscription> {
-    const subscription = await this.subscriptionsService.findSubscriptionAll({ userId });
+  async infoPopulate(@UserId() userId: number): Promise<ISubscription> {
+    const subscription = await this.subscriptionsService.populate({ userId });
+
+    if (!subscription) {
+      throw new NotFoundException('Подписка не найдена');
+    }
 
     return subscription;
   }

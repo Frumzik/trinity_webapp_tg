@@ -9,15 +9,23 @@ export enum UserRole {
 
 export interface IUser {
   _id?: Types.ObjectId;
-  subscription?: Types.ObjectId | ISubscription;
   userId: number;
-  subscriptionId?: number;
-  name?: string;
-  username?: string;
-  tgId?: number;
-  pinHash?: string;
-  email?: string;
-  passwordHash?: string;
+
+  // Ссылки
+  subscription: Types.ObjectId | ISubscription | null;
+  subscriptionId: number | null;
+
+  // Credentials
+  tgId: number | null;
+  pinHash: string | null;
+  email: string | null;
+  passwordHash: string | null;
+
+  // Метаинформация
+  name: string | null;
+  username: string | null;
+
+  // Other
   role: UserRole;
   balance: number;
 }

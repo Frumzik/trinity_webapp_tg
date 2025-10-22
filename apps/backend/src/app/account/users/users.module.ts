@@ -4,10 +4,12 @@ import { User, UserSchema } from './models/user.model';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { CountersModule } from '../../service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    CountersModule
   ],
   providers: [UsersService, UsersRepository],
   exports: [UsersService],

@@ -5,31 +5,28 @@ import { SubscriptionEntity } from '../../../billing';
 
 export class UserEntity implements IUser {
   _id?: Types.ObjectId;
-  subscription?: Types.ObjectId | ISubscription;
-  userId: number;
-  name?: string;
-  username?: string;
-  tgId?: number;
-  pinHash?: string;
-  email?: string;
-  passwordHash?: string;
-  role!: UserRole;
-  balance!: number;
-  subscriptionId?: number;
+  userId!: number;
 
-  constructor(user: IUser) {
-    this._id = user._id;
-    this.subscription = user.subscription;
-    this.userId = user.userId;
-    this.name = user.name;
-    this.tgId = user.tgId;
-    this.username = user.username;
-    this.pinHash = user.pinHash;
-    this.email = user.email;
-    this.passwordHash = user.passwordHash;
-    this.role = user.role;
-    this.balance = user.balance;
-    this.subscriptionId = user.subscriptionId;
+  // Ссылки
+  subscription: Types.ObjectId | ISubscription | null = null;
+  subscriptionId: number | null = null;
+
+  // Credentials
+  tgId: number | null = null;
+  pinHash: string | null = null;
+  email: string | null = null;
+  passwordHash: string | null = null;
+
+  // Метаинформация
+  name: string | null = null;
+  username: string | null = null;
+  // Other
+
+  role: UserRole = UserRole.User;
+  balance = 0;
+
+  constructor(user: Partial<IUser> = {}) {
+    Object.assign(this, user);
   }
 
   public async setPassword(password: string) {
@@ -61,7 +58,7 @@ export class UserEntity implements IUser {
     return compare(pin, this.pinHash);
   }
 
-  public updateUserProfile(data: { username?: string; name?: string }) {
+  public updateUserProfile(data: Partial<Pick<IUser, 'name' | 'username'>>) {
     if (data.name !== undefined) {
       this.name = data.name;
     }
@@ -88,6 +85,10 @@ export class UserEntity implements IUser {
   }
 
   public bindSubscription(subscription: SubscriptionEntity) {
+    if (!subscription._id) {
+      throw new Error('Подписка не имеет _id');
+    }
+
     this.subscriptionId = subscription.subscriptionId;
     this.subscription = subscription._id;
 

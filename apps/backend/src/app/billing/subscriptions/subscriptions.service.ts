@@ -1,27 +1,30 @@
 import {
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
-import { SubscriptionEntity } from '../../billing';
-import { Subscription } from 'rxjs';
+import { Subscription, SubscriptionEntity } from '../../billing';
 import { SubscriptionsRepository } from './repositories';
-import { UserEntity } from '../../account';
+import {  UserEntity } from '../../account';
+import { CounterType } from '@trinity/shared';
+import { CountersService } from '../../service';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
-    private readonly subscriptionsRepository: SubscriptionsRepository
+    private readonly subscriptionsRepository: SubscriptionsRepository,
+    private readonly countersService: CountersService,
   ) {}
 
-  async createSubscription(
-    subscriptionEntity: SubscriptionEntity
-  ): Promise<SubscriptionEntity> {
+  async create(): Promise<SubscriptionEntity> {
     try {
-      return await this.subscriptionsRepository.createSubscription(
-        subscriptionEntity
-      );
+      const newSubscription = new SubscriptionEntity({
+        subscriptionId: await this.countersService.saveNextSequence(
+          CounterType.SUBSCRIPTION_ID
+        ),
+      });
+
+      return await this.subscriptionsRepository.create(newSubscription);
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при создании подписки';
@@ -29,16 +32,12 @@ export class SubscriptionsService {
     }
   }
 
-  async findSubscription(
+  async find(
     condition: FilterQuery<Subscription>
-  ): Promise<SubscriptionEntity> {
+  ): Promise<SubscriptionEntity | null> {
     try {
-      const subscription = await this.subscriptionsRepository.findSubscription(
-        condition
-      );
-      if (!subscription) {
-        throw new NotFoundException('Подписка не найдена');
-      }
+      const subscription = await this.subscriptionsRepository.find(condition);
+
       return subscription;
     } catch (error: unknown) {
       const message =
@@ -47,34 +46,12 @@ export class SubscriptionsService {
     }
   }
 
-    async findSubscriptionAll(
-    condition: FilterQuery<Subscription>
-  ): Promise<SubscriptionEntity> {
-    try {
-      const subscription = await this.subscriptionsRepository.findSubscriptionAll(
-        condition
-      );
-      if (!subscription) {
-        throw new NotFoundException('Подписка не найдена');
-      }
-      return subscription;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
-      throw new InternalServerErrorException(message);
-    }
-  }
-
-  async deleteSubscription(
+  async delete(
     condition: FilterQuery<Subscription>
   ): Promise<{ deleted: boolean }> {
     try {
-      const result = await this.subscriptionsRepository.deleteSubscription(
-        condition
-      );
-      if (!result.deleted) {
-        throw new NotFoundException('Подписка не найдена для удаления');
-      }
+      const result = await this.subscriptionsRepository.delete(condition);
+
       return result;
     } catch (error: unknown) {
       const message =
@@ -84,25 +61,34 @@ export class SubscriptionsService {
   }
 
   async bindUser(
-    condition: FilterQuery<Subscription>,
-    updateData: { user: UserEntity }
+    subscription: SubscriptionEntity,
+    user: UserEntity
   ): Promise<SubscriptionEntity> {
     try {
-      const updated = await this.subscriptionsRepository.bindUser(
-        condition,
-        updateData
+      const updated = await this.subscriptionsRepository.update(
+        subscription.bindUser(user)
       );
-
-      if (!updated) {
-        throw new NotFoundException('Подписка не найдена для обновления');
-      }
 
       return updated;
     } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Ошибка при обновлении подписки';
+          : 'Ошибка при привязке пользователя к подписке';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+   async populate(
+    condition: FilterQuery<Subscription>
+  ): Promise<SubscriptionEntity | null> {
+    try {
+      const subscription = await this.subscriptionsRepository.populate(condition);
+
+      return subscription;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
       throw new InternalServerErrorException(message);
     }
   }

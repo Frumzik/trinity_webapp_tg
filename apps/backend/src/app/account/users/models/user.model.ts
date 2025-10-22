@@ -2,40 +2,40 @@ import { Document, Types } from 'mongoose';
 import { IUser, UserRole } from '@trinity/shared';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class User extends Document<Types.ObjectId> implements IUser {
   @Prop({ type: Types.ObjectId, ref: 'Subscription' })
-  subscription?: Types.ObjectId;
+  subscription!: Types.ObjectId | null;
 
   @Prop({ required: true, unique: true })
   userId!: number;
 
-  @Prop({ unique: true, sparse: true })
-  tgId?: number;
-
   @Prop()
-  pinHash?: string;
+  tgId!: number;
 
-  @Prop({ unique: true, sparse: true })
-  email?: string;
+  @Prop({ type: String })
+  pinHash!: string | null;
 
-  @Prop()
-  passwordHash?: string;
+  @Prop({ type: String })
+  email!: string | null;
 
-  @Prop({ required: true, enum: UserRole, type: String })
+  @Prop({ type: String })
+  passwordHash!: string | null;
+
+  @Prop({ enum: UserRole, type: String, default: UserRole.User })
   role!: UserRole;
 
-  @Prop()
-  name?: string;
+  @Prop({ type: String })
+  name!: string | null;
 
-  @Prop()
-  username?: string;
+  @Prop({ type: String })
+  username!: string | null;
 
-  @Prop({ required: true })
+  @Prop({ type: Number })
   balance!: number;
 
-  @Prop()
-  subscriptionId?: number;
+  @Prop({ type: String })
+  subscriptionId!: number | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

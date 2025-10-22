@@ -1,157 +1,72 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../models/user.model';
 import { FilterQuery, Model } from 'mongoose';
-import { UserEntity } from '../entities/user.entity';
-import { SubscriptionEntity } from '../../../billing';
-import { IUser, UserRole } from '@trinity/shared';
+import { User } from '../models';
+import { UserEntity } from '../entities';
 
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>
+    @InjectModel(User.name)
+    private readonly userModel: Model<User>
   ) {}
 
-  // Создание пользователя
-  async createUser(userEntity: UserEntity): Promise<UserEntity> {
-    const newUser = new this.userModel(userEntity);
-    const saved = await newUser.save();
+  // Создание подписки
+  async create(userEntity: UserEntity): Promise<UserEntity> {
+    const created = await new this.userModel(userEntity).save();
 
-    return new UserEntity(saved);
+    return new UserEntity(created.toObject());
   }
 
-  // Поиск пользователя
-  async findUser(condition: FilterQuery<User>): Promise<UserEntity | null> {
+  // Поиск подписки
+  async find(condition: FilterQuery<User>): Promise<UserEntity | null> {
     const user = await this.userModel.findOne(condition).exec();
-    return user ? new UserEntity(user) : null;
+
+    return user ? new UserEntity(user.toObject()) : null;
   }
 
-  // Поиск пользователя
-  async findUserAll(condition: FilterQuery<User>): Promise<IUser | null> {
-    const user = await this.userModel.findOne(condition).populate('subscription').exec();
-    return user ? new UserEntity(user) : null;
+  // Обновление подписки
+  async update(userEntity: UserEntity): Promise<UserEntity> {
+    if (!userEntity._id) {
+      throw new Error('Пользователь не имеет _id');
+    }
+
+    const updated = await this.userModel
+      .findOneAndUpdate(
+        { _id: userEntity._id },
+        { $set: userEntity },
+        { new: true } // вернуть обновлённый документ
+      )
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(
+        `Пользователь с id ${userEntity._id} не найден`
+      );
+    }
+
+    return new UserEntity(updated.toObject());
   }
 
-  // Удаление пользователя
-  async deleteUser(
-    condition: FilterQuery<User>
-  ): Promise<{ deleted: boolean }> {
+  // Удаление подписки
+  async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     const result = await this.userModel.deleteOne(condition).exec();
-    return { deleted: result.deletedCount > 0 };
+
+    return { deleted: result.deletedCount !== 0 };
   }
 
-  // Обновление пользователя
-  async updateUserProfile(
-    condition: FilterQuery<User>,
-    update: { username?: string; name?: string }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    userEntity.updateUserProfile(update);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
+  // Получение с подпиской
+  async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
+    const user = await this.userModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'subscription',
+        },
+      ])
+      .lean()
       .exec();
 
-    return updated ? new UserEntity(updated) : null;
-  }
-
-  // Обновление пина
-  async updateUserPin(
-    condition: FilterQuery<User>,
-    update: { pin: string }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    await userEntity.updateUserPin(update.pin);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
-      .exec();
-
-    return updated ? new UserEntity(updated) : null;
-  }
-
-  // Обновление пароля
-  async updateUserPassword(
-    condition: FilterQuery<User>,
-    update: { password: string }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    await userEntity.updateUserPassword(update.password);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
-      .exec();
-
-    return updated ? new UserEntity(updated) : null;
-  }
-
-  // Привязка id подписки
-  async bindSubscription(
-    condition: FilterQuery<User>,
-    update: { subscription: SubscriptionEntity }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    userEntity.bindSubscription(update.subscription);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
-      .exec();
-
-    return updated ? new UserEntity(updated) : null;
-  }
-
-  // Обновление баланса
-  async updateUserBalance(
-    condition: FilterQuery<User>,
-    update: { balance: number }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    userEntity.updateUserBalance(update.balance);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
-      .exec();
-
-    return updated ? new UserEntity(updated) : null;
-  }
-
-
-  // Обновление роли
-  async updateUserRole(
-    condition: FilterQuery<User>,
-    update: { role: UserRole }
-  ): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne(condition).exec();
-    if (!user) return null;
-
-    // Применяем изменения через UserEntity
-    const userEntity = new UserEntity(user);
-    userEntity.updateUserRole(update.role);
-
-    const updated = await this.userModel
-      .findOneAndUpdate(condition, userEntity, { new: true })
-      .exec();
-
-    return updated ? new UserEntity(updated) : null;
+    return user ? new UserEntity(user) : null;
   }
 }

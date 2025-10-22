@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Patch, UseGuards } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { UsersService } from './users.service';
 import {
   IUser,
   UserUpdateProfileRequestDto,
+  UserUpdateRoleRequestDto,
 } from '@trinity/shared';
 
 @Controller('user')
@@ -13,38 +14,46 @@ export class UsersController {
   @Get('info')
   @UseGuards(JWTAuthGuard)
   async info(@UserId() userId: number): Promise<IUser> {
-    const user = await this.usersService.findUser({ userId });
+    const user = await this.usersService.find({ userId });
 
-    return user
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    return user;
   }
 
-  @Get('info-all')
+  @Get('info/populate')
   @UseGuards(JWTAuthGuard)
-  async infoAll(@UserId() userId: number): Promise<IUser> {
-    const user = await this.usersService.findUserAll({ userId });
+  async infoPopulate(@UserId() userId: number): Promise<IUser> {
+    const user = await this.usersService.populate({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
 
     return user;
   }
 
   @Patch('update-profile')
   @UseGuards(JWTAuthGuard)
-  async update(
+  async updateProfile(
     @UserId() userId: number,
     @Body() updateData: UserUpdateProfileRequestDto
   ): Promise<IUser> {
-    const user = await this.usersService.updateUserProfile(
-      { userId },
-      updateData
-    );
+    const user = await this.usersService.updateProfile({ userId }, updateData);
 
-    return {
-      userId: user.userId,
-      name: user.name,
-      username: user.username,
-      tgId: user.tgId,
-      email: user.email,
-      role: user.role,
-      balance: user.balance,
-    };
+    return user;
+  }
+
+  @Patch('update-role')
+  @UseGuards(JWTAuthGuard)
+  async updateRole(
+    @UserId() userId: number,
+    @Body() updateData: UserUpdateRoleRequestDto
+  ): Promise<IUser> {
+    const user = await this.usersService.updateRole({ userId }, updateData);
+
+    return user;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../users/entities/user.entity';
 import {
   AuthLoginRequestDto,
@@ -6,26 +6,22 @@ import {
   AuthRegisterRequestDto,
   AuthRegisterResponseDto,
   AuthType,
-  CounterType,
-  UserRole,
 } from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
 import {
-  CountersService,
   UserEvents,
   UserLoggedInEvent,
   UserRegisteredEvent,
 } from '../../service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
-import { SubscriptionEntity, SubscriptionsService } from '../../billing';
+import { SubscriptionsService } from '../../billing';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly countersService: CountersService,
     private readonly eventEmitter: EventEmitter2,
     private readonly subscriptionsService: SubscriptionsService
   ) {}
@@ -33,55 +29,11 @@ export class AuthService {
   public async register(
     dto: AuthRegisterRequestDto
   ): Promise<AuthRegisterResponseDto> {
-    // Проверяем существующего пользователя
-    const condition =
-      dto.type === 'TG' ? { tgId: dto.tgId } : { email: dto.email };
-    const oldUser = await this.usersService
-      .findUser(condition)
-      .catch(() => null);
-    if (oldUser) throw new Error('Такой пользователь уже зарегистрирован');
+    const newUser = await this.usersService.create(dto);
+    const newSubscription = await this.subscriptionsService.create();
 
-    // Создаем UserEntity
-    const newUserEntity = new UserEntity({
-      userId: await this.countersService.getNextSequence(CounterType.USER_ID),
-      name: dto.name,
-      username: dto.username,
-      tgId: dto.tgId,
-      email: dto.email,
-      role: UserRole.User,
-      balance: 0,
-    });
-
-    if (dto.type === 'TG' && dto.pin) {
-      await newUserEntity.setPin(dto.pin);
-    } else if (dto.type === 'EMAIL' && dto.password) {
-      await newUserEntity.setPassword(dto.password);
-    }
-
-    let newUser = await this.usersService.createUser(newUserEntity);
-
-    // Создаем SubscriptionEntity
-    const newSubscriptionEntity = new SubscriptionEntity({
-      subscriptionId: await this.countersService.getNextSequence(
-        CounterType.SUBSCRIPTION_ID
-      ),
-    });
-
-    const newSubscription = await this.subscriptionsService.createSubscription(
-      newSubscriptionEntity
-    );
-
-    newUser = await this.usersService.bindSubscription(
-      { _id: newUser._id },
-      { subscription: newSubscription }
-    );
-    await this.subscriptionsService.bindUser(
-      { _id: newSubscription._id },
-      { user: newUser }
-    );
-
-    await this.countersService.saveNextSequence(CounterType.USER_ID);
-    await this.countersService.saveNextSequence(CounterType.SUBSCRIPTION_ID);
+    await this.usersService.bindSubscription(newUser, newSubscription);
+    await this.subscriptionsService.bindUser(newSubscription, newUser);
 
     // Событие регистрации
     this.eventEmitter.emit(
@@ -96,7 +48,11 @@ export class AuthService {
   async validate(dto: AuthLoginRequestDto): Promise<UserEntity> {
     const condition =
       dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
-    const user = await this.usersService.findUser(condition);
+    const user = await this.usersService.find(condition);
+
+    if (!user) {
+      throw new NotFoundException('Неверный логин или пароль');
+    }
 
     const isValid =
       dto.type === AuthType.TG
@@ -117,7 +73,10 @@ export class AuthService {
     );
 
     return {
-      access_token: await this.jwtService.signAsync({ userId: user.userId }),
+      access_token: await this.jwtService.signAsync({
+        userId: user.userId,
+        role: user.role,
+      }),
     };
   }
 }
