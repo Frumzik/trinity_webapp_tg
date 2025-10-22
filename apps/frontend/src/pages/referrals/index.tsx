@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../../shared/api/client";
+import { api } from "../../shared/api/baseApi";
 import { endpoints } from "../../shared/api/endpoints";
 
 type RefUser = { id: number; name: string; joinedAt: string };

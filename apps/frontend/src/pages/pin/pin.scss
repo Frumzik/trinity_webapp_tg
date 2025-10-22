@@ -1,0 +1,67 @@
+.pin {
+  &__main { padding: 12px 24px 24px; }
+  &__form { display: grid; gap: 16px; margin-top: 12px; }
+
+  &__field {
+    position: relative;
+    display: grid;
+  }
+
+  &__input {
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    background: var(--Input-Field, #F1F5F9);
+    padding: 0 44px 0 18px;
+    font-size: 16px;
+    color: #121826;
+    outline: none;
+
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  &__input::placeholder {
+    color: var(--Input-Label, #94A3B8);
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .pin__eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: 0;
+    padding: 0;
+    background: transparent url("../../assets/icons/eye.svg") no-repeat center / 18px 18px;
+    outline: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  &__under {
+    color: var(--Text-Black, #121826);
+    text-align: center;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    margin-top: 32px;
+  }
+
+  a {
+    color: #D1874D;
+    text-decoration: underline;
+  }
+  .gbtn {
+    width: 100%;
+  }
+}

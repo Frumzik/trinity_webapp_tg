@@ -39,6 +39,8 @@ import WorkshopPage from "../pages/workshop";
 import HealthLabPage from "../pages/healthLab";
 import PolicyPage from "../pages/policy";
 import FilmsPage from "../pages/films";
+import PinCreatePage from '../pages/pin/create';
+import PinLoginPage from '../pages/pin/login';
 
 const wrap = (node: JSX.Element) => (
   <FooterTabProvider>{node}</FooterTabProvider>
@@ -84,4 +86,6 @@ export const router = createBrowserRouter([
   { path: "/subscription", element: wrap(<SubscriptionPage />) },
   { path: "/faq", element: wrap(<FaqPage />) },
   { path: "/health-lab", element: wrap(<HealthLabPage />) },
+  { path: "/pin/create", element: wrap(<PinCreatePage />) },
+  { path: "/pin/login", element: wrap(<PinLoginPage />) },
 ]);
