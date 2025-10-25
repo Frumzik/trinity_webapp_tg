@@ -12,16 +12,21 @@ import {
   ContentAddLessonResponseDto,
   ContentAddTrainingRequestDto,
   ContentAddTrainingResponseDto,
+  ContentEvents,
   CounterType,
+  LessonCreatedEvent,
+  TrainingCreatedEvent,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ContentService {
   constructor(
     private readonly trainingsRepository: TrainingsRepository,
     private readonly lessonsRepository: LessonsRepository,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async createTraining(
@@ -56,6 +61,11 @@ export class ContentService {
         );
       }
 
+      this.eventEmitter.emit(
+        ContentEvents.TRAINING_CREATED,
+        new TrainingCreatedEvent(createdTraining.trainingId)
+      );
+
       return { trainingId: createdTraining.trainingId };
     } catch (error: unknown) {
       const message =
@@ -78,7 +88,7 @@ export class ContentService {
     }
   }
 
-    async findAllTrainings(
+  async findAllTrainings(
     condition: FilterQuery<Training> = {}
   ): Promise<TrainingEntity[]> {
     try {
@@ -130,6 +140,11 @@ export class ContentService {
 
     await this.trainingsRepository.update(training.bindLesson(createdLesson));
     await this.lessonsRepository.update(createdLesson.bindParent(training));
+
+    this.eventEmitter.emit(
+      ContentEvents.LESSON_CREATED,
+      new LessonCreatedEvent(createdLesson.lessonId)
+    );
 
     return { lessonId: createdLesson.lessonId };
   }

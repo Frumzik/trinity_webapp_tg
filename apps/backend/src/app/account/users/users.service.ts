@@ -11,16 +11,20 @@ import {
   AuthRegisterRequestDto,
   CounterType,
   IUser,
+  UserEvents,
   UserRole,
+  UserUpdatedEvent,
 } from '@trinity/shared';
 import { SubscriptionEntity } from '../../billing';
 import { CountersService } from '../../service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: AuthRegisterRequestDto): Promise<UserEntity> {
@@ -230,6 +234,11 @@ export class UsersService {
 
       const updated = await this.usersRepository.update(
         await user.updateUserRole(updateData.role)
+      );
+
+      this.eventEmitter.emit(
+        UserEvents.UPDATED,
+        new UserUpdatedEvent(user.userId)
       );
 
       return updated;

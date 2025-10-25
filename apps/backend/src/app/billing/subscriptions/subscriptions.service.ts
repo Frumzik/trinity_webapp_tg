@@ -1,19 +1,26 @@
 import {
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
-import { Subscription, SubscriptionEntity } from '../../billing';
+import {
+  Subscription,
+  SubscriptionEntity,
+  SubscriptionPurchase,
+} from '../../billing';
 import { SubscriptionsRepository } from './repositories';
-import {  UserEntity } from '../../account';
-import { CounterType } from '@trinity/shared';
+import { UserEntity } from '../../account';
+import { CounterType, SubscriptionEvents, SubscriptionUpdatedEvent } from '@trinity/shared';
 import { CountersService } from '../../service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly subscriptionsRepository: SubscriptionsRepository,
     private readonly countersService: CountersService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async create(): Promise<SubscriptionEntity> {
@@ -79,13 +86,45 @@ export class SubscriptionsService {
     }
   }
 
-   async populate(
+  async populate(
     condition: FilterQuery<Subscription>
   ): Promise<SubscriptionEntity | null> {
     try {
-      const subscription = await this.subscriptionsRepository.populate(condition);
+      const subscription = await this.subscriptionsRepository.populate(
+        condition
+      );
 
       return subscription;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async addPuchase(
+    condition: FilterQuery<Subscription>,
+    purchase: SubscriptionPurchase
+  ): Promise<SubscriptionEntity | null> {
+    try {
+      const subscription = await this.subscriptionsRepository.populate(
+        condition
+      );
+
+      if (!subscription) {
+        throw new NotFoundException('Подписка не найдена');
+      }
+
+      const updated = await this.subscriptionsRepository.update(
+        subscription.addPurchase(purchase)
+      );
+
+      this.eventEmitter.emit(
+        SubscriptionEvents.UPDATED,
+        new SubscriptionUpdatedEvent(updated.subscriptionId)
+      );
+
+      return updated;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';

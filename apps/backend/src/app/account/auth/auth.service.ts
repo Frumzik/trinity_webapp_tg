@@ -6,13 +6,11 @@ import {
   AuthRegisterRequestDto,
   AuthRegisterResponseDto,
   AuthType,
-} from '@trinity/shared';
-import { JwtService } from '@nestjs/jwt';
-import {
   UserEvents,
   UserLoggedInEvent,
   UserRegisteredEvent,
-} from '../../service';
+} from '@trinity/shared';
+import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
 import { SubscriptionsService } from '../../billing';
