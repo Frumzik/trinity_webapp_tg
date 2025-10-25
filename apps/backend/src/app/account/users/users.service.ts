@@ -75,6 +75,20 @@ export class UsersService {
     }
   }
 
+  async findAll(condition: FilterQuery<User> = {}): Promise<UserEntity[]> {
+    try {
+      const users = await this.usersRepository.findAll(condition);
+
+      return users;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
     try {
       const user = await this.usersRepository.populate(condition);

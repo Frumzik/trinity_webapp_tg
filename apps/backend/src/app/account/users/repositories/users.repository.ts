@@ -11,21 +11,27 @@ export class UsersRepository {
     private readonly userModel: Model<User>
   ) {}
 
-  // Создание подписки
+  // Создание пользователя
   async create(userEntity: UserEntity): Promise<UserEntity> {
     const created = await new this.userModel(userEntity).save();
 
     return new UserEntity(created.toObject());
   }
 
-  // Поиск подписки
+  // Поиск пользователя
   async find(condition: FilterQuery<User>): Promise<UserEntity | null> {
     const user = await this.userModel.findOne(condition).exec();
 
     return user ? new UserEntity(user.toObject()) : null;
   }
 
-  // Обновление подписки
+  // Получение всех пользователей
+  async findAll(filter: FilterQuery<User> = {}): Promise<UserEntity[]> {
+    const users = await this.userModel.find(filter).lean().exec();
+    return users.map((user) => new UserEntity(user));
+  }
+
+  // Обновление пользователя
   async update(userEntity: UserEntity): Promise<UserEntity> {
     if (!userEntity._id) {
       throw new Error('Пользователь не имеет _id');
@@ -48,7 +54,7 @@ export class UsersRepository {
     return new UserEntity(updated.toObject());
   }
 
-  // Удаление подписки
+  // Удаление пользователя
   async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     const result = await this.userModel.deleteOne(condition).exec();
 

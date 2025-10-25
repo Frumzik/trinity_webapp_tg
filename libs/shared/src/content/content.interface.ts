@@ -145,4 +145,6 @@ export type IContentAccess =
   | IContentAccessSubscription
   | IContentAccessOneTimePayment
   | IContentAccessFree
-  | IContentAccessDateUnlock;
+  | IContentAccessDateUnlock
+  | IContentAccessTrainingCompleted
+  | IContentAccessLessonCompleted;

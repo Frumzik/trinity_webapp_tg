@@ -7,3 +7,5 @@ export * from './subscription/subscription.interface.js';
 export * from './subscription/subscription.contract.js';
 export * from './content/content.interface.js';
 export * from './content/content.contract.js';
+export * from './learning/learning.contract.js'
+export * from './learning/learning.interface.js'

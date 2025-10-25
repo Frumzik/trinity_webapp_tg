@@ -26,6 +26,13 @@ export class TrainingsRepository {
     return training ? new TrainingEntity(training.toObject()) : null;
   }
 
+  // Получение всех тренингов
+  async findAll(filter: FilterQuery<Training> = {}): Promise<TrainingEntity[]> {
+    const trainings = await this.trainingModel.find(filter).lean().exec();
+
+    return trainings.map((training) => new TrainingEntity(training));
+  }
+
   // Обонлвение тренинга
   async update(trainingEntity: TrainingEntity): Promise<TrainingEntity> {
     if (!trainingEntity._id) {

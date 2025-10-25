@@ -1,4 +1,9 @@
-import { ISubscription, IUser, SubscriptionType } from '@trinity/shared';
+import {
+  ISubscription,
+  ISubscriptionPurchase,
+  IUser,
+  SubscriptionType,
+} from '@trinity/shared';
 import { Types } from 'mongoose';
 import { UserEntity } from '../../../account';
 
@@ -17,6 +22,9 @@ export class SubscriptionEntity implements ISubscription {
   startDate: Date = new Date();
   endDate: Date | null = null;
 
+  // Покупки
+  purchases: ISubscriptionPurchase[] = [];
+
   constructor(subscription: Partial<ISubscription> = {}) {
     Object.assign(this, subscription);
   }
@@ -30,5 +38,30 @@ export class SubscriptionEntity implements ISubscription {
     this.user = user._id;
 
     return this;
+  }
+
+  public addPurchase(purchase: ISubscriptionPurchase) {
+    this.purchases.push(purchase);
+
+    return this;
+  }
+
+  public hasPurchase(purchase: ISubscriptionPurchase) {
+    return this.purchases.some(
+      (p) => p.type == purchase.type && p.contentId == purchase.contentId
+    );
+  }
+
+  public isActive(): boolean {
+    if (
+      (this.type == SubscriptionType.PAID ||
+        this.type == SubscriptionType.TRIAL) &&
+      this.endDate
+        ? this.endDate > new Date()
+        : true
+    ) {
+      return true;
+    }
+    return false;
   }
 }

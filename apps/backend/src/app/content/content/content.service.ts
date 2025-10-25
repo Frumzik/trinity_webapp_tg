@@ -78,6 +78,20 @@ export class ContentService {
     }
   }
 
+    async findAllTrainings(
+    condition: FilterQuery<Training> = {}
+  ): Promise<TrainingEntity[]> {
+    try {
+      const trainings = await this.trainingsRepository.findAll(condition);
+
+      return trainings;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async populateTraining(
     condition: FilterQuery<Training>
   ): Promise<TrainingEntity | null> {
