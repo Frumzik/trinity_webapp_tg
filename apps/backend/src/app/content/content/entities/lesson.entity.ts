@@ -1,5 +1,5 @@
 import {
-  IContentAccess,
+  TypeContentAccess,
   ILesson,
   ILessonContent,
   ILessonTextContent,
@@ -27,7 +27,7 @@ export class LessonEntity implements ILesson {
   coverUrl: string | null = null;
 
   // Условия доступности
-  accessRules: IContentAccess[] = [];
+  accessRules: TypeContentAccess[] = [];
   price: number | null = null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
@@ -43,6 +43,35 @@ export class LessonEntity implements ILesson {
 
     this.parent = training._id;
     this.parentId = training.trainingId;
+
+    return this;
+  }
+
+  public update(
+    data: Partial<
+      Pick<ILesson, 'title' | 'description' | 'coverUrl' | 'price' | 'content'>
+    >
+  ) {
+    if (data.title !== undefined) {
+      this.title = data.title;
+    }
+    if (data.description !== undefined) {
+      this.description = data.description;
+    }
+    if (data.coverUrl !== undefined) {
+      this.coverUrl = data.coverUrl;
+    }
+    if (data.price !== undefined) {
+      this.price = data.price;
+    }
+    if (data.content !== undefined) {
+      this.content = data.content as ILessonContent;
+    }
+    return this;
+  }
+
+  updateAccessRules(accessRules: TypeContentAccess[]) {
+    this.accessRules = accessRules;
 
     return this;
   }

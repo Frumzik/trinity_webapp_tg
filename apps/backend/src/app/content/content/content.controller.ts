@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseGuards,
@@ -15,12 +16,15 @@ import { ContentService } from './content.service';
 import { JWTAuthGuard, Roles, RolesGuard, S3Service } from '../../service';
 import {
   ContentAddLessonRequestDto,
-  ContentAddLessonResponseDto,
   ContentAddTrainingRequestDto,
-  ContentAddTrainingResponseDto,
-  ILesson,
-  ITraining,
+  ContentLessonInfoResponseDto,
+  ContentLessonUpdateAccessRulesRequestDto,
+  ContentLessonUpdateRequestDto,
+  ContentTrainingInfoResponseDto,
+  ContentTrainingUpdateAccessRulesRequestDto,
+  ContentTrainingUpdateRequestDto,
   LessonType,
+  TypeContentAccess,
   UserRole,
 } from '@trinity/shared';
 import {
@@ -42,7 +46,7 @@ export class ContentController {
   async addTraining(
     @Body() dto: ContentAddTrainingRequestDto,
     @UploadedFile() file: Express.Multer.File
-  ): Promise<ContentAddTrainingResponseDto> {
+  ): Promise<ContentTrainingInfoResponseDto> {
     if (file) {
       const url = await this.s3Service.uploadFile(file);
 
@@ -55,23 +59,15 @@ export class ContentController {
   }
 
   @Get('training/:id')
-  async infoTraining(@Param('id') trainingId: number): Promise<ITraining> {
-    const training = await this.contentService.findTraining({ trainingId });
-
-    if (!training) {
-      throw new NotFoundException('Тренинг не найден');
-    }
-
-    return training;
-  }
-
-  @Get('training/:id/populate')
-  async infoStructureTraining(
-    @Param('id') trainingId: number
-  ): Promise<ITraining> {
-    const training = await this.contentService.populateTraining({
-      trainingId,
-    });
+  async infoTraining(
+    @Param('id') trainingId: number,
+    @Query('populate') populate?: boolean
+  ): Promise<ContentTrainingInfoResponseDto> {
+    const training = populate
+      ? await this.contentService.populateTraining({
+          trainingId,
+        })
+      : await this.contentService.findTraining({ trainingId });
 
     if (!training) {
       throw new NotFoundException('Тренинг не найден');
@@ -95,7 +91,7 @@ export class ContentController {
       contentFile?: Express.Multer.File[];
       coverFile?: Express.Multer.File[];
     }
-  ): Promise<ContentAddLessonResponseDto> {
+  ): Promise<ContentLessonInfoResponseDto> {
     if (files.contentFile?.[0]) {
       switch (dto.type) {
         case LessonType.AUDIO:
@@ -127,8 +123,13 @@ export class ContentController {
   }
 
   @Get('lesson/:id')
-  async infoLesson(@Param('id') lessonId: number): Promise<ILesson> {
-    const lessson = await this.contentService.findLesson({ lessonId });
+  async infoLesson(
+    @Param('id') lessonId: number,
+    @Query('populate') populate?: boolean
+  ): Promise<ContentLessonInfoResponseDto> {
+    const lessson = populate
+      ? await this.contentService.populateLesson({ lessonId })
+      : await this.contentService.findLesson({ lessonId });
 
     if (!lessson) {
       throw new NotFoundException('Урок не найден');
@@ -140,14 +141,60 @@ export class ContentController {
   @Delete('training/:id')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
-  async deleteTraining(@Param('id') trainingId: number) {
+  async deleteTraining(@Param('id') trainingId: number): Promise<boolean> {
     return await this.contentService.deleteTraining(trainingId);
   }
 
   @Delete('lesson/:id')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
-  async deleteLesson(@Param('id') lessonId: number) {
+  async deleteLesson(@Param('id') lessonId: number): Promise<boolean> {
     return await this.contentService.deleteLesson(lessonId);
+  }
+
+  @Post('training/:id/update')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async updateTraining(
+    @Param('id') trainingId: number,
+    @Body() updateData: ContentTrainingUpdateRequestDto
+  ): Promise<ContentTrainingInfoResponseDto> {
+    return await this.contentService.updateTraining({ trainingId }, updateData);
+  }
+
+  @Post('lesson/:id/update')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async updateLesson(
+    @Param('id') lessonId: number,
+    @Body() updateData: ContentLessonUpdateRequestDto
+  ): Promise<ContentLessonInfoResponseDto> {
+    return await this.contentService.updateLesson({ lessonId }, updateData);
+  }
+
+  @Post('training/:id/update/access-rules')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async updateTrainingAccessRules(
+    @Param('id') trainingId: number,
+    @Body() updateData: ContentTrainingUpdateAccessRulesRequestDto
+  ): Promise<ContentTrainingInfoResponseDto> {
+    return await this.contentService.updateTrainingAccessRules(
+      { trainingId },
+      { accessRules: updateData.accessRules as unknown as TypeContentAccess[] }
+    );
+  }
+
+  @Post('lesson/:id/update/access-rules')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async updateLessonAccessRules(
+    @Param('id') lessonId: number,
+    @Body() updateData: ContentLessonUpdateAccessRulesRequestDto
+  ): Promise<ContentLessonInfoResponseDto> {
+    return await this.contentService.updateLessonAccessRules(
+      { lessonId },
+      { accessRules: updateData.accessRules as unknown as TypeContentAccess[] }
+    );
   }
 }

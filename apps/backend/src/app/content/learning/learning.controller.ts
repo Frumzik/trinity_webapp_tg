@@ -13,7 +13,7 @@ export class LearningController {
     return await this.learningService.recalculateAll();
   }
 
-  @Get('training/tree')
+  @Get('training')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
   async findAll(
@@ -22,7 +22,7 @@ export class LearningController {
     return await this.learningService.getLearningTree({ userId });
   }
 
-  @Get('training/:id/tree')
+  @Get('training/:id')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
   async findTraining(

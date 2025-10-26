@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
-  type IContentAccess,
+  type TypeContentAccess,
   ILesson,
   type ITraining,
   TrainingType,
@@ -51,7 +51,7 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
 
   // Условия доступности
   @Prop({ type: Array, default: [] })
-  accessRules!: IContentAccess[];
+  accessRules!: TypeContentAccess[];
 
   @Prop({ type: Number, default: 0 })
   price!: number;

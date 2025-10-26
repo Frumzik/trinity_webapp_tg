@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { AuthType } from './auth.interface.js';
 
+// auth/register
 export class AuthRegisterRequestDto {
   @IsEnum(AuthType, { message: 'Тип аутентификации должен быть TG или EMAIL' })
   type!: AuthType;
@@ -69,6 +70,7 @@ export class AuthRegisterResponseDto {
   userId!: number;
 }
 
+// auth/login
 export class AuthLoginRequestDto {
   @IsEnum(AuthType, { message: 'Тип аутентификации должен быть TG или EMAIL' })
   type!: AuthType;

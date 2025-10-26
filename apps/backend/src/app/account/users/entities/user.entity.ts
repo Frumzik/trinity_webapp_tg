@@ -58,7 +58,7 @@ export class UserEntity implements IUser {
     return compare(pin, this.pinHash);
   }
 
-  public updateUserProfile(data: Partial<Pick<IUser, 'name' | 'username'>>) {
+  public updateProfile(data: Partial<Pick<IUser, 'name' | 'username'>>) {
     if (data.name !== undefined) {
       this.name = data.name;
     }
@@ -68,7 +68,7 @@ export class UserEntity implements IUser {
     return this;
   }
 
-  public async updateUserPin(pin: string) {
+  public async updatePin(pin: string) {
     if (pin) {
       await this.setPin(pin);
     }
@@ -76,7 +76,7 @@ export class UserEntity implements IUser {
     return this;
   }
 
-  public async updateUserPassword(password: string) {
+  public async updatePassword(password: string) {
     if (password) {
       await this.setPassword(password);
     }
@@ -95,14 +95,20 @@ export class UserEntity implements IUser {
     return this;
   }
 
-  public updateUserBalance(balance: number) {
+  public updateBalance(balance: number) {
     this.balance = balance;
 
     return this;
   }
 
-  public updateUserRole(role: UserRole) {
+  public updateRole(role: UserRole) {
     this.role = role;
+
+    return this;
+  }
+
+  public updateEmail(email: string) {
+    this.email = email;
 
     return this;
   }

@@ -9,15 +9,18 @@ import { FilterQuery } from 'mongoose';
 import { Lesson, Training } from './models';
 import {
   ContentAddLessonRequestDto,
-  ContentAddLessonResponseDto,
   ContentAddTrainingRequestDto,
-  ContentAddTrainingResponseDto,
   ContentEvents,
+  ContentLessonInfoResponseDto,
+  ContentTrainingInfoResponseDto,
   CounterType,
+  ILesson,
+  ITraining,
   LessonCreatedEvent,
   LessonDeletedEvent,
   TrainingCreatedEvent,
   TrainingDeletedEvent,
+  TypeContentAccess,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -31,9 +34,10 @@ export class ContentService {
     private readonly eventEmitter: EventEmitter2
   ) {}
 
+  // Тренинги
   async createTraining(
     dto: ContentAddTrainingRequestDto
-  ): Promise<ContentAddTrainingResponseDto> {
+  ): Promise<ContentTrainingInfoResponseDto> {
     try {
       const newTraining = new TrainingEntity({
         trainingId: await this.countersService.saveNextSequence(
@@ -68,7 +72,7 @@ export class ContentService {
         new TrainingCreatedEvent(createdTraining.trainingId)
       );
 
-      return { trainingId: createdTraining.trainingId };
+      return createdTraining;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при создании тренинга';
@@ -133,9 +137,60 @@ export class ContentService {
     return deleted;
   }
 
+  async updateTrainingAccessRules(
+    condition: FilterQuery<Training>,
+    updateData: { accessRules: TypeContentAccess[] }
+  ) {
+    try {
+      const training = await this.findTraining(condition);
+
+      if (!training) {
+        throw new NotFoundException('Тренинг не найден');
+      }
+
+      const updated = await this.trainingsRepository.update(
+        training.updateAccessRules(updateData.accessRules)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateTraining(
+    condition: FilterQuery<Training>,
+    updateData: Partial<
+      Pick<ITraining, 'title' | 'description' | 'coverUrl' | 'price'>
+    >
+  ) {
+    try {
+      const training = await this.findTraining(condition);
+
+      if (!training) {
+        throw new NotFoundException('Тренинг не найден');
+      }
+
+      const updated = await this.trainingsRepository.update(
+        training.update(updateData)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  // Уроки
   async createLesson(
     dto: ContentAddLessonRequestDto
-  ): Promise<ContentAddLessonResponseDto> {
+  ): Promise<ContentLessonInfoResponseDto> {
     const newLesson = new LessonEntity({
       lessonId: await this.countersService.saveNextSequence(
         CounterType.LESSON_ID
@@ -161,7 +216,7 @@ export class ContentService {
       new LessonCreatedEvent(createdLesson.lessonId, training.trainingId)
     );
 
-    return { lessonId: createdLesson.lessonId };
+    return createdLesson;
   }
 
   async findLesson(
@@ -171,6 +226,20 @@ export class ContentService {
       const lesson = await this.lessonsRepository.find(condition);
 
       return lesson;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске урока';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async populateLesson(
+    condition: FilterQuery<Lesson>
+  ): Promise<LessonEntity | null> {
+    try {
+      const lesssonPopulated = await this.lessonsRepository.populate(condition);
+
+      return lesssonPopulated;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске урока';
@@ -199,5 +268,53 @@ export class ContentService {
     }
 
     return deleted;
+  }
+
+  async updateLessonAccessRules(
+    condition: FilterQuery<Training>,
+    updateData: { accessRules: TypeContentAccess[] }
+  ) {
+    try {
+      const lesson = await this.findLesson(condition);
+
+      if (!lesson) {
+        throw new NotFoundException('Урок не найден');
+      }
+
+      const updated = await this.lessonsRepository.update(
+        lesson.updateAccessRules(updateData.accessRules)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске урока';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateLesson(
+    condition: FilterQuery<Lesson>,
+    updateData: Partial<
+      Pick<ILesson, 'title' | 'description' | 'coverUrl' | 'price' | 'content'>
+    >
+  ) {
+    try {
+      const lesson = await this.findLesson(condition);
+
+      if (!lesson) {
+        throw new NotFoundException('Урок не найден');
+      }
+
+      const updated = await this.lessonsRepository.update(
+        lesson.update(updateData)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при обновлении урока';
+      throw new InternalServerErrorException(message);
+    }
   }
 }

@@ -70,4 +70,22 @@ export class LessonsRepository {
 
     return { deleted: result.deletedCount !== 0 };
   }
+
+  // Получение соседей (родителя, детей и уроков)
+  async populate(
+    condition: FilterQuery<Training>
+  ): Promise<LessonEntity | null> {
+    // Находим тренинг и сразу подтягиваем родителя, детей и уроки
+    const lesson = await this.lessonModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'parent', // подтянуть родительский тренинг
+        },
+      ])
+      .lean()
+      .exec();
+
+    return lesson ? new LessonEntity(lesson) : null;
+  }
 }
