@@ -17,3 +17,4 @@ export * from './content/content.events.js';
 
 export * from './learning/learning.contract.js';
 export * from './learning/learning.interface.js';
+export * from './learning/learning.events.js';

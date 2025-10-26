@@ -8,17 +8,17 @@ export const LearningEvents = {
 };
 
 export class TrainingAccessStatusUpdatedEvent {
-  constructor(public readonly trainingId: number) {}
+  constructor(public readonly trainingId: number, public readonly userId: number) {}
 }
 
 export class TrainingProgressStatusUpdatedEvent {
-  constructor(public readonly trainingId: number) {}
+  constructor(public readonly trainingId: number, public readonly userId: number) {}
 }
 
 export class LessonAccessStatusUpdatedEvent {
-  constructor(public readonly trainingId: number) {}
+  constructor(public readonly trainingId: number, public readonly userId: number) {}
 }
 
 export class LessonProgressStatusUpdatedEvent {
-  constructor(public readonly trainingId: number) {}
+  constructor(public readonly trainingId: number, public readonly userId: number) {}
 }

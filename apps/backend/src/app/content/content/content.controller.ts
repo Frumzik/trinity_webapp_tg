@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -134,5 +135,19 @@ export class ContentController {
     }
 
     return lessson;
+  }
+
+  @Delete('training/:id')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async deleteTraining(@Param('id') trainingId: number) {
+    return await this.contentService.deleteTraining(trainingId);
+  }
+
+  @Delete('lesson/:id')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async deleteLesson(@Param('id') lessonId: number) {
+    return await this.contentService.deleteLesson(lessonId);
   }
 }

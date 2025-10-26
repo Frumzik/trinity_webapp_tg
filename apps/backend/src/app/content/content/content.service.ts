@@ -15,7 +15,9 @@ import {
   ContentEvents,
   CounterType,
   LessonCreatedEvent,
+  LessonDeletedEvent,
   TrainingCreatedEvent,
+  TrainingDeletedEvent,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -143,7 +145,7 @@ export class ContentService {
 
     this.eventEmitter.emit(
       ContentEvents.LESSON_CREATED,
-      new LessonCreatedEvent(createdLesson.lessonId)
+      new LessonCreatedEvent(createdLesson.lessonId, training.trainingId)
     );
 
     return { lessonId: createdLesson.lessonId };
@@ -161,5 +163,41 @@ export class ContentService {
         error instanceof Error ? error.message : 'Ошибка при поиске урока';
       throw new InternalServerErrorException(message);
     }
+  }
+
+  async deleteTraining(trainingId: number): Promise<boolean> {
+    const { deleted } = await this.trainingsRepository.delete({ trainingId });
+
+    if (deleted) {
+      this.eventEmitter.emit(
+        ContentEvents.TRAINING_DELETED,
+        new TrainingDeletedEvent(trainingId)
+      );
+    }
+
+    return deleted;
+  }
+
+  async deleteLesson(lessonId: number): Promise<boolean> {
+    // 1️⃣ Сначала находим урок, чтобы получить parentId
+    const lesson = await this.lessonsRepository.find({ lessonId });
+    if (!lesson) {
+      throw new NotFoundException(`Урок с ID ${lessonId} не найден`);
+    }
+
+    const parentId = lesson.parentId;
+
+    // 2️⃣ Потом удаляем
+    const { deleted } = await this.lessonsRepository.delete({ lessonId });
+
+    // 3️⃣ Если удалён — эмитим событие с parentId
+    if (deleted) {
+      this.eventEmitter.emit(
+        ContentEvents.LESSON_DELETED,
+        new LessonDeletedEvent(lessonId, parentId as number)
+      );
+    }
+
+    return deleted;
   }
 }

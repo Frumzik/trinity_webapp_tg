@@ -3,12 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Learning } from '../models';
 import { LearningEntity } from '../entities';
+import { Training } from '../../content/models';
 
 @Injectable()
 export class LearningsRepository {
   constructor(
     @InjectModel(Learning.name)
-    private readonly learningModel: Model<Learning>
+    private readonly learningModel: Model<Learning>,
+    @InjectModel(Training.name)
+    private readonly trainingModel: Model<Training>
   ) {}
 
   // Создание
@@ -54,12 +57,63 @@ export class LearningsRepository {
     return new LearningEntity(updated.toObject());
   }
 
-  // Удаление
-  async delete(
-    condition: FilterQuery<Learning>
-  ): Promise<{ deleted: boolean }> {
-    const result = await this.learningModel.deleteOne(condition).exec();
+  /**
+   * Удаляет прогресс:
+   * - если указан trainingId → по этому тренингу и всем его дочерним, для всех пользователей
+   * - если указан userId → весь прогресс пользователя (по всем тренингам)
+   */
+  async delete(options: {
+    trainingId?: number;
+    userId?: number;
+  }): Promise<{ deletedCount: number }> {
+    const { trainingId, userId } = options;
 
-    return { deleted: result.deletedCount !== 0 };
+    // 1️⃣ Если указан только userId — удаляем все его прогрессы
+    if (userId && !trainingId) {
+      const result = await this.learningModel.deleteMany({ userId });
+      return { deletedCount: result.deletedCount ?? 0 };
+    }
+
+    // 2️⃣ Если указан trainingId — удаляем прогресс по тренингу (и всем дочерним)
+    if (trainingId) {
+      const allTrainingIds = new Set<number>([trainingId]);
+
+      // рекурсивно собираем все дочерние тренинги
+      const collectChildren = async (ids: number[]) => {
+        const children = await this.trainingModel
+          .find({ parentId: { $in: ids } })
+          .select('trainingId')
+          .lean();
+
+        const childIds = children.map((t) => t.trainingId);
+
+        for (const id of childIds) allTrainingIds.add(id);
+
+        if (childIds.length > 0) {
+          await collectChildren(childIds);
+        }
+      };
+
+      await collectChildren([trainingId]);
+
+      // ✅ Без any, с типизацией FilterQuery
+      const filter: FilterQuery<Learning> = {
+        trainingId: { $in: Array.from(allTrainingIds) },
+      };
+
+      // если указан userId — ограничиваем удаление конкретным пользователем
+      if (userId) {
+        filter.userId = userId;
+      }
+
+      const result = await this.learningModel.deleteMany(filter);
+
+      return { deletedCount: result.deletedCount ?? 0 };
+    }
+
+    // если не передано ни userId, ни trainingId
+    throw new Error(
+      'Необходимо указать либо trainingId, либо userId для удаления прогресса.'
+    );
   }
 }

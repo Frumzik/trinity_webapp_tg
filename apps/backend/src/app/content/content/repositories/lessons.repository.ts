@@ -1,14 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
-import { Lesson } from '../models';
+import { Lesson, Training } from '../models';
 import { LessonEntity } from '../entities';
 
 @Injectable()
 export class LessonsRepository {
   constructor(
     @InjectModel(Lesson.name)
-    private readonly lessonModel: Model<Lesson>
+    private readonly lessonModel: Model<Lesson>,
+
+    @InjectModel(Training.name)
+    private readonly trainingModel: Model<Training>
   ) {}
 
   // Создание урока
@@ -45,9 +48,25 @@ export class LessonsRepository {
     return new LessonEntity(updated.toObject());
   }
 
-  // Удаление урока
-  async delete(condition: FilterQuery<Lesson>): Promise<{deleted: boolean}> {
-    const result = await this.lessonModel.deleteOne(condition).exec();
+  // ✅ Удаление урока + очистка в Training
+  async delete(condition: FilterQuery<Lesson>): Promise<{ deleted: boolean }> {
+    const lesson = await this.lessonModel.findOne(condition).exec();
+    if (!lesson) return { deleted: false };
+
+    const result = await this.lessonModel.deleteOne({ _id: lesson._id }).exec();
+
+    // ⬇️ Удаляем ссылку на урок во всех тренингах
+    await this.trainingModel.updateMany(
+      {
+        $or: [{ lessons: lesson._id }, { lessonsId: lesson.lessonId }],
+      },
+      {
+        $pull: {
+          lessons: lesson._id,
+          lessonsId: lesson.lessonId,
+        },
+      }
+    );
 
     return { deleted: result.deletedCount !== 0 };
   }

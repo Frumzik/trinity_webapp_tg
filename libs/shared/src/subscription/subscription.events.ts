@@ -4,5 +4,5 @@ export const SubscriptionEvents = {
 }
 
 export class SubscriptionUpdatedEvent {
-  constructor(public readonly subscirptionId: number) {}
+  constructor(public readonly subscriptionId: number) {}
 }

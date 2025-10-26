@@ -29,16 +29,16 @@ export class TrainingAccessRulesUpdatedEvent {
 
 
 export class LessonCreatedEvent {
-  constructor(public readonly lessonId: number) {}
+  constructor(public readonly lessonId: number, public readonly trainingId: number) {}
 }
 
 export class LessonUpdatedEvent {
-  constructor(public readonly lessonId: number) {}
+  constructor(public readonly lessonId: number, public readonly trainingId: number) {}
 }
 export class LessonDeletedEvent {
-  constructor(public readonly lessonId: number) {}
+  constructor(public readonly lessonId: number, public readonly trainingId: number) {}
 }
 
 export class LessonAccessRulesUpdatedEvent {
-  constructor(public readonly lessonId: number) {}
+  constructor(public readonly lessonId: number, public readonly trainingId: number) {}
 }
