@@ -1,7 +1,7 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { LearningService } from './learning.service';
 import { JWTAuthGuard, Roles, UserId } from '../../service';
-import { ILearning, UserRole } from '@trinity/shared';
+import { ITraining, UserRole } from '@trinity/shared';
 
 @Controller('learning')
 export class LearningController {
@@ -13,10 +13,22 @@ export class LearningController {
     return await this.learningService.recalculateAll();
   }
 
-  @Get('find-all')
+  @Get('training/tree')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
-  async findAdll(@UserId() userId: number): Promise<ILearning[]> {
-    return await this.learningService.findAll({ userId });
+  async findAll(
+    @UserId() userId: number
+  ): Promise<ITraining[] | ITraining | null> {
+    return await this.learningService.getLearningTree({ userId });
+  }
+
+  @Get('training/:id/tree')
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @UseGuards(JWTAuthGuard)
+  async findTraining(
+    @UserId() userId: number,
+    @Param('id') trainingId: number
+  ): Promise<ITraining[] | ITraining | null> {
+    return await this.learningService.getLearningTree({ userId, trainingId });
   }
 }

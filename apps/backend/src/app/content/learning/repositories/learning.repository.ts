@@ -4,6 +4,13 @@ import { FilterQuery, Model } from 'mongoose';
 import { Learning } from '../models';
 import { LearningEntity } from '../entities';
 import { Training } from '../../content/models';
+import { TrainingEntity } from '../../content/entities';
+import {
+  ILesson,
+  ITraining,
+  LearningAccessStatus,
+  LearningProgressStatus,
+} from '@trinity/shared';
 
 @Injectable()
 export class LearningsRepository {
@@ -115,5 +122,79 @@ export class LearningsRepository {
     throw new Error(
       'Необходимо указать либо trainingId, либо userId для удаления прогресса.'
     );
+  }
+
+  async getLearningTree(
+    condition?: FilterQuery<Learning>
+  ): Promise<TrainingEntity[] | TrainingEntity | null> {
+    // Загружаем все тренинги (с уроками)
+    const allTrainings = await this.trainingModel
+      .find()
+      .populate('lessons')
+      .lean()
+      .exec();
+
+    // Загружаем все learning-записи (например, для конкретного userId)
+    const learnings = await this.learningModel
+      .find(condition ?? {})
+      .lean()
+      .exec();
+
+    // Создаём карту для быстрого доступа по trainingId
+    const learningMap = new Map<number, Learning>(
+      learnings.map((l) => [l.trainingId, l as unknown as Learning])
+    );
+
+    // Рекурсивная функция сборки дерева
+    const buildTree = (training: ITraining): ITraining => {
+      const learning = learningMap.get(training.trainingId);
+
+      // Применяем статусы доступа и прогресса к тренингу
+      training.accessStatus =
+        learning?.accessStatus ?? LearningAccessStatus.LOCKED;
+      training.progressStatus =
+        learning?.progressStatus ?? LearningProgressStatus.NOT_STARTED;
+
+      // Добавляем статусы урокам
+      const populatedLessons = (training.lessons ?? []) as ILesson[];
+      training.lessons = populatedLessons.map((lesson) => {
+        const lessonLearning = learning?.lessons?.find(
+          (l) => l.lessonId === lesson.lessonId
+        );
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { content: _omit, ...lessonWithoutContent } = lesson;
+
+        return {
+          ...lessonWithoutContent,
+          accessStatus:
+            lessonLearning?.accessStatus ?? LearningAccessStatus.LOCKED,
+          progressStatus:
+            lessonLearning?.progressStatus ??
+            LearningProgressStatus.NOT_STARTED,
+        };
+      });
+
+      // Рекурсивно собираем дочерние тренинги
+      training.childrens = allTrainings
+        .filter((t) => t.parentId === training.trainingId)
+        .map((child) => buildTree(child));
+
+      return training;
+    };
+
+    // Если передан конкретный trainingId → возвращаем дерево от него
+    if (condition?.trainingId) {
+      const root = allTrainings.find(
+        (t) => t.trainingId === condition.trainingId
+      );
+      if (!root) return null;
+
+      return new TrainingEntity(buildTree(root));
+    }
+
+    // Иначе возвращаем массив всех корневых деревьев
+    const roots = allTrainings.filter((t) => !t.parentId);
+    return roots.map((r) => new TrainingEntity(buildTree(r)));
   }
 }

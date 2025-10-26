@@ -4,6 +4,8 @@ import {
   ILessonContent,
   ILessonTextContent,
   ITraining,
+  LearningAccessStatus,
+  LearningProgressStatus,
   LessonType,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
@@ -27,6 +29,8 @@ export class LessonEntity implements ILesson {
   // Условия доступности
   accessRules: IContentAccess[] = [];
   price: number | null = null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 
   constructor(lesson: Partial<ILesson> = {}) {
     Object.assign(this, lesson);
@@ -36,7 +40,7 @@ export class LessonEntity implements ILesson {
     if (!training._id) {
       throw new Error('Тренинг не имеет _id');
     }
-  
+
     this.parent = training._id;
     this.parentId = training.trainingId;
 

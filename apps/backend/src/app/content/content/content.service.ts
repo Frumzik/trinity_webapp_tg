@@ -120,6 +120,19 @@ export class ContentService {
     }
   }
 
+  async deleteTraining(trainingId: number): Promise<boolean> {
+    const { deleted } = await this.trainingsRepository.delete({ trainingId });
+
+    if (deleted) {
+      this.eventEmitter.emit(
+        ContentEvents.TRAINING_DELETED,
+        new TrainingDeletedEvent(trainingId)
+      );
+    }
+
+    return deleted;
+  }
+
   async createLesson(
     dto: ContentAddLessonRequestDto
   ): Promise<ContentAddLessonResponseDto> {
@@ -163,19 +176,6 @@ export class ContentService {
         error instanceof Error ? error.message : 'Ошибка при поиске урока';
       throw new InternalServerErrorException(message);
     }
-  }
-
-  async deleteTraining(trainingId: number): Promise<boolean> {
-    const { deleted } = await this.trainingsRepository.delete({ trainingId });
-
-    if (deleted) {
-      this.eventEmitter.emit(
-        ContentEvents.TRAINING_DELETED,
-        new TrainingDeletedEvent(trainingId)
-      );
-    }
-
-    return deleted;
   }
 
   async deleteLesson(lessonId: number): Promise<boolean> {

@@ -1,4 +1,8 @@
 import { Types } from 'mongoose';
+import {
+  LearningAccessStatus,
+  LearningProgressStatus,
+} from '../learning/learning.interface.js';
 
 // Тренинги
 export enum TrainingType {
@@ -28,6 +32,8 @@ interface ITrainingBase {
   // Условия доступности
   accessRules: IContentAccess[];
   price: number | null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 }
 
 export interface ITrainingCourse extends ITrainingBase {
@@ -56,11 +62,13 @@ interface ILessonBase {
   // Метаданные
   title: string | null;
   description: string | null;
-  content: ILessonContent | null;
+  content?: ILessonContent | null;
 
   // Условия доступности
   accessRules: IContentAccess[];
   price: number | null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 }
 
 export interface ILessonVideoContent {

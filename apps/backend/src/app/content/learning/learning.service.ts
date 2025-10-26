@@ -397,4 +397,17 @@ export class LearningService {
   async delete(options: { trainingId?: number; userId?: number }) {
     return await this.learningRepository.delete(options);
   }
+
+  async getLearningTree(condition?: FilterQuery<Learning>) {
+    if (condition?.trainingId) {
+      const training = await this.contentService.findTraining({
+        trainingId: condition.trainingId,
+      });
+
+      if (!training) {
+        throw new NotFoundException('Тренинг не найден');
+      }
+    }
+    return await this.learningRepository.getLearningTree(condition);
+  }
 }

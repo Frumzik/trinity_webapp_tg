@@ -2,6 +2,8 @@ import {
   IContentAccess,
   ILesson,
   ITraining,
+  LearningAccessStatus,
+  LearningProgressStatus,
   TrainingType,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
@@ -29,6 +31,8 @@ export class TrainingEntity implements ITraining {
   // Условия доступности
   accessRules: IContentAccess[] = [];
   price: number | null = null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 
   constructor(training: Partial<ITraining> = {}) {
     Object.assign(this, training);
