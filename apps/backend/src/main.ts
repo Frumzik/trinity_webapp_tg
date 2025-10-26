@@ -6,7 +6,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { AllExceptionsFilter } from './app/service';
+import { AllExceptionsFilter, ResponseTransformInterceptor } from './app/service';
 
 async function bootstrap() {
   const globalPrefix = '';
@@ -20,11 +20,12 @@ async function bootstrap() {
       whitelist: true, // удаляет поля, которых нет в DTO
       forbidNonWhitelisted: true, // выбрасывает ошибку, если есть лишние поля
       transform: true, // автоматически преобразует типы (например, string → number),
-      errorHttpStatusCode: 400,   // возвращаем BadRequest при ошибках
+      errorHttpStatusCode: 400, // возвращаем BadRequest при ошибках
     })
   );
 
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
 
   await app.listen(port);
   Logger.log(
