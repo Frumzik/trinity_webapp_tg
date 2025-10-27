@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../users/entities/user.entity';
 import {
-  AuthLoginRequestDto,
+  AuthLoginTgRequestDto,
   AuthLoginResponseDto,
   AuthRegisterEmailDto,
   AuthRegisterResponseDto,
@@ -10,6 +10,7 @@ import {
   UserEvents,
   UserLoggedInEvent,
   UserRegisteredEvent,
+  AuthLoginEmailRequestDto,
 } from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -44,7 +45,9 @@ export class AuthService {
   }
 
   // AuthService
-  async validate(dto: AuthLoginRequestDto): Promise<UserEntity> {
+  async validate(
+    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+  ): Promise<UserEntity> {
     const condition =
       dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
     const user = await this.usersService.find(condition);
@@ -63,7 +66,9 @@ export class AuthService {
     return user;
   }
 
-  async login(dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
+  async login(
+    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+  ): Promise<AuthLoginResponseDto> {
     const user = await this.validate(dto);
 
     this.eventEmitter.emit(
@@ -77,5 +82,11 @@ export class AuthService {
         role: user.role,
       }),
     };
+  }
+
+  async checkTg(tgId: number): Promise<boolean> {
+    const user = await this.usersService.find({ tgId });
+
+    return Boolean(user);
   }
 }

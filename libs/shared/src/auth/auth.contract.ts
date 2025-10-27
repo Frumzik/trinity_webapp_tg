@@ -75,7 +75,7 @@ export class AuthRegisterResponseDto {
  * ============================================================ */
 
 @ApiExtraModels()
-export class AuthLoginEmailDto {
+export class AuthLoginEmailRequestDto {
   @ApiProperty({ enum: AuthType, example: AuthType.EMAIL })
   @IsEnum(AuthType)
   type!: AuthType.EMAIL;
@@ -91,12 +91,12 @@ export class AuthLoginEmailDto {
 }
 
 @ApiExtraModels()
-export class AuthLoginTgDto {
+export class AuthLoginTgRequestDto {
   @ApiProperty({ enum: AuthType, example: AuthType.TG })
   @IsEnum(AuthType)
   type!: AuthType.TG;
 
-  @ApiProperty({ example: 123456789 })
+  @ApiProperty({ example: 6 })
   @IsNumber()
   tgId!: number;
 

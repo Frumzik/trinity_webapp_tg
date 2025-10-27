@@ -1,8 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  AuthLoginEmailDto,
-  AuthLoginTgDto,
+  AuthLoginEmailRequestDto,
+  AuthLoginTgRequestDto,
   AuthLoginResponseDto,
   AuthRegisterEmailDto,
   AuthRegisterTgDto,
@@ -13,10 +13,12 @@ import {
   ApiBody,
   ApiExtraModels,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
+import { JWTAuthGuard } from '../../service';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -73,19 +75,18 @@ export class AuthController {
   /* ==================== LOGIN ==================== */
   @Post('login')
   @ApiOperation({ summary: 'Авторизовать пользователя' })
-  @ApiExtraModels(AuthLoginEmailDto, AuthLoginTgDto)
-  @ApiOperation({ summary: 'Зарегистрировать пользователя' })
+  @ApiExtraModels(AuthLoginEmailRequestDto, AuthLoginTgRequestDto)
   @ApiBody({
     schema: {
       oneOf: [
-        { $ref: getSchemaPath(AuthLoginTgDto) },
-        { $ref: getSchemaPath(AuthLoginEmailDto) },
+        { $ref: getSchemaPath(AuthLoginTgRequestDto) },
+        { $ref: getSchemaPath(AuthLoginEmailRequestDto) },
       ],
       discriminator: {
         propertyName: 'type',
         mapping: {
-          [AuthType.TG]: getSchemaPath(AuthLoginTgDto),
-          [AuthType.EMAIL]: getSchemaPath(AuthLoginEmailDto),
+          [AuthType.TG]: getSchemaPath(AuthLoginTgRequestDto),
+          [AuthType.EMAIL]: getSchemaPath(AuthLoginEmailRequestDto),
         },
       },
     },
@@ -110,8 +111,34 @@ export class AuthController {
   })
   @ApiResponse({ type: AuthLoginResponseDto })
   async login(
-    @Body() dto: AuthLoginEmailDto | AuthLoginTgDto
+    @Body() dto: AuthLoginEmailRequestDto | AuthLoginTgRequestDto
   ): Promise<AuthLoginResponseDto> {
     return this.authService.login(dto);
+  }
+
+  // 🔍 Проверка Telegram ID
+  @Get('check-tg')
+  @ApiOperation({
+    summary: 'Проверить Telegram-пользователя по ID',
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'Telegram ID пользователя',
+    example: 6,
+    type: Number,
+    required: true,
+  })
+  async checkTg(@Query('id') tgId: number) {
+    return await this.authService.checkTg(tgId);
+  }
+
+  // 🔍 Проверка авторизации
+  @Get('check-auth')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({
+    summary: 'Проверить авторизацию',
+  })
+  async checkAuth() {
+    return true;
   }
 }
