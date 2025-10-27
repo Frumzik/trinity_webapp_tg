@@ -12,7 +12,7 @@ export class TrainingEntity implements ITraining {
   _id?: Types.ObjectId;
 
   trainingId!: number;
-  type: TrainingType = TrainingType.COURSE;
+  type: TrainingType = TrainingType.STANDART;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[] = [];

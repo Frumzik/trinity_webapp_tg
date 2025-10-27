@@ -3,8 +3,9 @@ import { UserEntity } from '../users/entities/user.entity';
 import {
   AuthLoginRequestDto,
   AuthLoginResponseDto,
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
   AuthRegisterResponseDto,
+  AuthRegisterTgDto,
   AuthType,
   UserEvents,
   UserLoggedInEvent,
@@ -25,7 +26,7 @@ export class AuthService {
   ) {}
 
   public async register(
-    dto: AuthRegisterRequestDto
+    dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
     const newUser = await this.usersService.create(dto);
     const newSubscription = await this.subscriptionsService.create();

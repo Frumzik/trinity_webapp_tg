@@ -3,7 +3,6 @@ import { S3Module } from 'nestjs-s3';
 import { ConfigModule } from '@nestjs/config';
 import { S3Service } from './s3.service';
 import { getS3Config } from '../config';
-import { S3Controller } from './s3.controller';
 
 @Module({
   imports: [
@@ -12,6 +11,6 @@ import { S3Controller } from './s3.controller';
   ],
   providers: [S3Service],
   exports: [S3Service],
-  controllers: [S3Controller]
+  controllers: []
 })
 export class S3ProviderModule {}

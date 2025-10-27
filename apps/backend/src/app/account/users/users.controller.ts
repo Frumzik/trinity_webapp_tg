@@ -7,12 +7,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { JWTAuthGuard, UserId } from '../../service';
+import { JWTAuthGuard, Roles, UserId } from '../../service';
 import { UsersService } from './users.service';
 import {
   UserBalanceDecRequestDto,
   UserBalanceIncRequestDto,
   UserInfoResponseDto,
+  UserRole,
   UserUpdateEmailRequestDto,
   UserUpdatePasswordRequestDto,
   UserUpdatePinRequestDto,
@@ -20,13 +21,32 @@ import {
   UserUpdateResponseDto,
   UserUpdateRoleRequestDto,
 } from '@trinity/shared';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 
+@ApiTags('User')
+@ApiBearerAuth('access_token')
+@UseGuards(JWTAuthGuard)
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Получить информацию о пользователе' })
+  @ApiResponse({ type: UserInfoResponseDto })
+  @ApiQuery({
+    name: 'populate',
+    required: false,
+    type: Boolean,
+    description: 'Если true — вернуть данные с полной информацией (populate)',
+    example: false,
+  })
   async info(
     @UserId() userId: number,
     @Query('populate') populate?: boolean
@@ -43,79 +63,82 @@ export class UsersController {
   }
 
   @Post('update/profile')
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Обновить профиль пользователя' })
+  @ApiBody({ type: UserUpdateProfileRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
   async updateProfile(
     @UserId() userId: number,
     @Body() updateData: UserUpdateProfileRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updateProfile({ userId }, updateData);
-
-    return user;
+    return this.usersService.updateProfile({ userId }, updateData);
   }
 
   @Post('update/role')
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Изменить роль пользователя' })
+  @Roles(UserRole.Admin, UserRole.Moderator)
+  @ApiBody({ type: UserUpdateRoleRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
   async updateRole(
     @UserId() userId: number,
     @Body() updateData: UserUpdateRoleRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updateRole({ userId }, updateData);
-
-    return user;
+    return this.usersService.updateRole({ userId }, updateData);
   }
 
   @Post('update/pin')
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Изменить PIN-код' })
+  @ApiBody({ type: UserUpdatePinRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
   async updatePin(
     @UserId() userId: number,
     @Body() updateData: UserUpdatePinRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updatePin({ userId }, updateData);
-
-    return user;
+    return this.usersService.updatePin({ userId }, updateData);
   }
 
   @Post('update/password')
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Изменить пароль пользователя' })
+  @ApiBody({ type: UserUpdatePasswordRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
   async updatePassword(
     @UserId() userId: number,
     @Body() updateData: UserUpdatePasswordRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updatePassword({ userId }, updateData);
-
-    return user;
+    return this.usersService.updatePassword({ userId }, updateData);
   }
 
   @Post('update/email')
-  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Изменить email пользователя' })
+  @ApiBody({ type: UserUpdateEmailRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
   async updateEmail(
     @UserId() userId: number,
     @Body() updateData: UserUpdateEmailRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.updateEmail({ userId }, updateData);
-
-    return user;
+    return this.usersService.updateEmail({ userId }, updateData);
   }
 
-  @Post('/balance/inc')
-  @UseGuards(JWTAuthGuard)
+  @Post('balance/inc')
+  @ApiOperation({ summary: 'Увеличить баланс пользователя' })
+  @ApiBody({ type: UserBalanceIncRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
+  @Roles(UserRole.Admin, UserRole.Moderator)
   async incBalance(
     @UserId() userId: number,
     @Body() updateData: UserBalanceIncRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.incBalance({ userId }, updateData);
-
-    return user;
+    return this.usersService.incBalance({ userId }, updateData);
   }
 
-  @Post('/balance/dec')
-  @UseGuards(JWTAuthGuard)
+  @Post('balance/dec')
+  @ApiOperation({ summary: 'Уменьшить баланс пользователя' })
+  @ApiBody({ type: UserBalanceDecRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
+  @Roles(UserRole.Admin, UserRole.Moderator)
   async decBalance(
     @UserId() userId: number,
     @Body() updateData: UserBalanceDecRequestDto
   ): Promise<UserUpdateResponseDto> {
-    const user = await this.usersService.decBalance({ userId }, updateData);
-
-    return user;
+    return this.usersService.decBalance({ userId }, updateData);
   }
 }

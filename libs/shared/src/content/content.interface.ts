@@ -6,7 +6,7 @@ import {
 
 // Тренинги
 export enum TrainingType {
-  COURSE = 'course',
+  STANDART = 'standart',
 }
 
 export interface ITraining {
@@ -37,7 +37,7 @@ export interface ITraining {
 }
 
 export interface ITrainingCourse extends ITraining {
-  type: TrainingType.COURSE;
+  type: TrainingType.STANDART;
 }
 
 export type TypeTraining = ITrainingCourse;

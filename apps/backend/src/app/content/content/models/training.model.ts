@@ -16,7 +16,7 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
     type: String,
     required: true,
     enum: TrainingType,
-    default: TrainingType.COURSE,
+    default: TrainingType.STANDART,
   })
   type!: TrainingType;
 

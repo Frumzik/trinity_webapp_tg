@@ -8,7 +8,8 @@ import { FilterQuery } from 'mongoose';
 import { User } from './models/user.model';
 import { UserEntity } from './entities/user.entity';
 import {
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
+  AuthRegisterTgDto,
   CounterType,
   IUser,
   UserEvents,
@@ -27,7 +28,7 @@ export class UsersService {
     private readonly eventEmitter: EventEmitter2
   ) {}
 
-  async create(dto: AuthRegisterRequestDto): Promise<UserEntity> {
+  async create(dto: AuthRegisterEmailDto | AuthRegisterTgDto): Promise<UserEntity> {
     try {
       // Проверяем существующего пользователя
       const condition =
