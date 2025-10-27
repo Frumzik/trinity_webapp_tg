@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import {
   type ILesson,
-  type IContentAccess,
+  type TypeContentAccess,
   type ILessonContent,
   LessonType,
 } from '@trinity/shared';
@@ -43,7 +43,7 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
 
   // Условия доступности
   @Prop({ type: Array, default: [] })
-  accessRules!: IContentAccess[];
+  accessRules!: TypeContentAccess[];
 
   @Prop({ type: Number, default: 0 })
   price!: number;

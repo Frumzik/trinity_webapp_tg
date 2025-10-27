@@ -8,6 +8,7 @@ import { CountersModule, getMongoConfig, S3ProviderModule } from './service';
 import { AuthModule, UsersModule } from './account';
 import { SubscriptionsModule } from './billing';
 import { ContentModule } from './content';
+import { LearningModule } from './content/learning';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { ContentModule } from './content';
     CountersModule,
     SubscriptionsModule,
     ContentModule,
-    S3ProviderModule
+    S3ProviderModule,
+    LearningModule,
   ],
   controllers: [],
   providers: [],

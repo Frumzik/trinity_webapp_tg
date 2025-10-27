@@ -8,22 +8,27 @@ import { FilterQuery } from 'mongoose';
 import { User } from './models/user.model';
 import { UserEntity } from './entities/user.entity';
 import {
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
+  AuthRegisterTgDto,
   CounterType,
   IUser,
+  UserEvents,
   UserRole,
+  UserUpdatedEvent,
 } from '@trinity/shared';
 import { SubscriptionEntity } from '../../billing';
 import { CountersService } from '../../service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
-  async create(dto: AuthRegisterRequestDto): Promise<UserEntity> {
+  async create(dto: AuthRegisterEmailDto | AuthRegisterTgDto): Promise<UserEntity> {
     try {
       // Проверяем существующего пользователя
       const condition =
@@ -75,6 +80,20 @@ export class UsersService {
     }
   }
 
+  async findAll(condition: FilterQuery<User> = {}): Promise<UserEntity[]> {
+    try {
+      const users = await this.usersRepository.findAll(condition);
+
+      return users;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
     try {
       const user = await this.usersRepository.populate(condition);
@@ -115,7 +134,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateUserProfile(updateData)
+        await user.updateProfile(updateData)
       );
 
       return updated;
@@ -140,7 +159,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateUserPin(updateData.pin)
+        await user.updatePin(updateData.pin)
       );
 
       return updated;
@@ -165,7 +184,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateUserPassword(updateData.password)
+        await user.updatePassword(updateData.password)
       );
 
       return updated;
@@ -190,7 +209,57 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateUserBalance(updateData.balance)
+        await user.updateBalance(updateData.balance)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async incBalance(
+    condition: FilterQuery<User>,
+    updateData: { inc: number }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.updateBalance(user.balance + updateData.inc)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async decBalance(
+    condition: FilterQuery<User>,
+    updateData: { dec: number }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.updateBalance(user.balance + updateData.dec)
       );
 
       return updated;
@@ -215,7 +284,12 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateUserRole(updateData.role)
+        await user.updateRole(updateData.role)
+      );
+
+      this.eventEmitter.emit(
+        UserEvents.UPDATED,
+        new UserUpdatedEvent(user.userId)
       );
 
       return updated;
@@ -224,6 +298,36 @@ export class UsersService {
         error instanceof Error
           ? error.message
           : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateEmail(
+    condition: FilterQuery<User>,
+    updateData: { email: string }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.updateEmail(updateData.email)
+      );
+
+      this.eventEmitter.emit(
+        UserEvents.UPDATED,
+        new UserUpdatedEvent(user.userId)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении email пользователя';
       throw new InternalServerErrorException(message);
     }
   }

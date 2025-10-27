@@ -1,14 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
-import { Training } from '../models';
+import { FilterQuery, Model, Types } from 'mongoose';
+import { Lesson, Training } from '../models';
 import { TrainingEntity } from '../entities';
 
 @Injectable()
 export class TrainingsRepository {
   constructor(
     @InjectModel(Training.name)
-    private readonly trainingModel: Model<Training>
+    private readonly trainingModel: Model<Training>,
+
+    @InjectModel(Lesson.name)
+    private readonly lessonModel: Model<Lesson>
   ) {}
 
   // Создание тренинга
@@ -24,6 +27,13 @@ export class TrainingsRepository {
     const training = await this.trainingModel.findOne(condition).exec();
 
     return training ? new TrainingEntity(training.toObject()) : null;
+  }
+
+  // Получение всех тренингов
+  async findAll(filter: FilterQuery<Training> = {}): Promise<TrainingEntity[]> {
+    const trainings = await this.trainingModel.find(filter).lean().exec();
+
+    return trainings.map((training) => new TrainingEntity(training));
   }
 
   // Обонлвение тренинга
@@ -49,11 +59,51 @@ export class TrainingsRepository {
     return new TrainingEntity(updated.toObject());
   }
 
-  // Удаление тренинга
+  // ✅ Рекурсивное удаление тренинга и его контента
   async delete(
     condition: FilterQuery<Training>
   ): Promise<{ deleted: boolean }> {
-    const result = await this.trainingModel.deleteOne(condition).exec();
+    const training = await this.trainingModel.findOne(condition).exec();
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
+
+    // --- 1. Удаляем ссылки из родителя ---
+    if (training.parent) {
+      await this.trainingModel
+        .updateOne(
+          { _id: training.parent },
+          {
+            $pull: {
+              childrens: training._id,
+              childrensId: training.trainingId,
+            },
+          }
+        )
+        .exec();
+    }
+
+    // --- 2. Удаляем вложенные тренинги рекурсивно ---
+    if (training.childrens?.length) {
+      for (const childId of training.childrens as Types.ObjectId[]) {
+        await this.delete({ _id: childId });
+      }
+    }
+
+    // --- 3. Удаляем все уроки тренинга ---
+    if (training.lessons?.length) {
+      await this.lessonModel
+        .deleteMany({
+          _id: { $in: training.lessons },
+        })
+        .exec();
+    }
+
+    // --- 4. Удаляем сам тренинг ---
+    const result = await this.trainingModel
+      .deleteOne({ _id: training._id })
+      .exec();
 
     return { deleted: result.deletedCount !== 0 };
   }

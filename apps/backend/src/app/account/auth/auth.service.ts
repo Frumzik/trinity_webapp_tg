@@ -3,16 +3,15 @@ import { UserEntity } from '../users/entities/user.entity';
 import {
   AuthLoginRequestDto,
   AuthLoginResponseDto,
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
   AuthRegisterResponseDto,
+  AuthRegisterTgDto,
   AuthType,
-} from '@trinity/shared';
-import { JwtService } from '@nestjs/jwt';
-import {
   UserEvents,
   UserLoggedInEvent,
   UserRegisteredEvent,
-} from '../../service';
+} from '@trinity/shared';
+import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
 import { SubscriptionsService } from '../../billing';
@@ -27,7 +26,7 @@ export class AuthService {
   ) {}
 
   public async register(
-    dto: AuthRegisterRequestDto
+    dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
     const newUser = await this.usersService.create(dto);
     const newSubscription = await this.subscriptionsService.create();

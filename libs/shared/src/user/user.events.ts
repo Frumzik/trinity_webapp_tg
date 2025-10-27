@@ -12,3 +12,8 @@ export class UserRegisteredEvent {
 export class UserLoggedInEvent {
   constructor(public readonly userId: number) {}
 }
+
+
+export class UserUpdatedEvent {
+  constructor(public readonly userId: number) {}
+}
