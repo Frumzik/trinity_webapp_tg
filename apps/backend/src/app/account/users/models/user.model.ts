@@ -34,7 +34,7 @@ export class User extends Document<Types.ObjectId> implements IUser {
   @Prop({ type: Number })
   balance!: number;
 
-  @Prop({ type: String })
+  @Prop({ type: Number })
   subscriptionId!: number | null;
 }
 

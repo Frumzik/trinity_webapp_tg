@@ -8,6 +8,9 @@ module.exports = {
   },
   devServer: {
     port: 4200,
+    hot: true,
+    liveReload: true,
+    watchFiles: ['src/**/*'],
     historyApiFallback: {
       index: '/index.html',
       disableDotRule: true,
