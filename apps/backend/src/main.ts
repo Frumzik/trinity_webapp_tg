@@ -16,7 +16,7 @@ async function bootstrap() {
   const globalPrefix = '';
   const port = process.env.PORT || 3000;
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(
