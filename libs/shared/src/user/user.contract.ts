@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsInt,
@@ -7,7 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { IUser, UserRole } from './user.interface.js';
+import { IUser, UserGender, UserRole } from './user.interface.js';
 import { Types } from 'mongoose';
 import { ISubscription } from '../subscription/subscription.interface.js';
 
@@ -40,11 +41,26 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: '$2b$10$hashedpassword', nullable: true })
   passwordHash!: string | null;
 
+  @ApiProperty({ example: '$2b$10$hashedpassword', nullable: true })
+  finPasswordHash!: string | null;
+
   @ApiProperty({ example: 'Иван Иванов', nullable: true })
   name!: string | null;
 
   @ApiProperty({ example: 'ivan_tg', nullable: true })
   username!: string | null;
+
+  @ApiProperty({ example: 175, nullable: true })
+  height!: number | null;
+
+  @ApiProperty({ example: 65, nullable: true })
+  weight!: number | null;
+
+  @ApiProperty({ example: new Date(), nullable: true })
+  birthDate!: Date | null;
+
+  @ApiProperty({ example: UserGender.MALE, nullable: true })
+  gender!: UserGender | null;
 
   @ApiProperty({
     enum: UserRole,
@@ -71,6 +87,31 @@ export class UserUpdateProfileRequestDto {
   @IsOptional()
   @IsString({ message: 'Username должен быть строкой' })
   username?: string;
+
+  @ApiProperty({ example: 65, required: false })
+  @IsOptional()
+  @IsInt({ message: 'weight должно быть числом' })
+  weight?: number;
+
+  @ApiProperty({ example: 75, required: false })
+  @IsOptional()
+  @IsInt({ message: 'height должен быть числом' })
+  height?: string;
+
+  @ApiProperty({ example: new Date(), required: false })
+  @IsOptional()
+  @IsDate({ message: 'birthDate должен быть датой' })
+  birthDate?: Date;
+
+  @ApiProperty({
+    enum: UserGender,
+    example: UserGender.MALE,
+    description: 'Новый пользователя',
+  })
+  @IsEnum(UserGender, {
+    message: 'Пол должен быть UserGender',
+  })
+  gender?: UserGender;
 }
 
 /* ============================================================
@@ -87,6 +128,13 @@ export class UserUpdateRoleRequestDto {
     message: 'Роль должна быть USER, MODERATOR или ADMIN',
   })
   role!: UserRole;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID пользователя',
+  })
+  @IsInt()
+  userId!: UserRole;
 }
 
 /* ============================================================
@@ -109,6 +157,16 @@ export class UserUpdatePasswordRequestDto {
   @IsString({ message: 'password должен быть строкой' })
   @IsNotEmpty({ message: 'password не может быть пустым' })
   password!: string;
+}
+
+/* ============================================================
+ * UPDATE FIN PASSWORD
+ * ============================================================ */
+export class UserUpdateFinPasswordRequestDto {
+  @ApiProperty({ example: 'qwerty123', description: 'Новый пароль' })
+  @IsString({ message: 'finPassword должен быть строкой' })
+  @IsNotEmpty({ message: 'finPassword не может быть пустым' })
+  finPassword!: string;
 }
 
 /* ============================================================
