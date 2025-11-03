@@ -7,6 +7,23 @@ import {
 // Тренинги
 export enum TrainingType {
   STANDART = 'standart',
+  STAGES_SPIRIT = 'stages_spirit',
+  STAGE_LEVEL = 'stage_level',
+  STAGE = 'stage',
+  SPIRITUAL_START = 'spiritual_start',
+  ACADEMY_SPIRIT = 'acedemy_spirit',
+  PRACTICE = 'practice',
+  USEFUL_MATERIALS = 'userful_materials',
+  KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
+  COURSE = 'course',
+}
+
+export enum FavoritesTag {
+  STANDART= 'standart',
+  FILMS = 'films',
+  MUSIC = 'music',
+  MEDITATION = 'meditation',
+  PRODUCT = 'product',
 }
 
 export interface ITraining {
@@ -14,6 +31,7 @@ export interface ITraining {
 
   trainingId: number;
   type: TrainingType;
+  favoritesTag: FavoritesTag;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[];
@@ -27,11 +45,15 @@ export interface ITraining {
   // Метаданные
   title: string | null;
   description: string | null;
+  shortDescription: string | null;
+  duration: string | null;
   coverUrl: string | null;
+  iconUrl: string | null;
 
   // Условия доступности
   accessRules: TypeContentAccess[];
   price: number | null;
+  salePrice: number | null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 }
@@ -47,6 +69,7 @@ export enum LessonType {
   VIDEO = 'video',
   AUDIO = 'audio',
   TEXT = 'text',
+  FILM = 'film',
 }
 
 export interface ILesson {
@@ -54,6 +77,7 @@ export interface ILesson {
 
   lessonId: number;
   type: LessonType;
+  favoritesTag: FavoritesTag;
 
   // Вложенность
   parent: Types.ObjectId | ITraining | null;
@@ -62,24 +86,29 @@ export interface ILesson {
   // Метаданные
   title: string | null;
   description: string | null;
+  duration: string | null;
   coverUrl: string | null;
+  bgUrl: string | null;
   content?: ILessonContent | null;
 
   // Условия доступности
   accessRules: TypeContentAccess[];
   price: number | null;
+  salePrice: number | null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 }
 
 export interface ILessonVideoContent {
   videoUrl: string;
-  duration?: number;
 }
 
 export interface ILessonAudioContent {
   audioUrl: string;
-  duration?: number;
+}
+
+export interface ILessonFilmContent {
+  html: string;
 }
 
 export interface ILessonTextContent {
@@ -89,11 +118,17 @@ export interface ILessonTextContent {
 export type ILessonContent =
   | ILessonVideoContent
   | ILessonAudioContent
-  | ILessonTextContent;
+  | ILessonTextContent
+  | ILessonFilmContent;
 
 export interface ILessonVideo extends ILesson {
   type: LessonType.VIDEO;
   content: ILessonVideoContent;
+}
+
+export interface ILessonFilm extends ILesson {
+  type: LessonType.FILM;
+  content: ILessonFilmContent;
 }
 export interface ILessonAudio extends ILesson {
   type: LessonType.AUDIO;
@@ -139,12 +174,14 @@ export interface TypeContentAccessDateUnlock extends TypeContentAccessBase {
   value: Date;
 }
 
-export interface TypeContentAccessTrainingCompleted extends TypeContentAccessBase {
+export interface TypeContentAccessTrainingCompleted
+  extends TypeContentAccessBase {
   type: ContentAccessType.TRAINING_COMPLETED;
   value: number;
 }
 
-export interface TypeContentAccessLessonCompleted extends TypeContentAccessBase {
+export interface TypeContentAccessLessonCompleted
+  extends TypeContentAccessBase {
   type: ContentAccessType.LESSON_COMPLETED;
   value: number;
 }

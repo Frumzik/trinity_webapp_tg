@@ -5,6 +5,7 @@ import {
   LearningAccessStatus,
   LearningProgressStatus,
   TrainingType,
+  FavoritesTag,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
 
@@ -13,6 +14,7 @@ export class TrainingEntity implements ITraining {
 
   trainingId!: number;
   type: TrainingType = TrainingType.STANDART;
+  favoritesTag: FavoritesTag = FavoritesTag.STANDART;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[] = [];
@@ -26,11 +28,15 @@ export class TrainingEntity implements ITraining {
   // Метаданные
   title: string | null = null;
   description: string | null = null;
+  shortDescription: string | null = null;
   coverUrl: string | null = null;
+  iconUrl: string | null = null;
+  duration: string | null = null;
 
   // Условия доступности
   accessRules: TypeContentAccess[] = [];
   price: number | null = null;
+  salePrice: number | null = null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 
@@ -79,7 +85,18 @@ export class TrainingEntity implements ITraining {
 
   public update(
     data: Partial<
-      Pick<ITraining, 'title' | 'description' | 'coverUrl' | 'price'>
+      Pick<
+        ITraining,
+        | 'title'
+        | 'description'
+        | 'coverUrl'
+        | 'price'
+        | 'shortDescription'
+        | 'duration'
+        | 'favoritesTag'
+        | 'salePrice'
+        | 'iconUrl'
+      >
     >
   ) {
     if (data.title !== undefined) {
@@ -93,6 +110,22 @@ export class TrainingEntity implements ITraining {
     }
     if (data.price !== undefined) {
       this.price = data.price;
+    }
+
+    if (data.shortDescription !== undefined) {
+      this.shortDescription = data.shortDescription;
+    }
+    if (data.duration !== undefined) {
+      this.duration = data.duration;
+    }
+    if (data.favoritesTag !== undefined) {
+      this.favoritesTag = data.favoritesTag;
+    }
+    if (data.salePrice !== undefined) {
+      this.salePrice = data.salePrice;
+    }
+    if (data.iconUrl !== undefined) {
+      this.iconUrl = data.iconUrl;
     }
 
     return this;

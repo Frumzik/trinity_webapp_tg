@@ -4,6 +4,7 @@ import {
   ILesson,
   type ITraining,
   TrainingType,
+  FavoritesTag,
 } from '@trinity/shared';
 import { Document, Types } from 'mongoose';
 
@@ -19,6 +20,14 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
     default: TrainingType.STANDART,
   })
   type!: TrainingType;
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: FavoritesTag,
+    default: FavoritesTag.STANDART,
+  })
+  favoritesTag!: FavoritesTag;
 
   // Вложенность
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Lesson' }], default: [] })
@@ -47,7 +56,16 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
   description!: string | null;
 
   @Prop({ type: String, default: null })
+  shortDescription!: string | null;
+
+  @Prop({ type: String, default: null })
+  duration!: string | null;
+
+  @Prop({ type: String, default: null })
   coverUrl!: string | null;
+
+  @Prop({ type: String, default: null })
+  iconUrl!: string | null;
 
   // Условия доступности
   @Prop({ type: Array, default: [] })
@@ -55,6 +73,9 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
 
   @Prop({ type: Number, default: 0 })
   price!: number;
+
+  @Prop({ type: Number, default: null })
+  salePrice!: number | null;
 }
 
 export const TrainingSchema = SchemaFactory.createForClass(Training);

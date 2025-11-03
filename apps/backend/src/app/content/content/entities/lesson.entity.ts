@@ -7,6 +7,7 @@ import {
   LearningAccessStatus,
   LearningProgressStatus,
   LessonType,
+  FavoritesTag,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
 
@@ -15,6 +16,7 @@ export class LessonEntity implements ILesson {
 
   lessonId!: number;
   type: LessonType = LessonType.TEXT;
+  favoritesTag: FavoritesTag = FavoritesTag.STANDART;
 
   // Вложенность
   parent: Types.ObjectId | ITraining | null = null;
@@ -23,12 +25,15 @@ export class LessonEntity implements ILesson {
   // Метаданные
   title: string | null = null;
   description: string | null = null;
+  duration: string | null = null;
   content: ILessonContent = { html: '' } as ILessonTextContent;
   coverUrl: string | null = null;
+  bgUrl: string | null = null;
 
   // Условия доступности
   accessRules: TypeContentAccess[] = [];
   price: number | null = null;
+  salePrice: number | null = null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 
@@ -49,7 +54,17 @@ export class LessonEntity implements ILesson {
 
   public update(
     data: Partial<
-      Pick<ILesson, 'title' | 'description' | 'coverUrl' | 'price' | 'content'>
+      Pick<
+        ILesson,
+        | 'title'
+        | 'description'
+        | 'coverUrl'
+        | 'price'
+        | 'content'
+        | 'favoritesTag'
+        | 'bgUrl'
+        | 'salePrice'
+      >
     >
   ) {
     if (data.title !== undefined) {
@@ -66,6 +81,15 @@ export class LessonEntity implements ILesson {
     }
     if (data.content !== undefined) {
       this.content = data.content as ILessonContent;
+    }
+    if (data.favoritesTag !== undefined) {
+      this.favoritesTag = data.favoritesTag;
+    }
+    if (data.bgUrl !== undefined) {
+      this.bgUrl = data.bgUrl;
+    }
+    if (data.salePrice !== undefined) {
+      this.salePrice = data.salePrice;
     }
     return this;
   }
