@@ -159,23 +159,36 @@ export class LearningService {
 
   async recalculateTrainingForUser(training: TrainingEntity, user: UserEntity) {
     try {
+      // 1️⃣ Проверяем прогресс
       let learning = await this.learningRepository.find({
         user: user._id,
         training: training._id,
       });
 
-      // Если прогресса и доступа ещё нет — создаём с нуля
+      // --- Вычисляем доступ для родительского тренинга ---
+      const trainingAccessStatus = await this.calculateAccess(user, training);
+
+      // 2️⃣ Если прогресса нет — создаём
       if (!learning) {
         const lessons: ILearningLesson[] = [];
+
+        // Если сам тренинг недоступен — все уроки тоже недоступны
+        const globalAccess =
+          trainingAccessStatus === LearningAccessStatus.LOCKED
+            ? LearningAccessStatus.LOCKED
+            : undefined;
 
         for (const id of training.lessons) {
           const lesson = await this.contentService.findLesson({ _id: id });
           if (!lesson) continue;
 
+          const accessStatus =
+            globalAccess ?? (await this.calculateAccess(user, lesson));
+
           lessons.push({
             lesson: id,
             lessonId: lesson.lessonId,
-            accessStatus: await this.calculateAccess(user, lesson),
+            accessStatus,
             progressStatus: LearningProgressStatus.NOT_STARTED,
           });
         }
@@ -186,22 +199,19 @@ export class LearningService {
           userId: user.userId,
           trainingId: training.trainingId,
           lessons,
-          accessStatus: await this.calculateAccess(user, training),
+          accessStatus: trainingAccessStatus,
           progressStatus: LearningProgressStatus.NOT_STARTED,
         });
 
         return await this.learningRepository.create(newLearning);
       }
 
-      // Если прогресс уже существует — синхронизируем уроки
+      // 3️⃣ Прогресс уже есть — синхронизируем уроки
       const trainingLessonIds = training.lessonsId;
-
-      // --- 1️⃣ Удаляем уроки, которых больше нет в тренинге ---
       const filteredLessons = learning.lessons.filter((l) =>
         trainingLessonIds.includes(l.lessonId)
       );
 
-      // --- 2️⃣ Добавляем новые уроки, которых нет в прогрессе ---
       for (const lessonId of trainingLessonIds) {
         const exists = filteredLessons.some((l) => l.lessonId === lessonId);
         if (!exists) {
@@ -210,30 +220,36 @@ export class LearningService {
           });
           if (!lessonEntity) continue;
 
+          const accessStatus =
+            trainingAccessStatus === LearningAccessStatus.LOCKED
+              ? LearningAccessStatus.LOCKED
+              : await this.calculateAccess(user, lessonEntity);
+
           filteredLessons.push({
             lesson: lessonEntity._id as Types.ObjectId,
             lessonId: lessonEntity.lessonId,
-            accessStatus: await this.calculateAccess(user, lessonEntity),
+            accessStatus,
             progressStatus: LearningProgressStatus.NOT_STARTED,
           });
         }
       }
 
-      // --- 3️⃣ Обновляем статусы доступа у всех актуальных уроков ---
+      // 4️⃣ Обновляем статусы доступа у всех актуальных уроков
       for (const lesson of filteredLessons) {
         const lessonEntity = await this.contentService.findLesson({
           lessonId: lesson.lessonId,
         });
         if (!lessonEntity) continue;
 
-        lesson.accessStatus = await this.calculateAccess(user, lessonEntity);
+        lesson.accessStatus =
+          trainingAccessStatus === LearningAccessStatus.LOCKED
+            ? LearningAccessStatus.LOCKED
+            : await this.calculateAccess(user, lessonEntity);
       }
 
-      // --- 4️⃣ Пересчитываем и сохраняем ---
+      // 5️⃣ Обновляем сам объект обучения
       learning.lessons = filteredLessons;
-      learning = learning.updateAccessStatus(
-        await this.calculateAccess(user, training)
-      );
+      learning = learning.updateAccessStatus(trainingAccessStatus);
 
       const updated = await this.learningRepository.update(learning);
       return updated;
