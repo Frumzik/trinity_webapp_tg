@@ -1,41 +1,44 @@
 import {
   TypeContentAccess,
   ILesson,
+  ILessonContent,
+  ILessonTextContent,
   ITraining,
   LearningAccessStatus,
   LearningProgressStatus,
-  TrainingType,
+  LessonType,
+  FavoritesTag,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
 
-export class TrainingEntity implements ITraining {
+export class LessonEntity implements ILesson {
   _id?: Types.ObjectId;
 
-  trainingId!: number;
-  type: TrainingType = TrainingType.STANDART;
+  lessonId!: number;
+  type: LessonType = LessonType.TEXT;
+  favoritesTag: FavoritesTag = FavoritesTag.STANDART;
 
   // Вложенность
-  lessons: Types.ObjectId[] | ILesson[] = [];
-  childrens: Types.ObjectId[] | ITraining[] = [];
   parent: Types.ObjectId | ITraining | null = null;
-
-  lessonsId: number[] = [];
-  childrensId: number[] = [];
   parentId: number | null = null;
 
   // Метаданные
   title: string | null = null;
   description: string | null = null;
+  duration: string | null = null;
+  content: ILessonContent = { html: '' } as ILessonTextContent;
   coverUrl: string | null = null;
+  bgUrl: string | null = null;
 
   // Условия доступности
   accessRules: TypeContentAccess[] = [];
   price: number | null = null;
+  salePrice: number | null = null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 
-  constructor(training: Partial<ITraining> = {}) {
-    Object.assign(this, training);
+  constructor(lesson: Partial<ILesson> = {}) {
+    Object.assign(this, lesson);
   }
 
   bindParent(training: ITraining) {
@@ -49,37 +52,19 @@ export class TrainingEntity implements ITraining {
     return this;
   }
 
-  bindChildren(training: ITraining) {
-    if (!training._id) {
-      throw new Error('Тренинг не имеет _id');
-    }
-
-    this.childrens.push(training._id as Types.ObjectId & ITraining);
-    this.childrensId.push(training.trainingId);
-
-    return this;
-  }
-
-  bindLesson(lesson: ILesson) {
-    if (!lesson._id) {
-      throw new Error('Урок не имеет _id');
-    }
-
-    this.lessons.push(lesson._id as Types.ObjectId & ILesson);
-    this.lessonsId.push(lesson.lessonId);
-
-    return this;
-  }
-
-  updateAccessRules(accessRules: TypeContentAccess[]) {
-    this.accessRules = accessRules;
-
-    return this;
-  }
-
   public update(
     data: Partial<
-      Pick<ITraining, 'title' | 'description' | 'coverUrl' | 'price'>
+      Pick<
+        ILesson,
+        | 'title'
+        | 'description'
+        | 'coverUrl'
+        | 'price'
+        | 'content'
+        | 'favoritesTag'
+        | 'bgUrl'
+        | 'salePrice'
+      >
     >
   ) {
     if (data.title !== undefined) {
@@ -94,6 +79,23 @@ export class TrainingEntity implements ITraining {
     if (data.price !== undefined) {
       this.price = data.price;
     }
+    if (data.content !== undefined) {
+      this.content = data.content as ILessonContent;
+    }
+    if (data.favoritesTag !== undefined) {
+      this.favoritesTag = data.favoritesTag;
+    }
+    if (data.bgUrl !== undefined) {
+      this.bgUrl = data.bgUrl;
+    }
+    if (data.salePrice !== undefined) {
+      this.salePrice = data.salePrice;
+    }
+    return this;
+  }
+
+  updateAccessRules(accessRules: TypeContentAccess[]) {
+    this.accessRules = accessRules;
 
     return this;
   }

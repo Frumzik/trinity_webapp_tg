@@ -15,6 +15,7 @@ import {
   UserInfoResponseDto,
   UserRole,
   UserUpdateEmailRequestDto,
+  UserUpdateFinPasswordRequestDto,
   UserUpdatePasswordRequestDto,
   UserUpdatePinRequestDto,
   UserUpdateProfileRequestDto,
@@ -79,10 +80,12 @@ export class UsersController {
   @ApiBody({ type: UserUpdateRoleRequestDto })
   @ApiResponse({ type: UserUpdateResponseDto })
   async updateRole(
-    @UserId() userId: number,
     @Body() updateData: UserUpdateRoleRequestDto
   ): Promise<UserUpdateResponseDto> {
-    return this.usersService.updateRole({ userId }, updateData);
+    return this.usersService.updateRole(
+      { userId: updateData.userId },
+      updateData
+    );
   }
 
   @Post('update/pin')
@@ -105,6 +108,17 @@ export class UsersController {
     @Body() updateData: UserUpdatePasswordRequestDto
   ): Promise<UserUpdateResponseDto> {
     return this.usersService.updatePassword({ userId }, updateData);
+  }
+
+  @Post('update/fin-password')
+  @ApiOperation({ summary: 'Изменить финансовый пароль пользователя' })
+  @ApiBody({ type: UserUpdateFinPasswordRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
+  async updateFinPassword(
+    @UserId() userId: number,
+    @Body() updateData: UserUpdateFinPasswordRequestDto
+  ): Promise<UserUpdateResponseDto> {
+    return this.usersService.updateFinPassword({ userId }, updateData);
   }
 
   @Post('update/email')

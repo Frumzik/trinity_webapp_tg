@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class S3Service {
+export class FileService {
   private readonly bucket: string;
 
   constructor(
@@ -38,7 +38,9 @@ export class S3Service {
   async uploadFile(file: Express.Multer.File, key?: string): Promise<string> {
     try {
       if (!key) {
-        key = `uploads/${Date.now()}-${file.originalname}`;
+        key = `${this.configService.get('S3_FOLDER') ?? 'uploads'}/${Date.now()}-${
+          file.originalname
+        }`;
       }
 
       await this.s3.send(

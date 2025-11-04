@@ -7,25 +7,18 @@ import {
   Param,
   Post,
   Query,
-  UploadedFile,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiConsumes,
+  ApiBody,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
 import { ContentService } from './content.service';
-import { JWTAuthGuard, Roles, RolesGuard, S3Service } from '../../service';
+import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
 import {
   ContentAddLessonRequestDto,
   ContentAddTrainingRequestDto,
@@ -35,7 +28,6 @@ import {
   ContentTrainingInfoResponseDto,
   ContentTrainingUpdateAccessRulesRequestDto,
   ContentTrainingUpdateRequestDto,
-  LessonType,
   TypeContentAccess,
   UserRole,
 } from '@trinity/shared';
@@ -45,29 +37,18 @@ import {
 @UseGuards(JWTAuthGuard, RolesGuard)
 @Controller('content')
 export class ContentController {
-  constructor(
-    private readonly contentService: ContentService,
-    private readonly s3Service: S3Service
-  ) {}
+  constructor(private readonly contentService: ContentService) {}
 
   // 📦 Добавление тренинга
   @Post('training/add')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @ApiOperation({ summary: 'Создать новый тренинг' })
-  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: ContentTrainingInfoResponseDto })
-  @UseInterceptors(FileInterceptor('file'))
+  @ApiBody({ type: ContentAddTrainingRequestDto }) // 💡 только DTO
   async addTraining(
-    @Body() dto: ContentAddTrainingRequestDto,
-    @UploadedFile() file: Express.Multer.File
+    @Body() dto: ContentAddTrainingRequestDto
   ): Promise<ContentTrainingInfoResponseDto> {
-    let coverUrl: string | undefined;
-
-    if (file) {
-      coverUrl = await this.s3Service.uploadFile(file);
-    }
-
-    return await this.contentService.createTraining(dto, coverUrl);
+    return await this.contentService.createTraining(dto);
   }
 
   // 📘 Информация о тренинге
@@ -98,51 +79,17 @@ export class ContentController {
   @Post('lesson/add')
   @Roles(UserRole.Admin, UserRole.Moderator)
   @ApiOperation({ summary: 'Создать новый урок' })
-  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: ContentLessonInfoResponseDto })
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'contentFile', maxCount: 1 },
-      { name: 'coverFile', maxCount: 1 },
-    ])
-  )
+  @ApiBody({ type: ContentAddLessonRequestDto }) // 💡 теперь только JSON DTO
   async addLesson(
-    @Body() dto: ContentAddLessonRequestDto,
-    @UploadedFiles()
-    files: {
-      contentFile?: Express.Multer.File[];
-      coverFile?: Express.Multer.File[];
-    }
+    @Body() dto: ContentAddLessonRequestDto
   ): Promise<ContentLessonInfoResponseDto> {
-    // 🎥/🎧 контент
-    if (files.contentFile?.[0]) {
-      const url = await this.s3Service.uploadFile(files.contentFile[0]);
-
-      if (dto.type === LessonType.VIDEO) {
-        dto.content = { videoUrl: url };
-      } else if (dto.type === LessonType.AUDIO) {
-        dto.content = { audioUrl: url };
-      }
-    }
-
-    // 📖 текстовый урок
-    if (dto.type === LessonType.TEXT && dto.html) {
-      dto.content = { html: dto.html };
-    }
-
-    // 🖼️ обложка
-    if (files.coverFile?.[0]) {
-      const coverUrl = await this.s3Service.uploadFile(files.coverFile[0]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (dto as any).coverUrl = coverUrl; // добавляем динамически перед отправкой в сервис
-    }
-
     return this.contentService.createLesson(dto);
   }
 
   // 📄 Информация об уроке
   @Get('lesson/:id')
-  @ApiOperation({ summary: 'Получить информацию об уроке' })
+  @ApiOperation({ summary: 'Получить информацию об урок' })
   @ApiResponse({ status: 200, type: ContentLessonInfoResponseDto })
   @ApiResponse({ status: 404, description: 'Урок не найден' })
   @ApiQuery({

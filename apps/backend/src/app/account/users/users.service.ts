@@ -159,7 +159,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updatePin(updateData.pin)
+        await user.setPin(updateData.pin)
       );
 
       return updated;
@@ -184,7 +184,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updatePassword(updateData.password)
+        await user.setPassword(updateData.password)
       );
 
       return updated;
@@ -193,6 +193,31 @@ export class UsersService {
         error instanceof Error
           ? error.message
           : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateFinPassword(
+    condition: FilterQuery<User>,
+    updateData: { finPassword: string }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.setFinPassword(updateData.finPassword)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении финпароля пользователя';
       throw new InternalServerErrorException(message);
     }
   }

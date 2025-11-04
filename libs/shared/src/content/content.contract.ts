@@ -2,7 +2,6 @@ import {
   IsDate,
   IsEnum,
   IsInt,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -25,6 +24,7 @@ import {
   LessonType,
   TrainingType,
   ContentAccessType,
+  FavoritesTag,
 } from './content.interface.js';
 import {
   LearningAccessStatus,
@@ -34,7 +34,7 @@ import {
 // ─────────────────────────────────────────────
 // TRAINING: CREATE / INFO / UPDATE
 // ─────────────────────────────────────────────
-export class ContentAddTrainingRequestDto {
+export class ContentAddTrainingRequestDto implements Partial<ITraining> {
   @ApiProperty({
     description: 'Название тренинга',
     example: 'Осознанность 101',
@@ -49,6 +49,38 @@ export class ContentAddTrainingRequestDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Краткое описание тренинга',
+    example: 'Информация',
+  })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url обложки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  coverUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url фона',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  iconUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Длительность',
+    example: '10 мин',
+  })
+  @IsOptional()
+  @IsString()
+  duration?: string;
 
   @ApiPropertyOptional({
     description: 'ID родительского тренинга (если вложенный)',
@@ -70,6 +102,14 @@ export class ContentAddTrainingRequestDto {
   @IsEnum(TrainingType)
   type!: TrainingType;
 
+  @ApiProperty({
+    description: 'Тип тренинга',
+    enum: FavoritesTag,
+    example: FavoritesTag.STANDART,
+  })
+  @IsEnum(FavoritesTag)
+  favoritesTag!: FavoritesTag;
+
   @ApiPropertyOptional({
     description: 'Цена тренинга',
     example: 500,
@@ -80,6 +120,21 @@ export class ContentAddTrainingRequestDto {
   @IsInt()
   @Min(0)
   price?: number;
+
+  @ApiPropertyOptional({
+    description: 'Цена тренинга со скидкой',
+    example: null,
+    nullable: true,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  salePrice?: number;
+
+  @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
+  @IsOptional()
+  accessRules?: TypeContentAccess[];
 }
 
 export class ContentTrainingInfoResponseDto implements ITraining {
@@ -91,6 +146,9 @@ export class ContentTrainingInfoResponseDto implements ITraining {
 
   @ApiProperty({ description: 'Тип тренинга', enum: TrainingType })
   type!: TrainingType;
+
+  @ApiProperty({ description: 'Тип избранного', enum: FavoritesTag })
+  favoritesTag!: FavoritesTag;
 
   @ApiProperty({
     description: 'Уроки, входящие в тренинг',
@@ -138,16 +196,37 @@ export class ContentTrainingInfoResponseDto implements ITraining {
   description!: string | null;
 
   @ApiPropertyOptional({
+    description: 'Короткое описание',
+    example: 'Информация',
+  })
+  shortDescription!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Длительность',
+    example: '10 мин',
+  })
+  duration!: string | null;
+
+  @ApiPropertyOptional({
     description: 'Обложка',
     example: 'https://cdn.site/cover.jpg',
   })
   coverUrl!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Иконка',
+    example: 'https://cdn.site/icon.jpg',
+  })
+  iconUrl!: string | null;
 
   @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
   accessRules!: TypeContentAccess[];
 
   @ApiProperty({ description: 'Цена', example: 500 })
   price!: number | null;
+
+  @ApiProperty({ description: 'Цена со скидкой', example: null })
+  salePrice!: number | null;
 
   @ApiPropertyOptional({ enum: LearningAccessStatus })
   accessStatus?: LearningAccessStatus;
@@ -167,11 +246,6 @@ export class LessonVideoContentDto {
   })
   @IsString()
   videoUrl!: string;
-
-  @ApiPropertyOptional({ description: 'Длительность в секундах', example: 180 })
-  @IsOptional()
-  @IsInt()
-  duration?: number;
 }
 
 export class LessonAudioContentDto {
@@ -181,16 +255,20 @@ export class LessonAudioContentDto {
   })
   @IsString()
   audioUrl!: string;
-
-  @ApiPropertyOptional({ description: 'Длительность в секундах', example: 120 })
-  @IsOptional()
-  @IsInt()
-  duration?: number;
 }
 
 export class LessonTextContentDto {
   @ApiProperty({
     description: 'HTML контент урока',
+    example: '<p>Привет, это текстовый урок!</p>',
+  })
+  @IsString()
+  html!: string;
+}
+
+export class LessonFilmContentDto {
+  @ApiProperty({
+    description: 'HTML контент видео - урока',
     example: '<p>Привет, это текстовый урок!</p>',
   })
   @IsString()
@@ -210,6 +288,14 @@ export class ContentAddLessonRequestDto {
   @IsString()
   description?: string;
 
+  @ApiPropertyOptional({
+    description: 'Длительность урока',
+    example: '10 min',
+  })
+  @IsOptional()
+  @IsString()
+  duration?: string;
+
   @ApiProperty({ description: 'ID родительского тренинга', example: 1 })
   @Type(() => Number)
   @IsInt()
@@ -223,21 +309,35 @@ export class ContentAddLessonRequestDto {
   @IsEnum(LessonType)
   type!: LessonType;
 
-  @ApiPropertyOptional({
-    description: 'HTML (если урок текстовый)',
-    example: '<p>Привет, это текстовый урок!</p>',
+  @ApiProperty({
+    description: 'Тэг избранного',
+    enum: FavoritesTag,
+    example: FavoritesTag.STANDART,
   })
-  @ValidateIf((o) => o.type === LessonType.TEXT)
-  @IsString()
-  @IsNotEmpty()
-  html?: string;
+  @IsEnum(FavoritesTag)
+  favoritesTag!: FavoritesTag;
 
   @ValidateNested()
-  @Type(() => Object)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @Type(({ object }: any) => {
+    switch (object?.type) {
+      case LessonType.VIDEO:
+        return LessonVideoContentDto;
+      case LessonType.AUDIO:
+        return LessonAudioContentDto;
+      case LessonType.TEXT:
+        return LessonTextContentDto;
+      case LessonType.FILM:
+        return LessonFilmContentDto;
+      default:
+        return LessonTextContentDto;
+    }
+  })
   content!:
     | LessonVideoContentDto
     | LessonAudioContentDto
-    | LessonTextContentDto;
+    | LessonTextContentDto
+    | LessonFilmContentDto;
 
   @ApiPropertyOptional({ description: 'Цена урока', example: 100 })
   @Type(() => Number)
@@ -245,6 +345,33 @@ export class ContentAddLessonRequestDto {
   @IsInt()
   @Min(0)
   price?: number;
+
+  @ApiPropertyOptional({ description: 'Цена со скидкой', nullable: true })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  salePrice?: number;
+
+  @ApiPropertyOptional({
+    description: 'Url обложки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  coverUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url иконки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  bgUrl?: string;
+
+  @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
+  @IsOptional()
+  accessRules?: TypeContentAccess[];
 }
 
 export class ContentLessonInfoResponseDto implements ILesson {
@@ -256,6 +383,9 @@ export class ContentLessonInfoResponseDto implements ILesson {
 
   @ApiProperty({ description: 'Тип урока', enum: LessonType })
   type!: LessonType;
+
+  @ApiProperty({ description: 'Тип избранного', enum: FavoritesTag })
+  favoritesTag!: FavoritesTag;
 
   @ApiPropertyOptional({
     description: 'Родительский тренинг',
@@ -276,11 +406,18 @@ export class ContentLessonInfoResponseDto implements ILesson {
   description!: string | null;
 
   @ApiPropertyOptional({
+    description: 'Длительность',
+    example: '15 min',
+  })
+  duration!: string | null;
+
+  @ApiPropertyOptional({
     description: 'Контент урока',
     oneOf: [
       { $ref: getSchemaPath(LessonVideoContentDto) },
       { $ref: getSchemaPath(LessonAudioContentDto) },
       { $ref: getSchemaPath(LessonTextContentDto) },
+      { $ref: getSchemaPath(LessonFilmContentDto) },
     ],
   })
   content?: ILessonContent | null;
@@ -291,11 +428,20 @@ export class ContentLessonInfoResponseDto implements ILesson {
   })
   coverUrl!: string | null;
 
+  @ApiPropertyOptional({
+    description: 'URL фона',
+    example: 'https://cdn.site/bg.png',
+  })
+  bgUrl!: string | null;
+
   @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
   accessRules!: TypeContentAccess[];
 
   @ApiPropertyOptional({ description: 'Цена', example: 100 })
   price!: number | null;
+
+  @ApiPropertyOptional({ description: 'Цена со скидкой', example: null })
+  salePrice!: number | null;
 
   @ApiPropertyOptional({ enum: LearningAccessStatus })
   accessStatus?: LearningAccessStatus;
@@ -375,6 +521,7 @@ export class ContentLessonUpdateRequestDto {
       { $ref: getSchemaPath(LessonVideoContentDto) },
       { $ref: getSchemaPath(LessonAudioContentDto) },
       { $ref: getSchemaPath(LessonTextContentDto) },
+      { $ref: getSchemaPath(LessonFilmContentDto) },
     ],
   })
   @IsOptional()
@@ -383,7 +530,8 @@ export class ContentLessonUpdateRequestDto {
   content?:
     | LessonVideoContentDto
     | LessonAudioContentDto
-    | LessonTextContentDto;
+    | LessonTextContentDto
+    | LessonFilmContentDto;
 }
 
 // ─────────────────────────────────────────────

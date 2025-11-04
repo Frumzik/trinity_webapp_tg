@@ -5,6 +5,7 @@ import {
   type TypeContentAccess,
   type ILessonContent,
   LessonType,
+  FavoritesTag,
 } from '@trinity/shared';
 
 @Schema({ versionKey: false, timestamps: true })
@@ -19,6 +20,14 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
     default: LessonType.TEXT,
   })
   type!: LessonType;
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: FavoritesTag,
+    default: FavoritesTag.STANDART,
+  })
+  favoritesTag!: FavoritesTag;
 
   // Вложенность
   @Prop({ type: Types.ObjectId, ref: 'Training', default: null })
@@ -35,7 +44,16 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
   description!: string | null;
 
   @Prop({ type: String, default: null })
+  duration!: string | null;
+
+  @Prop({ type: String, default: null })
+  shortDescription!: string | null;
+
+  @Prop({ type: String, default: null })
   coverUrl!: string | null;
+
+  @Prop({ type: String, default: null })
+  bgUrl!: string | null;
 
   // Контент (в зависимости от типа урока)
   @Prop({ type: Object, default: { html: '' } })
@@ -45,8 +63,11 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
   @Prop({ type: Array, default: [] })
   accessRules!: TypeContentAccess[];
 
-  @Prop({ type: Number, default: 0 })
-  price!: number;
+  @Prop({ type: Number, default: null })
+  price!: number | null;
+
+  @Prop({ type: Number, default: null })
+  salePrice!: number | null;
 }
 
 export const LessonSchema = SchemaFactory.createForClass(Lesson);
