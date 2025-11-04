@@ -158,107 +158,129 @@ export class LearningService {
   }
 
   async recalculateTrainingForUser(training: TrainingEntity, user: UserEntity) {
-    try {
-      // 1️⃣ Проверяем прогресс
-      let learning = await this.learningRepository.find({
-        user: user._id,
-        training: training._id,
-      });
+  try {
+    // 1️⃣ Получаем существующий прогресс
+    const learning = await this.learningRepository.find({
+      user: user._id,
+      training: training._id,
+    });
 
-      // --- Вычисляем доступ для родительского тренинга ---
-      const trainingAccessStatus = await this.calculateAccess(user, training);
+    // --- Вычисляем доступ для родительского тренинга ---
+    const trainingAccessStatus = await this.calculateAccess(user, training);
 
-      // 2️⃣ Если прогресса нет — создаём
-      if (!learning) {
-        const lessons: ILearningLesson[] = [];
+    // 2️⃣ Если прогресса нет — создаём
+    if (!learning) {
+      const lessons: ILearningLesson[] = [];
 
-        // Если сам тренинг недоступен — все уроки тоже недоступны
-        const globalAccess =
-          trainingAccessStatus === LearningAccessStatus.LOCKED
-            ? LearningAccessStatus.LOCKED
-            : undefined;
+      // Если сам тренинг недоступен — все уроки тоже недоступны
+      const globalAccess =
+        trainingAccessStatus === LearningAccessStatus.LOCKED
+          ? LearningAccessStatus.LOCKED
+          : undefined;
 
-        for (const id of training.lessons) {
-          const lesson = await this.contentService.findLesson({ _id: id });
-          if (!lesson) continue;
+      for (const id of training.lessons) {
+        const lesson = await this.contentService.findLesson({ _id: id });
+        if (!lesson) continue;
 
-          const accessStatus =
-            globalAccess ?? (await this.calculateAccess(user, lesson));
+        const accessStatus =
+          globalAccess ?? (await this.calculateAccess(user, lesson));
 
-          lessons.push({
-            lesson: id,
-            lessonId: lesson.lessonId,
-            accessStatus,
-            progressStatus: LearningProgressStatus.NOT_STARTED,
-          });
-        }
-
-        const newLearning = new LearningEntity({
-          user: user._id as Types.ObjectId,
-          training: training._id as Types.ObjectId,
-          userId: user.userId,
-          trainingId: training.trainingId,
-          lessons,
-          accessStatus: trainingAccessStatus,
+        lessons.push({
+          lesson: id,
+          lessonId: lesson.lessonId,
+          accessStatus,
           progressStatus: LearningProgressStatus.NOT_STARTED,
         });
-
-        return await this.learningRepository.create(newLearning);
       }
 
-      // 3️⃣ Прогресс уже есть — синхронизируем уроки
-      const trainingLessonIds = training.lessonsId;
-      const filteredLessons = learning.lessons.filter((l) =>
-        trainingLessonIds.includes(l.lessonId)
-      );
+      const newLearning = new LearningEntity({
+        user: user._id as Types.ObjectId,
+        training: training._id as Types.ObjectId,
+        userId: user.userId,
+        trainingId: training.trainingId,
+        lessons,
+        accessStatus: trainingAccessStatus,
+        progressStatus: LearningProgressStatus.NOT_STARTED,
+      });
 
-      for (const lessonId of trainingLessonIds) {
-        const exists = filteredLessons.some((l) => l.lessonId === lessonId);
-        if (!exists) {
-          const lessonEntity = await this.contentService.findLesson({
-            lessonId,
-          });
-          if (!lessonEntity) continue;
+      return await this.learningRepository.create(newLearning);
+    }
 
-          const accessStatus =
-            trainingAccessStatus === LearningAccessStatus.LOCKED
-              ? LearningAccessStatus.LOCKED
-              : await this.calculateAccess(user, lessonEntity);
+    // 3️⃣ Прогресс уже есть — синхронизируем уроки
+    const trainingLessonIds = training.lessonsId;
+    const filteredLessons = learning.lessons.filter((l) =>
+      trainingLessonIds.includes(l.lessonId)
+    );
 
-          filteredLessons.push({
-            lesson: lessonEntity._id as Types.ObjectId,
-            lessonId: lessonEntity.lessonId,
-            accessStatus,
-            progressStatus: LearningProgressStatus.NOT_STARTED,
-          });
-        }
-      }
-
-      // 4️⃣ Обновляем статусы доступа у всех актуальных уроков
-      for (const lesson of filteredLessons) {
-        const lessonEntity = await this.contentService.findLesson({
-          lessonId: lesson.lessonId,
-        });
+    for (const lessonId of trainingLessonIds) {
+      const exists = filteredLessons.some((l) => l.lessonId === lessonId);
+      if (!exists) {
+        const lessonEntity = await this.contentService.findLesson({ lessonId });
         if (!lessonEntity) continue;
 
-        lesson.accessStatus =
+        const accessStatus =
           trainingAccessStatus === LearningAccessStatus.LOCKED
             ? LearningAccessStatus.LOCKED
             : await this.calculateAccess(user, lessonEntity);
+
+        filteredLessons.push({
+          lesson: lessonEntity._id as Types.ObjectId,
+          lessonId: lessonEntity.lessonId,
+          accessStatus,
+          progressStatus: LearningProgressStatus.NOT_STARTED,
+        });
       }
-
-      // 5️⃣ Обновляем сам объект обучения
-      learning.lessons = filteredLessons;
-      learning = learning.updateAccessStatus(trainingAccessStatus);
-
-      const updated = await this.learningRepository.update(learning);
-      return updated;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка пересчёта прогресса';
-      throw new InternalServerErrorException(message);
     }
+
+    // 4️⃣ Обновляем статусы доступа у всех актуальных уроков
+    for (const lesson of filteredLessons) {
+      const lessonEntity = await this.contentService.findLesson({
+        lessonId: lesson.lessonId,
+      });
+      if (!lessonEntity) continue;
+
+      lesson.accessStatus =
+        trainingAccessStatus === LearningAccessStatus.LOCKED
+          ? LearningAccessStatus.LOCKED
+          : await this.calculateAccess(user, lessonEntity);
+    }
+
+    // 5️⃣ Рассчитываем общий статус тренинга по дочерним элементам
+    const lessonStatuses = filteredLessons.map((l) => l.progressStatus);
+
+    const hasInProgress = lessonStatuses.includes(
+      LearningProgressStatus.IN_PROGRESS
+    );
+    const hasCompleted = lessonStatuses.includes(
+      LearningProgressStatus.COMPLETED
+    );
+    const allCompleted =
+      lessonStatuses.length > 0 &&
+      lessonStatuses.every(
+        (s) => s === LearningProgressStatus.COMPLETED
+      );
+
+    let newProgressStatus = LearningProgressStatus.NOT_STARTED;
+    if (hasInProgress || (hasCompleted && !allCompleted)) {
+      newProgressStatus = LearningProgressStatus.IN_PROGRESS;
+    } else if (allCompleted) {
+      newProgressStatus = LearningProgressStatus.COMPLETED;
+    }
+
+    // 6️⃣ Обновляем объект обучения
+    learning.lessons = filteredLessons;
+    learning.accessStatus = trainingAccessStatus;
+    learning.progressStatus = newProgressStatus;
+
+    const updated = await this.learningRepository.update(learning);
+    return updated;
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : 'Ошибка пересчёта прогресса';
+    throw new InternalServerErrorException(message);
   }
+}
+
 
   async recalculateForUser(userId: number) {
     try {
