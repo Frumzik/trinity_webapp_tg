@@ -12,7 +12,6 @@ import { FavoritesService } from './favorites.service';
 import {
   FavoriteAddRequestDto,
   FavoriteInfoResponseDto,
-  FavoriteType,
 } from '@trinity/shared';
 import {
   ApiBearerAuth,
@@ -72,31 +71,6 @@ export class FavoritesController {
     @UserId() userId: number,
     @Body() dto: FavoriteAddRequestDto
   ): Promise<FavoriteInfoResponseDto | null> {
-    let existingFavorite = null;
-
-    switch (dto.type) {
-      case FavoriteType.TRAINING:
-        existingFavorite = await this.favoritesService.find({
-          userId,
-          trainingId: dto.trainingId,
-        });
-
-        break;
-      case FavoriteType.LESSON:
-        existingFavorite = await this.favoritesService.find({
-          userId,
-          lessonId: dto.lessonId,
-        });
-
-        break;
-    }
-
-    if (existingFavorite) {
-      throw new Error('Избранное уже добавлено');
-    }
-
-    const favorite = await this.favoritesService.create(dto);
-
-    return favorite;
+    return await this.favoritesService.create(userId, dto);
   }
 }

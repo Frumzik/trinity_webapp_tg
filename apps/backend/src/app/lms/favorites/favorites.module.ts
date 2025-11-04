@@ -5,13 +5,17 @@ import { Favorite, FavoriteSchema } from './models';
 import { FavoritesService } from './favorites.service';
 import { FavoritesController } from './favorites.controller';
 import { CountersModule } from '../../service';
+import { ContentModule } from '../content';
+import { UsersModule } from '../../account';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Favorite.name, schema: FavoriteSchema },
     ]),
-    CountersModule
+    CountersModule,
+    ContentModule,
+    UsersModule
   ],
   providers: [FavoritesService, FavoritesRepository],
   controllers: [FavoritesController],

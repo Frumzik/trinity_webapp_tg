@@ -1,20 +1,82 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { FavoritesRepository } from './repositories';
-import { CounterType, FavoriteAddRequestDto } from '@trinity/shared';
+import {
+  CounterType,
+  FavoriteAddRequestDto,
+  FavoriteType,
+} from '@trinity/shared';
 import { CountersService } from '../../service';
 import { FavoriteEntity } from './entities';
 import { Favorite } from './models';
+import { ContentService } from '../content';
+import { UsersService } from '../../account';
 
 @Injectable()
 export class FavoritesService {
   constructor(
     private readonly favoritesRepository: FavoritesRepository,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    private readonly contentService: ContentService,
+    private readonly usersService: UsersService
   ) {}
 
-  async create(dto: FavoriteAddRequestDto): Promise<FavoriteEntity> {
+  async create(
+    userId: number,
+    dto: FavoriteAddRequestDto
+  ): Promise<FavoriteEntity> {
     try {
+      const user = await this.usersService.find({ userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      let existingFavorite = null;
+
+      switch (dto.type) {
+        case FavoriteType.TRAINING: {
+          existingFavorite = await this.find({
+            userId,
+            trainingId: dto.trainingId,
+          });
+
+          const training = await this.contentService.findTraining({
+            trainingId: dto.trainingId,
+          });
+
+          if (!training) {
+            throw new NotFoundException('Тренинг не найден');
+          }
+
+          break;
+        }
+
+        case FavoriteType.LESSON: {
+          existingFavorite = await this.find({
+            userId,
+            lessonId: dto.lessonId,
+          });
+
+          const lesson = await this.contentService.findLesson({
+            lessonId: dto.lessonId,
+          });
+
+          if (!lesson) {
+            throw new NotFoundException('Урок не найден');
+          }
+
+          break;
+        }
+      }
+
+      if (existingFavorite) {
+        throw new Error('Избранное уже добавлено');
+      }
       const newFavorite = new FavoriteEntity({
         favoriteId: await this.countersService.saveNextSequence(
           CounterType.FAVORITE_ID
