@@ -36,8 +36,7 @@ export class ContentService {
 
   // Тренинги
   async createTraining(
-    dto: ContentAddTrainingRequestDto,
-    coverUrl?: string | null
+    dto: ContentAddTrainingRequestDto
   ): Promise<ContentTrainingInfoResponseDto> {
     try {
       const newTraining = new TrainingEntity({
@@ -45,7 +44,6 @@ export class ContentService {
           CounterType.TRAINING_ID
         ),
         ...dto,
-        coverUrl,
       });
 
       const createdTraining = await this.trainingsRepository.create(

@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class S3Service {
+export class FileService {
   private readonly bucket: string;
 
   constructor(

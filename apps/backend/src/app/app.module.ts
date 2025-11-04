@@ -4,11 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CountersModule, getMongoConfig, S3ProviderModule } from './service';
+import { CountersModule, getMongoConfig, FileModule } from './service';
 import { AuthModule, UsersModule } from './account';
 import { SubscriptionsModule } from './billing';
-import { ContentModule } from './content';
-import { LearningModule } from './content/learning';
+import { ContentModule } from './lms';
+import { LearningModule } from './lms/learning';
+import { FavoritesModule } from './lms/favorites';
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import { LearningModule } from './content/learning';
     CountersModule,
     SubscriptionsModule,
     ContentModule,
-    S3ProviderModule,
+    FileModule,
     LearningModule,
+    FavoritesModule
   ],
   controllers: [],
   providers: [],

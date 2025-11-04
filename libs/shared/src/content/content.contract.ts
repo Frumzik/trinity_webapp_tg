@@ -2,7 +2,6 @@ import {
   IsDate,
   IsEnum,
   IsInt,
-  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -35,7 +34,7 @@ import {
 // ─────────────────────────────────────────────
 // TRAINING: CREATE / INFO / UPDATE
 // ─────────────────────────────────────────────
-export class ContentAddTrainingRequestDto implements Partial<ITraining>{
+export class ContentAddTrainingRequestDto implements Partial<ITraining> {
   @ApiProperty({
     description: 'Название тренинга',
     example: 'Осознанность 101',
@@ -58,6 +57,22 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining>{
   @IsOptional()
   @IsString()
   shortDescription?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url обложки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  coverUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url фона',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  iconUrl?: string;
 
   @ApiPropertyOptional({
     description: 'Длительность',
@@ -87,6 +102,14 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining>{
   @IsEnum(TrainingType)
   type!: TrainingType;
 
+  @ApiProperty({
+    description: 'Тип тренинга',
+    enum: FavoritesTag,
+    example: FavoritesTag.STANDART,
+  })
+  @IsEnum(FavoritesTag)
+  favoritesTag!: FavoritesTag;
+
   @ApiPropertyOptional({
     description: 'Цена тренинга',
     example: 500,
@@ -108,6 +131,10 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining>{
   @IsInt()
   @Min(0)
   salePrice?: number;
+
+  @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
+  @IsOptional()
+  accessRules?: TypeContentAccess[];
 }
 
 export class ContentTrainingInfoResponseDto implements ITraining {
@@ -290,17 +317,22 @@ export class ContentAddLessonRequestDto {
   @IsEnum(FavoritesTag)
   favoritesTag!: FavoritesTag;
 
-  @ApiPropertyOptional({
-    description: 'HTML (если урок текстовый)',
-    example: '<p>Привет, это текстовый урок!</p>',
-  })
-  @ValidateIf((o) => o.type === LessonType.TEXT)
-  @IsString()
-  @IsNotEmpty()
-  html?: string;
-
   @ValidateNested()
-  @Type(() => Object)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @Type(({ object }: any) => {
+    switch (object?.type) {
+      case LessonType.VIDEO:
+        return LessonVideoContentDto;
+      case LessonType.AUDIO:
+        return LessonAudioContentDto;
+      case LessonType.TEXT:
+        return LessonTextContentDto;
+      case LessonType.FILM:
+        return LessonFilmContentDto;
+      default:
+        return LessonTextContentDto;
+    }
+  })
   content!:
     | LessonVideoContentDto
     | LessonAudioContentDto
@@ -320,6 +352,26 @@ export class ContentAddLessonRequestDto {
   @IsInt()
   @Min(0)
   salePrice?: number;
+
+  @ApiPropertyOptional({
+    description: 'Url обложки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  coverUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url иконки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
+  bgUrl?: string;
+
+  @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
+  @IsOptional()
+  accessRules?: TypeContentAccess[];
 }
 
 export class ContentLessonInfoResponseDto implements ILesson {

@@ -4,7 +4,7 @@ import { ContentController } from './content.controller';
 import { LessonsRepository, TrainingsRepository } from './repositories';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Lesson, LessonSchema, Training, TrainingSchema } from './models';
-import { CountersModule, S3ProviderModule } from '../../service';
+import { CountersModule, FileModule } from '../../service';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { CountersModule, S3ProviderModule } from '../../service';
       { name: Lesson.name, schema: LessonSchema },
     ]),
     CountersModule,
-    S3ProviderModule
+    FileModule
   ],
   providers: [ContentService, TrainingsRepository, LessonsRepository],
   controllers: [ContentController],
