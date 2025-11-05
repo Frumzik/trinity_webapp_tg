@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { SubscriptionsModule } from '../../billing';
+import { ReferralsModule } from '../../referrals';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SubscriptionsModule } from '../../billing';
     CountersModule,
     SubscriptionsModule,
     JwtModule.registerAsync(getJwtConfig()),
+    ReferralsModule
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
