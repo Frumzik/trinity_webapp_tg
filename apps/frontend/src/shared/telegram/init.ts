@@ -1,5 +1,6 @@
 import WebApp from "@twa-dev/sdk";
-
+import { bootstrapDevTelegram } from './dev-tg';
+bootstrapDevTelegram();
 export function initTelegram() {
   WebApp.ready();
 
