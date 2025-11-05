@@ -21,3 +21,6 @@ export * from './learning/learning.events.js';
 
 export * from './favorites/favorites.contract.js';
 export * from './favorites/favorites.interface.js';
+
+export * from './transactions/transactions.interface.js';
+export * from './referrals/referrals.interface.js';

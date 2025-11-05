@@ -10,6 +10,8 @@ import { SubscriptionsModule } from './billing';
 import { ContentModule } from './lms';
 import { LearningModule } from './lms/learning';
 import { FavoritesModule } from './lms/favorites';
+import { TransactionsModule } from './billing/transactions/transactions.module';
+import { ReferralsModule } from './referrals/referrals.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { FavoritesModule } from './lms/favorites';
     ContentModule,
     FileModule,
     LearningModule,
-    FavoritesModule
+    FavoritesModule,
+    TransactionsModule,
+    ReferralsModule,
   ],
   controllers: [],
   providers: [],

@@ -422,7 +422,7 @@ export class LearningService {
 
       this.eventEmitter.emit(
         LearningEvents.LESSON_PROGRESS_STATUS_UPDATED,
-        new LessonProgressStatusUpdatedEvent(lesson.lessonId, userId)
+        new LessonProgressStatusUpdatedEvent(lesson.parentId as number, lesson.lessonId, userId)
       );
 
       return updated;
