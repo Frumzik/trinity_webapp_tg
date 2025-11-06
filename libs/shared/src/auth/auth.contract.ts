@@ -37,6 +37,11 @@ export class AuthRegisterEmailDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsNumber()
+  @IsOptional()
+  partnerId?: number;
 }
 
 @ApiExtraModels()
@@ -63,6 +68,11 @@ export class AuthRegisterTgDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsNumber()
+  @IsOptional()
+  partnerId?: number;
 }
 
 export class AuthRegisterResponseDto {

@@ -16,6 +16,8 @@ import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
 import { SubscriptionsService } from '../../billing';
+import { ReferralsService } from '../../referrals';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -23,17 +25,39 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly subscriptionsService: SubscriptionsService
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly referralsService: ReferralsService
   ) {}
 
   public async register(
     dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
-    const newUser = await this.usersService.create(dto);
-    const newSubscription = await this.subscriptionsService.create();
+    let newUser = await this.usersService.create(dto);
+    let newSubscription = await this.subscriptionsService.create();
 
-    await this.usersService.bindSubscription(newUser, newSubscription);
-    await this.subscriptionsService.bindUser(newSubscription, newUser);
+    newUser = await this.usersService.bindSubscription(
+      newUser,
+      newSubscription
+    );
+    newSubscription = await this.subscriptionsService.bindUser(
+      newSubscription,
+      newUser
+    );
+
+    if (dto.partnerId) {
+      const partner = await this.usersService.find({ userId: dto.partnerId });
+
+      if (partner) {
+        await this.referralsService.create({
+          partner: partner._id as Types.ObjectId,
+          referral: newUser._id as Types.ObjectId,
+
+          partnerId: partner.userId,
+          referralId: newUser.userId,
+          earn: 0,
+        });
+      }
+    }
 
     // Событие регистрации
     this.eventEmitter.emit(

@@ -11,6 +11,7 @@ import {
 import { IUser, UserGender, UserRole } from './user.interface.js';
 import { Types } from 'mongoose';
 import { ISubscription } from '../subscription/subscription.interface.js';
+import { Type } from 'class-transformer';
 
 /* ============================================================
  * USER INFO
@@ -100,6 +101,7 @@ export class UserUpdateProfileRequestDto {
 
   @ApiProperty({ example: new Date(), required: false })
   @IsOptional()
+  @Type(() => Date)
   @IsDate({ message: 'birthDate должен быть датой' })
   birthDate?: Date;
 

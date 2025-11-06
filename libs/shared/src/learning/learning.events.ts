@@ -16,9 +16,9 @@ export class TrainingProgressStatusUpdatedEvent {
 }
 
 export class LessonAccessStatusUpdatedEvent {
-  constructor(public readonly trainingId: number, public readonly userId: number) {}
+  constructor(public readonly trainingId: number, public readonly lessonId: number, public readonly userId: number) {}
 }
 
 export class LessonProgressStatusUpdatedEvent {
-  constructor(public readonly trainingId: number, public readonly userId: number) {}
+  constructor(public readonly trainingId: number, public readonly lessonId: number, public readonly userId: number) {}
 }

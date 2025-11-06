@@ -3,8 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   ContentEvents,
+  LearningEvents,
   LessonAccessRulesUpdatedEvent,
   LessonCreatedEvent,
+  LessonProgressStatusUpdatedEvent,
   SubscriptionEvents,
   SubscriptionUpdatedEvent,
   TrainingAccessRulesUpdatedEvent,
@@ -56,10 +58,19 @@ export class LearningListener {
     );
   }
 
+  
+
   @OnEvent(ContentEvents.LESSON_DELETED)
   async onLessonDeleted(payload: LessonCreatedEvent) {
     console.log(`✅ Урок ${payload.lessonId} удалён`);
 
+    return await this.learningService.recalculateForTraining(
+      payload.trainingId
+    );
+  }
+
+  @OnEvent(LearningEvents.LESSON_PROGRESS_STATUS_UPDATED)
+  async onLessonProgressStatusUpdated(payload: LessonProgressStatusUpdatedEvent) {
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
