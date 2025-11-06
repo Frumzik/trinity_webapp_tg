@@ -1,17 +1,22 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { Provider } from 'react-redux'
-import { store } from './app/store'
-import App from './app/App'
-import "./shared/styles/main.scss"
-import { bootstrapDevAuth } from './shared/dev/dev-auth'
+import { StrictMode, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { RouterProvider } from 'react-router-dom';
+import { store } from './app/store';
+import { router } from './app/router';
+import { initTelegram } from './shared/telegram/init';
 
-bootstrapDevAuth(store)
+function Bootstrap() {
+  useEffect(() => {
+    if ((window as any).Telegram?.WebApp) initTelegram();
+  }, []);
+  return <RouterProvider router={router} />;
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <App />
+      <Bootstrap />
     </Provider>
   </StrictMode>
-)
+);

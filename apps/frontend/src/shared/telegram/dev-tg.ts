@@ -1,5 +1,4 @@
-// src/shared/telegram/dev-tg.ts
-type TgUser = { id: number; username?: string; first_name?: string; last_name?: string; language_code?: string };
+type TgUser = { id: number; username?: string; first_name?: string; last_name?: string; language_code?: string; photo_url?: string; };
 
 function parseQuery(): Partial<TgUser> {
   const q = new URLSearchParams(location.search);
@@ -10,6 +9,7 @@ function parseQuery(): Partial<TgUser> {
     first_name: q.get('first_name') || undefined,
     last_name: q.get('last_name') || undefined,
     language_code: q.get('lang') || undefined,
+    photo_url: q.get('photo') || undefined,
   };
 }
 function loadSavedUser(): TgUser | null {
@@ -25,7 +25,6 @@ export function bootstrapDevTelegram() {
   const real = (window as any).Telegram?.WebApp;
   const hasRealUser = !!real?.initDataUnsafe?.user;
 
-  // берём юзера из query или из localStorage
   const fromQuery = parseQuery();
   const user: TgUser | null = Number.isFinite(fromQuery.id!) ? (fromQuery as TgUser) : loadSavedUser();
   if (!user) {
@@ -34,8 +33,6 @@ export function bootstrapDevTelegram() {
   }
   saveUser(user);
 
-  // важный момент: не трогаем поля существующего объекта (там геттеры),
-  // просто перезаписываем весь window.Telegram целиком
   if (!hasRealUser) {
     (window as any).Telegram = {
       WebApp: {
