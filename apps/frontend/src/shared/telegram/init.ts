@@ -1,15 +1,22 @@
 import WebApp from "@twa-dev/sdk";
 import { bootstrapDevTelegram } from './dev-tg';
+
+let __tgInited = false;
+
 bootstrapDevTelegram();
+
 export function initTelegram() {
-  WebApp.ready();
+  if (__tgInited) return;
+  __tgInited = true;
+
+  try {
+    WebApp.ready();
+  } catch (e) { /* empty */ }
 
   setTimeout(() => {
     try {
       WebApp.expand();
-    } catch (e) {
-      console.warn("Telegram expand failed:", e);
-    }
+    } catch (e) { /* empty */ }
   }, 100);
 
   return {

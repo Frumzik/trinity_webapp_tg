@@ -65,7 +65,7 @@ const Index = () => {
   return (
     <div className="app">
       <TopBar onMenu={() => setMenuOpen(true)} />
-      <main className="screen">
+      <main className="screen" style={{ paddingTop: "20px" }}>
         <Title
           right={
             <button className="icon-btn">

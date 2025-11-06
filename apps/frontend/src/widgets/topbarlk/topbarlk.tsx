@@ -81,11 +81,11 @@ export default function TopBar({
           </button>
         </NavLink>
         <NavLink to="/account">
-          <a className="topbar__avatarlk" href="#">
+          <div className="topbar__avatarlk">
             {avatarUrl ? (
               <img src={avatarUrl} alt="" width={36} height={36} />
             ) : null}
-          </a>
+          </div>
         </NavLink>
         {left}
         {right}

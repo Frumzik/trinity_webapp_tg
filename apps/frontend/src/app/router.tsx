@@ -18,7 +18,7 @@ import BillingSettingsPage from '../pages/billing/settings'
 import ProfilePage from '../pages/profile'
 import SupportPage from '../pages/support'
 import SecurityList from '../pages/security/index'
-import ViewPage from '../pages/preview'
+import ViewPage from '../pages/profile/view/index'
 import AccountPage from '../pages/profile/account'
 import ChangePinPage from '../pages/security/change-pin'
 import ResetPinRequestPage from '../pages/security/reset-pin-request'
@@ -44,6 +44,7 @@ import FaqPage from '../pages/faq'
 import HealthLabPage from '../pages/healthLab'
 import PinCreatePage from '../pages/pin/create'
 import PinLoginPage from '../pages/pin/login'
+
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
