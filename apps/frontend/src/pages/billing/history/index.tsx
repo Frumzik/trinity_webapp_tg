@@ -1,33 +1,25 @@
-import { useEffect, useState } from "react";
-import {
-  getBalance,
-  getTransactions,
-} from "../../../entities/wallet/api/walet.api.ts";
-import BalanceCard from "../../../widgets/wallet/BalanceCard";
-import TransactionList from "../../../widgets/transactions/TransactionList";
-import type { Transaction } from "../../../entities/wallet/model/types";
-import "./index.scss";
-import TopBar from "../../../widgets/topbarTextpage";
+import TopBar from "../../../widgets/topbarTextpage"
+import BalanceCard from "../../../widgets/wallet/BalanceCard"
+import TransactionList from "../../../widgets/transactions/TransactionList"
+import "./index.scss"
+import { useGetUserQuery } from "../../../shared/api/user.api"
 
 export default function BillingHistoryPage() {
-  const [amount, setAmount] = useState(0);
-  const [list, setList] = useState<Transaction[]>([]);
-  useEffect(() => {
-    getBalance().then((b) => setAmount(b.amount));
-    getTransactions().then(setList);
-  }, []);
+  const { data, isLoading } = useGetUserQuery({ populate: false })
+  const amount = data?.data?.balance ?? 0
+
   return (
     <>
       <TopBar title="Общий доход" />
       <div className="billing-history">
         <BalanceCard
-          amount={amount}
-          currency="$"
+          amount={isLoading ? 0 : amount}
+          currency="OM"
           onDeposit={() => {}}
           onWithdraw={() => {}}
         />
-        <TransactionList items={list} />
+        <TransactionList items={[]} />
       </div>
     </>
-  );
+  )
 }

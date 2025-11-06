@@ -1,25 +1,144 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  AuthLoginRequestDto,
+  AuthLoginEmailRequestDto,
+  AuthLoginTgRequestDto,
   AuthLoginResponseDto,
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
+  AuthRegisterTgDto,
   AuthRegisterResponseDto,
+  AuthType,
 } from '@trinity/shared';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { JWTAuthGuard } from '../../service';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /* ==================== REGISTER ==================== */
   @Post('register')
-  async registerByTgId(
-    @Body() dto: AuthRegisterRequestDto
+  @ApiOperation({ summary: 'Зарегистрировать пользователя' })
+  @ApiExtraModels(AuthRegisterEmailDto, AuthRegisterTgDto)
+  @ApiBody({
+    schema: {
+      oneOf: [
+        { $ref: getSchemaPath(AuthRegisterTgDto) },
+        { $ref: getSchemaPath(AuthRegisterEmailDto) },
+      ],
+      discriminator: {
+        propertyName: 'type',
+        mapping: {
+          [AuthType.TG]: getSchemaPath(AuthRegisterTgDto),
+          [AuthType.EMAIL]: getSchemaPath(AuthRegisterEmailDto),
+        },
+      },
+    },
+    examples: {
+      [AuthType.TG]: {
+        summary: 'Регистрация через Telegram',
+        value: {
+          type: 'TG',
+          tgId: 1234,
+          pin: '1234',
+          username: 'ivan_tg',
+          name: 'Иван',
+        },
+      },
+      [AuthType.EMAIL]: {
+        summary: 'Регистрация по email',
+        value: {
+          type: 'EMAIL',
+          email: 'user@example.com',
+          password: 'qwerty123',
+          name: 'Иван Иванов',
+        },
+      },
+    },
+  })
+  @ApiResponse({ type: AuthRegisterResponseDto })
+  async register(
+    @Body() dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
-    return await this.authService.register(dto);
+    return this.authService.register(dto);
   }
 
+  /* ==================== LOGIN ==================== */
   @Post('login')
-  async login(@Body() dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
-    return await this.authService.login(dto);
+  @ApiOperation({ summary: 'Авторизовать пользователя' })
+  @ApiExtraModels(AuthLoginEmailRequestDto, AuthLoginTgRequestDto)
+  @ApiBody({
+    schema: {
+      oneOf: [
+        { $ref: getSchemaPath(AuthLoginTgRequestDto) },
+        { $ref: getSchemaPath(AuthLoginEmailRequestDto) },
+      ],
+      discriminator: {
+        propertyName: 'type',
+        mapping: {
+          [AuthType.TG]: getSchemaPath(AuthLoginTgRequestDto),
+          [AuthType.EMAIL]: getSchemaPath(AuthLoginEmailRequestDto),
+        },
+      },
+    },
+    examples: {
+      [AuthType.TG]: {
+        summary: 'Авторизация через Telegram',
+        value: {
+          type: 'TG',
+          tgId: 1234,
+          pin: '1234',
+        },
+      },
+      [AuthType.EMAIL]: {
+        summary: 'Авторизация по email',
+        value: {
+          type: 'EMAIL',
+          email: 'user@example.com',
+          password: 'qwerty123',
+        },
+      },
+    },
+  })
+  @ApiResponse({ type: AuthLoginResponseDto })
+  async login(
+    @Body() dto: AuthLoginEmailRequestDto | AuthLoginTgRequestDto
+  ): Promise<AuthLoginResponseDto> {
+    return this.authService.login(dto);
+  }
+
+  // 🔍 Проверка Telegram ID
+  @Get('check-tg')
+  @ApiOperation({
+    summary: 'Проверить Telegram-пользователя по ID',
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'Telegram ID пользователя',
+    example: 6,
+    type: Number,
+    required: true,
+  })
+  async checkTg(@Query('id') tgId: number) {
+    return await this.authService.checkTg(tgId);
+  }
+
+  // 🔍 Проверка авторизации
+  @Get('check-auth')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({
+    summary: 'Проверить авторизацию',
+  })
+  async checkAuth() {
+    return true;
   }
 }

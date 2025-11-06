@@ -7,6 +7,11 @@ export enum UserRole {
   Admin = 'Admin',
 }
 
+export enum UserGender {
+  MALE = 'Male',
+  FEMALE = 'Female'
+}
+
 export interface IUser {
   _id?: Types.ObjectId;
   userId: number;
@@ -20,10 +25,17 @@ export interface IUser {
   pinHash: string | null;
   email: string | null;
   passwordHash: string | null;
+  
+  finPasswordHash: string | null;
 
   // Метаинформация
   name: string | null;
   username: string | null;
+  birthDate: Date | null;
+  height: number | null;
+  weight: number | null;
+  gender: UserGender | null;
+
 
   // Other
   role: UserRole;
