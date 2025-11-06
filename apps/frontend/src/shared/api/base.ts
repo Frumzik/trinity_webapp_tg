@@ -3,9 +3,9 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import { sessionActions } from '../../entities/session/model/session.slice'
 
 type GetState = () => { session?: { token?: string | null } }
-
+const API_URL = process.env.NX_API_URL;
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:3000',
+  baseUrl: API_URL,
   prepareHeaders: (headers, { getState }) => {
     const state = (getState as GetState)()
     const token = state?.session?.token ?? null

@@ -3,14 +3,23 @@ const { NxReactWebpackPlugin } = require('@nx/react/webpack-plugin');
 const { join } = require('path');
 const webpack = require('webpack');
 const dotenv = require('dotenv');
+const dotenvExpand = require('dotenv-expand');
 
-const ENV = process.env.NODE_ENV || 'development';
+const mode =
+  process.env.NX_TASK_TARGET_CONFIGURATION ||
+  process.env.NODE_ENV ||
+  'development';
+
+// выбираем нужный .env-файл
 const envFile =
-  ENV === 'production' ? './envs/.prod.env'
-    : ENV === 'test'     ? './envs/.test.env'
-      :                      './envs/.dev.env';
+  mode === 'production' ? '.prod.env' :
+    mode === 'test'       ? '.test.env' :
+      '.dev.env';
 
-dotenv.config({ path: envFile });
+const myEnv = dotenv.config({ path: join(__dirname, 'envs', envFile) });
+dotenvExpand.expand(myEnv);
+
+console.log('[webpack] MODE =', mode, 'ENV FILE =', envFile, 'NX_API_URL =', process.env.NX_API_URL);
 
 module.exports = {
   output: { path: join(__dirname, 'dist') },
@@ -34,12 +43,12 @@ module.exports = {
       baseHref: '/',
       assets: ['./src/favicon.ico', './src/assets'],
       styles: ['./src/styles.scss'],
-      outputHashing: process.env.NODE_ENV === 'production' ? 'all' : 'none',
-      optimization: process.env.NODE_ENV === 'production',
+      outputHashing: mode === 'production' ? 'all' : 'none',
+      optimization: mode === 'production',
     }),
     new NxReactWebpackPlugin(),
     new webpack.DefinePlugin({
-      'process.env.API_URL': JSON.stringify(process.env.API_URL || ''),
+      'process.env.NX_API_URL': JSON.stringify(process.env.NX_API_URL || ''),
     }),
   ],
   module: {
