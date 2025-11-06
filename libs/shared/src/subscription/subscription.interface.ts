@@ -22,4 +22,17 @@ export interface ISubscription {
   // Сроки действия
   startDate: Date;
   endDate: Date | null; // null = бессрочная (например, free)
+
+  // Покупки
+  purchases: ISubscriptionPurchase[];
+}
+
+export enum SubscriptionPurchaseType {
+  TRAINING = 'training',
+  LESSON = 'lesson',
+}
+
+export interface ISubscriptionPurchase {
+  type: SubscriptionPurchaseType;
+  contentId: number;
 }

@@ -1,4 +1,4 @@
-import { ISubscription, IUser, UserRole } from '@trinity/shared';
+import { ISubscription, IUser, UserGender, UserRole } from '@trinity/shared';
 import { compare, genSalt, hash } from 'bcryptjs';
 import { Types } from 'mongoose';
 import { SubscriptionEntity } from '../../../billing';
@@ -16,12 +16,17 @@ export class UserEntity implements IUser {
   pinHash: string | null = null;
   email: string | null = null;
   passwordHash: string | null = null;
+  finPasswordHash: string | null = null;
 
   // Метаинформация
   name: string | null = null;
   username: string | null = null;
-  // Other
+  height: number | null = null;
+  weight: number | null = null;
+  birthDate: Date | null = null;
+  gender: UserGender | null = null;
 
+  // Other
   role: UserRole = UserRole.User;
   balance = 0;
 
@@ -32,6 +37,12 @@ export class UserEntity implements IUser {
   public async setPassword(password: string) {
     const salt = await genSalt(10);
     this.passwordHash = await hash(password, salt);
+    return this;
+  }
+
+  public async setFinPassword(finPassword: string) {
+    const salt = await genSalt(10);
+    this.finPasswordHash = await hash(finPassword, salt);
     return this;
   }
 
@@ -58,29 +69,32 @@ export class UserEntity implements IUser {
     return compare(pin, this.pinHash);
   }
 
-  public updateUserProfile(data: Partial<Pick<IUser, 'name' | 'username'>>) {
+  public updateProfile(
+    data: Partial<
+      Pick<
+        IUser,
+        'name' | 'username' | 'weight' | 'height' | 'birthDate' | 'gender'
+      >
+    >
+  ) {
     if (data.name !== undefined) {
       this.name = data.name;
     }
     if (data.username !== undefined) {
       this.username = data.username;
     }
-    return this;
-  }
-
-  public async updateUserPin(pin: string) {
-    if (pin) {
-      await this.setPin(pin);
+    if (data.weight !== undefined) {
+      this.weight = data.weight;
     }
-
-    return this;
-  }
-
-  public async updateUserPassword(password: string) {
-    if (password) {
-      await this.setPassword(password);
+    if (data.height !== undefined) {
+      this.height = data.height;
     }
-
+    if (data.birthDate !== undefined) {
+      this.birthDate = data.birthDate;
+    }
+    if (data.gender !== undefined) {
+      this.gender = data.gender;
+    }
     return this;
   }
 
@@ -95,14 +109,20 @@ export class UserEntity implements IUser {
     return this;
   }
 
-  public updateUserBalance(balance: number) {
+  public updateBalance(balance: number) {
     this.balance = balance;
 
     return this;
   }
 
-  public updateUserRole(role: UserRole) {
+  public updateRole(role: UserRole) {
     this.role = role;
+
+    return this;
+  }
+
+  public updateEmail(email: string) {
+    this.email = email;
 
     return this;
   }

@@ -1,21 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../users/entities/user.entity';
 import {
-  AuthLoginRequestDto,
+  AuthLoginTgRequestDto,
   AuthLoginResponseDto,
-  AuthRegisterRequestDto,
+  AuthRegisterEmailDto,
   AuthRegisterResponseDto,
+  AuthRegisterTgDto,
   AuthType,
-} from '@trinity/shared';
-import { JwtService } from '@nestjs/jwt';
-import {
   UserEvents,
   UserLoggedInEvent,
   UserRegisteredEvent,
-} from '../../service';
+  AuthLoginEmailRequestDto,
+} from '@trinity/shared';
+import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
 import { SubscriptionsService } from '../../billing';
+import { ReferralsService } from '../../referrals';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -23,17 +25,39 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly subscriptionsService: SubscriptionsService
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly referralsService: ReferralsService
   ) {}
 
   public async register(
-    dto: AuthRegisterRequestDto
+    dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
-    const newUser = await this.usersService.create(dto);
-    const newSubscription = await this.subscriptionsService.create();
+    let newUser = await this.usersService.create(dto);
+    let newSubscription = await this.subscriptionsService.create();
 
-    await this.usersService.bindSubscription(newUser, newSubscription);
-    await this.subscriptionsService.bindUser(newSubscription, newUser);
+    newUser = await this.usersService.bindSubscription(
+      newUser,
+      newSubscription
+    );
+    newSubscription = await this.subscriptionsService.bindUser(
+      newSubscription,
+      newUser
+    );
+
+    if (dto.partnerId) {
+      const partner = await this.usersService.find({ userId: dto.partnerId });
+
+      if (partner) {
+        await this.referralsService.create({
+          partner: partner._id as Types.ObjectId,
+          referral: newUser._id as Types.ObjectId,
+
+          partnerId: partner.userId,
+          referralId: newUser.userId,
+          earn: 0,
+        });
+      }
+    }
 
     // Событие регистрации
     this.eventEmitter.emit(
@@ -45,7 +69,9 @@ export class AuthService {
   }
 
   // AuthService
-  async validate(dto: AuthLoginRequestDto): Promise<UserEntity> {
+  async validate(
+    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+  ): Promise<UserEntity> {
     const condition =
       dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
     const user = await this.usersService.find(condition);
@@ -64,7 +90,9 @@ export class AuthService {
     return user;
   }
 
-  async login(dto: AuthLoginRequestDto): Promise<AuthLoginResponseDto> {
+  async login(
+    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+  ): Promise<AuthLoginResponseDto> {
     const user = await this.validate(dto);
 
     this.eventEmitter.emit(
@@ -78,5 +106,11 @@ export class AuthService {
         role: user.role,
       }),
     };
+  }
+
+  async checkTg(tgId: number): Promise<boolean> {
+    const user = await this.usersService.find({ tgId });
+
+    return Boolean(user);
   }
 }

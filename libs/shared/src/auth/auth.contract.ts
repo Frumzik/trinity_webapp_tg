@@ -6,110 +6,120 @@ import {
   IsOptional,
   IsString,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
+import { ApiProperty, ApiExtraModels } from '@nestjs/swagger';
 import { AuthType } from './auth.interface.js';
 
-export class AuthRegisterRequestDto {
-  @IsEnum(AuthType, { message: 'Тип аутентификации должен быть TG или EMAIL' })
-  type!: AuthType;
+/* ============================================================
+ * ENUM
+ * ============================================================ */
 
-  // Для TG
-  @ValidateIf((o) => o.type === AuthType.TG)
-  @IsNumber({}, { message: 'tgId должен быть числом' })
-  @IsNotEmpty({ message: 'tgId не может быть пустым' })
-  tgId!: number;
+/* ============================================================
+ * AUTH REGISTER
+ * ============================================================ */
 
-  @ValidateIf((o) => o.type === AuthType.TG)
-  @IsString({ message: 'pin должен быть строкой' })
-  @IsNotEmpty({ message: 'pin не может быть пустым' })
-  @MinLength(4, { message: 'pin должен быть минимум 4 символа' })
-  pin!: string;
+@ApiExtraModels()
+export class AuthRegisterEmailDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.EMAIL })
+  @IsEnum(AuthType)
+  type!: AuthType.EMAIL;
 
-  @ValidateIf((o) => o.type === AuthType.TG && o.email !== undefined)
-  @IsNotEmpty({ message: 'Email не должен быть указан для TG регистрации' })
-  _emailCheck?: never;
-
-  @ValidateIf((o) => o.type === AuthType.TG && o.password !== undefined)
-  @IsNotEmpty({ message: 'Пароль не должен быть указан для TG регистрации' })
-  _passwordCheck?: never;
-
-  // Для Email
-  @ValidateIf((o) => o.type === AuthType.EMAIL)
-  @IsEmail({}, { message: 'Некорректный формат email' })
-  @IsNotEmpty({ message: 'Email не может быть пустым' })
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
   email!: string;
 
-  @ValidateIf((o) => o.type === AuthType.EMAIL)
-  @IsString({ message: 'Пароль должен быть строкой' })
-  @IsNotEmpty({ message: 'Пароль не может быть пустым' })
-  @MinLength(6, { message: 'Пароль должен быть минимум 6 символов' })
+  @ApiProperty({ example: 'qwerty123' })
+  @IsString()
+  @MinLength(6)
   password!: string;
 
-  @ValidateIf((o) => o.type === AuthType.EMAIL && o.tgId !== undefined)
-  @IsNotEmpty({ message: 'tgId не должен быть указан для EMAIL регистрации' })
-  _tgIdCheck?: never;
-
-  @ValidateIf((o) => o.type === AuthType.EMAIL && o.pin !== undefined)
-  @IsNotEmpty({ message: 'pin не должен быть указан для EMAIL регистрации' })
-  _pinCheck?: never;
-
-  // Остальные поля
+  @ApiProperty({ example: 'Иван Иванов', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Имя должно быть строкой' })
   name?: string;
 
-  @ValidateIf((o) => o.type === AuthType.TG)
-  @IsString({ message: 'Username должен быть строкой' })
+  @ApiProperty({ example: 1, required: false })
+  @IsNumber()
+  @IsOptional()
+  partnerId?: number;
+}
+
+@ApiExtraModels()
+export class AuthRegisterTgDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.TG })
+  @IsEnum(AuthType)
+  type!: AuthType.TG;
+
+  @ApiProperty({ example: 123456789 })
+  @IsNumber()
+  tgId!: number;
+
+  @ApiProperty({ example: '1234' })
+  @IsString()
+  @MinLength(4)
+  pin!: string;
+
+  @ApiProperty({ example: 'ivan_tg', required: false })
+  @IsString()
   @IsOptional()
   username?: string;
+
+  @ApiProperty({ example: 'Иван', required: false })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsNumber()
+  @IsOptional()
+  partnerId?: number;
 }
 
 export class AuthRegisterResponseDto {
+  @ApiProperty({ example: 1, description: 'ID созданного пользователя' })
   userId!: number;
 }
 
-export class AuthLoginRequestDto {
-  @IsEnum(AuthType, { message: 'Тип аутентификации должен быть TG или EMAIL' })
-  type!: AuthType;
+/* ============================================================
+ * AUTH LOGIN
+ * ============================================================ */
 
-  // Для TG
-  @ValidateIf((o) => o.type === AuthType.TG)
-  @IsNumber({}, { message: 'tgId должен быть числом' })
-  tgId!: number;
+@ApiExtraModels()
+export class AuthLoginEmailRequestDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.EMAIL })
+  @IsEnum(AuthType)
+  type!: AuthType.EMAIL;
 
-  @ValidateIf((o) => o.type === AuthType.TG)
-  @IsString({ message: 'pin должен быть строкой' })
-  @IsNotEmpty({ message: 'pin не может быть пустым' })
-  pin!: string;
-
-  @ValidateIf((o) => o.type === AuthType.TG && o.email !== undefined)
-  @IsNotEmpty({ message: 'email не должен быть указан для TG авторизации' })
-  _emailCheck?: never;
-
-  @ValidateIf((o) => o.type === AuthType.TG && o.password !== undefined)
-  @IsNotEmpty({ message: 'password не должен быть указан для TG авторизации' })
-  _passwordCheck?: never;
-
-  // Для Email
-  @ValidateIf((o) => o.type === AuthType.EMAIL)
-  @IsEmail({}, { message: 'Некорректный формат email' })
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
   email!: string;
 
-  @ValidateIf((o) => o.type === AuthType.EMAIL)
-  @IsString({ message: 'Пароль должен быть строкой' })
-  @IsNotEmpty({ message: 'Пароль не может быть пустым' })
+  @ApiProperty({ example: 'qwerty123' })
+  @IsString()
+  @IsNotEmpty()
   password!: string;
+}
 
-  @ValidateIf((o) => o.type === AuthType.EMAIL && o.tgId !== undefined)
-  @IsNotEmpty({ message: 'tgId не должен быть указан для EMAIL авторизации' })
-  _tgIdCheck?: never;
+@ApiExtraModels()
+export class AuthLoginTgRequestDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.TG })
+  @IsEnum(AuthType)
+  type!: AuthType.TG;
 
-  @ValidateIf((o) => o.type === AuthType.EMAIL && o.pin !== undefined)
-  @IsNotEmpty({ message: 'pin не должен быть указан для EMAIL авторизации' })
-  _pinCheck?: never;
+  @ApiProperty({ example: 6 })
+  @IsNumber()
+  tgId!: number;
+
+  @ApiProperty({ example: '1234' })
+  @IsString()
+  @MinLength(4)
+  pin!: string;
 }
 
 export class AuthLoginResponseDto {
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'JWT-токен для авторизации',
+  })
   access_token!: string;
 }

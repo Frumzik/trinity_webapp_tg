@@ -30,6 +30,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       return response.status(status).json({
         statusCode: status,
+        success: false,
         error: status === 500 ? 'Internal Server Error' : 'Bad Request',
         message,
       });
@@ -39,6 +40,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const err = exception as Error;
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
       error: 'Internal Server Error',
       message: [err.message || 'Unknown error'],
     });

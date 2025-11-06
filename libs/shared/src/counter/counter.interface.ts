@@ -3,6 +3,8 @@ export enum CounterType {
   SUBSCRIPTION_ID = 'SUBSCRIPTION_ID',
   TRAINING_ID = 'TRAINING_ID',
   LESSON_ID = 'LESSON_ID',
+  FAVORITE_ID = 'FAVORITE_ID',
+  TRANSACTION_ID = 'TRANSACTION_ID',
 }
 
 export interface ICounter {

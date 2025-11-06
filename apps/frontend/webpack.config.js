@@ -1,13 +1,33 @@
 const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
 const { NxReactWebpackPlugin } = require('@nx/react/webpack-plugin');
 const { join } = require('path');
+const webpack = require('webpack');
+const dotenv = require('dotenv');
+const dotenvExpand = require('dotenv-expand');
+
+const mode =
+  process.env.NX_TASK_TARGET_CONFIGURATION ||
+  process.env.NODE_ENV ||
+  'development';
+
+// выбираем нужный .env-файл
+const envFile =
+  mode === 'production' ? '.prod.env' :
+    mode === 'test'       ? '.test.env' :
+      '.dev.env';
+
+const myEnv = dotenv.config({ path: join(__dirname, 'envs', envFile) });
+dotenvExpand.expand(myEnv);
+
+console.log('[webpack] MODE =', mode, 'ENV FILE =', envFile, 'NX_API_URL =', process.env.NX_API_URL);
 
 module.exports = {
-  output: {
-    path: join(__dirname, 'dist'),
-  },
+  output: { path: join(__dirname, 'dist') },
   devServer: {
     port: 4200,
+    hot: true,
+    liveReload: true,
+    watchFiles: ['src/**/*'],
     historyApiFallback: {
       index: '/index.html',
       disableDotRule: true,
@@ -23,13 +43,12 @@ module.exports = {
       baseHref: '/',
       assets: ['./src/favicon.ico', './src/assets'],
       styles: ['./src/styles.scss'],
-      outputHashing: process.env['NODE_ENV'] === 'production' ? 'all' : 'none',
-      optimization: process.env['NODE_ENV'] === 'production',
+      outputHashing: mode === 'production' ? 'all' : 'none',
+      optimization: mode === 'production',
     }),
-    new NxReactWebpackPlugin({
-      // Uncomment this line if you don't want to use SVGR
-      // See: https://react-svgr.com/
-      // svgr: false
+    new NxReactWebpackPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NX_API_URL': JSON.stringify(process.env.NX_API_URL || ''),
     }),
   ],
   module: {
@@ -37,11 +56,8 @@ module.exports = {
       {
         test: /\.(mp3|wav|ogg)$/i,
         type: 'asset/resource',
-        generator: {
-          filename: 'assets/[name][ext]',
-        },
+        generator: { filename: 'assets/[name][ext]' },
       },
-      // другие правила...
     ],
   },
 };

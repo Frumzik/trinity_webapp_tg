@@ -1,15 +1,37 @@
 import { Types } from 'mongoose';
+import {
+  LearningAccessStatus,
+  LearningProgressStatus,
+} from '../learning/learning.interface.js';
 
 // Тренинги
 export enum TrainingType {
+  STANDART = 'standart',
+  STAGES_SPIRIT = 'stages_spirit',
+  STAGE_LEVEL = 'stage_level',
+  STAGE = 'stage',
+  SPIRITUAL_START = 'spiritual_start',
+  ACADEMY_SPIRIT = 'acedemy_spirit',
+  PRACTICE = 'practice',
+  USEFUL_MATERIALS = 'userful_materials',
+  KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
   COURSE = 'course',
 }
 
-interface ITrainingBase {
+export enum FavoritesTag {
+  STANDART= 'standart',
+  FILMS = 'films',
+  MUSIC = 'music',
+  MEDITATION = 'meditation',
+  PRODUCT = 'product',
+}
+
+export interface ITraining {
   _id?: Types.ObjectId;
 
   trainingId: number;
   type: TrainingType;
+  favoritesTag: FavoritesTag;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[];
@@ -23,31 +45,39 @@ interface ITrainingBase {
   // Метаданные
   title: string | null;
   description: string | null;
+  shortDescription: string | null;
+  duration: string | null;
   coverUrl: string | null;
+  iconUrl: string | null;
 
   // Условия доступности
-  accessRules: IContentAccess[];
+  accessRules: TypeContentAccess[];
   price: number | null;
+  salePrice: number | null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 }
 
-export interface ITrainingCourse extends ITrainingBase {
-  type: TrainingType.COURSE;
+export interface ITrainingCourse extends ITraining {
+  type: TrainingType.STANDART;
 }
 
-export type ITraining = ITrainingCourse;
+export type TypeTraining = ITrainingCourse;
 
 // Уроки
 export enum LessonType {
   VIDEO = 'video',
   AUDIO = 'audio',
   TEXT = 'text',
+  FILM = 'film',
 }
 
-interface ILessonBase {
+export interface ILesson {
   _id?: Types.ObjectId;
 
   lessonId: number;
   type: LessonType;
+  favoritesTag: FavoritesTag;
 
   // Вложенность
   parent: Types.ObjectId | ITraining | null;
@@ -56,21 +86,29 @@ interface ILessonBase {
   // Метаданные
   title: string | null;
   description: string | null;
-  content: ILessonContent | null;
+  duration: string | null;
+  coverUrl: string | null;
+  bgUrl: string | null;
+  content?: ILessonContent | null;
 
   // Условия доступности
-  accessRules: IContentAccess[];
+  accessRules: TypeContentAccess[];
   price: number | null;
+  salePrice: number | null;
+  accessStatus?: LearningAccessStatus;
+  progressStatus?: LearningProgressStatus;
 }
 
 export interface ILessonVideoContent {
   videoUrl: string;
-  duration?: number;
 }
 
 export interface ILessonAudioContent {
   audioUrl: string;
-  duration?: number;
+}
+
+export interface ILessonFilmContent {
+  html: string;
 }
 
 export interface ILessonTextContent {
@@ -80,24 +118,29 @@ export interface ILessonTextContent {
 export type ILessonContent =
   | ILessonVideoContent
   | ILessonAudioContent
-  | ILessonTextContent;
+  | ILessonTextContent
+  | ILessonFilmContent;
 
-export interface ILessonVideo extends ILessonBase {
+export interface ILessonVideo extends ILesson {
   type: LessonType.VIDEO;
   content: ILessonVideoContent;
 }
-export interface ILessonAudio extends ILessonBase {
+
+export interface ILessonFilm extends ILesson {
+  type: LessonType.FILM;
+  content: ILessonFilmContent;
+}
+export interface ILessonAudio extends ILesson {
   type: LessonType.AUDIO;
   content: ILessonAudioContent;
 }
 
-export interface ILessonText extends ILessonBase {
+export interface ILessonText extends ILesson {
   type: LessonType.AUDIO;
   content: ILessonTextContent;
 }
 
-// export type ILesson = ILessonVideo | ILessonAudio | ILessonText;
-export type ILesson = ILessonBase;
+export type TypeLesson = ILessonVideo | ILessonAudio | ILessonText;
 
 // Условия доступности
 export enum ContentAccessType {
@@ -109,40 +152,44 @@ export enum ContentAccessType {
   LESSON_COMPLETED = 'lesson_completed',
 }
 
-interface IContentAccessBase {
+interface TypeContentAccessBase {
   type: ContentAccessType;
   description?: string;
 }
 
-export interface IContentAccessSubscription extends IContentAccessBase {
+export interface TypeContentAccessSubscription extends TypeContentAccessBase {
   type: ContentAccessType.SUBSCRIPTION;
 }
 
-export interface IContentAccessOneTimePayment extends IContentAccessBase {
+export interface TypeContentAccessOneTimePayment extends TypeContentAccessBase {
   type: ContentAccessType.ONE_TIME_PAYMENT;
 }
 
-export interface IContentAccessFree extends IContentAccessBase {
+export interface TypeContentAccessFree extends TypeContentAccessBase {
   type: ContentAccessType.FREE;
 }
 
-export interface IContentAccessDateUnlock extends IContentAccessBase {
+export interface TypeContentAccessDateUnlock extends TypeContentAccessBase {
   type: ContentAccessType.DATE_UNLOCK;
   value: Date;
 }
 
-export interface IContentAccessTrainingCompleted extends IContentAccessBase {
+export interface TypeContentAccessTrainingCompleted
+  extends TypeContentAccessBase {
   type: ContentAccessType.TRAINING_COMPLETED;
   value: number;
 }
 
-export interface IContentAccessLessonCompleted extends IContentAccessBase {
+export interface TypeContentAccessLessonCompleted
+  extends TypeContentAccessBase {
   type: ContentAccessType.LESSON_COMPLETED;
   value: number;
 }
 
-export type IContentAccess =
-  | IContentAccessSubscription
-  | IContentAccessOneTimePayment
-  | IContentAccessFree
-  | IContentAccessDateUnlock;
+export type TypeContentAccess =
+  | TypeContentAccessSubscription
+  | TypeContentAccessOneTimePayment
+  | TypeContentAccessFree
+  | TypeContentAccessDateUnlock
+  | TypeContentAccessTrainingCompleted
+  | TypeContentAccessLessonCompleted;
