@@ -4,14 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
-import {
-  Subscription,
-  SubscriptionEntity,
-  SubscriptionPurchase,
-} from '../../billing';
+import { Subscription, SubscriptionEntity } from '../../billing';
 import { SubscriptionsRepository } from './repositories';
 import { UserEntity } from '../../account';
-import { CounterType, SubscriptionEvents, SubscriptionUpdatedEvent } from '@trinity/shared';
+import {
+  CounterType,
+  SubscriptionEvents,
+  SubscriptionUpdatedEvent,
+} from '@trinity/shared';
 import { CountersService } from '../../service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -45,7 +45,11 @@ export class SubscriptionsService {
     try {
       const subscription = await this.subscriptionsRepository.find(condition);
 
-      return subscription;
+      if (!subscription) {
+        throw new NotFoundException('Подиска не найдена');
+      }
+
+      return await this.subscriptionsRepository.update(subscription.validate());
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
@@ -94,7 +98,11 @@ export class SubscriptionsService {
         condition
       );
 
-      return subscription;
+      if (!subscription) {
+        throw new NotFoundException('Подиска не найдена');
+      }
+
+      return await this.subscriptionsRepository.update(subscription.validate());
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
@@ -102,29 +110,22 @@ export class SubscriptionsService {
     }
   }
 
-  async addPuchase(
-    condition: FilterQuery<Subscription>,
-    purchase: SubscriptionPurchase
-  ): Promise<SubscriptionEntity | null> {
+  async purchase(condition: FilterQuery<Subscription>, dto: { days: number }) {
     try {
-      const subscription = await this.subscriptionsRepository.populate(
-        condition
-      );
+      const subscription = await this.find(condition);
 
       if (!subscription) {
         throw new NotFoundException('Подписка не найдена');
       }
 
       const updated = await this.subscriptionsRepository.update(
-        subscription.addPurchase(purchase)
+        subscription.purchase(dto.days)
       );
 
       this.eventEmitter.emit(
         SubscriptionEvents.UPDATED,
         new SubscriptionUpdatedEvent(updated.subscriptionId)
       );
-
-      return updated;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';

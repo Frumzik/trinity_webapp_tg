@@ -5,6 +5,7 @@ export enum TransactionType {
   STANDART = 'Standart',
   REFERRAL = 'Referral',
   PURCHASE = 'Purchase',
+  SUBSCRIPTION = 'Subscription',
   REPLENISHMENT = 'Replenishment',
   WITHDRAWAL = 'Withdrawal',
 }

@@ -23,4 +23,10 @@ export * from './favorites/favorites.contract.js';
 export * from './favorites/favorites.interface.js';
 
 export * from './transactions/transactions.interface.js';
+export * from './transactions/transactions.contract.js';
+
 export * from './referrals/referrals.interface.js';
+
+export * from './purchases/purchases.contract.js';
+export * from './purchases/purchases.interface.js';
+export * from './purchases/purchases.events.js';
