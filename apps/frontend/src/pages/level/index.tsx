@@ -1,63 +1,179 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Hero from "./ui/Hero";
 import TopActions from "./ui/TopActions";
 import Sheet from "./ui/Sheet";
 import "./level.scss";
 import PracticeSlider from "../../widgets/practise-card-slider";
-import SectionHeader from "./ui/Sectionheader.tsx";
+import SectionHeader from "./ui/Sectionheader";
+import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
+import { useLazyGetLessonAdminQuery } from "../../shared/api/contentAdmin.api";
 
-import Card1 from "../../assets/image/level/card1.png";
-import Card2 from "../../assets/image/level/card2.svg";
-import Card4 from "../../assets/image/level/card4.svg";
-import Card5 from "../../assets/image/level/card5.svg";
-import Card6 from "../../assets/image/level/card6.svg";
-import Card7 from "../../assets/image/level/card7.svg";
-import Card8 from "../../assets/image/level/card8.svg";
-
-const films = [
-  { id: 1, title: "Практики", subtitle: "12 min", imageUrl: Card1 },
-  { id: 2, title: "Анонсы", subtitle: "12 min", imageUrl: Card2 },
-  { id: 3, title: "Акции", subtitle: "12 min", imageUrl: Card5 },
-  { id: 4, title: "Подборки", subtitle: "12 min", imageUrl: Card4 },
-  { id: 5, title: "Новое", subtitle: "12 min", imageUrl: Card5 },
-  { id: 6, title: "Хит", subtitle: "12 min", imageUrl: Card6 },
-];
-
-const music = [
-  { id: 11, title: "Lo-Fi", subtitle: "12 min", imageUrl: Card4 },
-  { id: 12, title: "Ambient", subtitle: "12 min", imageUrl: Card5 },
-  { id: 13, title: "Focus", subtitle: "12 min", imageUrl: Card1 },
-];
-
-const meditations = [
-  { id: 21, title: "Сон", subtitle: "10 мин", imageUrl: Card1 },
-  { id: 22, title: "Антистресс", subtitle: "7 мин", imageUrl: Card7 },
-  { id: 22, title: "Антистресс", subtitle: "7 мин", imageUrl: Card8 },
-];
+/** ---------- Local progress (front-only) ---------- */
+type LocalProgress = { seconds: number; duration: number; status: "in_progress" | "completed" };
+const LP_KEY = "lessonProgress";
+const lpLoad = (): Record<string, LocalProgress> => {
+  try { return JSON.parse(localStorage.getItem(LP_KEY) || "{}"); } catch { return {}; }
+};
+const lpSave = (obj: Record<string, LocalProgress>) => {
+  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+};
+const setCompleted = (lessonId: number | string) => {
+  const key = String(lessonId);
+  const lp = lpLoad();
+  lp[key] = { seconds: 0, duration: 0, status: "completed" };
+  lpSave(lp);
+};
+const mergeStatus = (lesson: any, lp: Record<string, LocalProgress>) => {
+  const server = (lesson?.progressStatus as string) || "not_started";
+  const local = lp[String(lesson?.lessonId)];
+  if (local?.status === "completed") return "completed";
+  if (server === "completed") return "completed";
+  if (local?.status === "in_progress") return "in_progress";
+  return server;
+};
 
 export default function Index() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams<{ id: string }>();
+
+  const { data, isLoading, isError, refetch } = useGetUserTrainingByIdQuery({ id: Number(id) });
+  const [fetchLesson] = useLazyGetLessonAdminQuery();
+
+  const training = data?.data;
+  const lessons = training?.lessons ?? [];
+
+  /** принятый payload из плеера (выход/complete) — применяем локально */
+  useEffect(() => {
+    const st = location.state as
+      | {
+      sessionDecision?: "save" | "discard";
+      session?: { lessonId: number | string; current: number; duration: number; completed: boolean };
+    }
+      | undefined;
+
+    if (st?.sessionDecision === "save" && st.session) {
+      const { lessonId, current, duration, completed } = st.session;
+      const lp = lpLoad();
+      lp[String(lessonId)] = {
+        seconds: Math.max(0, Math.round(current)),
+        duration: Math.max(0, Math.round(duration)),
+        status: completed ? "completed" : "in_progress",
+      };
+      lpSave(lp);
+    }
+    // очистить одноразовый стейт
+    if (st?.sessionDecision) window.history.replaceState({}, "");
+  }, [location.state]);
+
+  const tiles = useMemo(
+    () =>
+      lessons.map((l: any) => ({
+        id: l.lessonId,
+        title: l.title,
+        subtitle: l.duration ?? "",
+        imageUrl: l.coverUrl ?? training?.coverUrl ?? "",
+        accessStatus: l.accessStatus,
+        typeHint: l.type,
+      })),
+    [lessons, training]
+  );
+
+  const audioItems = useMemo(() => {
+    return (training?.lessons ?? [])
+      .filter((l: any) => l.type === "audio")
+      .map((l: any) => ({
+        id: l.lessonId,
+        title: l.title,
+        subtitle: l.duration ?? undefined,
+        artworkUrl: l.coverUrl ?? training?.coverUrl ?? undefined,
+        mediaUrl: undefined as string | undefined, // префетч/плеер дотянет
+      }));
+  }, [training]);
+
+  const handleOpen = async (lessonId: number | string) => {
+    const audioIdx = audioItems.findIndex((i) => String(i.id) === String(lessonId));
+    if (audioIdx !== -1) {
+      try {
+        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+        const l: any = res.data;
+        const media = l?.content?.audioUrl || l?.mediaUrl;
+        const queuePrefilled = media
+          ? audioItems.map((it) => (String(it.id) === String(lessonId) ? { ...it, mediaUrl: media } : it))
+          : audioItems;
+
+        navigate("/player", { state: { queue: queuePrefilled, index: audioIdx, trainingId: training.trainingId, returnTo: `/level/${training.trainingId}`, } });
+        return;
+      } catch {
+        navigate("/player", { state: { queue: audioItems, index: audioIdx, trainingId: training.trainingId, returnTo: `/level/${training.trainingId}`, } });
+        return;
+      }
+    }
+
+    try {
+      const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+      const l: any = res.data;
+      const isText = l?.type === "text" || !!l?.content?.html;
+      if (isText && training) {
+        setCompleted(lessonId); // текст считаем пройденным сразу
+        navigate(`/lesson/${training.trainingId}/${lessonId}`);
+        return;
+      }
+    } catch {}
+
+    alert("Контент этого урока ещё не загружен");
+  };
+
+  const headerProgress = useMemo(() => {
+    const lp = lpLoad();
+    const total = lessons.length;
+    const done = lessons.filter((l: any) => mergeStatus(l, lp) === "completed").length;
+    return { current: done, total };
+  }, [lessons]);
+
+  if (isLoading) {
+    return (
+      <div className="preview">
+        <div style={{ padding: 16 }}>Загрузка…</div>
+      </div>
+    );
+  }
+  if (isError || !training) {
+    return (
+      <div className="preview">
+        <div style={{ padding: 16 }}>
+          Не удалось загрузить ступень. <button onClick={() => refetch()}>Повторить</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="preview">
-      <TopActions onBack={() => navigate(-1)} onMenu={() => {}} />
+      <TopActions onBack={() => navigate('/levels', { replace: true })} onMenu={() => {}} />
+
       <Hero
-        imageSrc={Card1}
+        imageSrc={training.coverUrl ?? ""}
         header={{
-          title: "Уровень 1",
-          subtitle: "Основы дыхания и концентрации",
-          practicesCount: 36,
-          progress: { current: 10, total: 36 },
+          title: training.title,
+          subtitle: training.description ?? "",
+          practicesCount: lessons.length,
+          progress: headerProgress,
         }}
-      ></Hero>
+      />
 
       <Sheet>
-        <SectionHeader title="Rain and Storm Sounds" count={films.length} />
-        <PracticeSlider items={films} />
-        <SectionHeader title="Wandering in Nature" count={music.length} />
-        <PracticeSlider items={music} />
-        <SectionHeader title="Wandering in Nature" count={music.length} />
-        <PracticeSlider items={meditations} />
+        <SectionHeader title="Уроки" count={tiles.length} />
+        <PracticeSlider
+          items={tiles.map((t) => ({
+            id: t.id,
+            title: t.title,
+            subtitle: t.subtitle,
+            imageUrl: t.imageUrl,
+            onClick: () => handleOpen(t.id),
+          }))}
+        />
       </Sheet>
     </div>
   );

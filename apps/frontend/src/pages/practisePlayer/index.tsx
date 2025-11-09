@@ -1,197 +1,308 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PlayerPage, {
-  type MediaTrack,
+  type MediaTrack as UITrack,
   type PlayerPayload,
-} from "../../widgets/practisePlayer";
-import Card1 from "../../assets/image/level/card1.png";
-import Card2 from "../../assets/image/level/card2.svg";
-import Card3 from "../../assets/image/level/card4.svg";
-import Audio from "../../assets/Лолита - Шпилька-каблучок.mp3";
-import "./player.scss";
+} from '../../widgets/practisePlayer';
+import {
+  useGetLessonAdminQuery,
+  useLazyGetLessonAdminQuery,
+} from '../../shared/api/contentAdmin.api';
 
-type TrackDTO = {
-  id: number | string;
+type MediaTrack = {
+  id: string | number;
   title: string;
   subtitle?: string;
-  media_url: string;
-  artwork_url: string;
-  is_favorite?: boolean;
+  mediaUrl?: string;
+  artworkUrl?: string;
+  isFavorite?: boolean;
 };
 
-function toMediaTrack(dto: TrackDTO): MediaTrack {
-  return {
-    id: dto.id,
-    title: dto.title,
-    subtitle: dto.subtitle,
-    mediaUrl: dto.media_url,
-    artworkUrl: dto.artwork_url,
-    isFavorite: dto.is_favorite ?? false,
-  };
+type NavState = {
+  // базовый payload
+  track?: any;
+  current?: number;
+  duration?: number;
+  progressPct?: number;
+  completed?: boolean;
+  // управление
+  decision?: 'save' | 'discard';
+  meta?: { action: 'back' | 'prev' | 'next' | 'autoNext' };
+  // очередь/позиция
+  queue?: MediaTrack[];
+  index?: number;
+  trainingId?: number | string;
+  // ОТКУДА ВЕРНУТЬСЯ ПОСЛЕ ПЛЕЕРА
+  returnTo?: string;
+} | null;
+
+type PendingAction = { kind: 'back' | 'prev' | 'next' | 'autoNext' } | null;
+
+const toUI = (t: MediaTrack): UITrack => ({
+  id: t.id,
+  title: t.title,
+  subtitle: t.subtitle,
+  mediaUrl: t.mediaUrl!,
+  artworkUrl: t.artworkUrl ?? '',
+  isFavorite: t.isFavorite ?? false,
+});
+
+// локальный (фронтовый) сейв прогресса
+function saveLessonProgress(
+  lessonId: number | string,
+  current: number,
+  duration: number,
+  completed: boolean
+) {
+  try {
+    localStorage.setItem(
+      `lessonProgress:${lessonId}`,
+      JSON.stringify({
+        lessonId,
+        current,
+        duration,
+        completed,
+        updatedAt: Date.now(),
+      })
+    );
+  } catch {}
 }
 
-async function fetchTrack(id: string | number): Promise<MediaTrack> {
-  const mock: TrackDTO = {
-    id,
-    title: "Lion's breath",
-    subtitle: "Sleep meditation",
-    media_url: Audio,
-    artwork_url: Card1,
-    is_favorite: false,
-  };
-  return toMediaTrack(mock);
-}
-
-async function fetchPlaylist(): Promise<MediaTrack[]> {
-  return [
-    toMediaTrack({
-      id: 101,
-      title: "Lion's breath",
-      subtitle: "Sleep meditation",
-      media_url: "/audio/lion.mp3",
-      artwork_url: Card1,
-    }),
-    toMediaTrack({
-      id: 102,
-      title: "Heavy Rain",
-      subtitle: "Rain & focus",
-      media_url: "/audio/rain.mp3",
-      artwork_url: Card2,
-      is_favorite: true,
-    }),
-    toMediaTrack({
-      id: 103,
-      title: "Ocean Waves",
-      subtitle: "Calm & sleep",
-      media_url: "/audio/ocean.mp3",
-      artwork_url: Card3,
-    }),
-  ];
-}
+const ratio = (p: PlayerPayload) => {
+  const dur = Math.max(1, Math.round(p.duration || 0));
+  const cur = Math.max(0, Math.round(p.current || 0));
+  return cur / dur;
+};
 
 export default function PlayerScreen() {
   const { trackId } = useParams<{ trackId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as {
-    queue?: MediaTrack[];
-    index?: number;
-  } | null;
+  const navState = (location.state as NavState) ?? null;
 
-  const [queue, setQueue] = useState<MediaTrack[] | null>(state?.queue ?? null);
-  const [, setIndex] = useState<number>(state?.index ?? 0);
-  const [track, setTrack] = useState<MediaTrack | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // если зашли по /player/:trackId — подтянем урок
+  const { data: lessonRes } = useGetLessonAdminQuery(
+    { id: Number(trackId), populate: true },
+    { skip: !trackId }
+  );
+  const [fetchLesson] = useLazyGetLessonAdminQuery();
 
+  const [queue, setQueue] = useState<MediaTrack[]>(navState?.queue ?? []);
+  const [index, setIndex] = useState<number>(navState?.index ?? 0);
+  const trainingIdRef = useRef<number | string | undefined>(navState?.trainingId);
+  const returnToRef = useRef<string | undefined>(navState?.returnTo); // <— запоминаем, куда возвращаться
+
+  // секундомер фронтового прогресса
+  const playedMsRef = useRef(0);
+  const startedAtRef = useRef<number | null>(null);
+  const tickerRef = useRef<number | null>(null);
+  const durationRef = useRef<number>(0);
+
+  // текущий трек
+  const track = useMemo(
+    () => (queue.length ? queue[(index + queue.length) % queue.length] : null),
+    [queue, index]
+  );
+
+  // одиночный вход /player/:trackId
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      try {
-        setLoading(true);
-        setError(null);
-        if (state?.queue?.length) {
-          if (!cancelled) {
-            setQueue(state.queue);
-            setIndex(state.index ?? 0);
-            setTrack(state.queue[state.index ?? 0]);
-          }
-          return;
-        }
-        if (trackId) {
-          const t = await fetchTrack(trackId);
-          if (!cancelled) {
-            setQueue([t]);
-            setIndex(0);
-            setTrack(t);
-          }
-          return;
-        }
-        const list = await fetchPlaylist();
-        if (!cancelled) {
-          setQueue(list);
-          setIndex(0);
-          setTrack(list[0] ?? null);
-        }
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? "Ошибка загрузки");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    if (queue.length || !lessonRes?.data) return;
+    const l: any = lessonRes.data;
+    const media = l?.content?.audioUrl || l?.mediaUrl;
+    if (!media) return;
+    trainingIdRef.current = Number(l?.parentId) || trainingIdRef.current;
+    // если returnTo не задан, попробуем построить его из trainingId
+    if (!returnToRef.current && trainingIdRef.current != null) {
+      returnToRef.current = `/level/${trainingIdRef.current}`;
     }
-    boot();
+    setQueue([
+      {
+        id: l.lessonId,
+        title: l.title,
+        subtitle: l.duration ?? undefined,
+        mediaUrl: media,
+        artworkUrl: l.coverUrl ?? undefined,
+      },
+    ]);
+    setIndex(0);
+  }, [lessonRes, queue.length]);
+
+  // если у текущего элемента нет mediaUrl — лениво дотянем через RTK-хук
+  useEffect(() => {
+    (async () => {
+      if (!track || track.mediaUrl) return;
+      try {
+        const res = await fetchLesson({ id: Number(track.id), populate: true }).unwrap();
+        const l: any = res.data;
+        const media = l?.content?.audioUrl || l?.mediaUrl;
+        if (media)
+          setQueue((q) =>
+            q.map((t, i) => (i === index ? { ...t, mediaUrl: media } : t))
+          );
+      } catch {}
+    })();
+  }, [track?.id, track?.mediaUrl, index, fetchLesson]);
+
+  // тикер прослушанного
+  useEffect(() => {
+    if (!track) return;
+    if (tickerRef.current) {
+      clearInterval(tickerRef.current);
+      tickerRef.current = null;
+    }
+    startedAtRef.current = Date.now();
+    tickerRef.current = window.setInterval(() => {
+      if (startedAtRef.current != null) {
+        const now = Date.now();
+        playedMsRef.current += now - startedAtRef.current;
+        startedAtRef.current = now;
+      }
+    }, 250);
     return () => {
-      cancelled = true;
+      if (tickerRef.current) {
+        clearInterval(tickerRef.current);
+        tickerRef.current = null;
+      }
+      if (startedAtRef.current != null) {
+        playedMsRef.current += Date.now() - startedAtRef.current;
+        startedAtRef.current = null;
+      }
     };
-  }, [trackId, state]);
+  }, [track?.id]);
+
+  const onDurationReady = (sec: number) => {
+    durationRef.current = sec || 0;
+  };
+
+  const buildPayload = (completed: boolean): PlayerPayload => {
+    const cur = Math.max(0, Math.round(playedMsRef.current / 1000));
+    const dur = Math.max(cur, Math.round(durationRef.current || 0));
+    const pct = dur ? Math.min(100, Math.round((cur / dur) * 100)) : 0;
+    return {
+      track: toUI(track!),
+      current: cur,
+      duration: dur,
+      progressPct: pct,
+      completed,
+    };
+  };
+
+  // ---- модалка / отложенное действие
+  const [pending, setPending] = useState<PendingAction>(null);
+
+  const requestConfirm = (act: PendingAction) => {
+    if (!track) return;
+    if (startedAtRef.current != null) {
+      playedMsRef.current += Date.now() - startedAtRef.current;
+      startedAtRef.current = Date.now();
+    }
+    setPending(act);
+    const p = buildPayload(false);
+    navigate('/player/exit', {
+      state: {
+        ...p,
+        queue,
+        index,
+        trainingId: trainingIdRef.current,
+        meta: { action: act?.kind || 'back' },
+        returnTo: returnToRef.current, // <— пробрасываем
+      },
+    });
+  };
 
   const onPrev =
-    queue && queue.length > 1
-      ? () => {
-          setIndex((i) => {
-            const ni = (i - 1 + queue.length) % queue.length;
-            setTrack(queue[ni]);
-            return ni;
-          });
-        }
-      : undefined;
-
+    queue.length > 1 ? () => requestConfirm({ kind: 'prev' }) : undefined;
   const onNext =
-    queue && queue.length > 1
-      ? () => {
-          setIndex((i) => {
-            const ni = (i + 1) % queue.length;
-            setTrack(queue[ni]);
-            return ni;
-          });
+    queue.length > 1 ? () => requestConfirm({ kind: 'next' }) : undefined;
+  const onBackTop = () => requestConfirm({ kind: 'back' });
+
+  const handleCompleted = () => {
+    if (startedAtRef.current != null) {
+      playedMsRef.current += Date.now() - startedAtRef.current;
+      startedAtRef.current = null;
+    }
+    const p = buildPayload(true);
+    navigate('/player/complete', {
+      state: {
+        ...p,
+        queue,
+        index,
+        trainingId: trainingIdRef.current,
+        nextIndex: index + 1, // SessionComplete сам проверит границы
+        returnTo: returnToRef.current, // <— пробрасываем
+      },
+    });
+  };
+
+  // >>> ХОЛОДНОЕ ВОЗВРАЩЕНИЕ ИЗ ExitConfirm/SessionComplete <<<
+  useEffect(() => {
+    const st = (location.state as NavState) || null;
+    if (!st?.decision || !st?.meta?.action) return;
+
+    // подцепим очередь/позицию и returnTo, если пришли из внешнего роутинга
+    if (Array.isArray(st.queue)) setQueue(st.queue);
+    if (typeof st.index === 'number') setIndex(st.index);
+    if (st.trainingId != null) trainingIdRef.current = st.trainingId;
+    if (st.returnTo) returnToRef.current = st.returnTo;
+
+    // Сохранение прогресса: решаем по пришедшему payload (если он был) либо по «живому» payload
+    const p: PlayerPayload =
+      st.track && typeof st.duration === 'number'
+        ? {
+          track: st.track,
+          current: st.current ?? 0,
+          duration: st.duration ?? 0,
+          progressPct: st.progressPct ?? 0,
+          completed: false,
         }
-      : undefined;
+        : buildPayload(false);
 
-  const onToggleFav = async (fav: boolean) => {
-    setTrack((t) => (t ? { ...t, isFavorite: fav } : t));
-    if (queue)
-      setQueue(
-        (q) =>
-          q?.map((it) =>
-            it.id === track?.id ? { ...it, isFavorite: fav } : it,
-          ) ?? q,
-      );
-  };
+    if (st.decision === 'save') {
+      const completed = ratio(p) >= 0.5;
+      saveLessonProgress(p.track.id, p.current, p.duration, completed);
+    }
 
-  const handleExit = (p: PlayerPayload) => {
-    navigate("/player/exit", { state: p });
-  };
+    // Выполняем действие
+    const a = st.meta.action;
+    if (a === 'back') {
+      // ЯВНЫЙ адрес возврата + replace: true (чтобы убрать /player из истории)
+      const url =
+        returnToRef.current ??
+        (typeof trainingIdRef.current === 'number'
+          ? `/level/${trainingIdRef.current}`
+          : '/levels');
+      navigate(url, { replace: true });
+    } else if (a === 'prev') {
+      const len = st.queue?.length ?? queue.length;
+      if (len > 0) setIndex((i) => (i - 1 + len) % len);
+    } else if (a === 'next' || a === 'autoNext') {
+      const len = st.queue?.length ?? queue.length;
+      if (len > 0) setIndex((i) => (i + 1) % len);
+    }
 
-  const handleCompleted = (p: PlayerPayload) => {
-    navigate("/player/complete", { state: p });
-  };
+    // очистить одноразовый state
+    navigate('.', { replace: true, state: {} });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // один раз при монтировании
 
-  if (loading)
+  if (!track || !track.mediaUrl) {
     return (
       <div className="player player--loading">
         <div className="player__spinner">Загрузка…</div>
       </div>
     );
-  if (error || !track)
-    return (
-      <div className="player player--error">
-        <div className="player__error">
-          {error ?? "Трек не найден"}
-          <button onClick={() => navigate(-1)}>Назад</button>
-        </div>
-      </div>
-    );
+  }
 
   return (
     <PlayerPage
-      track={track}
-      onBack={() => navigate(-1)}
+      track={toUI(track)}
+      onBack={onBackTop}
       onPrev={onPrev}
       onNext={onNext}
       onMenu={() => {}}
-      onToggleFav={onToggleFav}
-      onExit={handleExit}
+      onExit={() => requestConfirm({ kind: 'back' })}
       onCompleted={handleCompleted}
+      onDurationReady={onDurationReady}
       showFav
     />
   );

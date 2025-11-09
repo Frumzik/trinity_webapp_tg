@@ -35,8 +35,8 @@ import PreviewPage from '../pages/preview'
 import LevelsPage from '../pages/levels'
 import LevelPage from '../pages/level'
 import PlayerScreen from '../pages/practisePlayer'
-import ExitConfirm from '../pages/practisePlayer'
-import SessionComplete from '../pages/practisePlayer'
+import ExitConfirm from '../pages/session/ExitConfirm'
+import SessionComplete from '../pages/session/SessionComplete'
 import GoalsPage from '../pages/goals'
 import NotificationsPage from '../pages/notifications'
 import SubscriptionPage from '../pages/billing/subscription'
@@ -44,7 +44,8 @@ import FaqPage from '../pages/faq'
 import HealthLabPage from '../pages/healthLab'
 import PinCreatePage from '../pages/pin/create'
 import PinLoginPage from '../pages/pin/login'
-
+import TrainingPage from '../pages/training'
+import LessonTextPage from "../pages/level/text-level"
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
@@ -91,16 +92,21 @@ export const router = createBrowserRouter([
               { path: 'favorites', element: wrap(<FavoritesPage />) },
               { path: 'gifts', element: wrap(<GiftsPage />) },
               { path: 'about', element: wrap(<AboutPage />) },
+              { path: 'lesson/:trainingId/:lessonId', element: wrap(<LessonTextPage />) },
               { path: 'marketing', element: wrap(<MarketingPage />) },
               { path: 'detailing', element: wrap(<DetailingPage />) },
               { path: 'materials', element: wrap(<MaterialsPage />) },
               { path: 'preview', element: wrap(<PreviewPage />) },
               { path: 'levels', element: wrap(<LevelsPage />) },
+              { path: 'levels/:id', element: wrap(<LevelsPage />) },
+              { path: 'levels/:id/:stageId', element: wrap(<LevelsPage />) },
+              { path: 'trainings/:id', element: wrap(<TrainingPage />) },
               { path: 'level', element: wrap(<LevelPage />) },
+              { path: 'level/:id', element: wrap(<LevelPage />) },
               { path: 'player', element: wrap(<PlayerScreen />) },
-              { path: 'player/:trackId', element: wrap(<PlayerScreen />) },
               { path: 'player/exit', element: wrap(<ExitConfirm />) },
               { path: 'player/complete', element: wrap(<SessionComplete />) },
+              { path: 'player/:trackId', element: wrap(<PlayerScreen />) },
               { path: 'goals', element: wrap(<GoalsPage />) },
               { path: 'notifications', element: wrap(<NotificationsPage />) },
               { path: 'subscription', element: wrap(<SubscriptionPage />) },
