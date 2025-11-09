@@ -39,7 +39,6 @@
   background: rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(6px);
   color: #fff;
-  pointer-events: auto;
 }
 
 .spacer {
@@ -58,6 +57,19 @@
   font-size: 32px;
   font-style: normal;
   font-weight: 700;
+}
+.preview__subtitle{
+  position: absolute;
+  left: 24px;
+  bottom: 20%;
+  margin: 0;
+  line-height: 1.1;
+  z-index: 1;
+  color: var(--Grayscale-White, #fff);
+  font-family: "SF Pro Display";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
 }
 
 .preview__sheet {

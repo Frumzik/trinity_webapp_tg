@@ -24,17 +24,14 @@ export default function LevelCard({ item, onClick }: Props) {
         </span>
       )}
 
-      {/* блюр поверх всего контента */}
       {locked && <div className="lvl__blur" aria-hidden />}
 
-      {/* верхний чип "Разблокируйте за X USDT" */}
       {locked && item.priceUSDT && (
         <div className="lvl__unlock">
           Разблокируйте за {item.priceUSDT} USDT
         </div>
       )}
 
-      {/* обычное тело карточки — будет скрыто в locked */}
       <div className="lvl__body">
         <div className="lvl__title">{item.title}</div>
         {item.subtitle && <div className="lvl__subtitle">{item.subtitle}</div>}
@@ -64,7 +61,6 @@ export default function LevelCard({ item, onClick }: Props) {
         </div>
       </div>
 
-      {/* HUD в locked: видно только заголовок, время слева и замок справа */}
       {locked && (
         <div className="lvl__hud">
           <div className="lvl__hud-left">

@@ -17,7 +17,7 @@ import Card3 from "../../assets/image/About-ptoject.svg";
 import Card4 from "../../assets/image/image_4.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
-import {useNavigate} from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import BurgerMenu from '../../widgets/menuBurger/burger';
 import { useGetUserQuery } from "../../shared/api/user.api";
 import { getTelegramUser } from "../../shared/telegram/telegram";
@@ -68,9 +68,9 @@ const Index = () => {
       <main className="screen" style={{ paddingTop: "20px" }}>
         <Title
           right={
-            <button className="icon-btn">
+            <Link to="/account" className="icon-btn">
               <img src={EditIcon} alt=""/>
-            </button>
+            </Link>
           }
         >
           Личный кабинет

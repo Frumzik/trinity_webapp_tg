@@ -92,7 +92,7 @@ export default function TopActions({
 }: Props) {
   return (
     <div className="preview__topbar">
-      <button className="icon-btn" onClick={onBack} aria-label="Назад">
+      <button className="icon-btn" onClick={(e) => { e.stopPropagation(); onBack(); }} aria-label="Назад">
         <BackIcon />
       </button>
       <div className="spacer" />
