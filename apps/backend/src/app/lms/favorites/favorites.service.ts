@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -22,6 +24,7 @@ export class FavoritesService {
     private readonly favoritesRepository: FavoritesRepository,
     private readonly countersService: CountersService,
     private readonly contentService: ContentService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService
   ) {}
 

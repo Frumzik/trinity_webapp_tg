@@ -1,7 +1,6 @@
 import { Types } from 'mongoose';
 import {
   ISubscription,
-  ISubscriptionPurchase,
   SubscriptionType,
 } from './subscription.interface.js';
 import { IUser } from '../user/user.interface.js';
@@ -34,8 +33,8 @@ export class SubscriptionInfoResponseDto implements ISubscription {
 
   @ApiProperty({
     enum: SubscriptionType,
-    example: SubscriptionType.PAID,
-    description: 'Тип подписки (например, FREE, PAID, TRIAL)',
+    example: SubscriptionType.PREMIUM,
+    description: 'Тип подписки (например, FREE, PREMIUM, TRIAL)',
   })
   type!: SubscriptionType;
 
@@ -51,18 +50,4 @@ export class SubscriptionInfoResponseDto implements ISubscription {
     nullable: true,
   })
   endDate!: Date | null;
-
-  @ApiProperty({
-    type: 'array',
-    description: 'История покупок подписки',
-    example: [
-      {
-        purchaseId: 501,
-        date: '2025-01-01T00:00:00.000Z',
-        price: 299,
-        currency: 'RUB',
-      },
-    ],
-  })
-  purchases!: ISubscriptionPurchase[];
 }

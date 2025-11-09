@@ -4,7 +4,7 @@ import { IUser } from '../user/user.interface.js';
 export enum SubscriptionType {
   FREE = 'free',
   TRIAL = 'trial',
-  PAID = 'paid',
+  PREMIUM = 'premium',
   EXPIRED = 'expired',
 }
 
@@ -22,17 +22,4 @@ export interface ISubscription {
   // Сроки действия
   startDate: Date;
   endDate: Date | null; // null = бессрочная (например, free)
-
-  // Покупки
-  purchases: ISubscriptionPurchase[];
-}
-
-export enum SubscriptionPurchaseType {
-  TRAINING = 'training',
-  LESSON = 'lesson',
-}
-
-export interface ISubscriptionPurchase {
-  type: SubscriptionPurchaseType;
-  contentId: number;
 }
