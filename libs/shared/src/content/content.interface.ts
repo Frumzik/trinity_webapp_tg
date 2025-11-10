@@ -56,6 +56,7 @@ export interface ITraining {
   salePrice: number | null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
+  progressPercent?: number;
 }
 
 export interface ITrainingCourse extends ITraining {

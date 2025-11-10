@@ -30,6 +30,9 @@ export class UserEntity implements IUser {
   role: UserRole = UserRole.User;
   balance = 0;
 
+  // Рефералка
+  referralPath = '';
+
   constructor(user: Partial<IUser> = {}) {
     Object.assign(this, user);
   }

@@ -28,7 +28,10 @@ export class UsersService {
     private readonly eventEmitter: EventEmitter2
   ) {}
 
-  async create(dto: AuthRegisterEmailDto | AuthRegisterTgDto): Promise<UserEntity> {
+  async create(
+    dto: AuthRegisterEmailDto | AuthRegisterTgDto,
+    extra: { referralPath: string }
+  ): Promise<UserEntity> {
     try {
       // Проверяем существующего пользователя
       const condition =
@@ -46,6 +49,7 @@ export class UsersService {
           CounterType.USER_ID
         ),
         ...dto,
+        referralPath: extra.referralPath || '',
       });
 
       if (dto.type === 'TG' && dto.pin) {

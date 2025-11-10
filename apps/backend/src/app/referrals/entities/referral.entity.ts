@@ -9,7 +9,8 @@ export class ReferralEntity implements IReferral {
 
   partnerId!: number;
   referralId!: number;
-
+  
+  level!: number;
   earn = 0;
 
   constructor(referral: Partial<IReferral>) {

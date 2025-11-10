@@ -1,5 +1,10 @@
 // learning.listener.ts
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   ContentEvents,
@@ -7,6 +12,9 @@ import {
   LessonAccessRulesUpdatedEvent,
   LessonCreatedEvent,
   LessonProgressStatusUpdatedEvent,
+  PurchaseCreatedEvent,
+  PurchaseEvents,
+  PurchaseType,
   SubscriptionEvents,
   SubscriptionUpdatedEvent,
   TrainingAccessRulesUpdatedEvent,
@@ -15,13 +23,22 @@ import {
   UserRegisteredEvent,
 } from '@trinity/shared';
 import { LearningService } from './learning.service';
-import { SubscriptionsService } from '../../billing';
+import { PurchaseService, SubscriptionsService } from '../../billing';
+import { UsersService } from '../../account';
+import { ContentService } from '../content';
 
 @Injectable()
 export class LearningListener {
   constructor(
     private readonly learningService: LearningService,
-    private readonly subscriptionsService: SubscriptionsService
+    @Inject(forwardRef(() => SubscriptionsService))
+    private readonly subscriptionsService: SubscriptionsService,
+    @Inject(forwardRef(() => ContentService))
+    private readonly contentService: ContentService,
+    @Inject(forwardRef(() => PurchaseService))
+    private readonly purchaseService: PurchaseService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService
   ) {}
 
   @OnEvent(ContentEvents.TRAINING_CREATED)
@@ -58,7 +75,67 @@ export class LearningListener {
     );
   }
 
-  
+  @OnEvent(PurchaseEvents.CREATED)
+  async onPurchaseCreated({ purchaseId }: PurchaseCreatedEvent) {
+    console.log(`✅ Покупка ${purchaseId} создана`);
+
+    const purchase = await this.purchaseService.populate({ purchaseId });
+
+    if (!purchase) {
+      throw new NotFoundException('Покупка не найдена');
+    }
+
+    const user = await this.usersService.find({ userId: purchase.userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    switch (purchase.type) {
+      case PurchaseType.TRAINING: {
+        const training = await this.contentService.findTraining({
+          trainingId: purchase.contentId,
+        });
+
+        if (!training) {
+          throw new NotFoundException('Тренинг не найден');
+        }
+        return await this.learningService.recalculateTrainingForUser(
+          training,
+          user
+        );
+      }
+      case PurchaseType.LESSON: {
+        const lesson = await this.contentService.findLesson({
+          lessonId: purchase.contentId,
+        });
+
+        if (!lesson) {
+          throw new NotFoundException('Урок не найден');
+        }
+
+        const training = await this.contentService.findTraining({
+          trainingId: lesson.parentId,
+        });
+
+        if (!training) {
+          throw new NotFoundException('Тренинг не найден');
+        }
+
+        return await this.learningService.recalculateTrainingForUser(
+          training,
+          user
+        );
+      }
+      case PurchaseType.SUBSCRIPTION: {
+        return await this.learningService.recalculateForUser(purchase.userId);
+      }
+
+      default: {
+        return await this.learningService.recalculateForUser(purchase.userId);
+      }
+    }
+  }
 
   @OnEvent(ContentEvents.LESSON_DELETED)
   async onLessonDeleted(payload: LessonCreatedEvent) {
@@ -70,7 +147,9 @@ export class LearningListener {
   }
 
   @OnEvent(LearningEvents.LESSON_PROGRESS_STATUS_UPDATED)
-  async onLessonProgressStatusUpdated(payload: LessonProgressStatusUpdatedEvent) {
+  async onLessonProgressStatusUpdated(
+    payload: LessonProgressStatusUpdatedEvent
+  ) {
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
