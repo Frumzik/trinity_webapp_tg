@@ -25,7 +25,6 @@ export type LevelItem = {
   priceUSDT?: number;
 };
 
-// helpers
 const numFromTitle = (t?: string) => {
   const m = (t || "").match(/\d+/);
   return m ? Number(m[0]) : undefined;
@@ -36,7 +35,6 @@ const minutesFromDuration = (d?: string | null) => {
   return m ? Number(m[0]) : undefined;
 };
 
-// тип узла из /learning/training
 type BNode = {
   _id: string;
   trainingId: number;
@@ -59,16 +57,13 @@ export default function Index() {
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
 
-  // ⬇️ тянем дерево
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  // корень "Ступени Духа"
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
     return roots.find((r) => r.type === "stages_spirit");
   }, [data]);
 
-  // уровни (stage_level), отсортированы по номеру в заголовке
   const levelNodes: BNode[] = useMemo(() => {
     const arr = (root?.childrens ?? []) as BNode[];
     return [...arr].sort(
@@ -84,12 +79,10 @@ export default function Index() {
     return nums.length ? nums : [1];
   }, [levelNodes]);
 
-  // если выбранная вкладка отсутствует, переключаемся на первую
   useEffect(() => {
     if (!groups.includes(group) && groups.length) setGroup(groups[0]);
   }, [groups, group]);
 
-  // выбранный уровень
   const currentLevel: BNode | undefined = useMemo(
     () => levelNodes.find((n) => numFromTitle(n.title) === group),
     [levelNodes, group]
@@ -128,20 +121,19 @@ export default function Index() {
   );
 
   const handleCardClick = (l: LevelItem) => {
-    if (l.status === 'locked') {
-      setClickedId(l.id)
-      setModalOpen(true)
+    if (l.status === "locked") {
+      setClickedId(l.id);
+      setModalOpen(true);
     } else {
-      navigate(`/trainings/${l.id}`)
+      navigate(`/level/${l.id}`, { state: { returnTo: location.pathname } });
     }
-  }
+  };
 
   const purchase = (_p: {
     levelIds: (string | number)[];
     totalOM: number;
     discountedOM?: number;
   }) => {
-    // тут вызываешь покупку уровня (если будет эндпоинт). Пока закрываем модалку.
     setModalOpen(false);
   };
 
