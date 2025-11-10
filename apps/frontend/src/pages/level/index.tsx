@@ -1,35 +1,45 @@
-import { useEffect, useMemo } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import Hero from "./ui/Hero";
-import TopActions from "./ui/TopActions";
-import Sheet from "./ui/Sheet";
-import "./level.scss";
-import PracticeSlider from "../../widgets/practise-card-slider";
-import SectionHeader from "./ui/Sectionheader";
-import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
-import { useLazyGetLessonAdminQuery } from "../../shared/api/contentAdmin.api";
+import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import Hero from './ui/Hero';
+import TopActions from './ui/TopActions';
+import Sheet from './ui/Sheet';
+import './level.scss';
+import PracticeSlider from '../../widgets/practise-card-slider';
+import SectionHeader from './ui/Sectionheader';
+import { useGetUserTrainingByIdQuery } from '../../shared/api/learning.api';
+import { useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
 
 /** ---------- Local progress (front-only) ---------- */
-type LocalProgress = { seconds: number; duration: number; status: "in_progress" | "completed" };
-const LP_KEY = "lessonProgress";
+type LocalProgress = {
+  seconds: number;
+  duration: number;
+  status: 'in_progress' | 'completed';
+};
+const LP_KEY = 'lessonProgress';
 const lpLoad = (): Record<string, LocalProgress> => {
-  try { return JSON.parse(localStorage.getItem(LP_KEY) || "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(LP_KEY) || '{}');
+  } catch {
+    return {};
+  }
 };
 const lpSave = (obj: Record<string, LocalProgress>) => {
-  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+  try {
+    localStorage.setItem(LP_KEY, JSON.stringify(obj));
+  } catch {}
 };
 const setCompleted = (lessonId: number | string) => {
   const key = String(lessonId);
   const lp = lpLoad();
-  lp[key] = { seconds: 0, duration: 0, status: "completed" };
+  lp[key] = { seconds: 0, duration: 0, status: 'completed' };
   lpSave(lp);
 };
 const mergeStatus = (lesson: any, lp: Record<string, LocalProgress>) => {
-  const server = (lesson?.progressStatus as string) || "not_started";
+  const server = (lesson?.progressStatus as string) || 'not_started';
   const local = lp[String(lesson?.lessonId)];
-  if (local?.status === "completed") return "completed";
-  if (server === "completed") return "completed";
-  if (local?.status === "in_progress") return "in_progress";
+  if (local?.status === 'completed') return 'completed';
+  if (server === 'completed') return 'completed';
+  if (local?.status === 'in_progress') return 'in_progress';
   return server;
 };
 
@@ -38,7 +48,9 @@ export default function Index() {
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
-  const { data, isLoading, isError, refetch } = useGetUserTrainingByIdQuery({ id: Number(id) });
+  const { data, isLoading, isError, refetch } = useGetUserTrainingByIdQuery({
+    id: Number(id),
+  });
   const [fetchLesson] = useLazyGetLessonAdminQuery();
 
   const training = data?.data;
@@ -48,23 +60,28 @@ export default function Index() {
   useEffect(() => {
     const st = location.state as
       | {
-      sessionDecision?: "save" | "discard";
-      session?: { lessonId: number | string; current: number; duration: number; completed: boolean };
-    }
+          sessionDecision?: 'save' | 'discard';
+          session?: {
+            lessonId: number | string;
+            current: number;
+            duration: number;
+            completed: boolean;
+          };
+        }
       | undefined;
 
-    if (st?.sessionDecision === "save" && st.session) {
+    if (st?.sessionDecision === 'save' && st.session) {
       const { lessonId, current, duration, completed } = st.session;
       const lp = lpLoad();
       lp[String(lessonId)] = {
         seconds: Math.max(0, Math.round(current)),
         duration: Math.max(0, Math.round(duration)),
-        status: completed ? "completed" : "in_progress",
+        status: completed ? 'completed' : 'in_progress',
       };
       lpSave(lp);
     }
     // очистить одноразовый стейт
-    if (st?.sessionDecision) window.history.replaceState({}, "");
+    if (st?.sessionDecision) window.history.replaceState({}, '');
   }, [location.state]);
 
   const tiles = useMemo(
@@ -72,8 +89,8 @@ export default function Index() {
       lessons.map((l: any) => ({
         id: l.lessonId,
         title: l.title,
-        subtitle: l.duration ?? "",
-        imageUrl: l.coverUrl ?? training?.coverUrl ?? "",
+        subtitle: l.duration ?? '',
+        imageUrl: l.coverUrl ?? training?.coverUrl ?? '',
         accessStatus: l.accessStatus,
         typeHint: l.type,
       })),
@@ -82,7 +99,7 @@ export default function Index() {
 
   const audioItems = useMemo(() => {
     return (training?.lessons ?? [])
-      .filter((l: any) => l.type === "audio")
+      .filter((l: any) => l.type === 'audio')
       .map((l: any) => ({
         id: l.lessonId,
         title: l.title,
@@ -93,28 +110,54 @@ export default function Index() {
   }, [training]);
 
   const handleOpen = async (lessonId: number | string) => {
-    const audioIdx = audioItems.findIndex((i) => String(i.id) === String(lessonId));
+    const audioIdx = audioItems.findIndex(
+      (i) => String(i.id) === String(lessonId)
+    );
     if (audioIdx !== -1) {
       try {
-        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+        const res = await fetchLesson({
+          id: Number(lessonId),
+          populate: true,
+        }).unwrap();
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         const queuePrefilled = media
-          ? audioItems.map((it) => (String(it.id) === String(lessonId) ? { ...it, mediaUrl: media } : it))
+          ? audioItems.map((it) =>
+              String(it.id) === String(lessonId)
+                ? { ...it, mediaUrl: media }
+                : it
+            )
           : audioItems;
 
-        navigate("/player", { state: { queue: queuePrefilled, index: audioIdx, trainingId: training.trainingId, returnTo: `/level/${training.trainingId}`, } });
+        navigate('/player', {
+          state: {
+            queue: queuePrefilled,
+            index: audioIdx,
+            trainingId: training.trainingId,
+            returnTo: `/level/${training.trainingId}`,
+          },
+        });
         return;
       } catch {
-        navigate("/player", { state: { queue: audioItems, index: audioIdx, trainingId: training.trainingId, returnTo: `/level/${training.trainingId}`, } });
+        navigate('/player', {
+          state: {
+            queue: audioItems,
+            index: audioIdx,
+            trainingId: training.trainingId,
+            returnTo: `/level/${training.trainingId}`,
+          },
+        });
         return;
       }
     }
 
     try {
-      const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+      const res = await fetchLesson({
+        id: Number(lessonId),
+        populate: true,
+      }).unwrap();
       const l: any = res.data;
-      const isText = l?.type === "text" || !!l?.content?.html;
+      const isText = l?.type === 'text' || !!l?.content?.html;
       if (isText && training) {
         setCompleted(lessonId); // текст считаем пройденным сразу
         navigate(`/lesson/${training.trainingId}/${lessonId}`);
@@ -122,16 +165,18 @@ export default function Index() {
       }
     } catch {}
 
-    alert("Контент этого урока ещё не загружен");
+    alert('Контент этого урока ещё не загружен');
   };
 
   const headerProgress = useMemo(() => {
     const lp = lpLoad();
     const total = lessons.length;
-    const done = lessons.filter((l: any) => mergeStatus(l, lp) === "completed").length;
+    const done = lessons.filter(
+      (l: any) => mergeStatus(l, lp) === 'completed'
+    ).length;
     return { current: done, total };
   }, [lessons]);
-
+  const returnTo = (location.state as any)?.returnTo as string | undefined;
   if (isLoading) {
     return (
       <div className="preview">
@@ -143,7 +188,8 @@ export default function Index() {
     return (
       <div className="preview">
         <div style={{ padding: 16 }}>
-          Не удалось загрузить ступень. <button onClick={() => refetch()}>Повторить</button>
+          Не удалось загрузить ступень.{' '}
+          <button onClick={() => refetch()}>Повторить</button>
         </div>
       </div>
     );
@@ -151,13 +197,22 @@ export default function Index() {
 
   return (
     <div className="preview">
-      <TopActions onBack={() => navigate('/levels', { replace: true })} onMenu={() => {}} />
+      <TopActions
+        onBack={() => {
+          if (returnTo) {
+            navigate(returnTo, { replace: true });
+          } else {
+            navigate('/levels', { replace: true });
+          }
+        }}
+        onMenu={() => {}}
+      />
 
       <Hero
-        imageSrc={training.coverUrl ?? ""}
+        imageSrc={training.coverUrl ?? ''}
         header={{
           title: training.title,
-          subtitle: training.description ?? "",
+          subtitle: training.description ?? '',
           practicesCount: lessons.length,
           progress: headerProgress,
         }}
