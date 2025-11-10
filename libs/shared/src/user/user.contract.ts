@@ -63,6 +63,9 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: UserGender.MALE, nullable: true })
   gender!: UserGender | null;
 
+  @ApiProperty({ example: '3/8/2', nullable: false })
+  referralPath!: string;
+
   @ApiProperty({
     enum: UserRole,
     example: UserRole.User,

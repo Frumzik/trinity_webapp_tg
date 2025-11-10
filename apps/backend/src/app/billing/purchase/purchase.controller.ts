@@ -1,10 +1,12 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { PurchaseCreateRequestDto } from '@trinity/shared';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PurchaseService } from './purchase.service';
 
 @Controller('purchase')
+@ApiTags('purchase')
+@ApiBearerAuth('access_token')
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 

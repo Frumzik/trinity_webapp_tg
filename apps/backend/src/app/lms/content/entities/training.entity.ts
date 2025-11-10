@@ -39,6 +39,7 @@ export class TrainingEntity implements ITraining {
   salePrice: number | null = null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
+  progressPercent?: number;
 
   constructor(training: Partial<ITraining> = {}) {
     Object.assign(this, training);
