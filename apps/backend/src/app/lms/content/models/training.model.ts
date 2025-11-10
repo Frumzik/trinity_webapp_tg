@@ -5,6 +5,7 @@ import {
   type ITraining,
   TrainingType,
   FavoritesTag,
+  TrainingTag,
 } from '@trinity/shared';
 import { Document, Types } from 'mongoose';
 
@@ -17,7 +18,7 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
     type: String,
     required: true,
     enum: TrainingType,
-    default: TrainingType.STANDART,
+    default: TrainingType.TRAINING,
   })
   type!: TrainingType;
 
@@ -28,6 +29,25 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
     default: FavoritesTag.STANDART,
   })
   favoritesTag!: FavoritesTag;
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: TrainingTag,
+    default: TrainingTag.STANDART,
+  })
+  tag!: TrainingTag;
+
+  // Наставник
+  @Prop({ type: Number, default: null })
+  merchantId!: number | null;
+
+  // Если ступень
+  @Prop({ type: Number, required: false })
+  stage?: number;
+
+  @Prop({ type: Number, required: false })
+  stageLevel?: number;
 
   // Вложенность
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Lesson' }], default: [] })

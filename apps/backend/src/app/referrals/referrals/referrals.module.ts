@@ -3,7 +3,7 @@ import { ReferralsService } from './referrals.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Referral, ReferralSchema } from './models';
 import { ReferralsRepository } from './repositories';
-import { UsersModule } from '../account';
+import { UsersModule } from '../../account';
 import { ReferralsController } from './referrals.controller';
 
 @Module({

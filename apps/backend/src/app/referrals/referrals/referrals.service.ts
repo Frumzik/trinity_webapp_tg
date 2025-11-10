@@ -9,7 +9,7 @@ import { FilterQuery } from 'mongoose';
 import { ReferralsRepository } from './repositories';
 import { ReferralEntity } from './entities';
 import { Referral } from './models';
-import { UserEntity, UsersService } from '../account';
+import { UserEntity, UsersService } from '../../account';
 import { IUser } from '@trinity/shared';
 
 @Injectable()
