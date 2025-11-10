@@ -75,4 +75,16 @@ export class BannersController {
   ): Promise<BannerEntity | null> {
     return await this.bannersService.find({ bannerId });
   }
+
+  @Get('')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Получить баннеры' })
+  @ApiResponse({
+    status: 200,
+    type: Boolean,
+    description: 'Баннер',
+  })
+  async findAll(): Promise<BannerEntity[]> {
+    return await this.bannersService.findAll();
+  }
 }
