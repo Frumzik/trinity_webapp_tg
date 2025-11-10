@@ -30,3 +30,6 @@ export * from './referrals/referrals.interface.js';
 export * from './purchases/purchases.contract.js';
 export * from './purchases/purchases.interface.js';
 export * from './purchases/purchases.events.js';
+
+export * from './banners/banner.contract.js';
+export * from './banners/banner.interface.js';

@@ -51,6 +51,9 @@ export class User extends Document<Types.ObjectId> implements IUser {
 
   @Prop({ type: String })
   finPasswordHash!: string | null;
+
+  @Prop({ type: String, default: '' })
+  referralPath!: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

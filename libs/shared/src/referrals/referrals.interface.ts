@@ -10,5 +10,6 @@ export interface IReferral {
   partnerId: number;
   referralId: number;
 
+  level: number;
   earn: number;
 }

@@ -17,7 +17,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
 import { SubscriptionsService } from '../../billing';
 import { ReferralsService } from '../../referrals';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +31,23 @@ export class AuthService {
   public async register(
     dto: AuthRegisterEmailDto | AuthRegisterTgDto
   ): Promise<AuthRegisterResponseDto> {
-    let newUser = await this.usersService.create(dto);
+    let referralPath = '';
+
+    if (dto.partnerId) {
+      const partner = await this.usersService.find({
+        userId: dto.partnerId,
+      });
+
+      if (partner) {
+        const referralPathArr = (partner?.referralPath ?? '')
+          .split('/')
+          .filter((p) => p); // убираем пустые
+        referralPathArr.push(partner.userId.toString());
+        referralPath = referralPathArr.join('/');
+      }
+    }
+
+    let newUser = await this.usersService.create({ ...dto }, { referralPath });
     let newSubscription = await this.subscriptionsService.create();
 
     newUser = await this.usersService.bindSubscription(
@@ -48,14 +63,7 @@ export class AuthService {
       const partner = await this.usersService.find({ userId: dto.partnerId });
 
       if (partner) {
-        await this.referralsService.create({
-          partner: partner._id as Types.ObjectId,
-          referral: newUser._id as Types.ObjectId,
-
-          partnerId: partner.userId,
-          referralId: newUser.userId,
-          earn: 0,
-        });
+        await this.referralsService.create(partner, newUser);
       }
     }
 
