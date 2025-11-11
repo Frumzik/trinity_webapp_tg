@@ -50,7 +50,7 @@ export class AuthRegisterTgDto {
   @IsEnum(AuthType)
   type!: AuthType.TG;
 
-  @ApiProperty({ example: 123456789 })
+  @ApiProperty({ example: 1 })
   @IsNumber()
   tgId!: number;
 
@@ -106,7 +106,7 @@ export class AuthLoginTgRequestDto {
   @IsEnum(AuthType)
   type!: AuthType.TG;
 
-  @ApiProperty({ example: 6 })
+  @ApiProperty({ example: 1 })
   @IsNumber()
   tgId!: number;
 

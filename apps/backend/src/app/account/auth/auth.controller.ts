@@ -48,7 +48,7 @@ export class AuthController {
         summary: 'Регистрация через Telegram',
         value: {
           type: 'TG',
-          tgId: 1234,
+          tgId: 1,
           pin: '1234',
           username: 'ivan_tg',
           name: 'Иван',
@@ -95,7 +95,7 @@ export class AuthController {
         summary: 'Авторизация через Telegram',
         value: {
           type: 'TG',
-          tgId: 1234,
+          tgId: 1,
           pin: '1234',
         },
       },

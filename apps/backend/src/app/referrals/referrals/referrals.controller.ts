@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ReferralsService } from './referrals.service';
-import { JWTAuthGuard, UserId } from '../service';
+import { JWTAuthGuard, UserId } from '../../service';
 import {
   ApiBearerAuth,
   ApiOperation,

@@ -33,3 +33,6 @@ export * from './purchases/purchases.events.js';
 
 export * from './banners/banner.contract.js';
 export * from './banners/banner.interface.js';
+
+export * from './funds/funds.interface.js';
+export * from './funds/funds.contract.js';

@@ -11,9 +11,9 @@ import { ContentModule } from './lms';
 import { LearningModule } from './lms/learning';
 import { FavoritesModule } from './lms/favorites';
 import { TransactionsModule } from './billing/transactions/transactions.module';
-import { ReferralsModule } from './referrals/referrals.module';
 import { PurchaseModule } from './billing/purchase/purchase.module';
 import { BannersModule } from './banners/banners.module';
+import { FundsModule, ReferralsModule } from './referrals';
 
 @Module({
   imports: [
@@ -36,6 +36,7 @@ import { BannersModule } from './banners/banners.module';
     ReferralsModule,
     PurchaseModule,
     BannersModule,
+    FundsModule,
   ],
   controllers: [],
   providers: [],

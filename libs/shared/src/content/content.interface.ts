@@ -3,9 +3,15 @@ import {
   LearningAccessStatus,
   LearningProgressStatus,
 } from '../learning/learning.interface.js';
+import { FavoritesTag } from '../favorites/favorites.interface.js';
 
 // Тренинги
 export enum TrainingType {
+  TRAINING = 'training',
+  PRODUCT = 'product',
+}
+
+export enum TrainingTag {
   STANDART = 'standart',
   STAGES_SPIRIT = 'stages_spirit',
   STAGE_LEVEL = 'stage_level',
@@ -15,15 +21,8 @@ export enum TrainingType {
   PRACTICE = 'practice',
   USEFUL_MATERIALS = 'userful_materials',
   KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
+  HEALTH_LAB = 'health_lab',
   COURSE = 'course',
-}
-
-export enum FavoritesTag {
-  STANDART= 'standart',
-  FILMS = 'films',
-  MUSIC = 'music',
-  MEDITATION = 'meditation',
-  PRODUCT = 'product',
 }
 
 export interface ITraining {
@@ -31,7 +30,15 @@ export interface ITraining {
 
   trainingId: number;
   type: TrainingType;
+  tag: TrainingTag;
   favoritesTag: FavoritesTag;
+
+  // Наставник
+  merchantId: number | null;
+
+  // Если ступень
+  stage?: number;
+  stageLevel?: number;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[];
@@ -58,12 +65,6 @@ export interface ITraining {
   progressStatus?: LearningProgressStatus;
   progressPercent?: number;
 }
-
-export interface ITrainingCourse extends ITraining {
-  type: TrainingType.STANDART;
-}
-
-export type TypeTraining = ITrainingCourse;
 
 // Уроки
 export enum LessonType {
