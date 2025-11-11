@@ -16,13 +16,6 @@ export class FavoriteAddRequestDto {
   @IsEnum(FavoriteType)
   type!: FavoriteType;
 
-  @ApiProperty({
-    description: 'ID пользователя',
-    example: 42,
-  })
-  @IsInt()
-  userId!: number;
-
   @ApiPropertyOptional({
     description: 'ID тренинга (если избранное — тренинг)',
     example: 101,
@@ -93,4 +86,9 @@ export class FavoriteInfoResponseDto {
     type: () => Object, // можно заменить на DTO, если он есть
   })
   lesson?: Types.ObjectId | ILesson;
+}
+
+
+export class FavoriteDeleteRequestDto {
+  favoriteId!: number;
 }

@@ -1,32 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  ISubscription,
-  IUser,
-  SubscriptionType,
-  SubscriptionPurchaseType,
-  ISubscriptionPurchase,
-} from '@trinity/shared';
+import { ISubscription, IUser, SubscriptionType } from '@trinity/shared';
 import { Document, Types } from 'mongoose';
-@Schema({ id: false })
-export class SubscriptionPurchase
-  extends Document
-  implements ISubscriptionPurchase
-{
-  @Prop({
-    type: String,
-    enum: SubscriptionPurchaseType,
-    required: true,
-  })
-  type!: SubscriptionPurchaseType;
-
-  @Prop({
-    required: true,
-  })
-  contentId!: number;
-}
-
-export const SubscriptionPurchaseSchema = SchemaFactory.createForClass(SubscriptionPurchase);
-
 
 @Schema({ versionKey: false, timestamps: true })
 export class Subscription
@@ -58,9 +32,6 @@ export class Subscription
 
   @Prop({ type: Date, default: null })
   endDate!: Date | null;
-
-  @Prop({type: [SubscriptionPurchaseSchema], default: []})
-  purchases!: ISubscriptionPurchase[];
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

@@ -36,8 +36,10 @@ export interface IUser {
   weight: number | null;
   gender: UserGender | null;
 
-
   // Other
   role: UserRole;
   balance: number;
+
+  // Рефералка
+  referralPath: string;
 }

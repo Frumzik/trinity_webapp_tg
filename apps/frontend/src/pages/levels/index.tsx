@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
 import TopBar from "../../widgets/topbarTextpage";
 import helpIcon from "../../assets/icons/helpIcon.svg";
-import { levelsData } from "./levels.content";
 import Info from "../../assets/icons/popup.svg";
 import "./levels.scss";
 import Footer from "../../widgets/footer/footer";
-import LevelPurchaseModal, {
-  type PurchaseLevel,
-} from "../../widgets/level-purchase-modal";
+import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
+
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
 export type LevelItem = {
   id: string;
@@ -25,24 +25,88 @@ export type LevelItem = {
   priceUSDT?: number;
 };
 
+const numFromTitle = (t?: string) => {
+  const m = (t || "").match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+const minutesFromDuration = (d?: string | null) => {
+  if (!d) return undefined;
+  const m = d.match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+
+type BNode = {
+  _id: string;
+  trainingId: number;
+  type: string;
+  title: string;
+  description?: string | null;
+  duration?: string | null;
+  coverUrl?: string | null;
+  accessStatus: "available" | "locked";
+  progressStatus: "not_started" | "in_progress" | "completed";
+  price?: number | null;
+  salePrice?: number | null;
+  childrens?: BNode[];
+  lessons?: any[];
+};
+
 export default function Index() {
   const navigate = useNavigate();
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
-  const [clickedId, setClickedId] = useState<string | number | undefined>(
-    undefined,
-  );
+  const [clickedId, setClickedId] = useState<string | number | undefined>();
 
+  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
+
+  const root: BNode | undefined = useMemo(() => {
+    const roots = (data?.data ?? []) as BNode[];
+    return roots.find((r) => r.type === "stages_spirit");
+  }, [data]);
+
+  const levelNodes: BNode[] = useMemo(() => {
+    const arr = (root?.childrens ?? []) as BNode[];
+    return [...arr].sort(
+      (a, b) => (numFromTitle(a.title) ?? 0) - (numFromTitle(b.title) ?? 0)
+    );
+  }, [root]);
+
+  // вкладки "Уровни"
   const groups = useMemo(() => {
-    const g = new Set<number>();
-    levelsData.forEach((l) => g.add(l.group));
-    return Array.from(g).sort((a, b) => a - b);
-  }, []);
+    const nums = levelNodes
+      .map((n) => numFromTitle(n.title))
+      .filter((x): x is number => typeof x === "number");
+    return nums.length ? nums : [1];
+  }, [levelNodes]);
 
-  const items: LevelItem[] = useMemo(
-    () => levelsData.filter((l) => l.group === group),
-    [group],
+  useEffect(() => {
+    if (!groups.includes(group) && groups.length) setGroup(groups[0]);
+  }, [groups, group]);
+
+  const currentLevel: BNode | undefined = useMemo(
+    () => levelNodes.find((n) => numFromTitle(n.title) === group),
+    [levelNodes, group]
   );
+
+  // ступени текущего уровня → твои LevelItem
+  const items: LevelItem[] = useMemo(() => {
+    const stages = (currentLevel?.childrens ?? []) as BNode[];
+    return stages.map((s): LevelItem => ({
+      id: String(s.trainingId),                              // роут /levels/:id
+      group,
+      title: s.title,
+      subtitle: undefined,
+      durationMin: minutesFromDuration(s.duration),
+      image: s.coverUrl || "",
+      status:
+        s.accessStatus === "available"
+          ? "available"
+          : s.progressStatus === "completed"
+            ? "done"
+            : "locked",
+      priceUSDT: (s.salePrice ?? s.price) ?? undefined,
+    }));
+  }, [currentLevel, group]);
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
     () =>
@@ -53,16 +117,16 @@ export default function Index() {
         oldPriceOM: undefined,
         purchased: it.status !== "locked",
       })),
-    [items],
+    [items]
   );
 
   const handleCardClick = (l: LevelItem) => {
     if (l.status === "locked") {
       setClickedId(l.id);
       setModalOpen(true);
-      return;
+    } else {
+      navigate(`/level/${l.id}`, { state: { returnTo: location.pathname } });
     }
-    navigate(`/levels/${l.id}`);
   };
 
   const purchase = (_p: {
@@ -79,19 +143,17 @@ export default function Index() {
         title="Ступени духа"
         rightIconUrl={helpIcon}
         onRightClick={() =>
-            window.open(
-                'https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0',
-                '_blank',
-                'noopener,noreferrer'
-            )
+          window.open(
+            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
+            "_blank",
+            "noopener,noreferrer"
+          )
         }
       />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <div className="levels">
           <div className="levels__header">
-            <div className="levels__title">Прогресс</div>
-
             <div className="levels__tabs">
               <div className="levels__tabs-title">Уровни</div>
               <Tabs
@@ -101,6 +163,19 @@ export default function Index() {
               />
             </div>
           </div>
+
+          {/* лёгкий стейт загрузки/ошибки — без изменения вёрстки */}
+          {isLoading && (
+            <div style={{ padding: "8px 0 0 4px", fontSize: 14, opacity: 0.7 }}>
+              Загрузка…
+            </div>
+          )}
+          {isError && (
+            <div style={{ padding: "8px 0 0 4px", fontSize: 14 }}>
+              Не удалось загрузить.{" "}
+              <button onClick={() => refetch()}>Повторить</button>
+            </div>
+          )}
 
           <ScrollPanel
             maxHeight="66dvh"
@@ -116,11 +191,7 @@ export default function Index() {
           >
             <div className="levels__list">
               {items.map((l) => (
-                <LevelCard
-                  key={l.id}
-                  item={l}
-                  onClick={() => handleCardClick(l)}
-                />
+                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)} />
               ))}
             </div>
           </ScrollPanel>

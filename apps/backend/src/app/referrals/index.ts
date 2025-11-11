@@ -1,6 +1,2 @@
-export * from './referrals.module';
-export * from './referrals.service';
-
-export * from './entities';
-export * from './models';
-export * from './repositories';
+export * from './referrals';
+export * from './funds';

@@ -1,24 +1,25 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { FavoritesService } from './favorites.service';
 import {
   FavoriteAddRequestDto,
+  FavoriteDeleteRequestDto,
   FavoriteInfoResponseDto,
+  IFavoritesByTag,
 } from '@trinity/shared';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 @ApiTags('favorites')
@@ -36,27 +37,14 @@ export class FavoritesController {
     description: 'Информация о текущем избранном пользователя',
   })
   @ApiResponse({ status: 404, description: 'Избранное не найдено' })
-  @ApiQuery({
-    name: 'populate',
-    required: false, // 👈 необязательный query-параметр
-    type: Boolean,
-    description:
-      'Если true — вернуть избранное с полной информацией (populate)',
-    example: true,
-  })
-  async find(
-    @UserId() userId: number,
-    @Query('populate') populate?: boolean
-  ): Promise<FavoriteInfoResponseDto[] | FavoriteInfoResponseDto | null> {
-    const favorites = populate
-      ? await this.favoritesService.populate({ userId })
-      : await this.favoritesService.find({ userId });
+  async find(@UserId() userId: number): Promise<IFavoritesByTag[]> {
+    const favorites = await this.favoritesService.populate({ userId });
 
     if (!favorites) {
       throw new NotFoundException('Избранное не найдено');
     }
 
-    return favorites;
+    return this.favoritesService.groupFavoritesByTag(favorites);
   }
 
   @Post('')
@@ -72,5 +60,20 @@ export class FavoritesController {
     @Body() dto: FavoriteAddRequestDto
   ): Promise<FavoriteInfoResponseDto | null> {
     return await this.favoritesService.create(userId, dto);
+  }
+
+  @Delete('')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Удалить избранное пользователя' })
+  @ApiResponse({
+    status: 200,
+    type: FavoriteInfoResponseDto,
+    description: 'Информация о текущем избранном пользователя',
+  })
+  async delete(
+    @UserId() userId: number,
+    @Body() dto: FavoriteDeleteRequestDto
+  ): Promise<{deleted: boolean}> {
+    return await this.favoritesService.delete(dto);
   }
 }

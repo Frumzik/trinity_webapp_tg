@@ -48,3 +48,5 @@ Thumbs.db
 
 #logs
 *.log
+
+/traefik/acme.json
