@@ -87,3 +87,8 @@ export class FavoriteInfoResponseDto {
   })
   lesson?: Types.ObjectId | ILesson;
 }
+
+
+export class FavoriteDeleteRequestDto {
+  favoriteId!: number;
+}
