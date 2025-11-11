@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Post,
@@ -10,6 +11,7 @@ import { JWTAuthGuard, UserId } from '../../service';
 import { FavoritesService } from './favorites.service';
 import {
   FavoriteAddRequestDto,
+  FavoriteDeleteRequestDto,
   FavoriteInfoResponseDto,
   IFavoritesByTag,
 } from '@trinity/shared';
@@ -58,5 +60,20 @@ export class FavoritesController {
     @Body() dto: FavoriteAddRequestDto
   ): Promise<FavoriteInfoResponseDto | null> {
     return await this.favoritesService.create(userId, dto);
+  }
+
+  @Delete('')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Удалить избранное пользователя' })
+  @ApiResponse({
+    status: 200,
+    type: FavoriteInfoResponseDto,
+    description: 'Информация о текущем избранном пользователя',
+  })
+  async delete(
+    @UserId() userId: number,
+    @Body() dto: FavoriteDeleteRequestDto
+  ): Promise<{deleted: boolean}> {
+    return await this.favoritesService.delete(dto);
   }
 }
