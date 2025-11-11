@@ -77,6 +77,6 @@ export class FavoritesRepository {
       .lean()
       .exec();
 
-    return allFavorites.map((r) => new FavoriteEntity(r.toObject()));
+    return allFavorites.map((r) => new FavoriteEntity(r));
   }
 }

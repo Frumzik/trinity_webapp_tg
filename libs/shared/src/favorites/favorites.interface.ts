@@ -14,6 +14,14 @@ export enum FavoritesTag {
   PRODUCT = 'product',
 }
 
+export enum FavoritesTagTitle {
+  STANDART= 'Избранное',
+  FILMS = 'Фильмы',
+  MUSIC = 'Музыка',
+  MEDITATION = 'Медитации',
+  PRODUCT = 'Продукты',
+}
+
 export interface IFavorite {
   _id?: Types.ObjectId;
   favoriteId: number;
@@ -25,4 +33,13 @@ export interface IFavorite {
 
   training?: Types.ObjectId | ITraining;
   lesson?: Types.ObjectId | ILesson;
+}
+
+
+
+
+export interface IFavoritesByTag {
+  tag: FavoritesTag;
+  title: FavoritesTagTitle;
+  favorites: IFavorite[];
 }
