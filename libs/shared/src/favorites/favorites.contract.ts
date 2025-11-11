@@ -16,13 +16,6 @@ export class FavoriteAddRequestDto {
   @IsEnum(FavoriteType)
   type!: FavoriteType;
 
-  @ApiProperty({
-    description: 'ID пользователя',
-    example: 42,
-  })
-  @IsInt()
-  userId!: number;
-
   @ApiPropertyOptional({
     description: 'ID тренинга (если избранное — тренинг)',
     example: 101,

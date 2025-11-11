@@ -24,12 +24,13 @@ import {
   LessonType,
   TrainingType,
   ContentAccessType,
-  FavoritesTag,
+  TrainingTag,
 } from './content.interface.js';
 import {
   LearningAccessStatus,
   LearningProgressStatus,
 } from '../learning/learning.interface.js';
+import { FavoritesTag } from '../favorites/favorites.interface.js';
 
 // ─────────────────────────────────────────────
 // TRAINING: CREATE / INFO / UPDATE
@@ -57,6 +58,34 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining> {
   @IsOptional()
   @IsString()
   shortDescription?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID наставника',
+    example: 1,
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value === 'null' || value === null ? null : Number(value)
+  )
+  @IsInt()
+  merchantId!: number | null;
+
+  // Если ступень
+  @ApiPropertyOptional({
+    description: 'Номер ступени',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  stage?: number;
+
+  @ApiPropertyOptional({
+    description: 'Номер уровня ступени',
+    example: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  stageLevel?: number;
 
   @ApiPropertyOptional({
     description: 'Url обложки',
@@ -97,10 +126,18 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining> {
   @ApiProperty({
     description: 'Тип тренинга',
     enum: TrainingType,
-    example: TrainingType.STANDART,
+    example: TrainingType.TRAINING,
   })
   @IsEnum(TrainingType)
   type!: TrainingType;
+
+  @ApiProperty({
+    description: 'Тэг тренинга',
+    enum: TrainingTag,
+    example: TrainingTag.STANDART,
+  })
+  @IsEnum(TrainingTag)
+  tag!: TrainingTag;
 
   @ApiProperty({
     description: 'Тип тренинга',
@@ -147,8 +184,22 @@ export class ContentTrainingInfoResponseDto implements ITraining {
   @ApiProperty({ description: 'Тип тренинга', enum: TrainingType })
   type!: TrainingType;
 
+  @ApiProperty({ description: 'Тэг тренинга', enum: TrainingTag })
+  tag!: TrainingTag;
+
   @ApiProperty({ description: 'Тип избранного', enum: FavoritesTag })
   favoritesTag!: FavoritesTag;
+
+  // Наставник
+  @ApiProperty({ description: 'ID наставника', example: 1, nullable: true })
+  merchantId!: number | null;
+
+  // Если ступень
+  @ApiPropertyOptional({ description: 'Номер ступени', example: 1 })
+  stage?: number;
+
+  @ApiPropertyOptional({ description: 'Номер уровня ступени', example: 1 })
+  stageLevel?: number;
 
   @ApiProperty({
     description: 'Уроки, входящие в тренинг',

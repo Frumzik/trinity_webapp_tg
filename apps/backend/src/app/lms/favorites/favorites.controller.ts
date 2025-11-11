@@ -4,7 +4,6 @@ import {
   Get,
   NotFoundException,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
@@ -12,13 +11,13 @@ import { FavoritesService } from './favorites.service';
 import {
   FavoriteAddRequestDto,
   FavoriteInfoResponseDto,
+  IFavoritesByTag,
 } from '@trinity/shared';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 @ApiTags('favorites')
@@ -36,27 +35,14 @@ export class FavoritesController {
     description: 'Информация о текущем избранном пользователя',
   })
   @ApiResponse({ status: 404, description: 'Избранное не найдено' })
-  @ApiQuery({
-    name: 'populate',
-    required: false, // 👈 необязательный query-параметр
-    type: Boolean,
-    description:
-      'Если true — вернуть избранное с полной информацией (populate)',
-    example: true,
-  })
-  async find(
-    @UserId() userId: number,
-    @Query('populate') populate?: boolean
-  ): Promise<FavoriteInfoResponseDto[] | FavoriteInfoResponseDto | null> {
-    const favorites = populate
-      ? await this.favoritesService.populate({ userId })
-      : await this.favoritesService.find({ userId });
+  async find(@UserId() userId: number): Promise<IFavoritesByTag[]> {
+    const favorites = await this.favoritesService.populate({ userId });
 
     if (!favorites) {
       throw new NotFoundException('Избранное не найдено');
     }
 
-    return favorites;
+    return this.favoritesService.groupFavoritesByTag(favorites);
   }
 
   @Post('')

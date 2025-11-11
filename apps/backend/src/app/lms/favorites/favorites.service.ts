@@ -10,7 +10,11 @@ import { FavoritesRepository } from './repositories';
 import {
   CounterType,
   FavoriteAddRequestDto,
+  FavoritesTag,
+  FavoritesTagTitle,
   FavoriteType,
+  IFavorite,
+  IFavoritesByTag,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 import { FavoriteEntity } from './entities';
@@ -40,6 +44,8 @@ export class FavoritesService {
       }
 
       let existingFavorite = null;
+      let training_id = undefined;
+      let lesson_id = undefined;
 
       switch (dto.type) {
         case FavoriteType.TRAINING: {
@@ -55,6 +61,8 @@ export class FavoritesService {
           if (!training) {
             throw new NotFoundException('Тренинг не найден');
           }
+
+          training_id = training._id;
 
           break;
         }
@@ -73,6 +81,8 @@ export class FavoritesService {
             throw new NotFoundException('Урок не найден');
           }
 
+          lesson_id = lesson._id;
+
           break;
         }
       }
@@ -85,6 +95,9 @@ export class FavoritesService {
           CounterType.FAVORITE_ID
         ),
         ...dto,
+        userId,
+        lesson: lesson_id,
+        training: training_id
       });
 
       return await this.favoritesRepository.create(newFavorite);
@@ -119,6 +132,44 @@ export class FavoritesService {
         error instanceof Error ? error.message : 'Ошибка при поиске избранного';
       throw new InternalServerErrorException(message);
     }
+  }
+
+  groupFavoritesByTag(favorites: IFavorite[]): IFavoritesByTag[] {
+    const grouped: Record<FavoritesTag, IFavorite[]> = {} as Record<
+      FavoritesTag,
+      IFavorite[]
+    >;
+
+    for (const fav of favorites) {
+      let tag: FavoritesTag | undefined;
+
+      // Проверяем, что training это объект, а не ObjectId
+      if (
+        fav.training &&
+        typeof fav.training === 'object' &&
+        'favoritesTag' in fav.training
+      ) {
+        tag = fav.training.favoritesTag as FavoritesTag;
+      } else if (
+        fav.lesson &&
+        typeof fav.lesson === 'object' &&
+        'favoritesTag' in fav.lesson
+      ) {
+        tag = fav.lesson.favoritesTag as FavoritesTag;
+      }
+
+      if (!tag) continue;
+
+      if (!grouped[tag]) grouped[tag] = [];
+      grouped[tag].push(fav);
+    }
+
+    return Object.entries(grouped).map(([tag, favs]) => ({
+      tag: tag as FavoritesTag,
+      title:
+        FavoritesTagTitle[tag.toUpperCase() as keyof typeof FavoritesTagTitle],
+      favorites: favs,
+    }));
   }
 
   async delete(

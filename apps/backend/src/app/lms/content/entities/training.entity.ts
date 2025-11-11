@@ -6,6 +6,7 @@ import {
   LearningProgressStatus,
   TrainingType,
   FavoritesTag,
+  TrainingTag,
 } from '@trinity/shared';
 import { Types } from 'mongoose';
 
@@ -13,8 +14,16 @@ export class TrainingEntity implements ITraining {
   _id?: Types.ObjectId;
 
   trainingId!: number;
-  type: TrainingType = TrainingType.STANDART;
+  type: TrainingType = TrainingType.TRAINING;
   favoritesTag: FavoritesTag = FavoritesTag.STANDART;
+  tag: TrainingTag = TrainingTag.STANDART;
+
+  // Наставник
+  merchantId: number | null = null;
+
+  // Если ступень
+  stage?: number;
+  stageLevel?: number;
 
   // Вложенность
   lessons: Types.ObjectId[] | ILesson[] = [];
