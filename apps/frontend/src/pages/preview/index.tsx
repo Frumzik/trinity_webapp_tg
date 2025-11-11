@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import GradientButton from "../../shared/ui/gradient-button";
 import Hero from "./ui/Hero";
@@ -7,24 +8,57 @@ import TopActions from "./ui/TopActions";
 import Sheet from "./ui/Sheet";
 import Price from "./ui/Price";
 import TextPage from "../../shared/ui/TextPage";
-import { previewBlocks, previewPrice } from "./content";
-import Card1 from "../../assets/image/bg.svg";
 import "./preview.scss";
 
-function toSections(blocks: { title: string; text: string }[]) {
-  return blocks.map((b) => ({
-    title: b.title,
-    paragraphs: b.text.trim().split(/\n{2,}/g),
-  }));
-}
+import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
+
+const toSections = (text: string) => [
+  { title: "Описание", paragraphs: text.trim() ? [text] : [] },
+];
+
+type State = {
+  trainingId: number;
+  title: string;
+  description: string;
+  coverUrl?: string | null;
+  bg?: string;
+  icon?: string;
+  price: number;
+  returnTo?: string;
+};
 
 export default function Index() {
   const navigate = useNavigate();
   const [fav, setFav] = useState(false);
+  const st = (useLocation().state || {}) as Partial<State>;
+
+  const title = st.title || "Тренинг";
+  const desc = st.description || "";
+  const image = st.bg || st.coverUrl || undefined;
+
+  const [addPurchase, { isLoading }] = useAddPurchaseMutation();
+
+  const handlePurchase = async () => {
+    if (!st.trainingId) {
+      alert("Не указан trainingId для покупки")
+      navigate(st.returnTo || "/", { replace: true })
+      return
+    }
+    try {
+      await addPurchase({ trainingId: st.trainingId }).unwrap()
+      navigate(`/trainings/${st.trainingId}`, { replace: true })
+    } catch (e: any) {
+      const msg =
+        e?.data?.message?.[0] ||
+        e?.error ||
+        "Покупка не оформлена. Попробуй ещё раз."
+      alert(msg)
+    }
+  }
 
   return (
     <div className="preview">
-      <Hero imageSrc={Card1} title="Гипнотерапевт">
+      <Hero imageSrc={image} title={title}>
         <TopActions
           isFav={fav}
           onBack={() => navigate(-1)}
@@ -46,13 +80,17 @@ export default function Index() {
             zIndex: 20,
           }}
         >
-          <TextPage
-            sections={toSections(previewBlocks)}
-            className="preview__text"
-          />
+          <TextPage sections={toSections(desc)} className="preview__text" />
         </ScrollPanel>
-        <Price value={previewPrice} />
-        <GradientButton className="preview__cta">Приобрести</GradientButton>
+
+        <Price value={st.price ?? 0} />
+        <GradientButton
+          className="preview__cta"
+          onClick={handlePurchase}
+          disabled={isLoading}
+        >
+          {isLoading ? "Покупка..." : "Приобрести"}
+        </GradientButton>
       </Sheet>
     </div>
   );
