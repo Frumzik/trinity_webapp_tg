@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
@@ -10,7 +9,6 @@ import Info from "../../assets/icons/popup.svg";
 import "./levels.scss";
 import Footer from "../../widgets/footer/footer";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
-
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
 export type LevelItem = {
@@ -38,15 +36,20 @@ const minutesFromDuration = (d?: string | null) => {
 type BNode = {
   _id: string;
   trainingId: number;
-  type: string;
+  type: "training" | "product";
+  tag?: string | null;
   title: string;
   description?: string | null;
+  shortDescription?: string | null;
   duration?: string | null;
   coverUrl?: string | null;
+  iconUrl?: string | null;
   accessStatus: "available" | "locked";
   progressStatus: "not_started" | "in_progress" | "completed";
   price?: number | null;
   salePrice?: number | null;
+  stage?: number | null;
+  stageLevel?: number | null;
   childrens?: BNode[];
   lessons?: any[];
 };
@@ -56,25 +59,26 @@ export default function Index() {
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
-
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
-    return roots.find((r) => r.type === "stages_spirit");
+    return roots.find((r) => r.tag === "stages_spirit");
   }, [data]);
 
   const levelNodes: BNode[] = useMemo(() => {
     const arr = (root?.childrens ?? []) as BNode[];
-    return [...arr].sort(
-      (a, b) => (numFromTitle(a.title) ?? 0) - (numFromTitle(b.title) ?? 0)
-    );
+    const onlyLevels = arr.filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number");
+    return [...onlyLevels].sort((a, b) => {
+      const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
+      const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
   }, [root]);
 
-  // вкладки "Уровни"
   const groups = useMemo(() => {
     const nums = levelNodes
-      .map((n) => numFromTitle(n.title))
+      .map((n) => n.stageLevel ?? numFromTitle(n.title))
       .filter((x): x is number => typeof x === "number");
     return nums.length ? nums : [1];
   }, [levelNodes]);
@@ -84,15 +88,19 @@ export default function Index() {
   }, [groups, group]);
 
   const currentLevel: BNode | undefined = useMemo(
-    () => levelNodes.find((n) => numFromTitle(n.title) === group),
+    () =>
+      levelNodes.find(
+        (n) => (n.stageLevel ?? numFromTitle(n.title)) === group
+      ),
     [levelNodes, group]
   );
 
-  // ступени текущего уровня → твои LevelItem
   const items: LevelItem[] = useMemo(() => {
-    const stages = (currentLevel?.childrens ?? []) as BNode[];
+    const stages = ((currentLevel?.childrens ?? []) as BNode[]).filter(
+      (s) => s.tag === "stage" || typeof s.stage === "number"
+    );
     return stages.map((s): LevelItem => ({
-      id: String(s.trainingId),                              // роут /levels/:id
+      id: String(s.trainingId),
       group,
       title: s.title,
       subtitle: undefined,
@@ -164,7 +172,6 @@ export default function Index() {
             </div>
           </div>
 
-          {/* лёгкий стейт загрузки/ошибки — без изменения вёрстки */}
           {isLoading && (
             <div style={{ padding: "8px 0 0 4px", fontSize: 14, opacity: 0.7 }}>
               Загрузка…
@@ -172,8 +179,7 @@ export default function Index() {
           )}
           {isError && (
             <div style={{ padding: "8px 0 0 4px", fontSize: 14 }}>
-              Не удалось загрузить.{" "}
-              <button onClick={() => refetch()}>Повторить</button>
+              Не удалось загрузить. <button onClick={() => refetch()}>Повторить</button>
             </div>
           )}
 

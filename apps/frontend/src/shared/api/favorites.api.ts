@@ -1,56 +1,72 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQueryWithAuth } from './base';
+// src/shared/api/favorites.api.ts
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithAuth } from "./base";
 
-export type FavoriteType = 'Lesson' | 'Training';
+export type FavoriteType = "Lesson" | "Training";
 
-export type FavoriteItem = {
-  type: FavoriteType;
-  trainingId?: number;
-  lessonId?: number;
+export type FavoriteTraining = {
+  _id: string;
+  trainingId: number;
+  title: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  coverUrl?: string | null;
+  iconUrl?: string | null;
 };
 
-export type GetFavoritesRes =
-  | { success: true; data: FavoriteItem[] }
-  | { success: false; message: string[] };
-
-export type AddFavoriteReq = {
-  type: FavoriteType;
-  trainingId?: number;
-  lessonId?: number;
+export type FavoriteLesson = {
+  lessonId: number;
+  title?: string | null;
+  duration?: string | null;
+  coverUrl?: string | null;
+  training?: FavoriteTraining;
 };
 
-export type AddFavoriteRes = { success: true; data: true };
+export type FavoriteEntry = {
+  _id: string;
+  type: FavoriteType;
+  favoriteId: number;
+  userId: number;
+  trainingId?: number;
+  lessonId?: number;
+  training?: FavoriteTraining;
+  lesson?: FavoriteLesson;
+};
+
+export type FavoriteCategory = {
+  tag?: string | null;
+  title: string;
+  favorites: FavoriteEntry[];
+};
 
 export const favoritesApi = createApi({
-  reducerPath: 'favoritesApi',
+  reducerPath: "favoritesApi",
   baseQuery: baseQueryWithAuth,
-  tagTypes: ['Favorites'],
+  tagTypes: ["Favorites"],
   endpoints: (b) => ({
-    // 404 = «Избранное не найдено» -> считаем как пустой список
-    getFavorites: b.query<FavoriteItem[], { populate?: boolean } | void>({
+    getFavorites: b.query<FavoriteCategory[], { populate?: boolean } | void>({
       async queryFn(arg, _api, _extra, baseQuery) {
         const res: any = await baseQuery({
-          url: '/favorites',
+          url: "/favorites",
           params: arg?.populate ? { populate: true } : undefined,
         });
         if (res.error) {
-          if (res.error.status === 404) return { data: [] as FavoriteItem[] }; // <-- важно
+          if (res.error.status === 404) return { data: [] as FavoriteCategory[] };
           return { error: res.error };
         }
-        return { data: (res.data?.data ?? []) as FavoriteItem[] };
+        return { data: (res.data?.data ?? []) as FavoriteCategory[] };
       },
-      providesTags: ['Favorites'],
+      providesTags: ["Favorites"],
     }),
-
-    addFavorite: b.mutation<AddFavoriteRes, AddFavoriteReq>({
-      query: (body) => ({ url: '/favorites', method: 'POST', body }),
-      invalidatesTags: ['Favorites'],
+    addFavorite: b.mutation<{ success: true; data: true }, { type: FavoriteType; trainingId?: number; lessonId?: number }>({
+      query: (body) => ({ url: "/favorites", method: "POST", body }),
+      invalidatesTags: ["Favorites"],
+    }),
+    deleteFavorite: b.mutation<{ success: true; data: true }, { type: FavoriteType; trainingId?: number; lessonId?: number }>({
+      query: (body) => ({ url: "/favorites", method: "DELETE", body }),
+      invalidatesTags: ["Favorites"],
     }),
   }),
 });
 
-export const {
-  useGetFavoritesQuery,
-  useLazyGetFavoritesQuery,
-  useAddFavoriteMutation,
-} = favoritesApi;
+export const { useGetFavoritesQuery, useAddFavoriteMutation, useDeleteFavoriteMutation } = favoritesApi;

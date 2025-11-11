@@ -16,7 +16,8 @@ export type LearningLesson = {
 export type LearningNode = {
   _id: string
   trainingId: number
-  type: string
+  type: 'training' | 'product'
+  tag?: string | null
   title: string
   description?: string | null
   coverUrl?: string | null
@@ -27,6 +28,12 @@ export type LearningNode = {
   progressStatus: 'not_started' | 'in_progress' | 'completed'
   childrens: LearningNode[]
   lessons: LearningLesson[]
+  merchantId?: number | null
+  stage?: number | null
+  stageLevel?: number | null
+  iconUrl?: string | null
+  shortDescription?: string | null
+  duration?: string | null
 }
 
 export type GetTrainingTreeRes = { success: true; data: LearningNode[] }

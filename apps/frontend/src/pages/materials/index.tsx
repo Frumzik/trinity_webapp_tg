@@ -4,37 +4,33 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import PromoTile from "../../widgets/promo-tile";
-
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Bgmini from "../../assets/icons/bgmini.svg";
 import CardImage from "../../assets/image/level/card5.svg";
-
 import "./materials.scss";
-
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
-// Описание типа, чтобы было понятнее что приходит
 type LearningNode = {
   _id: string;
   trainingId: number | string;
-  type: string;
+  type: "training" | "product";
+  tag?: string | null;
   title: string;
   description?: string | null;
   shortDescription?: string | null;
   coverUrl?: string | null;
+  iconUrl?: string | null;
 };
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-
   const { data, isLoading, isError, error } = useGetTrainingTreeQuery();
 
   const materials: LearningNode[] = useMemo(() => {
     const all = (data?.data ?? []) as LearningNode[];
-    return all.filter((n) => n.type === "userful_materials");
+    return all.filter((n) => n.tag === "userful_materials");
   }, [data]);
 
   return (
@@ -54,28 +50,20 @@ export default function Index() {
 
         {!isLoading && !isError && (
           <div className="promo-container">
-            {materials.slice(0, 3).map((it) => {
-              const desc =
-                (it.shortDescription ?? it.description ?? "").trim();
-
+            {materials.map((it) => {
+              const desc = (it.shortDescription ?? it.description ?? "").trim();
               return (
                 <PromoTile
                   key={it._id}
                   title={it.title}
-                  // ⬇️ описание тянем из конкретного тренинга
                   description={desc}
-                  // На случай если у плитки другое имя пропса:
                   subtitle={desc}
                   bgSrc={Bgmini}
-                  imageUrl={it.coverUrl || CardImage}
+                  imageUrl={it.coverUrl || it.iconUrl || CardImage}
                   to={`/trainings/${it.trainingId}`}
                 />
               );
             })}
-
-            <PromoTile title="Музыка" bgSrc={Bgmini} imageUrl={CardImage} />
-            <PromoTile title="Книги" bgSrc={Bgmini} imageUrl={CardImage} />
-
             {materials.length === 0 && (
               <div style={{ opacity: 0.7 }}>Материалы пока пусты</div>
             )}

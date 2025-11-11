@@ -7,7 +7,6 @@ import Sheet from "../../preview/ui/Sheet";
 import TextPage from "../../../shared/ui/TextPage";
 import Card1 from "../../../assets/image/bg.svg";
 import "./lesson-text.scss";
-
 import { useGetLessonAdminQuery } from "../../../shared/api/contentAdmin.api";
 import { smartBack } from "../../../shared/navigation/smartBack";
 import { useLessonFavorite } from "../../../shared/lib/hooks/useLessonFavorite";
@@ -32,44 +31,22 @@ type Section = { title: string; paragraphs: string[] };
 
 export default function LessonTextPage() {
   const navigate = useNavigate();
-
-  // ХУКИ ВСЕГДА СВЕРХУ!
   const { trainingId: trainingIdStr, lessonId: lessonIdStr } = useParams<{ trainingId: string; lessonId: string }>();
   const trainingId = Number(trainingIdStr);
   const lessonId = Number(lessonIdStr);
 
-  // контент урока
   const { data, isLoading, isError, refetch } = useGetLessonAdminQuery(
     { id: lessonId, populate: true },
     { skip: !lessonId }
   );
 
-  // избранное
   const { isFav, toggle, pending } = useLessonFavorite(lessonId, trainingId);
 
-  if (isLoading) {
-    return (
-      <div className="preview">
-        <div style={{ padding: 16 }}>Загрузка…</div>
-      </div>
-    );
-  }
-
-  if (isError || !data?.data) {
-    return (
-      <div className="preview">
-        <div style={{ padding: 16 }}>
-          Не удалось загрузить урок. <button onClick={() => refetch()}>Повторить</button>
-        </div>
-      </div>
-    );
-  }
-
-  const lesson = data.data;
-  const imageSrc = lesson.coverUrl || Card1;
-  const title = lesson.title || "Урок";
-  const subtitle = lesson.duration || (lesson.type ? String(lesson.type).toUpperCase() : undefined);
-  const description = lesson.description || "Описание";
+  const lesson = data?.data;
+  const title = lesson?.title || "Урок";
+  const subtitle = lesson?.duration || (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
+  const description = lesson?.description || "Описание";
+  const imageSrc = lesson?.coverUrl || Card1;
 
   const sections: Section[] = useMemo(() => {
     const paragraphs = htmlToParagraphs((lesson as any)?.content?.html);
@@ -80,6 +57,24 @@ export default function LessonTextPage() {
       },
     ];
   }, [lesson, description]);
+
+  if (isLoading) {
+    return (
+      <div className="preview">
+        <div style={{ padding: 16 }}>Загрузка…</div>
+      </div>
+    );
+  }
+
+  if (isError || !lesson) {
+    return (
+      <div className="preview">
+        <div style={{ padding: 16 }}>
+          Не удалось загрузить урок. <button onClick={() => refetch()}>Повторить</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="preview">
