@@ -1,21 +1,41 @@
-import { useMemo, useCallback } from 'react';
-import { useAddFavoriteMutation, useGetFavoritesQuery } from '../../api/favorites.api';
+// src/shared/lib/hooks/useLessonFavorite.ts
+import { useMemo, useState } from "react";
+import { useAddFavoriteMutation, useDeleteFavoriteMutation, useGetFavoritesQuery } from "../../api/favorites.api";
 
-export function useLessonFavorite(lessonId?: number, trainingId?: number, userId?: number) {
-  const { data } = useGetFavoritesQuery({ populate: false });
-  const [addFavorite, addState] = useAddFavoriteMutation();
+export function useLessonFavorite(lessonId?: number, trainingId?: number) {
+  const { data } = useGetFavoritesQuery({ populate: true });
+  const [addFav, addState] = useAddFavoriteMutation();
+  const [delFav, delState] = useDeleteFavoriteMutation();
+  const [localFlip, setLocalFlip] = useState<null | boolean>(null);
 
-  const isFav = useMemo(() => {
-    const list = data?.data ?? [];
+  const isFavServer = useMemo(() => {
     if (!lessonId) return false;
-    return list.some((f) => f.type === 'Lesson' && f.lessonId === lessonId);
+    const cats = data ?? [];
+    for (const c of cats) {
+      for (const f of c.favorites || []) {
+        if (f.type === "Lesson" && Number(f.lessonId) === Number(lessonId)) return true;
+      }
+    }
+    return false;
   }, [data, lessonId]);
 
-  const toggle = useCallback(async () => {
-    if (!lessonId) return;
-    if (isFav) return;
-    await addFavorite({ type: 'Lesson', lessonId, trainingId, userId }).unwrap();
-  }, [isFav, addFavorite, lessonId, trainingId, userId]);
+  const isFav = localFlip === null ? isFavServer : localFlip;
+  const pending = addState.isLoading || delState.isLoading;
 
-  return { isFav, toggle, pending: addState.isLoading };
+  const toggle = async () => {
+    if (!lessonId) return;
+    const next = !isFav;
+    setLocalFlip(next);
+    try {
+      if (next) {
+        await addFav({ type: "Lesson", lessonId, trainingId }).unwrap();
+      } else {
+        await delFav({ type: "Lesson", lessonId, trainingId }).unwrap();
+      }
+    } catch {
+      setLocalFlip(null);
+    }
+  };
+
+  return { isFav, toggle, pending };
 }

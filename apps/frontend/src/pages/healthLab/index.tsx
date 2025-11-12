@@ -4,24 +4,21 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import Bg1 from "../../assets/icons/bg1.svg";
 import Card1 from "../../assets/icons/products/card1.svg";
 import Card2 from "../../assets/icons/products/card2.svg";
-
 import "./health-lab.scss";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
-
-// API
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
 type Node = {
   _id: string;
   trainingId: number;
-  type: string;
+  type: "training" | "product";
+  tag?: string | null;
+  parentId?: number | null;
   title: string;
   description?: string | null;
   shortDescription?: string | null;
@@ -39,19 +36,16 @@ export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  // все корневые
   const roots = useMemo(() => {
     const all = (data?.data ?? []) as Node[];
-    return all.filter((n) => n.parent == null);
+    return all.filter((n) => (n as any).parentId == null);
   }, [data]);
 
-  // сам раздел «Лаборатория здоровья»
   const healthLab = useMemo(() => {
     return (
-      roots.find((r) => r.type === "health_lab") ||
+      roots.find((r) => r.tag === "health_lab") ||
       roots.find((r) => r.title?.trim().toLowerCase() === "лаборатория здоровья")
     );
   }, [roots]);
@@ -80,7 +74,6 @@ export default function Index() {
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
-
       <main className="screen">
         <div className="supportPage">
           <Title>Лаборатория здоровья</Title>
@@ -113,15 +106,14 @@ export default function Index() {
                     description={t.shortDescription || t.description || ""}
                     bgImageUrl={Bg1}
                     rightImageUrl={t.iconUrl || t.coverUrl || iconFallback(idx)}
-                    enabled
+                    enabled={t.accessStatus === "available"}
                     onClick={() => openItem(t, idx)}
                   />
                 ))}
 
                 {items.length === 0 && (
                   <div style={{ padding: 16, opacity: 0.7 }}>
-                    Раздел пуст или не найден. Добавьте в бэке корневой тренинг
-                    с type="health_lab" (или названием «Лаборатория здоровья») и его дочерние элементы.
+                    Раздел пуст или не найден.
                   </div>
                 )}
               </ScrollPanel>
