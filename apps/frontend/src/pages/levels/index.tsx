@@ -237,7 +237,7 @@ export default function Index() {
       }
     }
   };
-
+  const anyModalOpen = modalOpen || resultOpen;
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar
@@ -307,7 +307,7 @@ export default function Index() {
         </div>
       </main>
 
-      <Footer />
+      {!anyModalOpen && <Footer />}
 
       <FlexibleModal
         open={resultOpen}
