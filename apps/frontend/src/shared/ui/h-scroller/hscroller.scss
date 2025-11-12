@@ -1,26 +1,29 @@
 .hscroll {
-  position: relative;
   width: 100%;
+  /* защита от родительского скролла */
+  overscroll-behavior-x: contain;
 }
 
 .hscroll__track {
   display: flex;
-  align-items: stretch;
+  flex-wrap: nowrap;             /* не переносим в столбец */
+  gap: var(--gap, 12px);
+
   overflow-x: auto;
   overflow-y: hidden;
 
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch; /* плавность iOS */
+  scroll-behavior: smooth;
+  touch-action: pan-x pinch-zoom;     /* свайп по горизонтали на мобильных */
 
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  touch-action: pan-x;
+  /* Скрыть полосы, если хочешь */
+  scrollbar-width: none;              /* Firefox */
 }
-.hscroll__track::-webkit-scrollbar { display: none; }
+.hscroll__track::-webkit-scrollbar {
+  display: none;                      /* Chrome/Safari */
+}
 
-.hscroll__track {
-  scroll-snap-type: x proximity;
-}
+/* КЛЮЧЕВОЕ: дети не сжимаются и занимают «естественную» ширину */
 .hscroll__track > * {
-  scroll-snap-align: start;
+  flex: 0 0 auto;
 }
