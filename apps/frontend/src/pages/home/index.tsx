@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+// src/pages/home/index.tsx
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MiniCardSlider, { type MiniCardItem } from "../../widgets/card-slider-homePage";
@@ -15,10 +16,6 @@ import Card1 from "../../assets/image/image_3.png";
 import Card2 from "../../assets/image/image_4.svg";
 import Card3 from "../../assets/icons/products/cardHeadphone.svg";
 
-// + иконки для статического списка баннеров
-import MiniCard1 from "../../assets/icons/miniCard1.svg";
-import MiniCard2 from "../../assets/icons/miniCard2.svg";
-
 import "./home.scss";
 import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
 
@@ -27,68 +24,53 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
+// Бэкенд-схема (для справки):
+// {
+//   _id?: string
+//   bannerId: number
+//   miniatureUrl: string
+//   imageUrl: string
+//   linkUrl: string | null
+//   viewedUsers: number[]
+//   endDate: string | null
+// }
+
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate();
 
-  // --- API ---
   const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
 
-  const STATIC_BANNERS: MiniCardItem[] = useMemo(() => ([
-    { id: 1, title: "Дары",                    imageUrl: MiniCard1, rightText: "36" },
-    { id: 2, title: "Открылся новый раздел!",  imageUrl: MiniCard2, rightText: "5"  },
-    { id: 3, title: "Магазин",                  imageUrl: MiniCard1 },
-    { id: 4, title: "Магазин",                  imageUrl: MiniCard2 },
-    { id: 5, title: "Магазин",                  imageUrl: MiniCard1 },
-    { id: 6, title: "Магазин",                  imageUrl: MiniCard2 },
-  ]), []);
-
-  // нормализуем данные с бэка под MiniCardItem
-  const apiItems: MiniCardItem[] = useMemo(() => {
+  const items: MiniCardItem[] = useMemo(() => {
     if (!Array.isArray(banners)) return [];
-    return banners.map((b: any, i: number): MiniCardItem => ({
-      id: b.bannerId ?? b.id ?? i + 1000,
-      title: b.title ?? "Баннер",
-      imageUrl: b.miniatureUrl || b.imageUrl || MiniCard1,
-      rightText: b.rightText ?? undefined,
-    }));
+    return banners.map((b: any): MiniCardItem => {
+      // Заголовок считаем на фронте (схема его не хранит)
+      const title =
+        (b.linkUrl?.startsWith('/') ? b.linkUrl.slice(1) : b.linkUrl)?.replace(/^https?:\/\/(www\.)?/,'') ||
+        'Баннер';
+      return {
+        id: b.bannerId,
+        title,
+        imageUrl: b.miniatureUrl || b.imageUrl || '',
+        rightText: Array.isArray(b.viewedUsers) ? b.viewedUsers.length : undefined,
+      };
+    });
   }, [banners]);
 
-  // источник правды для слайдера
-  const [sliderItems, setSliderItems] = useState<MiniCardItem[]>(
-    apiItems.length ? apiItems : STATIC_BANNERS
-  );
-
-  // как только бэк «проснулся» — подменяем статику на реальные данные
-  useEffect(() => {
-    if (apiItems.length) setSliderItems(apiItems);
-  }, [apiItems]);
-
-  // клик по баннеру: отправить просмотр, сдвинуть баннер в конец, перейти по маршруту
   const handleCardClick = (it: MiniCardItem) => {
-    // 1) отметить как просмотренный на бэке (если бэк недоступен — просто игнор)
+    // отметить просмотр
     addView(it.id as any).catch(() => {});
 
-    setSliderItems((prev) => {
-      const idx = prev.findIndex((x) => String(x.id) === String(it.id));
-      if (idx < 0) return prev;
-      const next = prev.slice();
-      const [picked] = next.splice(idx, 1);
-      next.push(picked);
-      return next;
-    });
+    // найти исходный баннер, чтобы взять linkUrl
+    const src: any = (banners as any[]).find(b => String(b.bannerId) === String(it.id));
+    const url: string = src?.linkUrl || '/';
 
-    const routes: Record<string | number, string> = {
-      1: '/gifts',
-      2: '/practice',
-      3: '/store',
-      4: '/store',
-      5: '/store',
-      6: '/store',
-    };
-    const path = routes[it.id] ?? '/';
-    nav(path);
+    if (url.startsWith('/')) {
+      nav(url);                     // внутренние роуты
+    } else {
+      window.open(url, '_blank');   // внешние ссылки/телега
+    }
   };
 
   return (
@@ -96,16 +78,11 @@ export default function SupportPage() {
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
-        <MiniCardSlider items={sliderItems} onItemClick={handleCardClick} />
+        <MiniCardSlider items={items} onItemClick={handleCardClick} />
 
         <div className="supportPage">
           <div className="supportPage__cards" style={{ gap: "10px" }}>
-            <IncomeTile
-              title="Академия духа"
-              showIncome={false}
-              imageUrl={Card1}
-              to="/academy"
-            />
+            <IncomeTile title="Академия духа" showIncome={false} imageUrl={Card1} to="/academy" />
 
             <FeatureTile
               className="featureTile--noBtn"
@@ -114,7 +91,6 @@ export default function SupportPage() {
               bgImageUrl={Bg2}
               enabled
               rightImageUrl={WhiteImg}
-              onOpen={undefined}
               to="/products"
             />
 
@@ -142,7 +118,6 @@ export default function SupportPage() {
               bgImageUrl={Bg2}
               enabled
               rightImageUrl={HimicalImg}
-              onOpen={undefined}
               to="/health-lab"
             />
           </div>
