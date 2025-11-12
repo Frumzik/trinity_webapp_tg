@@ -40,6 +40,9 @@ const Index = () => {
 
   const { data: stats } = useGetReferralsStatsQuery()
 
+  const BOT_USERNAME = 'TrinityFrontTestBot';
+
+
   const displayName = useMemo(() => {
     if (u?.name) return u.name
     if (tg?.first_name || tg?.last_name) return [tg?.first_name, tg?.last_name].filter(Boolean).join(' ')
@@ -51,14 +54,14 @@ const Index = () => {
   }, [u, tg])
 
   const avatarUrl = useMemo(() => {
-    return u?.avatarUrl || tg?.photo_url || avatarFrom(displayUsername, displayName)
+    return (u as any)?.avatarUrl || (tg as any)?.photo_url || avatarFrom(displayUsername, displayName)
   }, [u, tg, displayUsername, displayName])
 
   const balanceText = useMemo(() => `${u?.balance ?? 0} OM`, [u])
 
   const premium = useMemo(() => {
-    const type = u?.subscription?.type || 'free'
-    return type !== 'free'
+    const type = typeof (u as any)?.subscription === 'object' && (u as any)?.subscription ? (u as any).subscription.type : 'free'
+    return type && type !== 'free'
   }, [u])
 
   const totalEarn = useMemo(() => (stats ?? []).reduce((s, x) => s + (x.totalEarn || 0), 0), [stats])
@@ -69,8 +72,44 @@ const Index = () => {
     setOpenModal(true);
   }
 
+  const pickParentId = (u?: any) =>
+    u?.userId ?? u?.tgId ?? (typeof u?._id === 'string' ? u._id : undefined);
+
+  const b64url = (s: string) =>
+    btoa(unescape(encodeURIComponent(s)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
+
+  const inviteHref = useMemo(() => {
+    const parentId = pickParentId(u);
+    const baseFromEnv = "https://app.3nity.space";
+    const isLocal = typeof window !== 'undefined' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(window.location.origin);
+    const baseOrigin = (!isLocal && typeof window !== 'undefined') ? window.location.origin : undefined;
+    const base =
+      (baseFromEnv && baseFromEnv.replace(/\/+$/, '')) ||
+      (baseOrigin && baseOrigin.replace(/\/+$/, '')) ||
+      'https://app.3nity.space';
+
+    const siteLink = (() => {
+      const p = (u?.referralPath || '').trim();
+      if (!p) return base;
+      return /^https?:\/\//i.test(p) ? p : `${base}${p.startsWith('/') ? '' : '/'}${p}`;
+    })();
+
+    const payload = parentId ? b64url(JSON.stringify({ parentId })) : '';
+    const botDeepLink = payload
+      ? `https://t.me/${BOT_USERNAME}?start=${payload}`
+      : `https://t.me/${BOT_USERNAME}`;
+
+    const share = new URL('https://t.me/share/url');
+    share.searchParams.set('url', botDeepLink);
+    share.searchParams.set('text', 'Присоединяйся к проекту');
+    return share.toString();
+  }, [u]);
+
   return (
-    <div className="app">
+    <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
       <main className="screen" style={{ paddingTop: "20px" }}>
         <Title
@@ -156,7 +195,7 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton href="https://t.me/share/url?url=..." target="_blank">Пригласить друга</GradientButton>
+          <GradientButton href={inviteHref} target="_blank">Пригласить друга</GradientButton>
         </div>
       </div>
 

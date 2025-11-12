@@ -150,6 +150,7 @@ export default function Index() {
       <TopBar
         title="Ступени духа"
         rightIconUrl={helpIcon}
+        // onBack={() => navigate("/", { replace: true })}
         onRightClick={() =>
           window.open(
             "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
