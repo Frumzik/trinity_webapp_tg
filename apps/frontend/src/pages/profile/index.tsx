@@ -71,30 +71,27 @@ const Index = () => {
     setOpenModal(true);
   }
 
-  const pickTgParentId = (u?: any, tg?: any) => {
-    const fromTg = typeof tg?.id === "number" ? tg.id : undefined; // initDataUnsafe.user.id
-    const fromUser = typeof u?.tgId === "number" ? u.tgId
-      : typeof u?.userId === "number" ? u.userId
-        : undefined;
-    return fromTg ?? fromUser;
+  const pickAppUserId = (u?: any) => {
+    // чаще всего это число; но если строка — просто приведём к строке
+    const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
+    return id == null ? undefined : String(id);
   };
 
   const inviteHref = useMemo(() => {
-    const parentId = pickTgParentId(u, tg); // <- чистая цифра
+    const appUserId = pickAppUserId(u);
     const BOT_USERNAME = "TrinityFrontTestBot";
     const WEBAPP_SHORT_NAME = "TrinityFront";
 
     const botDeepLink =
       `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
-      (parentId != null ? `?startapp=${String(parentId)}` : "");
+      (appUserId ? `?startapp=${appUserId}` : "");
 
-    // ссылка на нативный шэр в Telegram
     const share = new URL("https://t.me/share/url");
     share.searchParams.set("url", botDeepLink);
     share.searchParams.set("text", "Присоединяйся к проекту ✨");
 
     return share.toString();
-  }, [u, tg]);
+  }, [u]);
 
   return (
     <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
