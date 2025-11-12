@@ -31,6 +31,72 @@ const numFromTitle = (t?: string) => {
   const m = (t || "").match(/\d+/);
   return m ? Number(m[0]) : undefined;
 };
+type LocalProgress = {
+  seconds: number;
+  duration: number;
+  status: 'in_progress' | 'completed';
+};
+const LP_KEY = 'lessonProgress';
+
+const lpLoad = (): Record<string, LocalProgress> => {
+  try { return JSON.parse(localStorage.getItem(LP_KEY) || '{}'); } catch { return {}; }
+};
+const lpSave = (obj: Record<string, LocalProgress>) => {
+  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+};
+
+/** Прочитать legacy-ключ вида lessonProgress:<id> из плеера */
+const readLegacyLesson = (lessonId: number | string) => {
+  try {
+    const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
+    if (!raw) return null;
+    const j = JSON.parse(raw); // { lessonId, current, duration, completed }
+    const current = Math.max(0, Math.round(j?.current || 0));
+    const duration = Math.max(0, Math.round(j?.duration || 0));
+    const completed = Boolean(j?.completed) || (duration > 0 && current >= duration);
+    return { seconds: current, duration, status: completed ? 'completed' as const : 'in_progress' as const };
+  } catch { return null; }
+};
+
+/** Один раз мигрируем все legacy-записи в единый объект LP_KEY */
+const lpMigrateFromLegacy = () => {
+  const lp = lpLoad();
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i) || '';
+      if (!key.startsWith('lessonProgress:')) continue;
+      const id = key.split(':')[1];
+      if (!id) continue;
+      const legacy = readLegacyLesson(id);
+      if (legacy) {
+        // аккуратно объединяем
+        const prev = lp[id];
+        lp[id] = prev
+          ? {
+            seconds: Math.max(prev.seconds || 0, legacy.seconds || 0),
+            duration: Math.max(prev.duration || 0, legacy.duration || 0),
+            status: (prev.status === 'completed' || legacy.status === 'completed') ? 'completed' : 'in_progress',
+          }
+          : legacy;
+      }
+    }
+    lpSave(lp);
+  } catch {}
+};
+
+const isLessonCompletedLocal = (lessonId: number | string, store?: Record<string, LocalProgress>) => {
+  const lp = store ?? lpLoad();
+  const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId); // учитываем и legacy
+  if (!rec) return false;
+  return rec.status === 'completed' || (rec.duration > 0 && rec.seconds >= rec.duration);
+};
+
+const isTrainingCompletedLocal = (node: BNode) => {
+  const lp = lpLoad();
+  const lessons = node.lessons ?? [];
+  if (!lessons.length) return false;
+  return lessons.every((l: any) => l.progressStatus === 'completed' || isLessonCompletedLocal(l.lessonId, lp));
+};
 const minutesFromDuration = (d?: string | null) => {
   if (!d) return undefined;
   const m = d.match(/\d+/);
@@ -112,21 +178,28 @@ export default function Index() {
     const stages = ((currentLevel?.childrens ?? []) as BNode[]).filter(
       (s) => s.tag === "stage" || typeof s.stage === "number"
     );
-    return stages.map((s): LevelItem => ({
-      id: String(s.trainingId),
-      group,
-      title: s.title,
-      subtitle: undefined,
-      durationMin: minutesFromDuration(s.duration),
-      image: s.coverUrl || "",
-      status:
-        s.accessStatus === "available"
-          ? "available"
-          : s.progressStatus === "completed"
-            ? "done"
-            : "locked",
-      priceUSDT: (s.salePrice ?? s.price) ?? undefined,
-    }));
+
+    return stages.map((s): LevelItem => {
+      const doneLocal = isTrainingCompletedLocal(s);
+
+      const status: LevelItem["status"] =
+        s.progressStatus === "completed" || doneLocal
+          ? "done"
+          : s.accessStatus === "available"
+            ? "available"
+            : "locked";
+
+      return {
+        id: String(s.trainingId),
+        group,
+        title: s.title,
+        subtitle: undefined,
+        durationMin: minutesFromDuration(s.duration),
+        image: s.coverUrl || "",
+        status,
+        priceUSDT: (s.salePrice ?? s.price) ?? undefined,
+      };
+    });
   }, [currentLevel, group]);
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
@@ -150,11 +223,9 @@ export default function Index() {
     }
   };
 
-  // ---- модалки результата ----
   const openSuccessModal = (titles: string[]) => {
-    setResultTitle("Покупка оформлена");
+    setResultTitle("Новый уровень открыт");
     setResultItems(titles);
-    setResultDesc("Доступ к ступеням открыт. Приятной практики!");
     setResultCta("Открыть");
     const first = purchaseLevels.find((pl) => titles.includes(pl.title));
     setResultOnCta(() => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false)));
@@ -164,10 +235,7 @@ export default function Index() {
   const openInsufficientModal = (needOM?: number, balanceOM?: number) => {
     setResultTitle("Недостаточно средств");
     const lines: string[] = [];
-    if (typeof needOM === "number") lines.push(`Требуется: ${needOM} OM`);
-    if (typeof balanceOM === "number") lines.push(`Доступно: ${balanceOM} OM`);
     setResultItems(lines.length ? lines : undefined);
-    setResultDesc("Пополните баланс и попробуйте снова.");
     setResultCta(undefined);
     setResultOnCta(undefined);
     setResultOpen(true);
@@ -175,9 +243,8 @@ export default function Index() {
 
   const openErrorModal = (message?: string) => {
     const msg = Array.isArray(message) ? message.join("\n") : message;
-    setResultTitle("Ошибка");
+    setResultTitle("Не удалось выполнить покупку. Попробуйте позже.");
     setResultItems(undefined);
-    setResultDesc(msg || "Не удалось выполнить покупку. Попробуйте позже.");
     setResultCta(undefined);
     setResultOnCta(undefined);
     setResultOpen(true);
@@ -202,8 +269,7 @@ export default function Index() {
         sale: Boolean(_p.discountedOM), // скидка при покупке всех
       }).unwrap();
 
-      // 2) оптимистично помечаем купленные тренинги доступными в кэше,
-      //    чтобы UI обновился мгновенно
+
       dispatch(
         learningApi.util.updateQueryData("getTrainingTree", undefined, (draft: any) => {
           const nodes: any[] = draft?.data ?? [];
@@ -219,7 +285,6 @@ export default function Index() {
           }
         })
       );
-
       // 3) модалка успеха
       const titles = purchaseLevels
         .filter((pl) => ids.includes(Number(pl.id)))

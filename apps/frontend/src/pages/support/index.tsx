@@ -24,7 +24,7 @@ export default function SupportPage() {
 
           <div className="supportPage__cards">
             <GreyTile
-              title="О проекте"
+              title="Канал"
               imageUrl={ChannelImg}
               buttonText={"Перейти"}
               href="#"
