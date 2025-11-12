@@ -70,7 +70,6 @@ export default function SupportPage() {
     // 1) отметить как просмотренный на бэке (если бэк недоступен — просто игнор)
     addView(it.id as any).catch(() => {});
 
-    // 2) локально отправить в конец
     setSliderItems((prev) => {
       const idx = prev.findIndex((x) => String(x.id) === String(it.id));
       if (idx < 0) return prev;
@@ -80,7 +79,6 @@ export default function SupportPage() {
       return next;
     });
 
-    // 3) навигация (демо-роуты)
     const routes: Record<string | number, string> = {
       1: '/gifts',
       2: '/practice',
