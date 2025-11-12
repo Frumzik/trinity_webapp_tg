@@ -8,6 +8,7 @@ export interface IBanner {
   miniatureUrl: string;
   imageUrl: string;
   linkUrl: string | null;
+  description: string | null;
 
   viewedUsers: number[];
   endDate: Date | null;

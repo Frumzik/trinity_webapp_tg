@@ -9,6 +9,7 @@ export class BannerEntity implements IBanner {
   miniatureUrl!: string;
   imageUrl!: string;
   linkUrl: string | null = null;
+  description: string | null = null;
 
   viewedUsers: number[] = [];
   endDate: Date | null = null;

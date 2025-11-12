@@ -1,49 +1,40 @@
-import { forwardRef, useRef, useMemo } from "react";
-import { useInertiaDragScroll } from "../../lib/hooks/useInertiaDragScroll";
-import "./hscroller.scss";
+
+import { forwardRef } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode, Mousewheel } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/free-mode";
 
 type Props = {
   className?: string;
-  trackClassName?: string;
+  trackClassName?: string; // не нужен, оставлен для совместимости
   children: React.ReactNode;
-  friction?: number;
-  minVelocity?: number;
-  gap?: number;
+  gap?: number; // в px
 };
 
-const isTouch = () =>
-  typeof window !== "undefined" &&
-  (("ontouchstart" in window) ||
-    (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
-
 const HScroller = forwardRef<HTMLDivElement, Props>(function HScroller(
-  { className, trackClassName, children, friction, minVelocity, gap = 12 },
-  refFromParent
+  { className, children, gap = 12 },
+  _ref
 ) {
-  const innerRef = useRef<HTMLDivElement>(null);
-  const ref = (refFromParent as React.RefObject<HTMLDivElement>) || innerRef;
-
-  const bind = useMemo(() => {
-    if (isTouch()) return {};
-    return useInertiaDragScroll(ref, {
-      axis: "x",
-      wheelToAxis: "auto",
-      friction,
-      minVelocity,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref, friction, minVelocity]);
-
   return (
     <div className={["hscroll", className].filter(Boolean).join(" ")}>
-      <div
-        ref={ref}
-        className={["hscroll__track", trackClassName].filter(Boolean).join(" ")}
-        style={{ gap }}
-        {...bind}
+      <Swiper
+        modules={[FreeMode, Mousewheel]}
+        slidesPerView="auto"           // ширина берётся из контента
+        spaceBetween={gap}             // отступы между карточками
+        freeMode                        // инерция/флик
+        mousewheel={{ forceToAxis: true, releaseOnEdges: true }} // колесо вбок
+        grabCursor                      // курсор-рука на десктопе
       >
-        {children}
-      </div>
+        {/* каждую «карточку» завернём в SwiperSlide с auto-width */}
+        {Array.isArray(children)
+          ? children.map((child: any, i) => (
+            <SwiperSlide key={child?.key ?? i} style={{ width: "auto" }}>
+              {child}
+            </SwiperSlide>
+          ))
+          : <SwiperSlide style={{ width: "auto" }}>{children}</SwiperSlide>}
+      </Swiper>
     </div>
   );
 });
