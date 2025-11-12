@@ -61,7 +61,7 @@ export default function Footer() {
           <span className="icon">
             <img src={ProfileIcon} alt="" />
           </span>
-          <span>Личный кабинет</span>
+          <span style={{width:64}}>Личный кабинет</span>
         </button>
 
         <button

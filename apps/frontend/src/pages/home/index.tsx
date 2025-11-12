@@ -27,21 +27,19 @@ export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate();
 
-  const { data: banners = [] } = useGetBannersQuery(); // ← уже нормализованные
+  const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
 
   const handleCardClick = (it: { id: string | number }) => {
     const src = banners.find(b => String(b.id) === String(it.id));
     if (!src) return;
 
-    // отметка просмотра — если id число
     const idNum = Number(src.id);
     if (Number.isFinite(idNum)) addView(idNum as any).catch(() => {});
 
     const url = (src.linkUrl || '').trim();
     if (!url) return;
 
-    // абсолютная ссылка → открываем в внешнем браузере/вкладке
     if (/^(https?:)?\/\//i.test(url)) {
       const tg = (window as any)?.Telegram?.WebApp;
       if (tg?.openLink) tg.openLink(url);
@@ -49,7 +47,6 @@ export default function SupportPage() {
       return;
     }
 
-    // относительный путь → роутинг внутри SPA
     const path = url.startsWith('/') ? url : `/${url}`;
     nav(path);
   };
@@ -59,10 +56,9 @@ export default function SupportPage() {
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
-        {/* тут просто отдаём banners (они уже с title/imageUrl/rightText) */}
         <MiniCardSlider items={banners} onItemClick={handleCardClick} />
 
-        <div className="supportPage">
+        <div className="supportPage" style={{marginTop:10}}>
           <div className="supportPage__cards" style={{ gap: "10px" }}>
             <IncomeTile title="Академия духа" showIncome={false} imageUrl={Card1} to="/academy" />
 
