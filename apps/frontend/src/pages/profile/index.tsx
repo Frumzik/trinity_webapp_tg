@@ -40,7 +40,6 @@ const Index = () => {
 
   const { data: stats } = useGetReferralsStatsQuery()
 
-  const BOT_USERNAME = 'TrinityFrontTestBot';
 
 
   const displayName = useMemo(() => {
@@ -75,36 +74,25 @@ const Index = () => {
   const pickParentId = (u?: any) =>
     u?.userId ?? u?.tgId ?? (typeof u?._id === 'string' ? u._id : undefined);
 
-  const b64url = (s: string) =>
-    btoa(unescape(encodeURIComponent(s)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
+
+  function b64url(s: string) {
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
 
   const inviteHref = useMemo(() => {
     const parentId = pickParentId(u);
-    const baseFromEnv = "https://app.3nity.space";
-    const isLocal = typeof window !== 'undefined' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(window.location.origin);
-    const baseOrigin = (!isLocal && typeof window !== 'undefined') ? window.location.origin : undefined;
-    const base =
-      (baseFromEnv && baseFromEnv.replace(/\/+$/, '')) ||
-      (baseOrigin && baseOrigin.replace(/\/+$/, '')) ||
-      'https://app.3nity.space';
+    const BOT_USERNAME = "TrinityFrontTestBot";
+    const WEBAPP_SHORT_NAME = "TrinityFront";
 
-    const siteLink = (() => {
-      const p = (u?.referralPath || '').trim();
-      if (!p) return base;
-      return /^https?:\/\//i.test(p) ? p : `${base}${p.startsWith('/') ? '' : '/'}${p}`;
-    })();
+    const payload = parentId ? b64url(JSON.stringify({ parentId })) : "";
 
-    const payload = parentId ? b64url(JSON.stringify({ parentId })) : '';
-    const botDeepLink = payload
-      ? `https://t.me/${BOT_USERNAME}?start=${payload}`
-      : `https://t.me/${BOT_USERNAME}`;
+    const botDeepLink =
+      `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
+      (payload ? `?startapp=${encodeURIComponent(payload)}` : "");
+    const share = new URL("https://t.me/share/url");
+    share.searchParams.set("url", botDeepLink);
+    share.searchParams.set("text", "Присоединяйся к проекту ✨");
 
-    const share = new URL('https://t.me/share/url');
-    share.searchParams.set('url', botDeepLink);
-    share.searchParams.set('text', 'Присоединяйся к проекту');
     return share.toString();
   }, [u]);
 
