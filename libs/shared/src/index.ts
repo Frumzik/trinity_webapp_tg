@@ -26,6 +26,7 @@ export * from './transactions/transactions.interface.js';
 export * from './transactions/transactions.contract.js';
 
 export * from './referrals/referrals.interface.js';
+export * from './referrals/referrals.events.js';
 
 export * from './purchases/purchases.contract.js';
 export * from './purchases/purchases.interface.js';

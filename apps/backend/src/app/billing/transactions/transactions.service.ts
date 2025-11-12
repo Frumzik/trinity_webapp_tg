@@ -1,25 +1,40 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { Transaction, TransactionEntity } from '../../billing';
 import { TransactionsRepository } from './repositories';
 import { CounterType, TransactionCreateRequestDto } from '@trinity/shared';
 import { CountersService } from '../../service';
+import { UsersService } from '../../account';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly transactionsRepository: TransactionsRepository,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService
   ) {}
 
   async create(dto: TransactionCreateRequestDto): Promise<TransactionEntity> {
     try {
+      const user = await this.usersService.find({ userId: dto.userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
       const newTransaction = new TransactionEntity({
         transactionId: await this.countersService.saveNextSequence(
           CounterType.TRANSACTION_ID
         ),
-        user: dto.user._id,
-        userId: dto.user.userId,
+        user: user._id,
+        userId: user.userId,
 
         type: dto.type,
         date: new Date(),

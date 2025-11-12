@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { ReferralsRepository } from './repositories';
@@ -90,6 +91,18 @@ export class ReferralsService {
     }
   }
 
+  async findAll(condition: FilterQuery<Referral>): Promise<ReferralEntity[]> {
+    try {
+      const referrals = await this.referralsRepository.findAll(condition);
+
+      return referrals;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске реферала';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async delete(
     condition: FilterQuery<Referral>
   ): Promise<{ deleted: boolean }> {
@@ -118,6 +131,29 @@ export class ReferralsService {
     }
   }
 
+  async incEarn(
+    condition: FilterQuery<Referral>,
+    updateData: { inc: number }
+  ): Promise<ReferralEntity> {
+    try {
+      const referral = await this.find(condition);
+
+      if (!referral) {
+        throw new NotFoundException('Реферал не найден');
+      }
+
+      const updated = await this.referralsRepository.update(
+        referral.incEarn(updateData.inc)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске реферала';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async getReferralStats(
     partnerId: number
   ): Promise<{ level: number; count: number; totalEarn: number }[]> {
@@ -135,12 +171,12 @@ export class ReferralsService {
   }
 
   async getReferralList(partnerId: number): Promise<
-      {
-        level: number;
-        totalEarn: number;
-        referrals: { referralId: number; earn: number; user: IUser | null }[];
-      }[]
-    >  {
+    {
+      level: number;
+      totalEarn: number;
+      referrals: { referralId: number; earn: number; user: IUser | null }[];
+    }[]
+  > {
     try {
       const referralList = await this.referralsRepository.getReferralList(
         partnerId
