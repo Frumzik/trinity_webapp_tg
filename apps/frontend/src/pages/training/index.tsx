@@ -25,8 +25,13 @@ export default function Index() {
   const lessons = useMemo(() => node?.lessons ?? [], [node])
 
   useEffect(() => {
-    if (node && lessons.length && children.length === 0) navigate(`/level/${node.trainingId}`, { replace: true })
-  }, [node, lessons, children, navigate])
+    if (node && lessons.length && children.length === 0) {
+      navigate(`/level/${node.trainingId}`, {
+        replace: true,
+        state: { returnTo: `/trainings/${node.trainingId}` }, // ← важное
+      });
+    }
+  }, [node, lessons, children, navigate]);
 
   const pickBg = (t?: string) => (t === 'stages_spirit' ? Bg1 : t === 'course' ? OrangeBg : Bgblue)
 

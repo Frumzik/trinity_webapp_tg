@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ScrollPanel from "../../../shared/ui/scroll-panel/scroll-panel";
 import Hero from "../../preview/ui/Hero";
@@ -7,9 +7,9 @@ import Sheet from "../../preview/ui/Sheet";
 import TextPage from "../../../shared/ui/TextPage";
 import Card1 from "../../../assets/image/bg.svg";
 import "./lesson-text.scss";
-
 import { useGetLessonAdminQuery } from "../../../shared/api/contentAdmin.api";
-import { smartBack } from '../../../shared/navigation/smartBack';
+import { smartBack } from "../../../shared/navigation/smartBack";
+import { useLessonFavorite } from "../../../shared/lib/hooks/useLessonFavorite";
 
 function htmlToParagraphs(html?: string | null): string[] {
   if (!html) return [];
@@ -19,8 +19,7 @@ function htmlToParagraphs(html?: string | null): string[] {
     .replace(/<li[^>]*>/gi, "• ")
     .replace(/<\/li>/gi, "\n")
     .replace(/<\/h[1-6]>/gi, "\n\n")
-    .replace(/<[^>]+>/g, ""); // убрать прочие теги
-  // нормализуем пустые строки
+    .replace(/<[^>]+>/g, "");
   txt = txt
     .split("\n")
     .map((s) => s.trim())
@@ -32,39 +31,32 @@ type Section = { title: string; paragraphs: string[] };
 
 export default function LessonTextPage() {
   const navigate = useNavigate();
-  const { trainingId, lessonId } = useParams<{ trainingId: string; lessonId: string }>();
-  const [fav, setFav] = useState(false);
+  const { trainingId: trainingIdStr, lessonId: lessonIdStr } = useParams<{ trainingId: string; lessonId: string }>();
+  const trainingId = Number(trainingIdStr);
+  const lessonId = Number(lessonIdStr);
 
-  // Тянем урок по lessonId, populate=true чтобы был content/html
   const { data, isLoading, isError, refetch } = useGetLessonAdminQuery(
-    { id: Number(lessonId), populate: true },
+    { id: lessonId, populate: true },
     { skip: !lessonId }
   );
 
+  const { isFav, toggle, pending } = useLessonFavorite(lessonId, trainingId);
+
   const lesson = data?.data;
-  const imageSrc = lesson?.coverUrl || Card1;
   const title = lesson?.title || "Урок";
   const subtitle = lesson?.duration || (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
   const description = lesson?.description || "Описание";
+  const imageSrc = lesson?.coverUrl || Card1;
 
   const sections: Section[] = useMemo(() => {
     const paragraphs = htmlToParagraphs((lesson as any)?.content?.html);
-    // Если есть явные подзаголовки в html — можно разбивать умнее.
-    // Сейчас — один раздел «Описание».
     return [
       {
-        title: lesson?.description || "Описание",
+        title: description,
         paragraphs: paragraphs.length ? paragraphs : ["Контент появится позже."],
       },
     ];
-  }, [lesson]);
-
-  // const backToLevel = () => {
-  //   navigate(`/level/${trainingId}`, { replace: true, state: {} });
-  //   requestAnimationFrame(() => {
-  //     try { window.history.replaceState({}, document.title); } catch {}
-  //   });
-  // };
+  }, [lesson, description]);
 
   if (isLoading) {
     return (
@@ -78,8 +70,7 @@ export default function LessonTextPage() {
     return (
       <div className="preview">
         <div style={{ padding: 16 }}>
-          Не удалось загрузить урок.{" "}
-          <button onClick={() => refetch()}>Повторить</button>
+          Не удалось загрузить урок. <button onClick={() => refetch()}>Повторить</button>
         </div>
       </div>
     );
@@ -89,9 +80,9 @@ export default function LessonTextPage() {
     <div className="preview">
       <Hero imageSrc={imageSrc} title={title} subtitle={subtitle}>
         <TopActions
-          isFav={fav}
+          isFav={isFav}
           onBack={() => smartBack(navigate, `/level/${trainingId}`)}
-          onToggleFav={() => setFav((v) => !v)}
+          onToggleFav={() => !pending && toggle()}
           onMenu={() => {}}
         />
       </Hero>
