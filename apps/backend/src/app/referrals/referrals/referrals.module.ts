@@ -5,6 +5,10 @@ import { Referral, ReferralSchema } from './models';
 import { ReferralsRepository } from './repositories';
 import { UsersModule } from '../../account';
 import { ReferralsController } from './referrals.controller';
+import { ReferralsListener } from './referrals.listener';
+import { ContentModule } from '../../lms';
+import { FundsModule } from '../funds';
+import { PurchaseModule, TransactionsModule } from '../../billing';
 
 @Module({
   imports: [
@@ -12,8 +16,12 @@ import { ReferralsController } from './referrals.controller';
       { name: Referral.name, schema: ReferralSchema },
     ]),
     forwardRef(() => UsersModule),
+    forwardRef(() => ContentModule),
+    FundsModule,
+    TransactionsModule,
+    PurchaseModule
   ],
-  providers: [ReferralsService, ReferralsRepository],
+  providers: [ReferralsService, ReferralsRepository, ReferralsListener],
   exports: [ReferralsService],
   controllers: [ReferralsController],
 })
