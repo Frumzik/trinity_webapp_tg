@@ -71,30 +71,30 @@ const Index = () => {
     setOpenModal(true);
   }
 
-  const pickParentId = (u?: any) =>
-    u?.userId ?? u?.tgId ?? (typeof u?._id === 'string' ? u._id : undefined);
-
-
-  function b64url(s: string) {
-    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
+  const pickTgParentId = (u?: any, tg?: any) => {
+    const fromTg = typeof tg?.id === "number" ? tg.id : undefined; // initDataUnsafe.user.id
+    const fromUser = typeof u?.tgId === "number" ? u.tgId
+      : typeof u?.userId === "number" ? u.userId
+        : undefined;
+    return fromTg ?? fromUser;
+  };
 
   const inviteHref = useMemo(() => {
-    const parentId = pickParentId(u);
+    const parentId = pickTgParentId(u, tg); // <- чистая цифра
     const BOT_USERNAME = "TrinityFrontTestBot";
     const WEBAPP_SHORT_NAME = "TrinityFront";
 
-    const payload = parentId ? b64url(JSON.stringify({ parentId })) : "";
-
     const botDeepLink =
       `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
-      (payload ? `?startapp=${encodeURIComponent(payload)}` : "");
+      (parentId != null ? `?startapp=${String(parentId)}` : "");
+
+    // ссылка на нативный шэр в Telegram
     const share = new URL("https://t.me/share/url");
     share.searchParams.set("url", botDeepLink);
     share.searchParams.set("text", "Присоединяйся к проекту ✨");
 
     return share.toString();
-  }, [u]);
+  }, [u, tg]);
 
   return (
     <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
