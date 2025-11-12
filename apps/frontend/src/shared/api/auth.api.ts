@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { baseQueryWithAuth } from './base'
 
-type RegisterTgReq = { type: 'TG'; tgId: number; pin: string; username?: string; name?: string, parentId?: number | string }
+type RegisterTgReq = { type: 'TG'; tgId: number; pin: string; username?: string; name?: string, partnerId?: number | string }
 type RegisterTgRes = { userId: number }
 type LoginTgReq = { type: 'TG'; tgId: number; pin: string }
 type LoginRes = { access_token: string }

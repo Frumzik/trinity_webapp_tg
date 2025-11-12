@@ -31,11 +31,11 @@ export default function PinCreatePage() {
   const startParam: string | undefined =
     (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param
 
-  const refParentId = useMemo(() => {
+  const refPartnerId = useMemo(() => {
     if (!startParam) return undefined
     try {
       const data = JSON.parse(decodeB64Url(startParam))
-      return data?.parentId as number | string | undefined
+      return data?.partnerId as number | string | undefined
     } catch {
       return undefined
     }
@@ -47,7 +47,7 @@ export default function PinCreatePage() {
     setErr(null);
     setLoading(true);
     try {
-      await registerTg({ type: 'TG', tgId, pin: pin1, username, name, parentId: refParentId, }).unwrap();
+      await registerTg({ type: 'TG', tgId, pin: pin1, username, name, partnerId: refPartnerId, }).unwrap();
       nav('/pin/login', { replace: true });
     } catch (e: any) {
       setErr(e?.data?.message?.[0] || e?.message || 'Ошибка регистрации');
