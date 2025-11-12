@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import PlayerPage, { type MediaTrack as UITrack, type PlayerPayload } from '../../widgets/practisePlayer';
-import { useGetLessonAdminQuery, useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
+import PlayerPage, {
+  type MediaTrack as UITrack,
+  type PlayerPayload,
+} from '../../widgets/practisePlayer';
+import {
+  useGetLessonAdminQuery,
+  useLazyGetLessonAdminQuery,
+} from '../../shared/api/contentAdmin.api';
 import { useLessonFavorite } from '../../shared/lib/hooks/useLessonFavorite';
 
 type MediaTrack = {
@@ -9,6 +15,7 @@ type MediaTrack = {
   title: string;
   subtitle?: string;
   mediaUrl?: string;
+  videoUrl?: string;
   artworkUrl?: string;
 };
 
@@ -32,16 +39,28 @@ const toUI = (t: MediaTrack, fav: boolean): UITrack => ({
   id: t.id,
   title: t.title,
   subtitle: t.subtitle,
-  mediaUrl: t.mediaUrl!,
+  mediaUrl: t.mediaUrl,
+  videoUrl: t.videoUrl,
   artworkUrl: t.artworkUrl ?? '',
   isFavorite: fav,
 });
 
-function saveLessonProgress(lessonId: number | string, current: number, duration: number, completed: boolean) {
+function saveLessonProgress(
+  lessonId: number | string,
+  current: number,
+  duration: number,
+  completed: boolean
+) {
   try {
     localStorage.setItem(
       `lessonProgress:${lessonId}`,
-      JSON.stringify({ lessonId, current, duration, completed, updatedAt: Date.now() })
+      JSON.stringify({
+        lessonId,
+        current,
+        duration,
+        completed,
+        updatedAt: Date.now(),
+      })
     );
   } catch {}
 }
@@ -50,6 +69,18 @@ const ratio = (p: PlayerPayload) => {
   const dur = Math.max(1, Math.round(p.duration || 0));
   const cur = Math.max(0, Math.round(p.current || 0));
   return cur / dur;
+};
+
+// локальная прога как на странице Level
+const lpLoad = (): Record<
+  string,
+  { seconds: number; duration: number; status: 'in_progress' | 'completed' }
+> => {
+  try {
+    return JSON.parse(localStorage.getItem('lessonProgress') || '{}');
+  } catch {
+    return {};
+  }
 };
 
 export default function PlayerScreen() {
@@ -66,8 +97,13 @@ export default function PlayerScreen() {
 
   const [queue, setQueue] = useState<MediaTrack[]>(navState?.queue ?? []);
   const [index, setIndex] = useState<number>(navState?.index ?? 0);
-  const trainingIdRef = useRef<number | string | undefined>(navState?.trainingId);
+  const trainingIdRef = useRef<number | string | undefined>(
+    navState?.trainingId
+  );
   const returnToRef = useRef<string | undefined>(navState?.returnTo);
+
+  // описание урока (для низа)
+  const [desc, setDesc] = useState<string | null>(null);
 
   const playedMsRef = useRef(0);
   const startedAtRef = useRef<number | null>(null);
@@ -80,43 +116,67 @@ export default function PlayerScreen() {
   );
 
   const currentLessonId = track ? Number(track.id) : undefined;
-  const currentTrainingId = trainingIdRef.current ? Number(trainingIdRef.current) : undefined;
-  const { isFav, toggle, pending } = useLessonFavorite(currentLessonId, currentTrainingId);
+  const currentTrainingId = trainingIdRef.current
+    ? Number(trainingIdRef.current)
+    : undefined;
+  const { isFav, toggle, pending } = useLessonFavorite(
+    currentLessonId,
+    currentTrainingId
+  );
 
+  // первичная подгрузка одиночного урока
   useEffect(() => {
     if (queue.length || !lessonRes?.data) return;
     const l: any = lessonRes.data;
     const media = l?.content?.audioUrl || l?.mediaUrl;
-    if (!media) return;
+    const vurl = l?.content?.videoUrl || l?.videoUrl;
+    if (!media && !vurl) return;
+
     trainingIdRef.current = Number(l?.parentId) || trainingIdRef.current;
     if (!returnToRef.current && trainingIdRef.current != null) {
       returnToRef.current = `/level/${trainingIdRef.current}`;
     }
+    setDesc(l?.description ?? null);
+
     setQueue([
       {
         id: l.lessonId,
         title: l.title,
         subtitle: l.duration ?? undefined,
         mediaUrl: media,
+        videoUrl: vurl,
         artworkUrl: l.coverUrl ?? undefined,
       },
     ]);
     setIndex(0);
   }, [lessonRes, queue.length]);
 
+  // догружаем медиа/описание для элемента очереди
   useEffect(() => {
     (async () => {
-      if (!track || track.mediaUrl) return;
+      if (!track || track.mediaUrl || track.videoUrl) return;
       try {
-        const res = await fetchLesson({ id: Number(track.id), populate: true }).unwrap();
+        const res = await fetchLesson({
+          id: Number(track.id),
+          populate: true,
+        }).unwrap();
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
-        if (media)
-          setQueue((q) => q.map((t, i) => (i === index ? { ...t, mediaUrl: media } : t)));
+        const vurl = l?.content?.videoUrl || l?.videoUrl;
+        setDesc(l?.description ?? null);
+
+        if (media || vurl) {
+          setQueue((q) =>
+            q.map((t, i) =>
+              i === index ? { ...t, mediaUrl: media, videoUrl: vurl } : t
+            )
+          );
+        }
       } catch {}
     })();
-  }, [track?.id, track?.mediaUrl, index, fetchLesson]);
+  }, [track?.id, track?.mediaUrl, track?.videoUrl, index, fetchLesson]);
 
+  // таймер «прослушано/просмотрено»
   useEffect(() => {
     if (!track) return;
     if (tickerRef.current) {
@@ -182,8 +242,10 @@ export default function PlayerScreen() {
     });
   };
 
-  const onPrev = queue.length > 1 ? () => requestConfirm({ kind: 'prev' }) : undefined;
-  const onNext = queue.length > 1 ? () => requestConfirm({ kind: 'next' }) : undefined;
+  const onPrev =
+    queue.length > 1 ? () => requestConfirm({ kind: 'prev' }) : undefined;
+  const onNext =
+    queue.length > 1 ? () => requestConfirm({ kind: 'next' }) : undefined;
   const onBackTop = () => requestConfirm({ kind: 'back' });
 
   const handleCompleted = () => {
@@ -215,12 +277,12 @@ export default function PlayerScreen() {
     const p: PlayerPayload =
       st.track && typeof st.duration === 'number'
         ? {
-          track: st.track,
-          current: st.current ?? 0,
-          duration: st.duration ?? 0,
-          progressPct: st.progressPct ?? 0,
-          completed: false,
-        }
+            track: st.track,
+            current: st.current ?? 0,
+            duration: st.duration ?? 0,
+            progressPct: st.progressPct ?? 0,
+            completed: false,
+          }
         : buildPayload(false);
 
     if (st.decision === 'save') {
@@ -230,10 +292,13 @@ export default function PlayerScreen() {
 
     const a = st.meta.action;
     if (a === 'back') {
-      const url =
-        returnToRef.current ??
-        (typeof trainingIdRef.current === 'number' ? `/level/${trainingIdRef.current}` : '/levels');
-      navigate(url, { replace: true });
+      if (returnToRef.current) {
+        navigate(returnToRef.current, { replace: true });
+      } else if (typeof trainingIdRef.current === 'number') {
+        navigate(`/level/${trainingIdRef.current}`, { replace: true });
+      } else {
+        navigate('/levels', { replace: true });
+      }
     } else if (a === 'prev') {
       const len = st.queue?.length ?? queue.length;
       if (len > 0) setIndex((i) => (i - 1 + len) % len);
@@ -246,7 +311,69 @@ export default function PlayerScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!track || !track.mediaUrl) {
+  // нижний блок: прогресс и описание
+  const progressNode = (() => {
+    const lp = lpLoad();
+    const rec =
+      currentLessonId != null ? lp[String(currentLessonId)] : undefined;
+    const donePct = rec?.duration
+      ? Math.min(
+          100,
+          Math.round((rec.seconds / Math.max(1, rec.duration)) * 100)
+        )
+      : 0;
+
+    return (
+      <div>
+        {desc && <div className="player__desc">{desc}</div>}
+        <div className="player__progress">
+          <div
+            className="player__progress-bar"
+            style={{ ['--done' as any]: `${donePct}%` }}
+          />
+          <div className="player__progress-text">{donePct}%</div>
+        </div>
+      </div>
+    );
+  })();
+
+  // фуллскрин/ландшафт
+  const [isFs, setIsFs] = useState(false);
+  const toggleFullscreenLandscape = async () => {
+    const el = document.fullscreenElement
+      ? document
+      : (document.querySelector('.player.player--video') as HTMLElement | null);
+    try {
+      if (!document.fullscreenElement) {
+        if (el && 'requestFullscreen' in el) {
+          await (el as any).requestFullscreen();
+        }
+        // попытка залочить ориентацию — только в фуллскрине и где доступно
+        // некоторые вебвью (в т.ч. TG) могут игнорить — это ок
+        // @ts-ignore
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock('landscape');
+          } catch {}
+        }
+        setIsFs(true);
+      } else {
+        // @ts-ignore
+        if (screen.orientation && screen.orientation.unlock) {
+          try {
+            screen.orientation.unlock();
+          } catch {}
+        }
+        await document.exitFullscreen();
+        setIsFs(false);
+      }
+    } catch {
+      // graceful fallback
+      setIsFs(!!document.fullscreenElement);
+    }
+  };
+
+  if (!track || (!track.mediaUrl && !track.videoUrl)) {
     return (
       <div className="player player--loading">
         <div className="player__spinner">Загрузка…</div>
@@ -267,6 +394,11 @@ export default function PlayerScreen() {
       showFav
       isFav={isFav}
       onToggleFav={() => !pending && toggle()}
+      extraBottom={progressNode}
+      onToggleFullscreen={
+        track.videoUrl ? toggleFullscreenLandscape : undefined
+      }
+      isFullscreen={isFs}
     />
   );
 }

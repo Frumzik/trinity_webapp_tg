@@ -1,29 +1,19 @@
-import { useEffect, useRef } from "react";
-
-type Options = {
-  friction?: number;
-  minVelocity?: number;
-  axis?: "x" | "y";
-  wheelToAxis?: "x" | "y" | "auto";
-};
+// src/shared/ui/use-inertia-drag-scroll.ts (твоя версия + правки)
+import { useEffect, useRef } from 'react';
 
 export function useInertiaDragScroll<T extends HTMLElement>(
   ref: React.RefObject<T>,
-  {
-    friction = 0.93,
-    minVelocity = 0.25,
-    axis = "x",
-    wheelToAxis = "auto",
-  }: Options = {},
+  { friction = 0.93, minVelocity = 0.25, axis = "x", wheelToAxis = "auto" }: Options = {}
 ) {
   const s = useRef({ active: false, start: 0, startPos: 0, v: 0, raf: 0 });
 
-  const clamp = (v: number, min: number, max: number) =>
-    Math.max(min, Math.min(max, v));
+  const isTouchDevice = typeof window !== 'undefined' && matchMedia?.('(pointer:coarse)').matches;
+
+  const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
   const onPointerDown = (e: React.PointerEvent) => {
-    const el = ref.current;
-    if (!el) return;
+    if (!e.isPrimary) return;
+    const el = ref.current; if (!el) return;
     el.setPointerCapture(e.pointerId);
     s.current.active = true;
     s.current.start = axis === "x" ? e.clientX : e.clientY;
@@ -33,8 +23,7 @@ export function useInertiaDragScroll<T extends HTMLElement>(
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
-    const el = ref.current;
-    if (!el || !s.current.active) return;
+    const el = ref.current; if (!el || !s.current.active) return;
     const cur = axis === "x" ? e.clientX : e.clientY;
     const dx = cur - s.current.start;
     const next = s.current.startPos - dx;
@@ -52,10 +41,9 @@ export function useInertiaDragScroll<T extends HTMLElement>(
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
-    const el = ref.current;
-    if (!el) return;
+    const el = ref.current; if (!el) return;
     s.current.active = false;
-    el.releasePointerCapture(e.pointerId);
+    try { el.releasePointerCapture(e.pointerId); } catch {}
     const step = () => {
       if (Math.abs(s.current.v) < minVelocity) return;
       s.current.v *= friction;
@@ -71,28 +59,20 @@ export function useInertiaDragScroll<T extends HTMLElement>(
     s.current.raf = requestAnimationFrame(step);
   };
 
-  const onWheel = (e: React.WheelEvent) => {
-    const el = ref.current;
-    if (!el) return;
-    const dir =
-      wheelToAxis === "auto"
-        ? Math.abs(e.deltaY) > Math.abs(e.deltaX)
-          ? "y"
-          : "x"
+  const onWheel = isTouchDevice
+    ? undefined // на мобильных не трогаем натив
+    : (e: React.WheelEvent) => {
+      const el = ref.current; if (!el) return;
+      const dir = wheelToAxis === "auto"
+        ? Math.abs(e.deltaY) > Math.abs(e.deltaX) ? "y" : "x"
         : wheelToAxis;
-    if (axis === "x" && dir === "y") el.scrollLeft += e.deltaY;
-    else if (axis === "x" && dir === "x") el.scrollLeft += e.deltaX;
-    else if (axis === "y" && dir === "y") el.scrollTop += e.deltaY;
-    else if (axis === "y" && dir === "x") el.scrollTop += e.deltaX;
-  };
+      if (axis === "x" && dir === "y") el.scrollLeft += e.deltaY;
+      else if (axis === "x" && dir === "x") el.scrollLeft += e.deltaX;
+      else if (axis === "y" && dir === "y") el.scrollTop += e.deltaY;
+      else if (axis === "y" && dir === "x") el.scrollTop += e.deltaX;
+    };
 
   useEffect(() => () => cancelAnimationFrame(s.current.raf), []);
 
-  return {
-    onPointerDown,
-    onPointerMove,
-    onPointerUp,
-    onPointerCancel: onPointerUp,
-    onWheel,
-  };
+  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp, ...(onWheel ? { onWheel } : {}) };
 }

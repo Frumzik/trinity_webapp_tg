@@ -7,6 +7,7 @@ import { contentAdminApi } from '../shared/api/contentAdmin.api';
 import { learningApi } from '../shared/api/learning.api';
 import { favoritesApi } from '../shared/api/favorites.api';
 import { referralsApi } from '../shared/api/referrals.api';
+import { bannersApi } from '../shared/api/banners.api';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [learningApi.reducerPath]: learningApi.reducer,
     [favoritesApi.reducerPath]: favoritesApi.reducer,
     [referralsApi.reducerPath]: referralsApi.reducer,
+    [bannersApi.reducerPath]: bannersApi.reducer,
   },
   middleware: (g) =>
     g().concat(
@@ -26,6 +28,7 @@ export const store = configureStore({
       learningApi.middleware,
       favoritesApi.middleware,
       referralsApi.middleware,
+      bannersApi.middleware,
     ),
 });
 

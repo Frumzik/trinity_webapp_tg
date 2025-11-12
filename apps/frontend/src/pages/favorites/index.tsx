@@ -51,6 +51,7 @@ export function Index() {
         if (f.type === "Lesson" && f.lessonId && f.trainingId) {
           const lessonType = String(f.lesson?.type || "").toLowerCase();
           const key = lessonType || "text";
+
           const item: SliderItem = {
             id: f.lessonId,
             title: f.lesson?.title || "Урок",
@@ -63,27 +64,32 @@ export function Index() {
                     title: f.lesson?.title || "Урок",
                     subtitle: f.lesson?.duration || undefined,
                     artworkUrl: img,
-                    mediaUrl: undefined as string | undefined,
+                    mediaUrl: undefined as string | undefined, // плеер дотянет audioUrl
+                  },
+                ];
+                navigate("/player", {
+                  state: { queue: q, index: 0, trainingId: f.trainingId!, returnTo: "/favorites" },
+                });
+              } else if (lessonType === "video") {
+                const q = [
+                  {
+                    id: f.lessonId!,
+                    title: f.lesson?.title || "Урок",
+                    subtitle: f.lesson?.duration || undefined,
+                    artworkUrl: img,
+                    videoUrl: undefined as string | undefined, // плеер дотянет videoUrl
                   },
                 ];
                 navigate("/player", {
                   state: { queue: q, index: 0, trainingId: f.trainingId!, returnTo: "/favorites" },
                 });
               } else {
+                // text / прочее
                 navigate(`/lesson/${f.trainingId!}/${f.lessonId!}`, { state: { returnTo: "/favorites" } });
               }
             },
           };
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(item);
-        } else if (f.type === "Training" && f.trainingId) {
-          const key = "training";
-          const item: SliderItem = {
-            id: f.trainingId,
-            title: tr?.title || "Тренинг",
-            imageUrl: img,
-            onClick: () => navigate(`/trainings/${f.trainingId!}`, { state: { returnTo: "/favorites" } }),
-          };
+
           if (!grouped[key]) grouped[key] = [];
           grouped[key].push(item);
         }

@@ -15,7 +15,7 @@ export default function TopBar({ title, rightIconUrl, onRightClick }: Props) {
       <div className="topbar__bar-text">
         <button
           className="topbar__btn-text topbar__btn--ghost-text"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/", { replace: true })}
         >
           <img src={BackIcon} alt="Назад" />
         </button>
