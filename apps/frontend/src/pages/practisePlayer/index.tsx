@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import PlayerPage, {
-  type MediaTrack as UITrack,
-  type PlayerPayload,
-} from '../../widgets/practisePlayer';
-import {
-  useGetLessonAdminQuery,
-  useLazyGetLessonAdminQuery,
-} from '../../shared/api/contentAdmin.api';
+import PlayerPage, { type MediaTrack as UITrack, type PlayerPayload } from '../../widgets/practisePlayer';
+import { useGetLessonAdminQuery, useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
+import { useLessonFavorite } from '../../shared/lib/hooks/useLessonFavorite';
 
 type MediaTrack = {
   id: string | number;
@@ -15,55 +10,38 @@ type MediaTrack = {
   subtitle?: string;
   mediaUrl?: string;
   artworkUrl?: string;
-  isFavorite?: boolean;
 };
 
 type NavState = {
-  // базовый payload
   track?: any;
   current?: number;
   duration?: number;
   progressPct?: number;
   completed?: boolean;
-  // управление
   decision?: 'save' | 'discard';
   meta?: { action: 'back' | 'prev' | 'next' | 'autoNext' };
-  // очередь/позиция
   queue?: MediaTrack[];
   index?: number;
   trainingId?: number | string;
-  // ОТКУДА ВЕРНУТЬСЯ ПОСЛЕ ПЛЕЕРА
   returnTo?: string;
 } | null;
 
 type PendingAction = { kind: 'back' | 'prev' | 'next' | 'autoNext' } | null;
 
-const toUI = (t: MediaTrack): UITrack => ({
+const toUI = (t: MediaTrack, fav: boolean): UITrack => ({
   id: t.id,
   title: t.title,
   subtitle: t.subtitle,
   mediaUrl: t.mediaUrl!,
   artworkUrl: t.artworkUrl ?? '',
-  isFavorite: t.isFavorite ?? false,
+  isFavorite: fav,
 });
 
-// локальный (фронтовый) сейв прогресса
-function saveLessonProgress(
-  lessonId: number | string,
-  current: number,
-  duration: number,
-  completed: boolean
-) {
+function saveLessonProgress(lessonId: number | string, current: number, duration: number, completed: boolean) {
   try {
     localStorage.setItem(
       `lessonProgress:${lessonId}`,
-      JSON.stringify({
-        lessonId,
-        current,
-        duration,
-        completed,
-        updatedAt: Date.now(),
-      })
+      JSON.stringify({ lessonId, current, duration, completed, updatedAt: Date.now() })
     );
   } catch {}
 }
@@ -80,7 +58,6 @@ export default function PlayerScreen() {
   const location = useLocation();
   const navState = (location.state as NavState) ?? null;
 
-  // если зашли по /player/:trackId — подтянем урок
   const { data: lessonRes } = useGetLessonAdminQuery(
     { id: Number(trackId), populate: true },
     { skip: !trackId }
@@ -90,28 +67,28 @@ export default function PlayerScreen() {
   const [queue, setQueue] = useState<MediaTrack[]>(navState?.queue ?? []);
   const [index, setIndex] = useState<number>(navState?.index ?? 0);
   const trainingIdRef = useRef<number | string | undefined>(navState?.trainingId);
-  const returnToRef = useRef<string | undefined>(navState?.returnTo); // <— запоминаем, куда возвращаться
+  const returnToRef = useRef<string | undefined>(navState?.returnTo);
 
-  // секундомер фронтового прогресса
   const playedMsRef = useRef(0);
   const startedAtRef = useRef<number | null>(null);
   const tickerRef = useRef<number | null>(null);
   const durationRef = useRef<number>(0);
 
-  // текущий трек
   const track = useMemo(
     () => (queue.length ? queue[(index + queue.length) % queue.length] : null),
     [queue, index]
   );
 
-  // одиночный вход /player/:trackId
+  const currentLessonId = track ? Number(track.id) : undefined;
+  const currentTrainingId = trainingIdRef.current ? Number(trainingIdRef.current) : undefined;
+  const { isFav, toggle, pending } = useLessonFavorite(currentLessonId, currentTrainingId);
+
   useEffect(() => {
     if (queue.length || !lessonRes?.data) return;
     const l: any = lessonRes.data;
     const media = l?.content?.audioUrl || l?.mediaUrl;
     if (!media) return;
     trainingIdRef.current = Number(l?.parentId) || trainingIdRef.current;
-    // если returnTo не задан, попробуем построить его из trainingId
     if (!returnToRef.current && trainingIdRef.current != null) {
       returnToRef.current = `/level/${trainingIdRef.current}`;
     }
@@ -127,7 +104,6 @@ export default function PlayerScreen() {
     setIndex(0);
   }, [lessonRes, queue.length]);
 
-  // если у текущего элемента нет mediaUrl — лениво дотянем через RTK-хук
   useEffect(() => {
     (async () => {
       if (!track || track.mediaUrl) return;
@@ -136,14 +112,11 @@ export default function PlayerScreen() {
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         if (media)
-          setQueue((q) =>
-            q.map((t, i) => (i === index ? { ...t, mediaUrl: media } : t))
-          );
+          setQueue((q) => q.map((t, i) => (i === index ? { ...t, mediaUrl: media } : t)));
       } catch {}
     })();
   }, [track?.id, track?.mediaUrl, index, fetchLesson]);
 
-  // тикер прослушанного
   useEffect(() => {
     if (!track) return;
     if (tickerRef.current) {
@@ -179,7 +152,7 @@ export default function PlayerScreen() {
     const dur = Math.max(cur, Math.round(durationRef.current || 0));
     const pct = dur ? Math.min(100, Math.round((cur / dur) * 100)) : 0;
     return {
-      track: toUI(track!),
+      track: toUI(track!, isFav),
       current: cur,
       duration: dur,
       progressPct: pct,
@@ -187,8 +160,7 @@ export default function PlayerScreen() {
     };
   };
 
-  // ---- модалка / отложенное действие
-  const [pending, setPending] = useState<PendingAction>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
   const requestConfirm = (act: PendingAction) => {
     if (!track) return;
@@ -196,7 +168,7 @@ export default function PlayerScreen() {
       playedMsRef.current += Date.now() - startedAtRef.current;
       startedAtRef.current = Date.now();
     }
-    setPending(act);
+    setPendingAction(act);
     const p = buildPayload(false);
     navigate('/player/exit', {
       state: {
@@ -205,15 +177,13 @@ export default function PlayerScreen() {
         index,
         trainingId: trainingIdRef.current,
         meta: { action: act?.kind || 'back' },
-        returnTo: returnToRef.current, // <— пробрасываем
+        returnTo: returnToRef.current,
       },
     });
   };
 
-  const onPrev =
-    queue.length > 1 ? () => requestConfirm({ kind: 'prev' }) : undefined;
-  const onNext =
-    queue.length > 1 ? () => requestConfirm({ kind: 'next' }) : undefined;
+  const onPrev = queue.length > 1 ? () => requestConfirm({ kind: 'prev' }) : undefined;
+  const onNext = queue.length > 1 ? () => requestConfirm({ kind: 'next' }) : undefined;
   const onBackTop = () => requestConfirm({ kind: 'back' });
 
   const handleCompleted = () => {
@@ -228,24 +198,20 @@ export default function PlayerScreen() {
         queue,
         index,
         trainingId: trainingIdRef.current,
-        nextIndex: index + 1, // SessionComplete сам проверит границы
-        returnTo: returnToRef.current, // <— пробрасываем
+        nextIndex: index + 1,
+        returnTo: returnToRef.current,
       },
     });
   };
 
-  // >>> ХОЛОДНОЕ ВОЗВРАЩЕНИЕ ИЗ ExitConfirm/SessionComplete <<<
   useEffect(() => {
     const st = (location.state as NavState) || null;
     if (!st?.decision || !st?.meta?.action) return;
-
-    // подцепим очередь/позицию и returnTo, если пришли из внешнего роутинга
     if (Array.isArray(st.queue)) setQueue(st.queue);
     if (typeof st.index === 'number') setIndex(st.index);
     if (st.trainingId != null) trainingIdRef.current = st.trainingId;
     if (st.returnTo) returnToRef.current = st.returnTo;
 
-    // Сохранение прогресса: решаем по пришедшему payload (если он был) либо по «живому» payload
     const p: PlayerPayload =
       st.track && typeof st.duration === 'number'
         ? {
@@ -262,15 +228,11 @@ export default function PlayerScreen() {
       saveLessonProgress(p.track.id, p.current, p.duration, completed);
     }
 
-    // Выполняем действие
     const a = st.meta.action;
     if (a === 'back') {
-      // ЯВНЫЙ адрес возврата + replace: true (чтобы убрать /player из истории)
       const url =
         returnToRef.current ??
-        (typeof trainingIdRef.current === 'number'
-          ? `/level/${trainingIdRef.current}`
-          : '/levels');
+        (typeof trainingIdRef.current === 'number' ? `/level/${trainingIdRef.current}` : '/levels');
       navigate(url, { replace: true });
     } else if (a === 'prev') {
       const len = st.queue?.length ?? queue.length;
@@ -280,10 +242,9 @@ export default function PlayerScreen() {
       if (len > 0) setIndex((i) => (i + 1) % len);
     }
 
-    // очистить одноразовый state
     navigate('.', { replace: true, state: {} });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // один раз при монтировании
+  }, []);
 
   if (!track || !track.mediaUrl) {
     return (
@@ -295,7 +256,7 @@ export default function PlayerScreen() {
 
   return (
     <PlayerPage
-      track={toUI(track)}
+      track={toUI(track, isFav)}
       onBack={onBackTop}
       onPrev={onPrev}
       onNext={onNext}
@@ -304,6 +265,8 @@ export default function PlayerScreen() {
       onCompleted={handleCompleted}
       onDurationReady={onDurationReady}
       showFav
+      isFav={isFav}
+      onToggleFav={() => !pending && toggle()}
     />
   );
 }
