@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Transaction, TransactionSchema } from './models';
 import { CountersModule } from '../../service';
 import { TransactionsService } from './transactions.service';
 import { TransactionsRepository } from './repositories';
+import { UsersModule } from '../../account';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TransactionsRepository } from './repositories';
       { name: Transaction.name, schema: TransactionSchema },
     ]),
     CountersModule,
+    forwardRef(() => UsersModule)
   ],
   providers: [TransactionsService, TransactionsRepository],
   exports: [TransactionsService],

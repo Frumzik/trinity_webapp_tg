@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsNotEmpty } from 'class-validator';
 import { FundType } from './funds.interface.js';
 
 export class FundCreateRequestDto {
@@ -22,7 +22,4 @@ export class ReserveFundItemCreateRequestDto {
 
   @IsNumber()
   stageLevel!: number;
-
-  @IsBoolean()
-  isReturned!: boolean;
 }

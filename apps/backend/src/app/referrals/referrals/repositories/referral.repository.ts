@@ -26,6 +26,13 @@ export class ReferralsRepository {
     return referral ? new ReferralEntity(referral.toObject()) : null;
   }
 
+    // Поиск реферала
+  async findAll(condition: FilterQuery<Referral> = {}): Promise<ReferralEntity[]> {
+    const referrals = await this.referralModel.find(condition).lean().exec();
+
+    return referrals.map((referral) => new ReferralEntity(referral.toObject()));
+  }
+
   // Обновление реферала
   async update(referralEntity: ReferralEntity): Promise<ReferralEntity> {
     if (!referralEntity._id) {
