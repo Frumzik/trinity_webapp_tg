@@ -1,11 +1,12 @@
+// src/pages/academy/index.tsx
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
 import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-
-import { useState } from "react";
+import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Bg1 from "../../assets/icons/bg1.svg";
@@ -14,19 +15,69 @@ import Card1 from "../../assets/icons/products/card9.svg";
 import Card2 from "../../assets/icons/products/card10.svg";
 import Card3 from "../../assets/icons/products/card11.svg";
 
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import "./academy.scss";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
+
+type BNode = {
+  tag?: string | null;
+  stage?: number | null;
+  stageLevel?: number | null;
+  progressStatus?: "not_started" | "in_progress" | "completed";
+  childrens?: BNode[];
+};
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
+
+  // находим ветку "Ступени духа"
+  const spiritRoot: BNode | undefined = useMemo(() => {
+    const roots = (data?.data ?? []) as BNode[];
+    return roots.find((r) => r.tag === "stages_spirit");
+  }, [data]);
+
+  // собираем все "stage" (ступени) из всех уровней
+  const { totalStages, completedStages } = useMemo(() => {
+    const levels = (spiritRoot?.childrens ?? []).filter(
+      (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
+    );
+
+    const stages = levels
+      .flatMap((lvl) => (lvl.childrens ?? []))
+      .filter((s) => s.tag === "stage" || typeof s.stage === "number");
+
+    const total = stages.length;
+    const done = stages.filter((s) => s.progressStatus === "completed").length;
+
+    return { totalStages: total, completedStages: done };
+  }, [spiritRoot]);
+
+  const desc =
+    isLoading
+      ? "Загрузка…"
+      : isError
+        ? "Не удалось загрузить"
+        : totalStages > 0
+          ? `Пройдено ${completedStages}/${totalStages}`
+          : "—";
+
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <main className="screen">
         <div className="supportPage">
-          <Title>Академия души</Title>
+          <Title
+            right={
+              isError ? (
+                <button className="icon-btn" onClick={() => refetch()} aria-label="Обновить" />
+              ) : null
+            }
+          >
+            Академия души
+          </Title>
 
           <div className="supportPage__cards">
             <ScrollPanel
@@ -43,12 +94,13 @@ export default function Index() {
             >
               <FeatureTile
                 title="Ступени духа"
-                description="Пройдено 1/40"
+                description={desc}
                 bgImageUrl={Bg1}
                 rightImageUrl={Card1}
                 enabled
                 to="/levels"
               />
+
               <FeatureTile
                 title="Полезные материалы"
                 description=""
@@ -57,6 +109,7 @@ export default function Index() {
                 enabled
                 to="/materials"
               />
+
               <FeatureTile
                 title="Мастерская знаний"
                 description=""
@@ -69,11 +122,13 @@ export default function Index() {
           </div>
         </div>
       </main>
+
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
           <GradientButton onClick={() => navigate(-1)}>Назад</GradientButton>
         </div>
       </div>
+
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
     </div>

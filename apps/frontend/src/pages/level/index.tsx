@@ -16,17 +16,31 @@ type LocalProgress = {
   status: 'in_progress' | 'completed';
 };
 const LP_KEY = 'lessonProgress';
+
 const lpLoad = (): Record<string, LocalProgress> => {
-  try {
-    return JSON.parse(localStorage.getItem(LP_KEY) || '{}');
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem(LP_KEY) || '{}'); } catch { return {}; }
 };
 const lpSave = (obj: Record<string, LocalProgress>) => {
-  try {
-    localStorage.setItem(LP_KEY, JSON.stringify(obj));
-  } catch {}
+  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+};
+
+export const lpMarkInProgress = (lessonId: number | string, duration = 0, seconds = 0) => {
+  const k = String(lessonId);
+  const lp = lpLoad();
+  const prev = lp[k] || { seconds: 0, duration: 0, status: 'in_progress' as const };
+  lp[k] = { ...prev, seconds, duration: Math.max(prev.duration, duration), status: 'in_progress' };
+  lpSave(lp);
+};
+
+export const lpMarkCompleted = (lessonId: number | string) => {
+  const k = String(lessonId);
+  const lp = lpLoad();
+  lp[k] = {
+    seconds: Math.max(lp[k]?.seconds ?? 0, lp[k]?.duration ?? 0),
+    duration: lp[k]?.duration ?? 0,
+    status: 'completed'
+  };
+  lpSave(lp);
 };
 const setCompleted = (lessonId: number | string) => {
   const key = String(lessonId);
@@ -135,7 +149,7 @@ export default function Index() {
             String(it.id) === String(lessonId) ? { ...it, mediaUrl: media } : it
           )
           : audioItems;
-
+        lpMarkCompleted(lessonId);
         navigate('/player', {
           state: {
             queue: queuePrefilled,
@@ -146,6 +160,7 @@ export default function Index() {
         });
         return;
       } catch {
+        lpMarkCompleted(lessonId);
         navigate('/player', {
           state: {
             queue: audioItems,
@@ -170,7 +185,7 @@ export default function Index() {
             String(it.id) === String(lessonId) ? { ...it, videoUrl: vurl } : it
           )
           : videoItems;
-
+        lpMarkCompleted(lessonId);
         navigate('/player', {
           state: {
             queue: queuePrefilled,
@@ -181,6 +196,7 @@ export default function Index() {
         });
         return;
       } catch {
+        lpMarkCompleted(lessonId);
         navigate('/player', {
           state: {
             queue: videoItems,
@@ -213,11 +229,14 @@ export default function Index() {
   const headerProgress = useMemo(() => {
     const lp = lpLoad();
     const total = lessons.length;
-    const done = lessons.filter(
-      (l: any) => mergeStatus(l, lp) === 'completed'
-    ).length;
-    return { current: done, total };
+
+    const started = lessons.filter((l: any) => {
+      const rec = lp[String(l.lessonId)];
+      return rec?.status === 'in_progress' || rec?.status === 'completed';
+    }).length;
+    return { current: started, total };
   }, [lessons]);
+
   const returnTo = (location.state as any)?.returnTo as string | undefined;
 
 

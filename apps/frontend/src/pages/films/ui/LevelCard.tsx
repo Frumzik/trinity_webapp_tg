@@ -28,7 +28,7 @@ export default function LevelCard({ item, onClick }: Props) {
 
       {locked && item.priceUSDT && (
         <div className="lvl__unlock">
-          Разблокируйте за {item.priceUSDT} USDT
+          Разблокируйте за {item.priceUSDT} OM
         </div>
       )}
 
