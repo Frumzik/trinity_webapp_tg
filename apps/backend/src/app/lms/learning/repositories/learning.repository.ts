@@ -6,6 +6,7 @@ import { LearningEntity } from '../entities';
 import { Training } from '../../content/models';
 import { TrainingEntity } from '../../content/entities';
 import {
+  ILearning,
   ILesson,
   ITraining,
   LearningAccessStatus,
@@ -141,11 +142,11 @@ export class LearningsRepository {
       .exec();
 
     // Создаём карту для быстрого доступа по trainingId
-    const learningMap = new Map<number, Learning>(
-      learnings.map((l) => [l.trainingId, l as unknown as Learning])
+    const learningMap = new Map<number, ILearning>(
+      learnings.map((l) => [l.trainingId, l as unknown as ILearning])
     );
 
-    // Рекурсивная функция сборки дерева
+    // Рекурсивная функция сборки дерева и расчёта прогресса
     const buildTree = (training: ITraining): ITraining => {
       const learning = learningMap.get(training.trainingId);
 
@@ -155,9 +156,9 @@ export class LearningsRepository {
       training.progressStatus =
         learning?.progressStatus ?? LearningProgressStatus.NOT_STARTED;
 
-      // Добавляем статусы урокам
+      // Считаем прогресс уроков текущего тренинга
       const populatedLessons = (training.lessons ?? []) as ILesson[];
-      training.lessons = populatedLessons.map((lesson) => {
+      const lessonsWithStatus = populatedLessons.map((lesson) => {
         const lessonLearning = learning?.lessons?.find(
           (l) => l.lessonId === lesson.lessonId
         );
@@ -175,12 +176,40 @@ export class LearningsRepository {
         };
       });
 
+      training.lessons = lessonsWithStatus;
+
       // Рекурсивно собираем дочерние тренинги
-      training.childrens = allTrainings
+      const childrenTrainings = allTrainings
         .filter((t) => t.parentId === training.trainingId)
         .map((child) => buildTree(child));
 
+      training.childrens = childrenTrainings;
+
+      // Рассчитываем progressPercent
+      const allLessons = [
+        ...lessonsWithStatus,
+        ...childrenTrainings.flatMap((child) => getAllLessons(child)),
+      ];
+
+      const completedCount = allLessons.filter(
+        (l) => l.progressStatus === LearningProgressStatus.COMPLETED
+      ).length;
+
+      training.progressPercent =
+        allLessons.length > 0
+          ? Math.round((completedCount / allLessons.length) * 100)
+          : 0;
+
       return training;
+    };
+
+    // Вспомогательная функция для получения всех уроков из дерева
+    const getAllLessons = (training: ITraining): ILesson[] => {
+      const lessons = training.lessons as ILesson[];
+      const childLessons = ((training.childrens ?? []) as ITraining[]).flatMap(
+        (child) => getAllLessons(child)
+      );
+      return [...lessons, ...childLessons];
     };
 
     // Если передан конкретный trainingId → возвращаем дерево от него

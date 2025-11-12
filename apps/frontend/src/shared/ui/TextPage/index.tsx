@@ -19,7 +19,7 @@ export default function TextPage({ sections, className }: TextPageProps) {
       <main className={styles.content}>
         {sections.map((s, i) => (
           <section key={i} className={styles.section}>
-            {s.title && <h2 className={styles.h2}>{s.title}</h2>}
+
             {s.paragraphs?.map((p, j) => (
               <p key={j} className={styles.p}>
                 {p}

@@ -1,3 +1,4 @@
+// src/pages/profile/index.tsx
 import {useMemo, useState} from "react";
 import Footer from "../../widgets/footer/footer";
 import TopBar from "../../widgets/topbarlk/topbarlk";
@@ -8,7 +9,7 @@ import LevelTile from "../../widgets/tiles/LevelTile/levelTile";
 import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
 import ReferralsTile from "../../widgets/tiles/FriendsTile/FriendsTile";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
-import GradientButton from "../../shared/ui/gradient-button/index";
+import GradientButton from "../../shared/ui/gradient-button";
 import PresentationSentModal from "../../widgets/presentation-sent-modal";
 import PopupIcon from "../../assets/icons/popup.svg";
 import Card1 from "../../assets/image/image_1.svg";
@@ -17,10 +18,11 @@ import Card3 from "../../assets/image/About-ptoject.svg";
 import Card4 from "../../assets/image/image_4.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
-import {useNavigate} from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import BurgerMenu from '../../widgets/menuBurger/burger';
 import { useGetUserQuery } from "../../shared/api/user.api";
 import { getTelegramUser } from "../../shared/telegram/telegram";
+import { useGetReferralsStatsQuery } from "../../shared/api/referrals.api";
 
 function avatarFrom(username?: string|null, name?: string|null) {
   const seed = username || name || 'user'
@@ -35,6 +37,8 @@ const Index = () => {
   const { data } = useGetUserQuery({ populate: true })
   const u = data?.data
   const tg = getTelegramUser()
+
+  const { data: stats } = useGetReferralsStatsQuery()
 
   const displayName = useMemo(() => {
     if (u?.name) return u.name
@@ -57,6 +61,9 @@ const Index = () => {
     return type !== 'free'
   }, [u])
 
+  const totalEarn = useMemo(() => (stats ?? []).reduce((s, x) => s + (x.totalEarn || 0), 0), [stats])
+  const levelsCount = useMemo(() => (stats ?? []).length || 0, [stats])
+
   const onDownload = (e?: React.MouseEvent) => {
     e?.preventDefault();
     setOpenModal(true);
@@ -68,9 +75,9 @@ const Index = () => {
       <main className="screen" style={{ paddingTop: "20px" }}>
         <Title
           right={
-            <button className="icon-btn">
+            <Link to="/account" className="icon-btn">
               <img src={EditIcon} alt=""/>
-            </button>
+            </Link>
           }
         >
           Личный кабинет
@@ -91,8 +98,8 @@ const Index = () => {
             vars={{ railRight: "-15px", railTop: "4px", railBottom: "4px", railWidth: "3px", railColor: "#E8E8E8", thumbColor: "#C7C7C7", zIndex: 20 }}
           >
             <div className="tiles">
-              <IncomeTile title="Общий доход" amountOM={40} showIncome imageUrl={Card1} onWithdraw={undefined} to="/withdraw" />
-              <LevelTile level={2} completed={20} total={40} imageUrl={Card2}/>
+              <IncomeTile title="Общий доход" amountOM={totalEarn} showIncome imageUrl={Card1} onWithdraw={undefined} to="/withdraw" />
+              <LevelTile level={levelsCount} completed={0} total={levelsCount} imageUrl={Card2}/>
               <GreyTile title="О проекте" imageUrl={Card3} buttonText={"Скачать презентацию"} onClick={onDownload}/>
             </div>
 
@@ -103,16 +110,16 @@ const Index = () => {
               </div>
             </div>
 
-            <ReferralsTile imageUrl={Card4} referrals={[{id: 1}, {id: 2}, {id: 3}, {id: 4}]} href="/referrals" />
+            <ReferralsTile imageUrl={Card4} referrals={[]} href="/referrals" />
 
             <div className="list__referals">
               <div className="list__referals-title">
                 <div className="list__referals-title-up">Доход</div>
-                <div className="list__referals-title-balance">140 080 OM</div>
+                <div className="list__referals-title-balance">{totalEarn} OM</div>
               </div>
               <div className="list__referals-subtitle">
                 <div className="list__referals-title-levels">Уровни</div>
-                <div className="list__referals-title-levels-count">9</div>
+                <div className="list__referals-title-levels-count">{levelsCount}</div>
               </div>
             </div>
 
@@ -121,27 +128,24 @@ const Index = () => {
               vars={{ railRight: "0px", railTop: "0px", railBottom: "6px", railWidth: "3px", railColor: "#ededed", thumbColor: "#b0b0b0", zIndex: 999 }}
             >
               <div className="list">
-                {Array.from({ length: 90 }).map((_, i) => {
-                  const level = i + 1;
-                  return (
-                    <div
-                      key={level}
-                      className="row is-clickable"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => nav('/detailing', { state: { level } })}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          nav('/detailing', { state: { level } });
-                        }
-                      }}
-                    >
-                      <span className="row__num">{level}</span>
-                      <span className="row__count">35 OM</span>
-                    </div>
-                  );
-                })}
+                {(stats ?? []).map((row) => (
+                  <div
+                    key={row.level}
+                    className="row is-clickable"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => nav('/detailing', { state: { level: row.level } })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        nav('/detailing', { state: { level: row.level } });
+                      }
+                    }}
+                  >
+                    <span className="row__num">{row.level}</span>
+                    <span className="row__count">{row.totalEarn} OM</span>
+                  </div>
+                ))}
               </div>
             </ScrollPanel>
           </ScrollPanel>

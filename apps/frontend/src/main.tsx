@@ -8,6 +8,7 @@ import { initTelegram } from './shared/telegram/init';
 
 initTelegram();
 
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>

@@ -31,7 +31,14 @@ export default function PromoTile({
         <button type="button" className={clsx("promo__tile", className)} onClick={handleClick}>
             {Bg ? <Bg className="promo__bg" /> : <img className="promo__bg" src={bgSrc as string} alt="" aria-hidden />}
             {Fg ? <Fg className="promo__fg" /> : imageUrl ? <img className="promo__fg" src={imageUrl as string} alt="" aria-hidden /> : null}
-            <div className="promo__label"><span className="promo__labelText">{title}</span></div>
+            <div className="promo__label"><span className="promo__labelText" style={{
+              fontFamily: '"Alegreya Sans", sans-serif',
+              fontWeight: 500,
+              fontSize: '14px',
+              lineHeight: '1.4',
+              letterSpacing: '0.2px',
+              color: '#fff',
+            }}>{title}</span></div>
         </button>
     );
 }

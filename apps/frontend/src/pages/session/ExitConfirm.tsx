@@ -2,37 +2,41 @@ import { useLocation, useNavigate } from "react-router-dom";
 import GradientButton from "../../shared/ui/gradient-button";
 import "./session.scss";
 
+type ExitState = {
+  track: any;
+  current?: number;
+  duration?: number;
+  progressPct?: number;
+  queue?: any[];
+  index?: number;
+  meta?: { action: "back" | "prev" | "next" | "autoNext" };
+  trainingId?: number | string;
+} | null;
+
 export default function ExitConfirm() {
   const nav = useNavigate();
-  const { state } = useLocation() as {
-    state: { track: any; currentSec: number; durationSec: number };
-  };
-  const minutes = Math.max(1, Math.round((state?.currentSec ?? 0) / 60));
+  const { state } = useLocation() as { state: ExitState };
+
   const t = state?.track;
+  const minutes = Math.max(1, Math.round(((state?.current ?? 0) as number) / 60));
 
-  const onSave = async () => {
-    nav(-1);
-  };
-
-  const onExitNoSave = () => {
-    nav(-1);
+  const decide = (decision: "save" | "discard") => {
+    // ВОЗВРАЩАЕМСЯ на /player С СОХРАНЕНИЕМ ВСЕГО СТЕЙТА + РЕШЕНИЕ
+    nav("/player", {
+      replace: true,
+      state: {
+        ...state,
+        decision,
+      },
+    });
   };
 
   return (
-    <div
-      className="session session--blur"
-      style={{ backgroundImage: `url(${t?.artworkUrl})` }}
-    >
+    <div className="session session--blur" style={{ backgroundImage: `url(${t?.artworkUrl})` }}>
       <div className="session__shade" />
       <div className="session__center">
-        <div className="session__title" style={{ color: "#FFF" }}>
-          {t?.title}
-        </div>
-        {t?.subtitle && (
-          <div className="session__subtitle" style={{ color: "#FFF" }}>
-            {t.subtitle}
-          </div>
-        )}
+        <div className="session__title" style={{ color: "#FFF" }}>{t?.title}</div>
+        {t?.subtitle && <div className="session__subtitle" style={{ color: "#FFF" }}>{t.subtitle}</div>}
         <div
           className="session__chip"
           style={{
@@ -44,13 +48,13 @@ export default function ExitConfirm() {
             color: "#FFF",
           }}
         >
-          <span style={{ fontWeight: "700" }}>{minutes}</span> минут прослушано
+          <span style={{ fontWeight: 700 }}>{minutes}</span> минут прослушано
         </div>
       </div>
 
       <div className="session__actions">
-        <GradientButton onClick={onSave}>Сохранить</GradientButton>
-        <button className="session__link" onClick={onExitNoSave}>
+        <GradientButton onClick={() => decide("save")}>Сохранить</GradientButton>
+        <button className="session__link" onClick={() => decide("discard")}>
           Закончить сессию без сохранения
         </button>
       </div>
