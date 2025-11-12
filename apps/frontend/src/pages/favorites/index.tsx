@@ -21,86 +21,76 @@ type SliderItem = {
   onClick?: () => void;
 };
 
-const TITLE_BY_KIND: Record<string, string> = {
-  video: "Фильмы",
-  audio: "Музыка",
-  text: "Медитации",
-  training: "Продукты",
-};
-const ORDER = ["video", "audio", "text", "training"];
-
 export function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useGetFavoritesQuery({ populate: true });
 
-  const sections = useMemo(() => {
+  // Просто отрисовываем то, что прислал бэк:
+  // data может быть либо массивом, либо объектом { success, data: [...] } — нормализуем и маппим
+  const blocks = useMemo(() => {
     const fallbacks = [CardFallback1, CardFallback2, CardFallback3];
-    const cats = data ?? [];
-    const grouped: Record<string, SliderItem[]> = {};
 
-    cats.forEach((c, ci) => {
-      (c.favorites ?? []).forEach((f, fi) => {
-        const tr = f.training || f.lesson?.training || null;
+    const raw: any = data as any;
+    const cats: any[] = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+
+    // Каждый элемент cats — это блок вида { tag, title, favorites: [...] }
+    return cats.map((cat, ci) => {
+      const items: SliderItem[] = (cat.favorites ?? []).map((f: any, fi: number) => {
+        const lessonType = String(f.lesson?.type || "").toLowerCase();
         const img =
+          f.lesson?.coverUrl ||
           f.training?.coverUrl ||
           f.training?.iconUrl ||
-          f.lesson?.coverUrl ||
           fallbacks[(ci + fi) % 3];
 
-        if (f.type === "Lesson" && f.lessonId && f.trainingId) {
-          const lessonType = String(f.lesson?.type || "").toLowerCase();
-          const key = lessonType || "text";
+        const item: SliderItem = {
+          id: f.lessonId ?? f._id ?? `${ci}-${fi}`,
+          title: f.lesson?.title || "Урок",
+          imageUrl: img,
+          onClick: () => {
+            // Навигация по типу урока
+            if (lessonType === "audio") {
+              const q = [
+                {
+                  id: f.lessonId as number,
+                  title: f.lesson?.title || "Урок",
+                  subtitle: f.lesson?.duration || undefined,
+                  artworkUrl: img,
+                  mediaUrl: undefined as string | undefined, // плеер сам подтянет audioUrl
+                },
+              ];
+              navigate("/player", {
+                state: { queue: q, index: 0, trainingId: f.trainingId as number, returnTo: "/favorites" },
+              });
+            } else if (lessonType === "video") {
+              const q = [
+                {
+                  id: f.lessonId as number,
+                  title: f.lesson?.title || "Урок",
+                  subtitle: f.lesson?.duration || undefined,
+                  artworkUrl: img,
+                  videoUrl: undefined as string | undefined,
+                },
+              ];
+              navigate("/player", {
+                state: { queue: q, index: 0, trainingId: f.trainingId as number, returnTo: "/favorites" },
+              });
+            } else {
+              navigate(`/lesson/${f.trainingId}/${f.lessonId}`, { state: { returnTo: "/favorites" } });
+            }
+          },
+        };
 
-          const item: SliderItem = {
-            id: f.lessonId,
-            title: f.lesson?.title || "Урок",
-            imageUrl: img,
-            onClick: () => {
-              if (lessonType === "audio") {
-                const q = [
-                  {
-                    id: f.lessonId!,
-                    title: f.lesson?.title || "Урок",
-                    subtitle: f.lesson?.duration || undefined,
-                    artworkUrl: img,
-                    mediaUrl: undefined as string | undefined, // плеер дотянет audioUrl
-                  },
-                ];
-                navigate("/player", {
-                  state: { queue: q, index: 0, trainingId: f.trainingId!, returnTo: "/favorites" },
-                });
-              } else if (lessonType === "video") {
-                const q = [
-                  {
-                    id: f.lessonId!,
-                    title: f.lesson?.title || "Урок",
-                    subtitle: f.lesson?.duration || undefined,
-                    artworkUrl: img,
-                    videoUrl: undefined as string | undefined, // плеер дотянет videoUrl
-                  },
-                ];
-                navigate("/player", {
-                  state: { queue: q, index: 0, trainingId: f.trainingId!, returnTo: "/favorites" },
-                });
-              } else {
-                // text / прочее
-                navigate(`/lesson/${f.trainingId!}/${f.lessonId!}`, { state: { returnTo: "/favorites" } });
-              }
-            },
-          };
-
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(item);
-        }
+        return item;
       });
-    });
 
-    return ORDER.filter((k) => grouped[k]?.length).map((k) => ({
-      key: k,
-      title: TITLE_BY_KIND[k] || "Избранное",
-      items: grouped[k],
-    }));
+      return {
+        key: cat.tag ?? `block-${ci}`,
+        title: cat.title ?? "Избранное",
+        items,
+      };
+    });
   }, [data, navigate]);
 
   return (
@@ -110,34 +100,39 @@ export function Index() {
         <Title>Избранное</Title>
 
         {isLoading && <div className="promo-container">Загрузка…</div>}
+
         {isError && (
           <div className="promo-container">
             Не удалось загрузить. <button onClick={() => refetch()}>Повторить</button>
           </div>
         )}
 
-        {!isLoading && !isError && sections.length === 0 && (
+        {!isLoading && !isError && blocks.length === 0 && (
           <div className="promo-container" style={{ opacity: 0.7 }}>Пока пусто</div>
         )}
 
         {!isLoading &&
           !isError &&
-          sections.map((s) => (
-            <div key={s.key}>
-              <h3 className="fav__sectionTitle">{s.title}</h3>
-              <PromoSlider bgSrc={Bgmini} items={s.items} />
+          blocks.map((b) => (
+            <div key={b.key}>
+              <h3 className="fav__sectionTitle">{b.title}</h3>
+              <PromoSlider bgSrc={Bgmini} items={b.items} />
             </div>
           ))}
 
         <div className="space-box" />
       </main>
+
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
           <GradientButton onClick={() => navigate(-1)}>Назад</GradientButton>
         </div>
       </div>
+
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
     </div>
   );
 }
+
+export default Index;

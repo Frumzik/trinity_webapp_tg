@@ -31,27 +31,8 @@ export default function FlexibleModal({
       <div className="flexmodal__sheet">
         <div className="flexmodal__head">
           {title && <div className="flexmodal__title">{title}</div>}
-          <button
-            className="flexmodal__close"
-            onClick={onClose}
-            aria-label="close"
-          >
-            <img src={closeIconUrl} alt="Закрыть" />
-          </button>
         </div>
 
-        {items && items.length > 0 && (
-          <ul className="flexmodal__list">
-            {items.map((item, i) => (
-              <li key={i} className="flexmodal__item">
-                <span className="flexmodal__check">✔</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {description && <p className="flexmodal__desc">{description}</p>}
 
         {ctaLabel && (
           <div className="flexmodal__cta">

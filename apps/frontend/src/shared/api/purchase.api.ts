@@ -1,23 +1,27 @@
-import { learningApi } from "./learning.api"
+// shared/api/purchase.api.ts
+import { learningApi } from "./learning.api";
 
-type AddPurchaseReq = { trainingId: number }
-type AddPurchaseRes = { success: true }
+export type AddPurchaseReq = {
+  type: "Training" | "Subscription" | "Lesson";
+  content?: number[];
+  sale?: boolean;
+  subscriptionDays?: number;
+  subscriptionSum?: number;
+};
+
+export type AddPurchaseRes = { success: true };
 
 export const purchaseApi = learningApi.injectEndpoints({
   endpoints: (b) => ({
     addPurchase: b.mutation<AddPurchaseRes, AddPurchaseReq>({
-      query: ({ trainingId }) => ({
+      query: (body) => ({
         url: `/purchase/add`,
         method: "POST",
-        params: { trainingId },   // <-- id уходит в query
-        body: {},                 // <-- пустое тело, иначе 400
+        body,
       }),
-      invalidatesTags: (_r, _e, a) => [
-        "Learning",
-        { type: "Learning", id: a.trainingId },
-      ],
+      invalidatesTags: ['Learning'],
     }),
   }),
-})
+});
 
-export const { useAddPurchaseMutation } = purchaseApi
+export const { useAddPurchaseMutation } = purchaseApi;
