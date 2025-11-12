@@ -208,6 +208,8 @@ export default function Index() {
     alert('Контент этого урока ещё не загружен');
   };
 
+
+
   const headerProgress = useMemo(() => {
     const lp = lpLoad();
     const total = lessons.length;
@@ -217,6 +219,8 @@ export default function Index() {
     return { current: done, total };
   }, [lessons]);
   const returnTo = (location.state as any)?.returnTo as string | undefined;
+
+
   if (isLoading) {
     return (
       <div className="preview">
