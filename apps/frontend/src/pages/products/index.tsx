@@ -25,13 +25,18 @@ export default function Index() {
   const trainings =
     data?.data?.filter((item) => item.parentId === null) ?? [];
 
+  const isAcademy = (t: any) =>
+    t?.type === 'stages_spirit' ||
+    /Ступени духа/i.test(String(t?.title)) ||
+    t?.slug === 'academy-spirit';
+
   const handleClick = (training: any) => {
-    if (training.type === 'stages_spirit') {
-      navigate('/levels')
+    if (isAcademy(training)) {
+      navigate('/levels');                 // <- сразу на страницу уровней
     } else {
-      navigate(`/trainings/${training.trainingId}`)
+      navigate(`/trainings/${training.trainingId}`);
     }
-  }
+  };
 
   if (isLoading) {
     return (

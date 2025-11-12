@@ -109,24 +109,31 @@ export default function Index() {
       }));
   }, [training]);
 
+  const videoItems = useMemo(() => {
+    return (training?.lessons ?? [])
+      .filter((l: any) => l.type === 'video')
+      .map((l: any) => ({
+        id: l.lessonId,
+        title: l.title,
+        subtitle: l.duration ?? undefined,
+        artworkUrl: l.coverUrl ?? training?.coverUrl ?? undefined,
+        // ключевой момент: для видео используем videoUrl (подставим позже)
+        videoUrl: undefined as string | undefined,
+      }));
+  }, [training]);
   const handleOpen = async (lessonId: number | string) => {
-    const audioIdx = audioItems.findIndex(
-      (i) => String(i.id) === String(lessonId)
-    );
+    const backTarget = `/level/${training.trainingId}`;
+
+    const audioIdx = audioItems.findIndex((i) => String(i.id) === String(lessonId));
     if (audioIdx !== -1) {
       try {
-        const res = await fetchLesson({
-          id: Number(lessonId),
-          populate: true,
-        }).unwrap();
+        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         const queuePrefilled = media
           ? audioItems.map((it) =>
-              String(it.id) === String(lessonId)
-                ? { ...it, mediaUrl: media }
-                : it
-            )
+            String(it.id) === String(lessonId) ? { ...it, mediaUrl: media } : it
+          )
           : audioItems;
 
         navigate('/player', {
@@ -134,7 +141,7 @@ export default function Index() {
             queue: queuePrefilled,
             index: audioIdx,
             trainingId: training.trainingId,
-            returnTo: `/level/${training.trainingId}`,
+            returnTo: backTarget,
           },
         });
         return;
@@ -144,22 +151,55 @@ export default function Index() {
             queue: audioItems,
             index: audioIdx,
             trainingId: training.trainingId,
-            returnTo: `/level/${training.trainingId}`,
+            returnTo: backTarget,
           },
         });
         return;
       }
     }
 
+    // 2) видео-плейлист — НОВОЕ
+    const videoIdx = videoItems.findIndex((i) => String(i.id) === String(lessonId));
+    if (videoIdx !== -1) {
+      try {
+        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+        const l: any = res.data;
+        const vurl = l?.content?.videoUrl || l?.videoUrl;
+        const queuePrefilled = vurl
+          ? videoItems.map((it) =>
+            String(it.id) === String(lessonId) ? { ...it, videoUrl: vurl } : it
+          )
+          : videoItems;
+
+        navigate('/player', {
+          state: {
+            queue: queuePrefilled,
+            index: videoIdx,
+            trainingId: training.trainingId,
+            returnTo: backTarget,
+          },
+        });
+        return;
+      } catch {
+        navigate('/player', {
+          state: {
+            queue: videoItems,
+            index: videoIdx,
+            trainingId: training.trainingId,
+            returnTo: backTarget,
+          },
+        });
+        return;
+      }
+    }
+
+    // 3) текст — как было
     try {
-      const res = await fetchLesson({
-        id: Number(lessonId),
-        populate: true,
-      }).unwrap();
+      const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
       const l: any = res.data;
       const isText = l?.type === 'text' || !!l?.content?.html;
       if (isText && training) {
-        setCompleted(lessonId); // текст считаем пройденным сразу
+        setCompleted(lessonId); // текст сразу считаем выполненным
         navigate(`/lesson/${training.trainingId}/${lessonId}`);
         return;
       }

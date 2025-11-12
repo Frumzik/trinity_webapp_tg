@@ -25,7 +25,21 @@ export default function PinCreatePage() {
     tg?.last_name?.trim?.() ||
     tg?.username ||
     undefined;
+  const decodeB64Url = (s: string) =>
+    decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))))
 
+  const startParam: string | undefined =
+    (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param
+
+  const refPartnerId = useMemo(() => {
+    if (!startParam) return undefined
+    try {
+      const data = JSON.parse(decodeB64Url(startParam))
+      return data?.partnerId as number | string | undefined
+    } catch {
+      return undefined
+    }
+  }, [startParam])
   const valid = pin1.length >= 3 && pin1 === pin2 && tgId > 0;
 
   const submit = async () => {
@@ -33,7 +47,7 @@ export default function PinCreatePage() {
     setErr(null);
     setLoading(true);
     try {
-      await registerTg({ type: 'TG', tgId, pin: pin1, username, name }).unwrap();
+      await registerTg({ type: 'TG', tgId, pin: pin1, username, name, partnerId: refPartnerId, }).unwrap();
       nav('/pin/login', { replace: true });
     } catch (e: any) {
       setErr(e?.data?.message?.[0] || e?.message || 'Ошибка регистрации');
