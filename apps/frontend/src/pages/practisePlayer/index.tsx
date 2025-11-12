@@ -9,6 +9,7 @@ import {
   useLazyGetLessonAdminQuery,
 } from '../../shared/api/contentAdmin.api';
 import { useLessonFavorite } from '../../shared/lib/hooks/useLessonFavorite';
+import { lpMarkInProgress } from '../level';
 
 type MediaTrack = {
   id: string | number;
@@ -267,6 +268,15 @@ export default function PlayerScreen() {
   };
 
   useEffect(() => {
+    if (trackId) lpMarkInProgress(Number(trackId));
+  }, [trackId]);
+
+  useEffect(() => {
+    if (currentLessonId != null) lpMarkInProgress(currentLessonId);
+  }, [currentLessonId]);
+
+
+  useEffect(() => {
     const st = (location.state as NavState) || null;
     if (!st?.decision || !st?.meta?.action) return;
     if (Array.isArray(st.queue)) setQueue(st.queue);
@@ -290,6 +300,7 @@ export default function PlayerScreen() {
       saveLessonProgress(p.track.id, p.current, p.duration, completed);
     }
 
+
     const a = st.meta.action;
     if (a === 'back') {
       if (returnToRef.current) {
@@ -311,7 +322,6 @@ export default function PlayerScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // нижний блок: прогресс и описание
   const progressNode = (() => {
     const lp = lpLoad();
     const rec =
@@ -372,6 +382,7 @@ export default function PlayerScreen() {
       setIsFs(!!document.fullscreenElement);
     }
   };
+
 
   if (!track || (!track.mediaUrl && !track.videoUrl)) {
     return (

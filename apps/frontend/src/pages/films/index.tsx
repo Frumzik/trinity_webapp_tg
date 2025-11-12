@@ -129,7 +129,7 @@ export default function Index() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="USDT = OM"
+            rateText="1 OM = 1 USDT"
             InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
