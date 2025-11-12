@@ -1,3 +1,4 @@
+// src/pages/pin/create/index.tsx
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TopBar from '../../../widgets/topbarTextpage';
@@ -6,6 +7,44 @@ import '../../pin/pin.scss';
 import { useRegisterTgMutation } from '../../../shared/api/auth.api';
 
 const toDigits = (v: string) => v.replace(/\D/g, '').slice(0, 6);
+
+// декодер b64url -> строка
+function decodeB64Url(s: string) {
+  try {
+    // b64url -> b64
+    const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+    // atob -> utf8
+    const bin = atob(b64);
+    // бинарь -> строка
+    return decodeURIComponent(
+      Array.from(bin, (c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+    );
+  } catch {
+    return '';
+  }
+}
+
+// парсим start_param из Telegram WebApp в number | undefined
+function parsePartnerId(startParam?: string): number | undefined {
+  if (!startParam) return undefined;
+  const s = startParam.trim();
+
+  // вариант 1: просто цифры `?startapp=12345`
+  if (/^\d+$/.test(s)) {
+    const n = Number(s);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
+  // вариант 2: старый b64url JSON {"partnerId": 12345}
+  try {
+    const json = decodeB64Url(s);
+    const data = JSON.parse(json);
+    const n = Number((data as any)?.partnerId);
+    return Number.isFinite(n) ? n : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export default function PinCreatePage() {
   const [pin1, setPin1] = useState('');
@@ -17,7 +56,11 @@ export default function PinCreatePage() {
   const [registerTg] = useRegisterTgMutation();
   const nav = useNavigate();
 
-  const tg = useMemo(() => (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user ?? null, []);
+  // Telegram user
+  const tg = useMemo(
+    () => (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user ?? null,
+    []
+  );
   const tgId = Number(tg?.id) || 0;
   const username = tg?.username || undefined;
   const name =
@@ -25,21 +68,13 @@ export default function PinCreatePage() {
     tg?.last_name?.trim?.() ||
     tg?.username ||
     undefined;
-  const decodeB64Url = (s: string) =>
-    decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))))
 
-  const startParam: string | undefined =
-    (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param
+  // start_param из Telegram
+  const startParam: string | undefined = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param;
 
-  const refPartnerId = useMemo(() => {
-    if (!startParam) return undefined
-    try {
-      const data = JSON.parse(decodeB64Url(startParam))
-      return data?.partnerId as number | string | undefined
-    } catch {
-      return undefined
-    }
-  }, [startParam])
+  // приводим к числу один раз
+  const partnerIdNum = useMemo(() => parsePartnerId(startParam), [startParam]);
+
   const valid = pin1.length >= 3 && pin1 === pin2 && tgId > 0;
 
   const submit = async () => {
@@ -47,7 +82,18 @@ export default function PinCreatePage() {
     setErr(null);
     setLoading(true);
     try {
-      await registerTg({ type: 'TG', tgId, pin: pin1, username, name, partnerId: refPartnerId, }).unwrap();
+      // на всякий случай можно подсмотреть тип в консоли во время отладки
+      // console.log('[register] partnerId:', partnerIdNum, typeof partnerIdNum);
+
+      await registerTg({
+        type: 'TG',
+        tgId,
+        pin: pin1,
+        username,
+        name,
+        ...(partnerIdNum !== undefined ? { partnerId: partnerIdNum } : {}), // ТОЛЬКО number
+      }).unwrap();
+
       nav('/pin/login', { replace: true });
     } catch (e: any) {
       setErr(e?.data?.message?.[0] || e?.message || 'Ошибка регистрации');
