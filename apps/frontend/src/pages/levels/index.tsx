@@ -1,4 +1,6 @@
+// src/pages/levels/index.tsx
 import { useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
@@ -9,7 +11,9 @@ import Info from "../../assets/icons/popup.svg";
 import "./levels.scss";
 import Footer from "../../widgets/footer/footer";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import FlexibleModal from "../../widgets/flexible-modal";
+import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 
 export type LevelItem = {
   id: string;
@@ -56,10 +60,22 @@ type BNode = {
 
 export default function Index() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
+
+  // модалка ответа пользователю
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultTitle, setResultTitle] = useState<string>();
+  const [resultItems, setResultItems] = useState<string[] | undefined>();
+  const [resultDesc, setResultDesc] = useState<string | undefined>();
+  const [resultCta, setResultCta] = useState<string | undefined>();
+  const [resultOnCta, setResultOnCta] = useState<(() => void) | undefined>();
+
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
+  const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
@@ -88,10 +104,7 @@ export default function Index() {
   }, [groups, group]);
 
   const currentLevel: BNode | undefined = useMemo(
-    () =>
-      levelNodes.find(
-        (n) => (n.stageLevel ?? numFromTitle(n.title)) === group
-      ),
+    () => levelNodes.find((n) => (n.stageLevel ?? numFromTitle(n.title)) === group),
     [levelNodes, group]
   );
 
@@ -137,12 +150,92 @@ export default function Index() {
     }
   };
 
-  const purchase = (_p: {
+  // ---- модалки результата ----
+  const openSuccessModal = (titles: string[]) => {
+    setResultTitle("Покупка оформлена");
+    setResultItems(titles);
+    setResultDesc("Доступ к ступеням открыт. Приятной практики!");
+    setResultCta("Открыть");
+    const first = purchaseLevels.find((pl) => titles.includes(pl.title));
+    setResultOnCta(() => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false)));
+    setResultOpen(true);
+  };
+
+  const openInsufficientModal = (needOM?: number, balanceOM?: number) => {
+    setResultTitle("Недостаточно средств");
+    const lines: string[] = [];
+    if (typeof needOM === "number") lines.push(`Требуется: ${needOM} OM`);
+    if (typeof balanceOM === "number") lines.push(`Доступно: ${balanceOM} OM`);
+    setResultItems(lines.length ? lines : undefined);
+    setResultDesc("Пополните баланс и попробуйте снова.");
+    setResultCta(undefined);
+    setResultOnCta(undefined);
+    setResultOpen(true);
+  };
+
+  const openErrorModal = (message?: string) => {
+    const msg = Array.isArray(message) ? message.join("\n") : message;
+    setResultTitle("Ошибка");
+    setResultItems(undefined);
+    setResultDesc(msg || "Не удалось выполнить покупку. Попробуйте позже.");
+    setResultCta(undefined);
+    setResultOnCta(undefined);
+    setResultOpen(true);
+  };
+
+  // ---- покупка ----
+  const purchase = async (_p: {
     levelIds: (string | number)[];
     totalOM: number;
     discountedOM?: number;
   }) => {
     setModalOpen(false);
+
+    const ids = _p.levelIds.map((id) => Number(id)).filter(Number.isFinite) as number[];
+    if (ids.length === 0) return;
+
+    try {
+      // 1) запрос на бэк
+      await addPurchase({
+        type: "Training",
+        content: ids,
+        sale: Boolean(_p.discountedOM), // скидка при покупке всех
+      }).unwrap();
+
+      // 2) оптимистично помечаем купленные тренинги доступными в кэше,
+      //    чтобы UI обновился мгновенно
+      dispatch(
+        learningApi.util.updateQueryData("getTrainingTree", undefined, (draft: any) => {
+          const nodes: any[] = draft?.data ?? [];
+          for (const root of nodes) {
+            const walk = (n: any) => {
+              if (typeof n?.trainingId === "number" && ids.includes(n.trainingId)) {
+                n.accessStatus = "available";
+                if (n.progressStatus !== "completed") n.progressStatus = "not_started";
+              }
+              (n.childrens ?? []).forEach(walk);
+            };
+            walk(root);
+          }
+        })
+      );
+
+      // 3) модалка успеха
+      const titles = purchaseLevels
+        .filter((pl) => ids.includes(Number(pl.id)))
+        .map((pl) => pl.title);
+      openSuccessModal(titles);
+
+      // 4) подстраховать свежими данными
+      await refetch();
+    } catch (e: any) {
+      const code = e?.data?.code;
+      if (code === "INSUFFICIENT_FUNDS") {
+        openInsufficientModal(e?.data?.needOM, e?.data?.balanceOM);
+      } else {
+        openErrorModal(e?.data?.message ?? e?.error ?? "Ошибка покупки");
+      }
+    }
   };
 
   return (
@@ -150,7 +243,6 @@ export default function Index() {
       <TopBar
         title="Ступени духа"
         rightIconUrl={helpIcon}
-        // onBack={() => navigate("/", { replace: true })}
         onRightClick={() =>
           window.open(
             "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
@@ -196,7 +288,7 @@ export default function Index() {
               zIndex: 10,
             }}
           >
-            <div className="levels__list">
+            <div className="levels__list" aria-busy={isBuying}>
               {items.map((l) => (
                 <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)} />
               ))}
@@ -216,6 +308,17 @@ export default function Index() {
       </main>
 
       <Footer />
+
+      <FlexibleModal
+        open={resultOpen}
+        title={resultTitle}
+        items={resultItems}
+        description={resultDesc}
+        ctaLabel={resultCta}
+        onCta={resultOnCta}
+        closeIconUrl={helpIcon}
+        onClose={() => setResultOpen(false)}
+      />
     </div>
   );
 }
