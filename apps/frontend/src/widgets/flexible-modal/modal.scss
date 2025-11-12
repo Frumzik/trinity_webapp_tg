@@ -20,7 +20,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 28px;
   background: #fff;
   padding: 24px 18px 20px;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
@@ -36,10 +35,11 @@
 }
 
 .flexmodal__title {
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1.25;
-  color: #0f172a;
+  color: var(--Text-Black, #121826);
+  font-family: "SF Pro Display";
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 700;
   max-width: 80%;
 }
 
