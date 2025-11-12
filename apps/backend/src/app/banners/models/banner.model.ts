@@ -17,6 +17,9 @@ export class Banner extends Document<Types.ObjectId> implements IBanner {
   @Prop({ type: String, default: null })
   linkUrl!: string | null;
 
+  @Prop({ type: String, default: null })
+  description!: string | null;
+
   // если viewedUsers хранят числовые userId:
   @Prop({ type: [Number], default: [] })
   viewedUsers!: number[];

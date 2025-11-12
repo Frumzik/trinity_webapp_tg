@@ -27,6 +27,15 @@ export class BannerCreateRequestDto {
   })
   imageUrl!: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Описание',
+    example: null,
+    nullable: true,
+  })
+  description?: string | null;
+
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
