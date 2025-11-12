@@ -138,6 +138,7 @@ export class FundsService {
       const newFundItem = new ReserveFundItemEntity({
         ...dto,
         endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+        isReturned: false
       });
 
       return await this.reserveFundItemsRepository.create(newFundItem);
