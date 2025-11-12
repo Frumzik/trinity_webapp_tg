@@ -93,6 +93,39 @@ const Index = () => {
     return share.toString();
   }, [u]);
 
+  function LogoutButton() {
+    const handleLogout = () => {
+      try {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("__tg_user");
+        window.location.reload();
+      } catch (e) {
+        window.location.reload();
+      }
+    };
+
+    return (
+      <button
+        onClick={handleLogout}
+        style={{
+          position: "fixed",
+          top: 8,
+          right: 8,
+          zIndex: 9999,
+          fontSize: 11,
+          padding: "6px 8px",
+          borderRadius: 6,
+          border: "1px solid #ccc",
+          background: "#fff",
+          cursor: "pointer",
+          opacity: 0.85,
+        }}
+      >
+        Разлогин
+      </button>
+    );
+  }
+
   return (
     <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
@@ -106,7 +139,7 @@ const Index = () => {
         >
           Личный кабинет
         </Title>
-
+        <LogoutButton />
         <ProfileHeader
           avatarUrl={avatarUrl}
           name={displayName}
