@@ -1,8 +1,7 @@
-// src/pages/home/index.tsx
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import MiniCardSlider, { type MiniCardItem } from "../../widgets/card-slider-homePage";
+import MiniCardSlider from "../../widgets/card-slider-homePage";
 import TopBar from "../../widgets/topbarlk/topbarlk";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
@@ -24,53 +23,35 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
-// Бэкенд-схема (для справки):
-// {
-//   _id?: string
-//   bannerId: number
-//   miniatureUrl: string
-//   imageUrl: string
-//   linkUrl: string | null
-//   viewedUsers: number[]
-//   endDate: string | null
-// }
-
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate();
 
-  const { data: banners = [] } = useGetBannersQuery();
+  const { data: banners = [] } = useGetBannersQuery(); // ← уже нормализованные
   const [addView] = useAddBannerViewMutation();
 
-  const items: MiniCardItem[] = useMemo(() => {
-    if (!Array.isArray(banners)) return [];
-    return banners.map((b: any): MiniCardItem => {
-      // Заголовок считаем на фронте (схема его не хранит)
-      const title =
-        (b.linkUrl?.startsWith('/') ? b.linkUrl.slice(1) : b.linkUrl)?.replace(/^https?:\/\/(www\.)?/,'') ||
-        'Баннер';
-      return {
-        id: b.bannerId,
-        title,
-        imageUrl: b.miniatureUrl || b.imageUrl || '',
-        rightText: Array.isArray(b.viewedUsers) ? b.viewedUsers.length : undefined,
-      };
-    });
-  }, [banners]);
+  const handleCardClick = (it: { id: string | number }) => {
+    const src = banners.find(b => String(b.id) === String(it.id));
+    if (!src) return;
 
-  const handleCardClick = (it: MiniCardItem) => {
-    // отметить просмотр
-    addView(it.id as any).catch(() => {});
+    // отметка просмотра — если id число
+    const idNum = Number(src.id);
+    if (Number.isFinite(idNum)) addView(idNum as any).catch(() => {});
 
-    // найти исходный баннер, чтобы взять linkUrl
-    const src: any = (banners as any[]).find(b => String(b.bannerId) === String(it.id));
-    const url: string = src?.linkUrl || '/';
+    const url = (src.linkUrl || '').trim();
+    if (!url) return;
 
-    if (url.startsWith('/')) {
-      nav(url);                     // внутренние роуты
-    } else {
-      window.open(url, '_blank');   // внешние ссылки/телега
+    // абсолютная ссылка → открываем в внешнем браузере/вкладке
+    if (/^(https?:)?\/\//i.test(url)) {
+      const tg = (window as any)?.Telegram?.WebApp;
+      if (tg?.openLink) tg.openLink(url);
+      else window.open(url, '_blank');
+      return;
     }
+
+    // относительный путь → роутинг внутри SPA
+    const path = url.startsWith('/') ? url : `/${url}`;
+    nav(path);
   };
 
   return (
@@ -78,7 +59,8 @@ export default function SupportPage() {
       <TopBar onMenu={() => setMenuOpen(true)} />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
-        <MiniCardSlider items={items} onItemClick={handleCardClick} />
+        {/* тут просто отдаём banners (они уже с title/imageUrl/rightText) */}
+        <MiniCardSlider items={banners} onItemClick={handleCardClick} />
 
         <div className="supportPage">
           <div className="supportPage__cards" style={{ gap: "10px" }}>
