@@ -3,8 +3,7 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import { sessionActions } from '../../entities/session/model/session.slice'
 
 type GetState = () => { session?: { token?: string | null } }
-// const API_URL = import.meta.env.VITE_API_URL as string;
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL as string;
 const TG_ID_KEY = 'tgId'
 
 const rawBaseQuery = fetchBaseQuery({
