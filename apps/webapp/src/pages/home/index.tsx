@@ -8,7 +8,7 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Blur from "../../../public/blurs/blur-1.png"
-import Card1 from "../../assets/homePage/";
+import Card1 from "../../assets/homePage/card1.svg";
 import Card2 from "../../assets/homePage/card2.svg";
 import Card3 from "../../assets/homePage/card3.svg";
 import Card4 from "../../assets/homePage/card4.svg";
@@ -66,7 +66,7 @@ export default function SupportPage() {
               title="Академия духа"
               description=""
               bgImageUrl={Tile1}
-              rightImageUrl={Card5}
+              rightImageUrl={Card1}
               enabled
               to="/academy"
             />
@@ -76,20 +76,20 @@ export default function SupportPage() {
               description=""
               bgImageUrl={Tile2}
               enabled
-              rightImageUrl={Card4}
+              rightImageUrl={Card2}
               to="/products"
             />
 
             <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
               <ReferralsCard
-                imageUrl={Card1}
+                imageUrl={Card3}
                 titleTop="Пройти практику"
                 labelBottom="Перейти"
                 href="/practice"
                 className="refCard--imgRight refCard--166x123"
               />
               <ReferralsCard
-                imageUrl={Card2}
+                imageUrl={Card4}
                 titleTop="Ступени духа"
                 labelBottom="2 ступень"
                 href="/levels"
@@ -102,7 +102,7 @@ export default function SupportPage() {
               description=""
               bgImageUrl={Tile2}
               enabled
-              rightImageUrl={Card3}
+              rightImageUrl={Card5}
               to="/health-lab"
             />
           </div>

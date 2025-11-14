@@ -50,7 +50,7 @@
   padding: 0 16px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.30);
-  backdrop-filter: blur(3.450000047683716px);
+  backdrop-filter: blur(6px);
 }
 
 .refCard__label {
@@ -106,6 +106,6 @@
   border-radius: 20px;
   border: 0.5px solid #FFF;
   background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
   z-index: 2;
 }

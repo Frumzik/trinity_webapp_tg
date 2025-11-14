@@ -211,7 +211,7 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">Пригласить друга</GradientButton>
+          <GradientButton href={inviteHref} target="_blank">Пригласить</GradientButton>
         </div>
       </div>
 
