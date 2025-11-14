@@ -4,7 +4,7 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/frontend"
+      "path": "./apps/webapp"
     },
     {
       "path": "./apps/admin"
@@ -17,6 +17,9 @@
     },
     {
       "path": "./libs/shared"
+    },
+    {
+      "path": "./apps/frontend"
     }
   ]
 }

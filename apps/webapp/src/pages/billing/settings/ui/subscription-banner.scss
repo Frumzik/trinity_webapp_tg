@@ -1,0 +1,36 @@
+.subb {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+  border-radius: 20px;
+  background: #070d2a;
+  color: #fff;
+}
+.subb__label {
+  color: #fff;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+.subb__name {
+  margin-top: 6px;
+  color: #fff;
+  font-family: "SF Pro Display";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+}
+.subb__btn {
+  width: 131px;
+  height: 49px;
+  border-radius: 12px;
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+}

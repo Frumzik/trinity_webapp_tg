@@ -1,0 +1,157 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 25px;
+}
+
+.scrollBox {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: 16px;
+  background: #fff;
+  min-height: 220px;
+}
+
+.scrollBox__title {
+  color: #fff;
+  font-family: "Alegreya_Sans";
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+}
+.scrollBox__title-cont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.scrollBox__icon {
+  a {
+    padding: 10px 10px 10px 10px;
+    img {
+      margin-top: 3px;
+      width: 10.5px;
+      height: 10.5px;
+    }
+  }
+}
+.list {
+  display: grid;
+  gap: 8px;
+  background: #f0f0f0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 26px;
+  border-radius: 15px;
+  background: #e7e7e7;
+  width: 97%;
+  &__num {
+    color: #575757;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    border-radius: 15px;
+    background: #d9d9d9;
+    width: 47px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__count {
+    color: #575757;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+
+    border-radius: 15px;
+    background: #d9d9d9;
+    width: 82px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding-right: 20px;
+  }
+}
+
+.tiles {
+  display: grid;
+  gap: 14px;
+}
+
+.list__referals {
+  height:64px;
+  border-radius: 19.36px 19.36px 0px 0px;
+
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
+  margin-bottom: -32px;
+}
+.list__referals-title {
+  height: 46px;
+  display: flex;
+  background: #e4e4e4;
+  border-radius: 19.36px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  &-up {
+    color: #000;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  &-balance {
+    color: #000;
+    text-align: right;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  &-levels {
+    color: #000;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+  &-levels-count {
+    color: #000;
+
+    text-align: right;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+  }
+}
+.list__referals-subtitle {
+  border-radius: 19.36px;
+  background: #e4e4e4;
+  height: 46px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  margin-top: 0!important;
+}
+
+.profile-wrapper{
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+}
+.list{
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%)!important;
+  backdrop-filter: blur(6px);
+}
