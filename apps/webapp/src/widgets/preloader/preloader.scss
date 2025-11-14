@@ -21,14 +21,12 @@
   pointer-events: none;
 }
 
-/* Круг с точками */
 .preloader__spinner {
   position: relative;
   width: 80px;
   height: 80px;
 }
 
-/* Базовый стиль точки */
 .preloader__dot {
   position: absolute;
   top: 50%;
