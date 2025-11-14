@@ -8,8 +8,8 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Bg1 from "../../assets/icons/bg1.svg";
-import Card1 from "../../assets/icons/products/Card7.png";
-import Card2 from "../../assets/icons/products/Card8.svg";
+import Card1 from "../../assets/icons/products/card7.png";
+import Card2 from "../../assets/icons/products/card8.svg";
 import Bgblue from "../../assets/icons/bgblue.svg";
 import GradientButton from "../../shared/ui/gradient-button";
 import { useNavigate } from "react-router-dom";
