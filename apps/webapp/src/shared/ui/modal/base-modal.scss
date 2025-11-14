@@ -1,0 +1,29 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 2000;
+}
+.modal__box {
+  position: relative;
+  width: 278.899px;
+  height: 146.422px;
+  padding: 15px 21px;
+  border-radius: 17.431px;
+  background: rgba(13, 13, 13, 0.53);
+  backdrop-filter: blur(11.33027458190918px);
+  transform: translateY(-15vh);
+}
+.modal__close {
+  position: absolute;
+  right: -8px;
+  top: -10px;
+  width: 21.843px;
+  height: 21.843px;
+  border-radius: 17.431px;
+
+  border: 0;
+  line-height: 0;
+}

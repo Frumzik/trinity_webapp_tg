@@ -1,0 +1,29 @@
+.hscroll {
+  width: 100%;
+  /* защита от родительского скролла */
+  overscroll-behavior-x: contain;
+}
+
+.hscroll__track {
+  display: flex;
+  flex-wrap: nowrap;             /* не переносим в столбец */
+  gap: var(--gap, 12px);
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  -webkit-overflow-scrolling: touch; /* плавность iOS */
+  scroll-behavior: smooth;
+  touch-action: pan-x pinch-zoom;     /* свайп по горизонтали на мобильных */
+
+  /* Скрыть полосы, если хочешь */
+  scrollbar-width: none;              /* Firefox */
+}
+.hscroll__track::-webkit-scrollbar {
+  display: none;                      /* Chrome/Safari */
+}
+
+/* КЛЮЧЕВОЕ: дети не сжимаются и занимают «естественную» ширину */
+.hscroll__track > * {
+  flex: 0 0 auto;
+}

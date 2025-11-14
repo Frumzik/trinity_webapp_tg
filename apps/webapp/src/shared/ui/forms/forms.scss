@@ -1,0 +1,128 @@
+:root{
+  --radius-lg: 12px;
+  --radius-md: 12px;
+  --bg-input: #F1F5F9;
+  --text: #64748B;
+  --sub: #6B7280;
+  --brand-grad: linear-gradient(180deg, #B4713D 0%, #D1AF68 100%);
+}
+
+.f-label{
+  color: var(--Text-Body, #64748B);
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.f-field{ display:block; }
+.f-input{
+  width: 100%;
+  height: 56px;
+  border: 0;
+  outline: 0;
+  border-radius: var(--radius-lg);
+  background: var(--bg-input);
+  padding: 0 16px;
+  color: var(--Text-Black, #121826);
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+}
+.f-seg__icon{
+
+}
+.f-seg__wrap{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.f-seg__btn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: var(--Text-Body, #64748B);
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  padding: 16px;
+  border-radius: 12px;
+  border: 0 solid #B1BBD6;
+  background: var(--Input-Field, #F1F5F9);
+}
+.f-seg__btn.is-active{
+  border-radius: 12px;
+  border: 1px solid #204E29;
+  background: var(--Input-Field, #F1F5F9);}
+
+
+.f-field{ display:block; }
+
+.f-label{
+  color: var(--text-body);
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.f-input-wrap{
+  position: relative;
+}
+
+.f-input{
+  width: 100%;
+  height: 56px;
+  border: 0;
+  outline: 0;
+  background: var(--bg-input);
+  padding: 0 16px;
+  color: var(--text-black);
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-weight: 500;
+
+  &[type="number"]::-webkit-outer-spin-button,
+  &[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  &[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+.f-input-wrap--spin .f-input{
+  padding-right: 48px;
+}
+
+.f-spin{
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  width: 36px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+}
+
+.f-spin__btn{
+  border: 0;
+  border-radius: 10px;
+  background: var(--bg-input);
+  color: var(--spin-color);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.f-spin__btn:active{
+  background: rgba(100,116,139,0.22);
+}

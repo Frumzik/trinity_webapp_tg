@@ -19,7 +19,7 @@ import { FundsModule, ReferralsModule } from './referrals';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // чтобы ConfigModule был доступен везде
-      envFilePath: 'apps/backend/envs/.dev.env',
+      envFilePath: 'apps/backend/envs/.env.development',
     }),
     MongooseModule.forRootAsync(getMongoConfig()),
     PassportModule,

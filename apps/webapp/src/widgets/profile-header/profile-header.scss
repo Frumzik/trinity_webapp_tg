@@ -1,0 +1,86 @@
+.profileHeader {
+  margin-top: 26px;
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.profileHeader__avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 58px;
+  object-fit: cover;
+}
+
+.profileHeader__info {
+  display: grid;
+  gap: 7px;
+}
+
+.profileHeader__name {
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.profileHeader__username {
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.profileHeader__side {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+}
+
+.profileHeader__status {
+  color: #FFF;
+  text-align: right;
+  font-family: "SF Pro Display";
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.profileHeader__statusValue {
+  color: #FFC34F;
+  font-family: "SF Pro Display";
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.profileHeader__balance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 17px;
+  //width: 100px;
+  //height: 29px;
+  padding: 6px 10px;
+  border-radius: 59px;
+  background: #FFB3E1;
+  box-shadow: 2px 1px 25px 0 rgba(241, 39, 172, 0.50) inset;
+}
+
+.profileHeader__balanceIcon {
+  //margin-top: 5px;
+  //width: 17px;
+  //height: 17px;
+}
+
+.profileHeader__balanceText {
+  color: #fff;
+  text-align: right;
+  font-family: "SF Pro Display";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}

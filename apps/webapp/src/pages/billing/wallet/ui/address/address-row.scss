@@ -1,0 +1,19 @@
+.addr {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+}
+.addr__text {
+  display: block;
+  padding: 10px 0px;
+  text-align: center;
+  border-bottom: 1px solid #d7dee7;
+  background: #fff;
+  color: #24292E;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  word-break: break-all;
+}

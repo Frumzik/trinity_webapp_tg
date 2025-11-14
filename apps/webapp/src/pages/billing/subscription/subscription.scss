@@ -1,0 +1,188 @@
+.sub {
+  &__main {
+    padding: 0 24px 110px;
+  }
+
+  &__section {
+    margin-top: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__pill {
+    border-radius: 14px;
+    background: #000333;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    padding: 24px 24px;
+    color: #F8FAFC;
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+
+    &--grad {
+      background: var(--Linear, linear-gradient(180deg, #B4713D 0%, #D1AF68 100%));
+    }
+  }
+
+  &__pill-left {
+
+  }
+
+  &__pill-right {
+    color: #F8FAFC;
+    text-align: right;
+    font-family: "SF Pro Display";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    justify-self: end;
+  }
+
+  &__pitch {
+    margin-top: 36px;
+  }
+
+  &__h2 {
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    margin: 8px 0 20px;
+  }
+
+  &__ul {
+    display: grid;
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__li {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 10px;
+    align-items: start;
+    color: var(--Text-Body, #64748B);
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  &__dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: #000333;
+    position: relative;
+    top: -2px;
+    img{
+      margin-left: 5px;
+      margin-top: 6px;
+    }
+  }
+
+  &__offer {
+    border-radius: 24px 24px 0 0;
+    background: var(--Input-Field, #F1F5F9);
+    width: 100%;
+  }
+.abc{
+  position: absolute;
+  bottom: 0px;
+  border-radius: 24px 24px 0 0;
+  height: 234px;
+  background: var(--Input-Field, #F1F5F9);
+  width: 100%;
+}
+  &__offer-card {
+    position: absolute;
+    bottom: 115px;
+    right: 24px;
+    left: 24px;
+    width: 88%;
+    border-radius: 16px;
+    background: #F1F5F9;
+    padding: 16px;
+    border: 2px solid #204E29;
+
+  }
+
+  &__offer-title {
+    font-family: "SF Pro Display";
+    font-weight: 700;
+    font-size: 14px;
+    color: #121826;
+    margin-bottom: 6px;
+  }
+
+  &__offer-price {
+    font-family: "SF Pro Display";
+    font-weight: 800;
+    font-size: 20px;
+    color: #121826;
+  }
+
+  &__offer-note {
+    font-weight: 600;
+    font-size: 14px;
+    color: #475569;
+    margin-left: 4px;
+  }
+
+  &__offer-sub {
+    color: #64748B;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  &__cta {
+    margin-top: 14px;
+  }
+
+  &__details {
+    margin-top: 18px;
+    display: grid;
+    gap: 20px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__label {
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  &__value {
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  &__link {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    color: #0B1229;
+    border-bottom: 2px solid #121826;
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+  }
+}
