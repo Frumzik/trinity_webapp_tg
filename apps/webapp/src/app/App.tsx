@@ -13,15 +13,15 @@ export default function App() {
       document.body.classList.remove('app-loaded');
     };
   }, []);
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 
   return (
     <FooterTabProvider>
-      <div className="app-layout">
-      {isMobile && <div className="top-rectangle"></div>}
+      {/*<div className="app-layout">*/}
+      {/*{isMobile && <div className="top-rectangle"></div>}*/}
       <Outlet />
-      </div>
+      {/*</div>*/}
     </FooterTabProvider>
   );
 }
