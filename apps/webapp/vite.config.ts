@@ -25,4 +25,5 @@ export default defineConfig(() => ({
       transformMixedEsModules: true,
     },
   },
+  envDir: 'envs',
 }));

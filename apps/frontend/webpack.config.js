@@ -12,9 +12,9 @@ const mode =
 
 // выбираем нужный envs-файл
 const envFile =
-  mode === 'production' ? '.prod.env' :
-    mode === 'test'       ? '.test.env' :
-      '.dev.env';
+  mode === 'production' ? '.env.production' :
+    mode === 'test'       ? '.env.test' :
+      '.env.development';
 
 const myEnv = dotenv.config({ path: join(__dirname, 'envs', envFile) });
 dotenvExpand.expand(myEnv);

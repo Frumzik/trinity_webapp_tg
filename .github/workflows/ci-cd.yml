@@ -47,7 +47,7 @@ jobs:
           npx nx run-many --target=build --all --prod
           npx nx run backend:copy-workspace-modules
           docker-compose down
-          ENVIRONMENT=prod docker-compose build
-          ENVIRONMENT=prod docker-compose up -d
+          ENVIRONMENT=production docker-compose build
+          ENVIRONMENT=production docker-compose up -d
           docker image prune --filter="dangling=true" --force
               
