@@ -1,0 +1,97 @@
+.dep {
+  padding: 8px 14px 24px;
+  display: grid;
+  gap: 14px;
+  background: #fff;
+}
+
+.dep__head {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.dep__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.dep__title {
+  color: var(--Gray-gray-900, #24292E);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.dep__caption {
+  white-space: pre-line;
+  color: var(--Gray-500, #667085);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.dep__block {
+  padding: 24px 16px 12px;
+}
+
+.dep__block:first-of-type {
+  margin-top: 6px;
+}
+.dep__block:nth-of-type(2) {
+  border-bottom:1px solid  var(--Gray-200, #E4E7EC);
+}
+.dep__block:nth-of-type(3) {
+  padding-top: 0px;
+}
+
+.dep__warn {
+  color: var(--Gray-gray-900, #24292E);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.78;
+}
+
+.dep__strong {
+  color: #000;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.dep__note {
+
+  white-space: pre-line;
+  color: var(--Gray-500, #667085);
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.dep__addr {
+  display: grid;
+  gap: 10px;
+}
+
+.dep__hint {
+  color: #667085;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+

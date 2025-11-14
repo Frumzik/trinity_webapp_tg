@@ -1,0 +1,68 @@
+.gbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  border-radius: 12px;
+  background: var(--Linear, linear-gradient(180deg, #b4713d 0%, #d1af68 100%));
+  color: var(--Grayscale-White, #fff);
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  text-decoration: none;
+  border: 0;
+}
+
+.gbtn--full {
+  width: 96%;
+}
+
+.gbtn:active {
+  transform: translateY(1px);
+}
+
+.gbtn:disabled,
+.gbtn[aria-disabled="true"] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.gbtn-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--footer-h) + 10px);
+  padding: 0 18px;
+  z-index: 3000;
+  pointer-events: none;
+}
+.gbtn-bar__inner {
+  height: var(--gbutton-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.gbtn--primary {
+  border-radius: 12px;
+  background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%);
+  box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.gbtn--alt {
+  color: #6A5017;
+  font-family: "SF Pro Display";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #FBFFE8 0.03%, #FEEEC1 50.49%, #F8BF5E 100.13%), linear-gradient(17deg, #FFFDCC -26.56%, #FF922D 55.28%), linear-gradient(180deg, #B4713D 0%, #D1AF68 100%);
+}

@@ -1,0 +1,27 @@
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title_everywhere {
+  margin: 0;
+  color: #FFF;
+  font-family: "Alegreya_Sans";
+  font-size: 27px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.title_right {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  button {
+    all: unset;
+    img {
+      width: 16.5px;
+      height: 17.5px;
+    }
+  }
+}

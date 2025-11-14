@@ -154,3 +154,15 @@
 .featureTile.featureTile-events {
   gap: 0 !important;
 }
+
+.featureTile__btn:not(.is-disabled) {
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.featureTile__btn:not(.is-disabled):hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.featureTile__btn:not(.is-disabled):active {
+  transform: scale(0.97);
+}
