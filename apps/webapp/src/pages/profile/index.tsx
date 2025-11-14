@@ -21,6 +21,7 @@ import BurgerMenu from '../../widgets/menuBurger/burger';
 import { useGetUserQuery } from "../../shared/api/user.api";
 import { getTelegramUser } from "../../shared/telegram/telegram";
 import { useGetReferralsStatsQuery } from "../../shared/api/referrals.api";
+import Blur from '../../../public/blurs/Blur-1.png';
 
 function avatarFrom(username?: string|null, name?: string|null) {
   const seed = username || name || 'user'
@@ -126,8 +127,11 @@ const Index = () => {
 
   return (
     <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
+      <img src={Blur} className={"blur"} alt="" />
+
       <TopBar onMenu={() => setMenuOpen(true)} />
       <main className="screen" style={{ paddingTop: "20px" }}>
+
         <Title
           right={
             <Link to="/account" className="icon-btn">
@@ -207,7 +211,7 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">Пригласить друга</GradientButton>
+          <GradientButton href={inviteHref} target="_blank">Пригласить</GradientButton>
         </div>
       </div>
 
