@@ -46,6 +46,7 @@ import PinCreatePage from '../pages/pin/create'
 import PinLoginPage from '../pages/pin/login'
 import TrainingPage from '../pages/training'
 import LessonTextPage from "../pages/level/text-level"
+import EntryPage from "../pages/entry"
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
@@ -62,13 +63,14 @@ export const router = createBrowserRouter([
         path: '/',
         element: <App />,
         children: [
+          { index: true, element: wrap(<EntryPage />) },
           { path: 'pin/create', element: wrap(<PinCreatePage />) },
           { path: 'pin/login', element: wrap(<PinLoginPage />) },
 
           {
             element: <PrivateRoute />,
             children: [
-              { index: true, element: wrap(<HomePage />) },
+              { path: 'home', element: wrap(<HomePage />) },
               { path: 'films', element: wrap(<FilmsPage />) },
               { path: 'policy', element: wrap(<PolicyPage />) },
               { path: 'practice', element: wrap(<PracticePage />) },

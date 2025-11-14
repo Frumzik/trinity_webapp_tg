@@ -25,7 +25,7 @@
 }
 
 .promoCard__title {
-  color: #000;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
@@ -37,9 +37,10 @@
   align-items: center;
   justify-content: center;
   height: 24px;
-  border-radius: 15px;
-  background: #bcbcbc;
-  backdrop-filter: blur(5.699999809265137px);
+  border-radius: 20px;
+  border: 0.5px solid #FFF;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
   color: #fff;
   text-align: center;
   font-family: "SF Pro Display";
