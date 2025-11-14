@@ -45,7 +45,7 @@ export default function App() {
   return (
     <FooterTabProvider>
       {!isPinPage && showPreloader && <Preloader hidden={fadeOut} />}
-      <Outlet />
+      <Outlet/>
     </FooterTabProvider>
   );
 }
