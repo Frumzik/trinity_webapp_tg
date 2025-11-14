@@ -66,7 +66,7 @@
   align-items: center;
   height: 26px;
   border-radius: 15px;
-  background: #e7e7e7;
+  background: rgba(255, 255, 255, 0.30);
   width: 97%;
 
   &__count {
@@ -142,7 +142,7 @@
 .list__referals-subtitle {
   margin-top: 16px;
   border-radius: 19.36px;
-  background: #e4e4e4;
+  background: rgba(255, 255, 255, 0.30);
   height: 46px;
   display: flex;
   justify-content: space-between;
