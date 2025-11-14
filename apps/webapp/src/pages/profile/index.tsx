@@ -21,7 +21,7 @@ import BurgerMenu from '../../widgets/menuBurger/burger';
 import { useGetUserQuery } from "../../shared/api/user.api";
 import { getTelegramUser } from "../../shared/telegram/telegram";
 import { useGetReferralsStatsQuery } from "../../shared/api/referrals.api";
-import Blur from '../../../public/blurs/Blur-1.png';
+import Blur from '../../../public/blurs/blur-1.png';
 
 function avatarFrom(username?: string|null, name?: string|null) {
   const seed = username || name || 'user'
