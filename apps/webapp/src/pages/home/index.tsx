@@ -8,7 +8,7 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Blur from "../../../public/blurs/blur-1.png"
-import Card1 from "../../assets/homePage/card1.svg";
+import Card1 from "../../assets/homePage/";
 import Card2 from "../../assets/homePage/card2.svg";
 import Card3 from "../../assets/homePage/card3.svg";
 import Card4 from "../../assets/homePage/card4.svg";
