@@ -1,20 +1,30 @@
-
+// src/pages/pin/create/index.tsx
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../widgets/topbarTextpage';
 import GradientButton from '../../../shared/ui/gradient-button';
 import '../../pin/pin.scss';
-import { useRegisterTgMutation } from '../../../shared/api/auth.api';
+import { useRegisterTgMutation, useLoginTgMutation } from '../../../shared/api/auth.api';
+import { useAppDispatch } from '../../../app/store';
+import { sessionActions } from '../../../entities/session/model/session.slice';
 
 const toDigits = (v: string) => v.replace(/\D/g, '').slice(0, 4);
-// декодер b64url -> строка
+
+// один и тот же pickToken, как в PinLoginPage
+const pickToken = (x: any): string | null =>
+  x?.access_token ||
+  x?.accessToken ||
+  x?.token ||
+  x?.data?.access_token ||
+  x?.data?.accessToken ||
+  x?.data?.token ||
+  null;
+
+// --- decodeB64Url / parsePartnerId как у тебя было ---
 function decodeB64Url(s: string) {
   try {
-    // b64url -> b64
     const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
-    // atob -> utf8
     const bin = atob(b64);
-    // бинарь -> строка
     return decodeURIComponent(
       Array.from(bin, (c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
     );
@@ -23,18 +33,15 @@ function decodeB64Url(s: string) {
   }
 }
 
-// парсим start_param из Telegram WebApp в number | undefined
 function parsePartnerId(startParam?: string): number | undefined {
   if (!startParam) return undefined;
   const s = startParam.trim();
 
-  // вариант 1: просто цифры `?startapp=12345`
   if (/^\d+$/.test(s)) {
     const n = Number(s);
     return Number.isFinite(n) ? n : undefined;
   }
 
-  // вариант 2: старый b64url JSON {"partnerId": 12345}
   try {
     const json = decodeB64Url(s);
     const data = JSON.parse(json);
@@ -52,10 +59,12 @@ export default function PinCreatePage() {
   const [show2, setShow2] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
   const [registerTg] = useRegisterTgMutation();
+  const [loginTg] = useLoginTgMutation();
+  const dispatch = useAppDispatch();
   const nav = useNavigate();
 
-  // Telegram user
   const tg = useMemo(
     () => (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user ?? null,
     []
@@ -68,10 +77,9 @@ export default function PinCreatePage() {
     tg?.username ||
     undefined;
 
-  // start_param из Telegram
-  const startParam: string | undefined = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param;
+  const startParam: string | undefined =
+    (window as any)?.Telegram?.WebApp?.initDataUnsafe?.start_param;
 
-  // приводим к числу один раз
   const partnerIdNum = useMemo(() => parsePartnerId(startParam), [startParam]);
 
   const isPinLengthOk = pin1.length === 4;
@@ -83,20 +91,28 @@ export default function PinCreatePage() {
     if (!valid || loading) return;
     setErr(null);
     setLoading(true);
-    try {
-      // на всякий случай можно подсмотреть тип в консоли во время отладки
-      // console.log('[register] partnerId:', partnerIdNum, typeof partnerIdNum);
 
+    try {
+      // 1. Регистрируем
       await registerTg({
         type: 'TG',
         tgId,
         pin: pin1,
         username,
         name,
-        ...(partnerIdNum !== undefined ? { partnerId: partnerIdNum } : {}), // ТОЛЬКО number
+        ...(partnerIdNum !== undefined ? { partnerId: partnerIdNum } : {}),
       }).unwrap();
 
-      nav('/pin/login', { replace: true });
+      // 2. Сразу же логиним тем же PIN
+      const resp = await loginTg({ type: 'TG', tgId, pin: pin1 }).unwrap();
+      const token = pickToken(resp);
+      if (!token) throw new Error('Токен не получен');
+
+      // 3. Сохраняем токен и отправляем на главную
+      dispatch(sessionActions.setToken(token));
+      localStorage.setItem('access_token', token);
+
+      nav('/', { replace: true });
     } catch (e: any) {
       setErr(e?.data?.message?.[0] || e?.message || 'Ошибка регистрации');
     } finally {
@@ -106,7 +122,7 @@ export default function PinCreatePage() {
 
   return (
     <div className="pin">
-      <TopBar title="Пин код" hideBackButton/>
+      <TopBar title="Пин код" hideBackButton />
       <main className="pin__main">
         <div className="pin__form">
           <div className="pin__field">
@@ -132,7 +148,7 @@ export default function PinCreatePage() {
           <div className="pin__field">
             <input
               className="pin__input"
-              type={show1 ? 'text' : 'password'}
+              type={show2 ? 'text' : 'password'}
               inputMode="numeric"
               pattern="\d*"
               maxLength={4}
@@ -166,10 +182,6 @@ export default function PinCreatePage() {
           >
             Создать аккаунт
           </GradientButton>
-
-          {/*<div className="pin__under">*/}
-          {/*  Уже есть пин? <Link to="/pin/login">Войти</Link>*/}
-          {/*</div>*/}
         </div>
       </main>
     </div>

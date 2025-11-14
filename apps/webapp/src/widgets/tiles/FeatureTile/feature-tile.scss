@@ -35,14 +35,9 @@
   height: 101px;
   color: #fff;
 
-  /* From https://css.glass */
-  background:
-    linear-gradient(0deg, rgba(0, 0, 0, 0.21) 0%, rgba(0, 0, 0, 0.21) 100%),
-    rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(7.2px);
-  -webkit-backdrop-filter: blur(7.2px);
+  border-radius: 15px;
+  background: rgba(11, 50, 90, 0.54);
+  backdrop-filter: blur(7.278717041015625px);
 }
 
 .featureTile__title {
@@ -50,7 +45,9 @@
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 300;
+  margin-top: 3px;
+  text-transform: capitalize;
 }
 
 .featureTile__desc {
@@ -70,12 +67,10 @@
   bottom: 7px;
   left: 9px;
   border: 0;
-  border-radius: 15px;
 
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(7.2px);
-  -webkit-backdrop-filter: blur(7.2px);
+  border-radius: 10px;
+  background: #A39AFF;
+  box-shadow: 2px 1px 25px 0 rgba(47, 54, 205, 0.50) inset, 10px -5px 55px 30px rgba(163, 154, 255, 0.30);
 
   width: 70px;
   height: 24px;

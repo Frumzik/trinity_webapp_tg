@@ -11,5 +11,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.__hidePreloader = function () {
+        var el = document.getElementById('html-preloader');
+        if (!el) return;
+        el.classList.add('preloader--hidden');
+        setTimeout(function () {
+          el?.parentNode?.removeChild(el);
+        }, 250);
+      };
+    </script>
   </body>
 </html>
