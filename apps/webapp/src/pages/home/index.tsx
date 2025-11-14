@@ -13,8 +13,8 @@ import Card2 from "../../assets/homePage/card2.svg";
 import Card3 from "../../assets/homePage/card3.svg";
 import Card4 from "../../assets/homePage/card4.svg";
 import Card5 from "../../assets/homePage/card5.svg";
-import Tile1 from "../../assets/homePage/tile1.png";
-import Tile2 from "../../assets/homePage/tile2.png";
+import Tile1 from "../../assets/homePage/tile1.svg";
+import Tile2 from "../../assets/homePage/tile2.svg";
 
 import "./home.scss";
 import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
@@ -71,7 +71,7 @@ export default function SupportPage() {
               to="/academy"
             />
             <FeatureTile
-              className="featureTile--noBtn"
+              // className="featureTile--noBtn"
               title="Все продукты"
               description=""
               bgImageUrl={Tile2}

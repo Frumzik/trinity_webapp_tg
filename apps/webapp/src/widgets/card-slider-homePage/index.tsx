@@ -1,8 +1,8 @@
-// widgets/card-slider-homePage/index.tsx
 import { useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
+
 
 export type MiniCardItem = {
   id: string | number;

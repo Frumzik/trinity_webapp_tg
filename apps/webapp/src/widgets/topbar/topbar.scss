@@ -29,15 +29,4 @@
       display: block;
     }
   }
-
-  &__status {
-    position: absolute;
-    top: 13px;
-    right: 20px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #2b903f;
-    pointer-events: none;
-  }
 }

@@ -44,7 +44,7 @@ export default function Footer() {
         <button
           type="button"
           className={`footer__item${tab === "home" ? " is-active" : ""}`}
-          onClick={() => go("/", "home")}
+          onClick={() => go("/home", "home")}
         >
           <span className="icon">
             <img src={HomeIcon} alt="" />

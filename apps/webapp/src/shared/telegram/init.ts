@@ -24,4 +24,6 @@ export function initTelegram() {
     user: WebApp.initDataUnsafe?.user || null,
     colorScheme: WebApp.colorScheme,
   };
+
+
 }
