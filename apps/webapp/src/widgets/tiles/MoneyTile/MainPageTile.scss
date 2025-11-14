@@ -27,24 +27,26 @@
   height: 115px;
 }
 
+
 .incomeCard__title {
   color: #FFF;
   text-align: center;
-  font-family: "SF Pro Display";
+  font-family: "Alegreya_Sans";
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
   border-radius: 15px;
-  background: rgba(91, 34, 41, 0.6);
+  background: rgba(91, 34, 41, 0.60);
   backdrop-filter: blur(5.699999809265137px);
-  width: 120px;
-  height: 29px;
+  width: 158px;
+  height: 27px;
   display: flex;
   align-items: center;
   justify-content: center;
+
 }
-.amount-container {
-}
+
+
 .incomeCard__amount {
   color: #fff;
   font-family: "SF Pro Display";
@@ -82,7 +84,7 @@
 .incomeMini__tally {
   position: relative;
   z-index: 2;
-  width: 120px;
+  width: 158px;
   height: 21px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -92,8 +94,8 @@
   color: rgba(255, 255, 255, 0.55);
   overflow: hidden;
   border-radius: 15px 15px 1.885px 1.885px;
-  border: 0.754px solid #fff;
-  background: rgba(166, 79, 90);
+  border: 0.754px solid #FFF;
+  background: rgba(255, 162, 240, 0.41);
   box-shadow: 0 1.508px 3.769px 0 rgba(0, 0, 0, 0.25) inset;
 }
 .incomeMini__cell {
@@ -138,25 +140,34 @@
   margin-top: -20px;
   padding: 30px 16px 0 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  width: 120px;
-  background: rgba(91, 34, 41, 0.6);
+  width: 158px;
+  border-radius: 0 0 15px 15px;
+  background: rgba(91, 34, 41, 0.60);
   backdrop-filter: blur(5.699999809265137px);
-  border-radius: 0px 0px 15px 15px;
 }
 .incomeMini__btn {
   width: 100%;
   height: 20px;
   border: 0;
-  background: #fff;
-  border-radius: 7px;
+  color: #fff;
   backdrop-filter: blur(5.699999809265137px);
-  color: #010d19;
   text-align: center;
   font-family: "SF Pro Display";
   font-size: 8px;
   font-style: normal;
   font-weight: 500;
+  border-radius: 12px;
+  background: rgba(255, 106, 204, 0.84);
+  box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
 }
 .incomeCard.is-clickable {
   cursor: pointer;
+}
+.incomeCard__overlay {
+  position: absolute;
+  right: 10%;
+  bottom: 0;
+  max-height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }

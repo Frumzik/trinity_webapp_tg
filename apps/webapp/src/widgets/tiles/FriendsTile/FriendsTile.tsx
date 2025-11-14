@@ -7,17 +7,13 @@ type Referral = { id: string | number };
 type Props = {
   imageUrl: string;
   titleTop?: ReactNode;
-  /** сюда передавай текст вида "2 ступень" */
   labelBottom?: ReactNode;
-  /** если передашь массив — справа покажется их количество */
   referrals?: Referral[];
-  /** если передашь число — справа покажется это число */
   count?: number;
   href?: string;
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
-  /** layout по умолчанию прежний */
   layout?: "overlay" | "split";
   height?: number;
   imgCol?: string;

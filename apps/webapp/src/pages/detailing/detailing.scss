@@ -9,7 +9,7 @@
   display: grid;
   grid-template-rows: auto 1fr;
   border-radius: 16px;
-  background: #fff;
+  background: transparent;
   min-height: 220px;
 }
 
@@ -38,13 +38,13 @@
 .list {
   display: grid;
   gap: 8px;
-  background: #f0f0f0;
+  background: #fff;
 }
 .row__title {
   display: inline-flex;
   align-items: center;
   /* визуал */
-  background: #d9d9d9;
+  background: #fff;
   color: #575757;
   font-family: "SF Pro Display";
   font-size: 14px;

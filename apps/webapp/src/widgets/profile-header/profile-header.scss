@@ -19,7 +19,7 @@
 }
 
 .profileHeader__name {
-  color: #1f1f1f;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 16px;
   font-style: normal;
@@ -27,7 +27,7 @@
 }
 
 .profileHeader__username {
-  color: #797979;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 12px;
   font-style: normal;
@@ -41,7 +41,7 @@
 }
 
 .profileHeader__status {
-  color: #797979;
+  color: #FFF;
   text-align: right;
   font-family: "SF Pro Display";
   font-size: 12px;
@@ -50,10 +50,7 @@
 }
 
 .profileHeader__statusValue {
-  background: var(--Linear, linear-gradient(180deg, #b4713d 0%, #d1af68 100%));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #FFC34F;
   font-family: "SF Pro Display";
   font-size: 12px;
   font-style: italic;
@@ -65,16 +62,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 17px;
-  width: 100px;
-  height: 29px;
-  padding: 0 10px;
-  border-radius: 29px;
-  background: #000333;
+  //width: 100px;
+  //height: 29px;
+  padding: 6px 10px;
+  border-radius: 59px;
+  background: #FFB3E1;
+  box-shadow: 2px 1px 25px 0 rgba(241, 39, 172, 0.50) inset;
 }
 
 .profileHeader__balanceIcon {
-  width: 17px;
-  height: 17px;
+  //margin-top: 5px;
+  //width: 17px;
+  //height: 17px;
 }
 
 .profileHeader__balanceText {

@@ -1,21 +1,20 @@
-// src/pages/profile/index.tsx
 import {useMemo, useState} from "react";
 import Footer from "../../widgets/footer/footer";
 import TopBar from "../../widgets/topbarlk/topbarlk";
 import Title from "../../shared/ui/title/Title";
 import ProfileHeader from "../../widgets/profile-header";
 import IncomeTile from "../../widgets/tiles/MoneyTile/Income";
-import LevelTile from "../../widgets/tiles/LevelTile/levelTile";
 import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
 import ReferralsTile from "../../widgets/tiles/FriendsTile/FriendsTile";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import GradientButton from "../../shared/ui/gradient-button";
 import PresentationSentModal from "../../widgets/presentation-sent-modal";
 import PopupIcon from "../../assets/icons/popup.svg";
-import Card1 from "../../assets/image/image_1.svg";
-import Card2 from "../../assets/image/image_2.svg";
-import Card3 from "../../assets/image/About-ptoject.svg";
-import Card4 from "../../assets/image/image_4.svg";
+import Tile1 from "../../assets/homePage/tile1.png";
+import Card1 from "../../assets/homePage/Card6.svg";
+
+import Card3 from "../../assets/homePage/mediumTile.svg";
+import Card4 from "../../assets/homePage/Card7.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
 import { Link, useNavigate } from 'react-router-dom';
@@ -139,7 +138,7 @@ const Index = () => {
         >
           Личный кабинет
         </Title>
-        <LogoutButton />
+        {/*<LogoutButton />*/}
         <ProfileHeader
           avatarUrl={avatarUrl}
           name={displayName}
@@ -150,30 +149,25 @@ const Index = () => {
         />
 
         <section className="scrollBox stack">
-          <ScrollPanel
-            maxHeight="57dvh"
-            vars={{ railRight: "-15px", railTop: "4px", railBottom: "4px", railWidth: "3px", railColor: "#E8E8E8", thumbColor: "#C7C7C7", zIndex: 20 }}
-          >
             <div className="tiles">
-              <IncomeTile title="Общий доход" amountOM={totalEarn} showIncome imageUrl={Card1} onWithdraw={undefined} to="/withdraw" />
-              <LevelTile level={levelsCount} completed={0} total={levelsCount} imageUrl={Card2}/>
+              <IncomeTile
+                title="Общие вознаграждения"
+                amountOM={totalEarn}
+                showIncome
+                imageUrl={Tile1}
+                overlayImageUrl={Card1}
+                to="/withdraw"
+              />
               <GreyTile title="О проекте" imageUrl={Card3} buttonText={"Скачать презентацию"} onClick={onDownload}/>
             </div>
-
+        <div className="profile-wrapper">
             <div className="scrollBox__title-cont">
               <div className="scrollBox__title">Единомышленники</div>
-              <div className="scrollBox__icon">
-                <a href="#"><img src={PopupIcon} alt="help"/></a>
-              </div>
             </div>
 
             <ReferralsTile imageUrl={Card4} referrals={[]} href="/referrals" />
 
             <div className="list__referals">
-              <div className="list__referals-title">
-                <div className="list__referals-title-up">Доход</div>
-                <div className="list__referals-title-balance">{totalEarn} OM</div>
-              </div>
               <div className="list__referals-subtitle">
                 <div className="list__referals-title-levels">Уровни</div>
                 <div className="list__referals-title-levels-count">{levelsCount}</div>
@@ -182,7 +176,7 @@ const Index = () => {
 
             <ScrollPanel
               maxHeight="200px"
-              vars={{ railRight: "0px", railTop: "0px", railBottom: "6px", railWidth: "3px", railColor: "#ededed", thumbColor: "#b0b0b0", zIndex: 999 }}
+              vars={{ railRight: "0px", railTop: "0px", railBottom: "6px", railWidth: "3px", railColor: "#ededed", thumbColor: "linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);", zIndex: 999 }}
             >
               <div className="list">
                 {(stats ?? []).map((row) => (
@@ -203,9 +197,10 @@ const Index = () => {
                     <span className="row__count">{row.totalEarn} OM</span>
                   </div>
                 ))}
+
               </div>
             </ScrollPanel>
-          </ScrollPanel>
+        </div>
         </section>
 
         <div className="screen__spacer"/>

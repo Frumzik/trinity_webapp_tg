@@ -7,6 +7,7 @@ type Props = {
   showIncome?: boolean;
   empty?: boolean;
   imageUrl?: string;
+  overlayImageUrl?: string;
   onWithdraw?: () => void;
   to?: string;
   href?: string;
@@ -24,18 +25,19 @@ function triads3(n: number) {
 }
 
 export default function IncomeCard({
-  title = "Общий доход",
-  amountOM = 0,
-  showIncome = true,
-  empty,
-  imageUrl,
-  onWithdraw,
-  to,
-  href,
-  onClick,
-  className,
-  ariaLabel,
-}: Props) {
+                                     title = "Общий доход",
+                                     amountOM = 0,
+                                     showIncome = true,
+                                     empty,
+                                     imageUrl,
+                                     overlayImageUrl,
+                                     onWithdraw,
+                                     to,
+                                     href,
+                                     onClick,
+                                     className,
+                                     ariaLabel,
+                                   }: Props) {
   const cls = [
     "incomeCard",
     empty ? "incomeCard--empty" : "",
@@ -54,15 +56,24 @@ export default function IncomeCard({
       className={cls}
       ariaLabel={ariaLabel}
     >
-      {imageUrl ? (
+      {imageUrl && (
         <div
           className="incomeCard__img"
           style={{ backgroundImage: `url(${imageUrl})` }}
         />
-      ) : null}
+      )}
+
+      {overlayImageUrl && (
+        <img
+          className="incomeCard__overlay"
+          src={overlayImageUrl}
+          alt=""
+        />
+      )}
+
       <div className="incomeCard__panel">
         <div className="incomeCard__title">{title}</div>
-        {showIncome ? (
+        {showIncome && (
           <div className="incomeMini">
             <div className="incomeMini__tally">
               <div className="incomeMini__cell">{m}</div>
@@ -80,11 +91,11 @@ export default function IncomeCard({
                   onWithdraw?.();
                 }}
               >
-                Вывести прибыль
+                Получить
               </button>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </TileWrapper>
   );

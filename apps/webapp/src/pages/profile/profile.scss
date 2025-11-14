@@ -14,7 +14,7 @@
 }
 
 .scrollBox__title {
-  color: var(--Text-Black, #121826);
+  color: #fff;
   font-family: "Alegreya_Sans";
   font-size: 22px;
   font-style: normal;
@@ -87,9 +87,11 @@
 }
 
 .list__referals {
-  height: 134px;
+  height:64px;
   border-radius: 19.36px 19.36px 0px 0px;
-  background: #f0f0f0;
+
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
   margin-bottom: -32px;
 }
 .list__referals-title {
@@ -133,7 +135,6 @@
   }
 }
 .list__referals-subtitle {
-  margin-top: 16px;
   border-radius: 19.36px;
   background: #e4e4e4;
   height: 46px;
@@ -141,4 +142,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
+  margin-top: 0!important;
+}
+
+.profile-wrapper{
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+  flex-direction: column;
+}
+.list{
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%)!important;
+  backdrop-filter: blur(6px);
 }

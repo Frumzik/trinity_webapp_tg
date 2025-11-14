@@ -30,10 +30,10 @@ export default function ProfileHeader({
             </div>
             <div className="profileHeader__side">
                 <div className="profileHeader__status">
-                    статус:{" "}
+                    Доступ:{" "}
                     <span
                         className="profileHeader__statusValue"
-                        onClick={onStatusClick} // ← добавляем
+                        onClick={onStatusClick}
                         role="button"
                         tabIndex={0}
                     >
@@ -42,7 +42,7 @@ export default function ProfileHeader({
                 </div>
                 <button className="profileHeader__balance" onClick={onBalanceClick}>
           <span className="profileHeader__balanceIcon">
-            <img src={WalletIcon} alt="кошелек"/>
+            <div className="img-wrap"><img src={WalletIcon} alt="кошелек"/></div>
           </span>
                     <span className="profileHeader__balanceText">{balance}</span>
                 </button>
