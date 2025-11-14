@@ -50,3 +50,6 @@ Thumbs.db
 *.log
 
 /traefik/acme.json
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*

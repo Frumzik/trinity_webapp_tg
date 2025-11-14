@@ -1,0 +1,146 @@
+.faq {
+  &__main {
+    padding: 0 16px 24px;
+  }
+
+  &__search {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #EEF2F6;
+    margin: 12px 0 14px;
+  }
+
+  &__search-ico {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  &__search-input {
+    appearance: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: "SF Pro Display";
+    font-size: 16px;
+    font-weight: 500;
+    color: #0F172A;
+  }
+
+  &__search-input::placeholder {
+    color: #94A3B8;
+  }
+
+  /* Список */
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  &__item {
+    border-radius: 12px;
+    border: 1px solid var(--Other-Empty, #F1F5F9);
+    overflow: hidden;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+
+    &.is-open {
+      border-radius: 12px;
+      border: 1px solid #204E29;
+      background: var(--Input-Field, #F1F5F9);
+    }
+  }
+
+  &__btn {
+    width: 100%;
+    display: grid;
+    grid-template-columns:1fr 24px;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  &__q {
+    color: var(--Text-Black, #121826);
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  &__chev {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    background-image: var(--chev-down);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+  }
+
+  .is-open &__chev {
+    background-image: var(--chev-up);
+  }
+
+  &__chev.is-rotating::before, &__chev.is-rotating::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 9px;
+    height: 2px;
+    background: #334155;
+    transform-origin: center;
+    transition: transform .18s ease, background .18s ease;
+  }
+
+  &__chev.is-rotating::before {
+    transform: rotate(45deg) translateY(4.8px);
+  }
+
+  &__chev.is-rotating::after {
+    transform: rotate(-45deg) translateY(4.8px);
+  }
+
+  .is-open &__chev.is-rotating::before {
+    transform: rotate(-45deg) translateY(-4.8px);
+    background: #2F5B3B;
+  }
+
+  .is-open &__chev.is-rotating::after {
+    transform: rotate(45deg) translateY(-4.8px);
+    background: #2F5B3B;
+  }
+
+  &__panel {
+    height: 0;
+    overflow: hidden;
+    will-change: height;
+    transition: height .18s ease;
+  }
+
+  &__panel-inner {
+    padding: 0 16px 14px;
+  }
+
+  &__a {
+    margin: 0;
+    color: var(--Text-Body, #64748B);
+    font-family: "SF Pro Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+  }
+}

@@ -1,0 +1,61 @@
+.psm {
+  display: grid;
+  gap: 20px;
+}
+
+.psm__title {
+  color: #fff;
+  font-family: "Alegreya_Sans";
+  font-size: 23.311px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.psm__file {
+  display: grid;
+  grid-template-columns: 25px 1fr auto;
+  align-items: end;
+  gap: 10px;
+  padding: 8px 8px 15px 8px;
+  border-radius: 11.977px 11.977px 11.977px 1.996px;
+  background: #000;
+  color: #fff;
+  width: 181.284px;
+  height: 41.835px;
+}
+
+.psm__fileIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+.psm__fileMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.psm__fileName {
+  color: #fff;
+  font-family:  "SF Pro Text";
+  font-size: 10.459px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.psm__fileMeta {
+  color: #9b9b9b;
+  font-family:  "SF Pro Text";
+  font-size: 8.716px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.psm__fileTime {
+  color: #9b9b9b;
+  font-family:  "SF Pro Text";
+  font-size: 8.716px;
+  font-style: normal;
+  font-weight: 400;
+}

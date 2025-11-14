@@ -58,7 +58,7 @@ services:
       context: .
       dockerfile: apps/backend/Dockerfile
     env_file:
-      - ./apps/backend/envs/.${ENVIRONMENT:-test}.env
+      - ./apps/backend/envs/.${ENVIRONMENT:-test}envs
     expose:
       - "3000"
     labels:
@@ -76,7 +76,7 @@ services:
       context: .
       dockerfile: apps/bot/Dockerfile
     env_file:
-      - ./apps/bot/envs/.${ENVIRONMENT:-test}.env
+      - ./apps/bot/envs/.${ENVIRONMENT:-test}envs
     ports:
       - "3001:3001"
     networks:
@@ -85,11 +85,11 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: apps/frontend/Dockerfile
+      dockerfile: apps/webapp/Dockerfile
     env_file:
-      - ./apps/frontend/envs/.${ENVIRONMENT:-test}.env
+      - apps/webapp/envs/.${ENVIRONMENT:-test}envs
     ports:
-      - "4200:4200"
+      - "4203:4203"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
@@ -105,7 +105,7 @@ services:
       context: .
       dockerfile: apps/admin/Dockerfile
     env_file:
-      - ./apps/admin/envs/.${ENVIRONMENT:-test}.env
+      - ./apps/admin/envs/.${ENVIRONMENT:-test}envs
     ports:
       - "4201:4201"
     labels:

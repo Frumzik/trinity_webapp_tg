@@ -1,0 +1,39 @@
+.settings {
+  display: grid;
+  gap: 0;
+  background: #fff;
+}
+.settings__body {
+  padding: 10px 24px 0px;
+  display: grid;
+  gap: 18px;
+}
+.settings__group {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.settings__caption {
+  padding: 4px 2px;
+  color: var(--Text-Secondary, #252d41);
+  font-family: "SF Pro Display";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+}
+.settings__logout {
+  text-align: left;
+  font-family: "SF Pro Display";
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 140%;
+  letter-spacing: 0.2px;
+  background: linear-gradient(180deg, #b4713d 0%, #d1af68 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: underline;
+  text-decoration-color: #d1af68; /* любой цвет или второй цвет градиента */
+  text-underline-offset: 2px; /* отступ от текста */
+  text-decoration-thickness: 2px; /* толщина линии */
+}
