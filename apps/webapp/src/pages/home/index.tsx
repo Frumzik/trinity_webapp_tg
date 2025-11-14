@@ -7,10 +7,7 @@ import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
-import Bg2 from "../../assets/icons/bgblue.svg";
-import Blur from "../../../public/blurs/Blur-1.png"
-import HimicalImg from "../../assets/icons/himical.svg";
-import WhiteImg from "../../assets/icons/WhiteImg.svg";
+import Blur from "../../../public/blurs/blur-1.png"
 import Card1 from "../../assets/homePage/card1.svg";
 import Card2 from "../../assets/homePage/card2.svg";
 import Card3 from "../../assets/homePage/card3.svg";
