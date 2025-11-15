@@ -5,7 +5,9 @@
 .levels__header {
   display: grid;
   gap: 16px;
-  background: #fff;
+  border-radius: 20px;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
 }
 
 .levels__title {
@@ -17,8 +19,7 @@
 }
 
 .levels__tabs {
-  border-radius: 12px;
-  border: 1px solid #d0d0d0;
+  border-radius: 20px;
   gap: 10px;
   position: relative;
 }
@@ -26,37 +27,43 @@
 .levels__tabs-title {
   position: absolute;
   left: 14px;
-  top: 10px;
-  color: #8a8a8a;
+  top: 11px;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
+  font-style: normal;
   font-weight: 500;
 }
 
 .tabs {
   display: flex;
   align-items: flex-end;
-  justify-content: space-around;
-  height: 63px;
+  justify-content: left;
+  height: 73px;
   width: 100%;
+  gap: 25px;
   margin-bottom: 10px;
+  margin-left: 14px;
 
   &__btn {
-    width: 87.661px;
+    width: 22vw;
     height: 28.82px;
     padding: 0 12px;
     border: 0;
-    border-radius: 7.205px;
-    background: #d9d9d9;
-    color: #8a8a8a;
+    border-radius: 20px;
+    background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    backdrop-filter: blur(6px);
+    color: #FFF;
     text-align: center;
     font-family: "SF Pro Display";
     font-size: 16.812px;
     font-weight: 500;
 
     &.is-active {
-      background: #b4713d;
-      color: #fff;
+      border-radius: 20px;
+      border: 0.1px solid #FFF;
+      background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+      backdrop-filter: blur(6px);
     }
   }
 }

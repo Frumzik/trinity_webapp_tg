@@ -1,4 +1,3 @@
-// src/pages/levels/index.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -45,7 +44,6 @@ const lpSave = (obj: Record<string, LocalProgress>) => {
   try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
 };
 
-/** Прочитать legacy-ключ вида lessonProgress:<id> из плеера */
 const readLegacyLesson = (lessonId: number | string) => {
   try {
     const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
@@ -58,7 +56,6 @@ const readLegacyLesson = (lessonId: number | string) => {
   } catch { return null; }
 };
 
-/** Один раз мигрируем все legacy-записи в единый объект LP_KEY */
 const lpMigrateFromLegacy = () => {
   const lp = lpLoad();
   try {
@@ -132,7 +129,6 @@ export default function Index() {
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
 
-  // модалка ответа пользователю
   const [resultOpen, setResultOpen] = useState(false);
   const [resultTitle, setResultTitle] = useState<string>();
   const [resultItems, setResultItems] = useState<string[] | undefined>();
@@ -250,7 +246,6 @@ export default function Index() {
     setResultOpen(true);
   };
 
-  // ---- покупка ----
   const purchase = async (_p: {
     levelIds: (string | number)[];
     totalOM: number;
@@ -285,13 +280,11 @@ export default function Index() {
           }
         })
       );
-      // 3) модалка успеха
       const titles = purchaseLevels
         .filter((pl) => ids.includes(Number(pl.id)))
         .map((pl) => pl.title);
       openSuccessModal(titles);
 
-      // 4) подстраховать свежими данными
       await refetch();
     } catch (e: any) {
       const code = e?.data?.code;
@@ -344,11 +337,11 @@ export default function Index() {
           <ScrollPanel
             maxHeight="66dvh"
             vars={{
-              railRight: "-15px",
+              railRight: "-10px",
               railTop: "10px",
               railBottom: "4px",
               railWidth: "3px",
-              railColor: "#E8E8E8",
+              railColor: "rgba(255, 255, 255, 0.25)",
               thumbColor: "#C7C7C7",
               zIndex: 10,
             }}
