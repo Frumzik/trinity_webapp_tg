@@ -28,14 +28,15 @@
 .topbar__title-text {
   color: #FFF;
   text-align: center;
-  font-family: "SF Pro Display";
-  font-size: 18px;
+  font-family: "Alegreya_Sans";
+  font-size: 22px;
   font-weight: 700;
   line-height: 140%;
   max-width: 70%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: capitalize;
 }
 
 .topbar__btn-right {

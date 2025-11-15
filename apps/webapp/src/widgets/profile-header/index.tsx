@@ -37,7 +37,7 @@ export default function ProfileHeader({
                         role="button"
                         tabIndex={0}
                     >
-    {premium ? 'Премиум' : 'Базовый'}
+    {premium ? 'Активен' : 'Неактивен'}
   </span>
                 </div>
                 <button className="profileHeader__balance" onClick={onBalanceClick}>

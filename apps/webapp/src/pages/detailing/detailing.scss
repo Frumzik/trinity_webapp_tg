@@ -43,20 +43,17 @@
 .row__title {
   display: inline-flex;
   align-items: center;
-  /* визуал */
   background: #fff;
-  color: #575757;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-weight: 300;
   border-radius: 999px;
-
-  /* ключевые строки: растёт от контента */
   padding: 4px 12px;
   min-height: 26px;
   width: max-content;
-  max-width: 70%;         /* чтобы не съедало всю строку */
-  white-space: nowrap;    /* одна строка */
+  max-width: 70%;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -67,17 +64,17 @@
   height: 26px;
   border-radius: 15px;
   background: rgba(255, 255, 255, 0.30);
-  width: 97%;
+  width: 100%;
 
   &__count {
-    color: #575757;
+    color: #FFF;
     font-family: "SF Pro Display";
     font-size: 14px;
     font-style: normal;
     font-weight: 300;
 
     border-radius: 20px;
-    border: 1px solid #FFF;
+    border: 0.1px solid #FFF;
     background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
     backdrop-filter: blur(6px);
 
@@ -111,14 +108,14 @@
   padding: 0 20px;
 }
 .list__referals-title-up-det {
-  color: #000;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
   font-weight: 300;
 }
 .list__referals-title-balance-det {
-  color: #000;
+  color: #FFF;
   text-align: right;
   font-family: "SF Pro Display";
   font-size: 14px;
@@ -126,14 +123,14 @@
   font-weight: 300;
 }
 .list__referals-title-levels-det {
-  color: #000;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
   font-weight: 300;
 }
 .list__referals-title-levels-count {
-  color: #000;
+  color: #FFF;
 
   text-align: right;
   font-family: "SF Pro Display";

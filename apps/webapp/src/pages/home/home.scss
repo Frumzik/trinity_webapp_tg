@@ -2,13 +2,6 @@
   position: absolute;
   width: 100%;
   top: -10vh;
-  z-index: 123;
+  z-index: 1;
   pointer-events: none;
-}
-.app{
-  background-image: url('/bg/bgmain.jpg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  background-attachment: fixed;
 }

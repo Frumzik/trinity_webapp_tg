@@ -65,7 +65,7 @@ export default function Footer() {
           type="button"
           className={`footer__item${tab === "profile" ? " is-active" : ""}`}
           onClick={() => go("/profile", "profile")}
-          style={{ fontSize: "8px" }}
+          style={{ width: 50 }}
         >
           <span className="icon">
             <img src={ProfileIcon} alt="" />

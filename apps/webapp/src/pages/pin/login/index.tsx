@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../widgets/topbarTextpage';
 import GradientButton from '../../../shared/ui/gradient-button';
@@ -51,6 +51,13 @@ export default function PinLoginPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    document.body.classList.add('body--pin');
+    return () => {
+      document.body.classList.remove('body--pin');
+    };
+  }, []);
 
   return (
     <div className="pin">

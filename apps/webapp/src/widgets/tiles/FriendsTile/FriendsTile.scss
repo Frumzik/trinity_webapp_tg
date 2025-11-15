@@ -3,9 +3,12 @@
   display: block;
   width: 100%;
   height: 123px;
-  border-radius: 13px;
+  border-radius: 20px;
   overflow: hidden;
   text-align: left;
+  border-radius: 20px;
+  border: 0px solid #FFF;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
   backdrop-filter: blur(6px);
 }
 
@@ -19,7 +22,7 @@
 
 .refCard__img {
   position: absolute;
-  border-radius: 13px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.30);
   inset: 0;
   background-size: cover;
@@ -35,22 +38,7 @@
   color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
-  font-weight: 300;
-}
-
-.refCard__bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 36px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  padding: 0 16px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.30);
-  backdrop-filter: blur(6px);
+  font-weight: 400;
 }
 
 .refCard__label {
@@ -106,6 +94,84 @@
   border-radius: 20px;
   border: 0.5px solid #FFF;
   background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   z-index: 2;
+}
+
+.refCard {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 123px;
+  border-radius: 20px;
+  overflow: hidden;
+  text-align: left;
+  backdrop-filter: blur(6px);
+}
+
+.refCard__img {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.30);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.refCard__fg {
+  position: absolute;
+  top: 0;
+  right: 5%;
+  bottom: 0;
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.refCard__fg img {
+  max-height: 100%;
+  width: auto;
+}
+
+.refCard__title {
+  position: relative;
+  z-index: 2;
+  padding: 14px 16px;
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.refCard__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0 16px;
+
+
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.10);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+          0 0 25px rgba(255, 255, 255, 0.35) inset,
+          0 12px 30px rgba(0, 0, 0, 0.18);
+
+  border: 0px solid rgba(255, 255, 255, 0.6);
+
+
+  z-index: 3;
 }

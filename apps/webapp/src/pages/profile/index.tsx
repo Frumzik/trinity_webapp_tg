@@ -6,14 +6,13 @@ import ProfileHeader from "../../widgets/profile-header";
 import IncomeTile from "../../widgets/tiles/MoneyTile/Income";
 import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
 import ReferralsTile from "../../widgets/tiles/FriendsTile/FriendsTile";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import GradientButton from "../../shared/ui/gradient-button";
 import PresentationSentModal from "../../widgets/presentation-sent-modal";
 import Tile1 from "../../assets/homePage/tile1.png";
 import Card1 from "../../assets/homePage/card6.svg";
 
 import Card3 from "../../assets/homePage/mediumTile.svg";
-import Card4 from "../../assets/homePage/card7.svg";
+import Card5 from "../../assets/homePage/card8.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
 import { Link, useNavigate } from 'react-router-dom';
@@ -69,7 +68,10 @@ const Index = () => {
     e?.preventDefault();
     setOpenModal(true);
   }
-
+  const totalReferrals = useMemo(
+    () => (stats ?? []).reduce((sum, x) => sum + (x.count || 0), 0),
+    [stats]
+  );
   const pickAppUserId = (u?: any) => {
     // чаще всего это число; но если строка — просто приведём к строке
     const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
@@ -126,7 +128,7 @@ const Index = () => {
   }
 
   return (
-    <div className="app" style={{overflow: 'hidden', height: '100svh' }}>
+    <div className="app">
       <img src={Blur} className={"blur"} alt="" />
 
       <TopBar onMenu={() => setMenuOpen(true)} />
@@ -168,19 +170,16 @@ const Index = () => {
               <div className="scrollBox__title">Единомышленники</div>
             </div>
 
-            <ReferralsTile imageUrl={Card4} referrals={[]} href="/referrals" />
+            <ReferralsTile rightImageUrl={Card5} count={totalReferrals} href="/referrals" />
 
             <div className="list__referals">
               <div className="list__referals-subtitle">
-                <div className="list__referals-title-levels">Уровни</div>
+                <div className="list__referals-title-levels">Поколения</div>
                 <div className="list__referals-title-levels-count">{levelsCount}</div>
               </div>
             </div>
 
-            <ScrollPanel
-              maxHeight="200px"
-              vars={{ railRight: "0px", railTop: "0px", railBottom: "6px", railWidth: "3px", railColor: "#ededed", thumbColor: "linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);", zIndex: 999 }}
-            >
+
               <div className="list">
                 {(stats ?? []).map((row) => (
                   <div
@@ -202,7 +201,7 @@ const Index = () => {
                 ))}
 
               </div>
-            </ScrollPanel>
+
         </div>
         </section>
 
