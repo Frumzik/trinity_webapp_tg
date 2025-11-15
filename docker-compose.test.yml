@@ -1,6 +1,6 @@
 services:
 
-  traefik:
+  test_traefik:
     image: traefik:v3.1
     container_name: traefik
     restart: always
@@ -30,30 +30,30 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
       - "traefik.http.routers.traefik.middlewares=traefik-auth"
     networks:
-      - default
+      - test
 
-  grafana:
+  test_grafana:
     image: grafana/grafana:latest
     ports:
       - "3111:3000"
     networks:
-      - default
+      - test
 
-  prometheus:
+  test_prometheus:
     image: prom/prometheus:latest
     ports:
       - "9091:9090"
     networks:
-      - default
+      - test
 
-  loki:
+  test_loki:
     image: grafana/loki:2.8.0
     ports:
       - "3110:3100"
     networks:
-      - default
+      - test
 
-  backend:
+  test_backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
@@ -69,9 +69,9 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.backend.tls=true"
     networks:
-      - default
+      - test
 
-  bot:
+  test_bot:
     build:
       context: .
       dockerfile: apps/bot/Dockerfile
@@ -80,9 +80,9 @@ services:
     ports:
       - "3011:3001"
     networks:
-      - default
+      - test
 
-  frontend:
+  test_frontend:
     build:
       context: .
       dockerfile: apps/webapp/Dockerfile
@@ -98,9 +98,9 @@ services:
       - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.frontend.tls=true"
     networks:
-      - default
+      - test
 
-  admin:
+  test_admin:
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
@@ -116,8 +116,8 @@ services:
       - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.admin.tls=true"
     networks:
-      - default
+      - test
 
 networks:
-  default:
+  test:
     driver: bridge
