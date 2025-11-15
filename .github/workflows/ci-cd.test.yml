@@ -1,7 +1,7 @@
 name: CI/CD
 on:
   push:
-    branches: [ main ]
+    branches: [ test ]
 
 # Needed for nx-set-shas when run on the main branch
 permissions:
@@ -41,14 +41,14 @@ jobs:
           source ~/.nvm/nvm.sh
           cd /home/trinity
           git fetch
-          git switch main
+          git switch test
           git pull
           npm install
           npx nx run-many --target=build --all --prod
           npx nx run backend:copy-workspace-modules
-          npx nx run webapp:build --mode=production
-          docker-compose -f docker-compose.production.yml down
-          docker-compose -f docker-compose.production.yml build
-          docker-compose -f docker-compose.production.yml up -d
+          npx nx run webapp:build --mode=test
+          docker-compose -f docker-compose.test.yml down
+          docker-compose -f docker-compose.test.yml build
+          docker-compose -f docker-compose.test.yml up -d
           docker image prune --filter="dangling=true" --force
               
