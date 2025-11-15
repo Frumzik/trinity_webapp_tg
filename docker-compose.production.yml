@@ -1,0 +1,123 @@
+services:
+
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/acme.json:/acme.json
+    command:
+      - "--api=true"                 # включаем Dashboard
+      - "--api.dashboard=true"       # explicit Dashboard
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsEncrypt.acme.email=tov.kessler@yandex.ru"
+      - "--certificatesresolvers.letsEncrypt.acme.storage=/acme.json"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.3nity.space`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3101:3000"
+    networks:
+      - default
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+
+  loki:
+    image: grafana/loki:2.8.0
+    ports:
+      - "3100:3100"
+    networks:
+      - default
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    env_file:
+      - ./apps/backend/envs/.env.production
+    expose:
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.3nity.space`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.backend.tls=true"
+    networks:
+      - default
+
+  bot:
+    build:
+      context: .
+      dockerfile: apps/bot/Dockerfile
+    env_file:
+      - ./apps/bot/envs/.env.production
+    ports:
+      - "3001:3001"
+    networks:
+      - default
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/webapp/Dockerfile
+    env_file:
+      - apps/webapp/envs/.env.production
+    ports:
+      - "4203:4203"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`app.3nity.space`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4203"
+      - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.frontend.tls=true"
+    networks:
+      - default
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    env_file:
+      - ./apps/admin/envs/.env.production
+    ports:
+      - "4201:4201"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=Host(`admin.3nity.space`)"
+      - "traefik.http.routers.admin.entrypoints=websecure"
+      - "traefik.http.services.admin.loadbalancer.server.port=4201"
+      - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.admin.tls=true"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
