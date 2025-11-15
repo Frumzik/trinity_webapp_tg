@@ -5,7 +5,12 @@ import TileWrapper from "../TileWrapper";
 type Referral = { id: string | number };
 
 type Props = {
-  imageUrl: string;
+  imageUrl?: string;
+
+  bgImageUrl?: string;
+
+  rightImageUrl?: string;
+
   titleTop?: ReactNode;
   labelBottom?: ReactNode;
   referrals?: Referral[];
@@ -21,8 +26,10 @@ type Props = {
 
 export default function ReferralsCard({
                                         imageUrl,
+                                        bgImageUrl,
+                                        rightImageUrl,
                                         titleTop = "Структура",
-                                        labelBottom = "Всего друзей",
+                                        labelBottom = "Всего",
                                         referrals,
                                         count,
                                         href,
@@ -33,12 +40,13 @@ export default function ReferralsCard({
                                         height,
                                         imgCol = "40%",
                                       }: Props) {
-  // считаем счётчик только если реально есть данные
+  const backgroundImage = bgImageUrl ?? imageUrl;
+
   const hasExplicitCount = typeof count === "number";
   const computedFromRefs =
     Array.isArray(referrals) ? referrals.length : undefined;
   const total = hasExplicitCount ? count : computedFromRefs;
-  const showCount = typeof total === "number"; // НЕ показываем «0», если ничего не передано
+  const showCount = typeof total === "number";
 
   const cls = [
     "refCard",
@@ -59,10 +67,19 @@ export default function ReferralsCard({
       ariaLabel={ariaLabel}
       style={rootStyle}
     >
-      <div
-        className="refCard__img"
-        style={{ backgroundImage: `url(${imageUrl})` }}
-      />
+      {backgroundImage && (
+        <div
+          className="refCard__img"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
+
+      {rightImageUrl && (
+        <div className="refCard__fg">
+          <img src={rightImageUrl} alt="" />
+        </div>
+      )}
+
       <div className="refCard__title">{titleTop}</div>
 
       <div className="refCard__bar">

@@ -39,6 +39,13 @@
 }
 @font-face {
   font-family: "SF Pro Display";
+  src: url("./fonts/SF_Pro_Display/SF-Pro-Display-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "SF Pro Display";
   src: url("./fonts/SF_Pro_Display/SF-Pro-Display-Light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
