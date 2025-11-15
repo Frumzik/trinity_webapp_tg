@@ -1,4 +1,25 @@
 services:
+  test_grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3111:3000"
+    networks:
+      - default
+
+  test_prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9091:9090"
+    networks:
+      - default
+
+  test_loki:
+    image: grafana/loki:2.8.0
+    ports:
+      - "3110:3100"
+    networks:
+      - default
+
   test_backend:
     build:
       context: .
