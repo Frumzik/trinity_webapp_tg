@@ -49,6 +49,6 @@ jobs:
           npx nx run webapp:build --mode=production
           docker-compose -f docker-compose.production.yml down
           docker-compose -f docker-compose.production.yml build
-          ocker-compose -f docker-compose.production.yml up -d
+          docker-compose -f docker-compose.production.yml up -d
           docker image prune --filter="dangling=true" --force
               
