@@ -1,6 +1,7 @@
 .topbar {
+  position:relative;
   background: transparent;
-  z-index: 20;
+  z-index: 999;
   padding: 16px 16px 5px 16px;
 
   &__barlk {
@@ -13,7 +14,7 @@
     width: 100%;
 
     border-radius: 20px;
-    border: 1px solid #FFF;
+    border: 0.5px solid #FFF;
     background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
     backdrop-filter: blur(6px);
   }
@@ -60,7 +61,10 @@
     font-size: 12px;
     font-style: normal;
     font-weight: 700;
+    position: relative;
+    z-index: 200;
   }
+
 
   &__avatarlk {
     width: 32.255px;
