@@ -61,7 +61,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`app.test.3nity.space`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.services.frontend.loadbalancer.server.port=4213"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4203"
       - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.frontend.tls=true"
     networks:
@@ -79,7 +79,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.admin.rule=Host(`admin.test.3nity.space`)"
       - "traefik.http.routers.admin.entrypoints=websecure"
-      - "traefik.http.services.admin.loadbalancer.server.port=4211"
+      - "traefik.http.services.admin.loadbalancer.server.port=4201"
       - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.admin.tls=true"
     networks:
