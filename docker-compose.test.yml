@@ -87,4 +87,4 @@ services:
 
 networks:
   default:
-    driver: bridge
+    external: true
