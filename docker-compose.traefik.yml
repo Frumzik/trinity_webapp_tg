@@ -30,8 +30,8 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$wLGkE25P$$quD8O/Dse456ikobVYqhf0"
       - "traefik.http.routers.traefik.middlewares=traefik-auth"
     networks:
-      - default
+      - proxy
 
 networks:
-  default:
+  proxy:
     external: true

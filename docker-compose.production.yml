@@ -4,21 +4,21 @@ services:
     ports:
       - "3101:3000"
     networks:
-      - default
+      - proxy
 
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
     networks:
-      - default
+      - proxy
 
   loki:
     image: grafana/loki:2.8.0
     ports:
       - "3100:3100"
     networks:
-      - default
+      - proxy
 
   backend:
     build:
@@ -36,7 +36,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.backend.tls=true"
     networks:
-      - default
+      - proxy
 
   bot:
     build:
@@ -47,7 +47,7 @@ services:
     ports:
       - "3001:3001"
     networks:
-      - default
+      - proxy
 
   frontend:
     build:
@@ -65,7 +65,7 @@ services:
       - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.frontend.tls=true"
     networks:
-      - default
+      - proxy
 
   admin:
     build:
@@ -83,8 +83,8 @@ services:
       - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.admin.tls=true"
     networks:
-      - default
+      - proxy
 
 networks:
-  default:
+  proxy:
     external: true
