@@ -30,11 +30,11 @@ services:
       - "3010"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.test.3nity.space`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.services.backend.loadbalancer.server.port=3010"
-      - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
-      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.test-backend.rule=Host(`api.test.3nity.space`)"
+      - "traefik.http.routers.test-backend.entrypoints=websecure"
+      - "traefik.http.services.test-backend.loadbalancer.server.port=3010"
+      - "traefik.http.routers.test-backend.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.test-backend.tls=true"
     networks:
       - proxy
 
@@ -59,11 +59,11 @@ services:
       - "4213:4203"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`app.test.3nity.space`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.services.frontend.loadbalancer.server.port=4203"
-      - "traefik.http.routers.frontend.tls.certresolver=letsEncrypt"
-      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.test-frontend.rule=Host(`app.test.3nity.space`)"
+      - "traefik.http.routers.test-frontend.entrypoints=websecure"
+      - "traefik.http.services.test-frontend.loadbalancer.server.port=4203"
+      - "traefik.http.routers.test-frontend.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.test-frontend.tls=true"
     networks:
       - proxy
 
@@ -77,11 +77,11 @@ services:
       - "4211:4201"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.admin.rule=Host(`admin.test.3nity.space`)"
-      - "traefik.http.routers.admin.entrypoints=websecure"
-      - "traefik.http.services.admin.loadbalancer.server.port=4201"
-      - "traefik.http.routers.admin.tls.certresolver=letsEncrypt"
-      - "traefik.http.routers.admin.tls=true"
+      - "traefik.http.routers.test-admin.rule=Host(`admin.test.3nity.space`)"
+      - "traefik.http.routers.test-admin.entrypoints=websecure"
+      - "traefik.http.services.test-admin.loadbalancer.server.port=4201"
+      - "traefik.http.routers.test-admin.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.test-admin.tls=true"
     networks:
       - proxy
 
