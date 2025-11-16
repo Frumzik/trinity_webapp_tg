@@ -229,21 +229,24 @@ export default function Index() {
     setResultOpen(true);
   };
 
-  const openInsufficientModal = (needOM?: number, balanceOM?: number) => {
-    setResultTitle("Недостаточно средств");
-    const lines: string[] = [];
-    setResultItems(lines.length ? lines : undefined);
-    setResultCta(undefined);
-    setResultOnCta(undefined);
-    setResultOpen(true);
-  };
 
-  const openErrorModal = (message?: string) => {
+  const openErrorModal = (message?: string | string[], isInsufficient?: boolean) => {
     const msg = Array.isArray(message) ? message.join("\n") : message;
-    setResultTitle("Не удалось выполнить покупку. Попробуйте позже.");
+
+    setResultTitle(msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка"));
     setResultItems(undefined);
-    setResultCta(undefined);
-    setResultOnCta(undefined);
+
+    setResultCta(isInsufficient ? "Пополнить баланс" : "Продолжить");
+
+    setResultOnCta(() => () => {
+      if (isInsufficient) {
+        navigate("/wallet");
+        setResultOpen(false);
+      } else {
+        setResultOpen(false);
+      }
+    });
+
     setResultOpen(true);
   };
 
@@ -258,13 +261,11 @@ export default function Index() {
     if (ids.length === 0) return;
 
     try {
-      // 1) запрос на бэк
       await addPurchase({
         type: "Training",
         content: ids,
-        sale: Boolean(_p.discountedOM), // скидка при покупке всех
+        sale: Boolean(_p.discountedOM),
       }).unwrap();
-
 
       dispatch(
         learningApi.util.updateQueryData("getTrainingTree", undefined, (draft: any) => {
@@ -288,12 +289,12 @@ export default function Index() {
 
       await refetch();
     } catch (e: any) {
-      const code = e?.data?.code;
-      if (code === "INSUFFICIENT_FUNDS") {
-        openInsufficientModal(e?.data?.needOM, e?.data?.balanceOM);
-      } else {
-        openErrorModal(e?.data?.message ?? e?.error ?? "Ошибка покупки");
-      }
+      const raw = e?.data?.message ?? e?.error ?? "Ошибка покупки";
+      const msg = Array.isArray(raw) ? raw[0] : raw;
+
+      const isInsufficient = msg === "Недостаточно баланса";
+
+      openErrorModal(msg, isInsufficient);
     }
   };
   const anyModalOpen = modalOpen || resultOpen;

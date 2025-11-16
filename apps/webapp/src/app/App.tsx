@@ -25,10 +25,10 @@ export default function App() {
     return () => clearTimeout(t);
   }, [location.pathname]);
 
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+  // const isMobile =
+  //   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+  //     navigator.userAgent
+  //   );
 
   const getBackgroundImage = () => {
     if (location.pathname === '/home') {
@@ -36,7 +36,8 @@ export default function App() {
     }
     if (
       location.pathname.startsWith('/profile') ||
-      location.pathname.startsWith('/detailing')
+      location.pathname.startsWith('/detailing') ||
+      location.pathname.startsWith('/about')
     ) {
       return "url('/bg/bglk.jpg')";
     }
@@ -50,9 +51,17 @@ export default function App() {
     return "url('/bg/bgmain.jpg')";
   };
   const shouldShowTopRect = () => {
-    if (!isMobile) return false;
-    const withoutRect = ['/level', '/lesson', '/player'];
-    return !withoutRect.some((path) => location.pathname.startsWith(path));
+    const normalizedPathname = location.pathname.startsWith('/')
+      ? location.pathname
+      : `/${location.pathname}`;
+
+    const withoutRect = [
+      /^\/level(\/|$)/,
+      /^\/lesson(\/|$)/,
+      /^\/player(\/|$)/,
+    ];
+
+    return !withoutRect.some((re) => re.test(normalizedPathname));
   };
   const layoutStyle: React.CSSProperties = {
     backgroundImage: getBackgroundImage(),

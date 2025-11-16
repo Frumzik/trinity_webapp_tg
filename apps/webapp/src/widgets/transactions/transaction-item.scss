@@ -4,7 +4,7 @@
   grid-template-columns: 44px 1fr auto;
   gap: 12px;
   padding: 10px 26px;
-  background: #fff;
+  background: transparent;
 }
 
 .trx__left {
@@ -21,8 +21,7 @@
   place-items: center;
 }
 .trx__cents {
-  color: rgba(16, 24, 40, 0.4);
-
+  color: rgba(255, 255, 255, 0.40);
   font-family: "SF Pro Display";
   font-size: 20px;
   font-style: normal;
@@ -44,7 +43,7 @@
 }
 
 .trx__sum {
-  color: #101828;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 20px;
   font-style: normal;
@@ -52,7 +51,7 @@
 }
 
 .trx__title {
-  color: var(--Gray-500, #667085);
+  color: #fff;
   font-family: "SF Pro Text";
   font-size: 14px;
   font-style: normal;
@@ -61,7 +60,7 @@
 }
 
 .trx__right {
-  color: var(--Gray-500, #667085);
+  color: #fff;
   align-self: center;
   font-family: "SF Pro Text";
   font-size: 12px;

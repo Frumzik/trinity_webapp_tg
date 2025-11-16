@@ -6,7 +6,8 @@ import { getTelegramUser } from '../../../../shared/telegram/telegram'
 import './withdraw-form.scss'
 
 type Props = {
-  avatarSrc?: string           // стало опциональным
+  // avatarSrc можно оставить, но он опционален
+  avatarSrc?: string
   title: string
   subtitle?: string
   balance: number
@@ -27,7 +28,7 @@ export default function WithdrawForm({ avatarSrc, title, subtitle, balance, subm
   const net: Network = 'USDT_BEP20'
 
   const { data } = useGetUserQuery({ populate: true })
-  const u = (data as any)?.data ?? (data as any)
+  const u = (data as any)?.data
   const tg = getTelegramUser()
 
   const displayName = useMemo(() => {
@@ -39,15 +40,15 @@ export default function WithdrawForm({ avatarSrc, title, subtitle, balance, subm
   }, [u, tg])
 
   const displayUsername = useMemo(() => {
-    return u?.username || tg?.username || 'user'
+    return u?.username || tg?.username || '—'
   }, [u, tg])
 
-  const autoAvatar = useMemo(
-    () => u?.avatarUrl || tg?.photo_url || avatarFrom(displayUsername, displayName),
-    [u, tg, displayUsername, displayName]
-  )
+  const autoAvatar = useMemo(() => {
+    return (u as any)?.avatarUrl || (tg as any)?.photo_url || avatarFrom(displayUsername, displayName)
+  }, [u, tg, displayUsername, displayName])
 
   const finalAvatar = avatarSrc || autoAvatar
+
 
   const [intPart, fracPart] = useMemo(() => {
     const safe = Number.isFinite(amount) ? amount : 0

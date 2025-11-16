@@ -17,13 +17,12 @@ type Props = {
   defaultSelectedId?: string | number;
   rateText?: string;
   title?: string;
-  /** % скидки при покупке всех */
   discountPercentAll?: number;
   onClose: () => void;
   onPurchase: (payload: {
     levelIds: (string | number)[];
-    totalOM: number;       // сумма по текущим (эффективным) ценам
-    discountedOM?: number; // итог по всем с учётом скидки (если выбраны все)
+    totalOM: number;
+    discountedOM?: number;
   }) => void;
   InfoIcon?: React.ComponentType<{ className?: string }>;
 };
@@ -50,18 +49,15 @@ export default function LevelPurchaseModal({
     setCheckAll(false);
   }, [open, defaultSelectedId, lockedLevels]);
 
-  // только доступные к покупке
   const selectable = useMemo(
     () => lockedLevels.filter((l) => !l.purchased),
     [lockedLevels]
   );
 
-  // мапа базовых цен
   const priceById = useMemo(() => {
     return new Map<string | number, number>(lockedLevels.map((l) => [l.id, l.priceOM]));
   }, [lockedLevels]);
 
-  // коэффициент скидки и цены со скидкой
   const discountFactor = useMemo(() => 1 - discountPercentAll / 100, [discountPercentAll]);
 
   const discountedPriceById = useMemo(() => {
@@ -73,19 +69,15 @@ export default function LevelPurchaseModal({
     return m;
   }, [lockedLevels, discountFactor]);
 
-  // «выбраны все?»
   const allSelected = selected.length === selectable.length && selectable.length > 0;
 
-  // показывать ли скидку в карточках (при «все активированы»)
   const showAllDiscount = selectable.length > 1 && (allSelected || checkAll);
 
-  // эффективные цены (либо базовые, либо скидочные для всех)
   const effectivePriceById = useMemo(
     () => (showAllDiscount ? discountedPriceById : priceById),
     [showAllDiscount, discountedPriceById, priceById]
   );
 
-  // суммы
   const fullSum = useMemo(
     () => selectable.reduce((acc, l) => acc + (priceById.get(l.id) ?? l.priceOM), 0),
     [selectable, priceById]
@@ -101,21 +93,17 @@ export default function LevelPurchaseModal({
     [selected, effectivePriceById]
   );
 
-  // реакция на чекбокс «Активировать все»
   useEffect(() => {
     if (!open) return;
     if (checkAll) setSelected(selectable.map((l) => l.id));
   }, [checkAll, selectable, open]);
 
-  // переключение одной карточки
   const toggle = (id: string | number, disabled: boolean) => {
     if (disabled) return;
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  // покупка
   const onBuy = () => {
-    // если выбраны все доступные, в payload кладём discountedOM
     const useDiscount = selected.length === selectable.length && selectable.length > 1;
     onPurchase({
       levelIds: selected,
@@ -186,7 +174,7 @@ export default function LevelPurchaseModal({
             <span className="lp-new">{fullDiscountedSum} OM</span>
             <span className="lp-note">
               при покупке{" "}
-              <span style={{ fontWeight: 500, color: "#474747" }}>{selectable.length} ступеней сразу</span>
+              <span style={{ fontWeight: 500, color: "#FFF" }}>{selectable.length} ступеней сразу</span>
             </span>
           </div>
         )}
@@ -216,7 +204,7 @@ export default function LevelPurchaseModal({
 
         <div className="lp-cta">
           <GradientButton onClick={onBuy} disabled={selected.length === 0}>
-            {selected.length > 0 ? `Приобрести за ${sum} OM` : "Приобрести"}
+            Открыть
           </GradientButton>
         </div>
       </div>

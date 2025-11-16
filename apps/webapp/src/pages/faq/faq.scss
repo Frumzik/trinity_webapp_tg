@@ -11,7 +11,8 @@
     height: 48px;
     padding: 0 12px;
     border-radius: 12px;
-    background: #EEF2F6;
+    background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    backdrop-filter: blur(6px);
     margin: 12px 0 14px;
   }
 
@@ -29,11 +30,11 @@
     font-family: "SF Pro Display";
     font-size: 16px;
     font-weight: 500;
-    color: #0F172A;
+    color: #FFF;
   }
 
   &__search-input::placeholder {
-    color: #94A3B8;
+    color: #FFF;
   }
 
   /* Список */
@@ -53,8 +54,9 @@
 
     &.is-open {
       border-radius: 12px;
-      border: 1px solid #204E29;
-      background: var(--Input-Field, #F1F5F9);
+      border: 1px solid #FFF;
+      background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+      backdrop-filter: blur(6px);
     }
   }
 
@@ -71,7 +73,7 @@
   }
 
   &__q {
-    color: var(--Text-Black, #121826);
+    color: #FFF;
     font-family: "SF Pro Display";
     font-size: 14px;
     font-style: normal;
@@ -101,7 +103,7 @@
     right: 4px;
     top: 9px;
     height: 2px;
-    background: #334155;
+    background: #FFF;
     transform-origin: center;
     transition: transform .18s ease, background .18s ease;
   }
@@ -116,12 +118,12 @@
 
   .is-open &__chev.is-rotating::before {
     transform: rotate(-45deg) translateY(-4.8px);
-    background: #2F5B3B;
+    background: #FFF;
   }
 
   .is-open &__chev.is-rotating::after {
     transform: rotate(45deg) translateY(-4.8px);
-    background: #2F5B3B;
+    background: #FFF;
   }
 
   &__panel {
@@ -137,8 +139,10 @@
 
   &__a {
     margin: 0;
-    color: var(--Text-Body, #64748B);
+    color: #FFF;
     font-family: "SF Pro Display";
+    line-height: 140%;
+    letter-spacing: 0.2px;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;

@@ -6,6 +6,8 @@ import GradientButton from "../../../shared/ui/gradient-button"
 import { useGetUserQuery, useUpdateFinPasswordMutation } from '../../../shared/api/user.api'
 import { useNavigate } from 'react-router-dom'
 import TextField from '../../../shared/ui/forms/TextField'
+import SettingsIcon from "../../../assets/icons/edit.svg";
+
 
 function fmtDate(iso?: string | null) {
   if (!iso) return ''
@@ -73,10 +75,10 @@ export default function ProfileViewPage() {
     setShowFinForm(false)
     await refetch()
   }
-
+  const navigate = useNavigate()
   return (
     <div className="pv">
-      <TopBar title="Профиль" />
+      <TopBar title="Профиль" rightIconUrl={SettingsIcon} onRightClick={() => navigate("/account")}/>
       <main className="pv__main">
         <div className="pv__card">
           {rows.map(([k, v]) => (
@@ -95,9 +97,7 @@ export default function ProfileViewPage() {
           <button className="acc__row" onClick={() => nav('/security/change-pin')}>
             <span>Сменить PIN-код</span><span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
           </button>
-          <button className="acc__row" onClick={() => nav('/security/verify-email-request')}>
-            <span>Подтвердить почту</span><span className="acc__chev">Запросить код <img src={arrowRight} alt="" /></span>
-          </button>
+
         </section>
 
         {showFinForm && (
