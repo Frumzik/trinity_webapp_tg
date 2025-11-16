@@ -1,6 +1,6 @@
 .settings {
-  display: grid;
-  gap: 0;
+
+  height: 100vh;
 }
 .settings__body {
   padding: 10px 24px 0px;
@@ -14,7 +14,7 @@
 }
 .settings__caption {
   padding: 4px 2px;
-  color: var(--Text-Secondary, #252d41);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 18px;
   font-style: normal;

@@ -183,9 +183,6 @@ export default function AccountPage() {
           <button className="acc__row" onClick={() => nav('/security/change-pin')}>
             <span>Сменить PIN-код</span><span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
           </button>
-          <button className="acc__row" onClick={() => nav('/security/verify-email-request')}>
-            <span>Подтвердить почту</span><span className="acc__chev">Запросить код <img src={arrowRight} alt="" /></span>
-          </button>
         </section>
 
         <section className="acc__card acc__group">

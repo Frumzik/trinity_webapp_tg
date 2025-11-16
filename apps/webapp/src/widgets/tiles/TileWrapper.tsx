@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
-  to?: string; // роут react-router
-  href?: string; // внешняя ссылка
-  onClick?: () => void; // действие (например, модалка)
+  to?: string;
+  href?: string;
+  onClick?: () => void;
   className?: string;
   style?: React.CSSProperties;
   ariaLabel?: string;

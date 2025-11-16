@@ -9,8 +9,9 @@
   }
 
   &__pill {
-    border-radius: 14px;
-    background: #000333;
+    border-radius: 12px;
+    background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    backdrop-filter: blur(6px);
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
@@ -22,7 +23,8 @@
     font-weight: 500;
 
     &--grad {
-      background: var(--Linear, linear-gradient(180deg, #B4713D 0%, #D1AF68 100%));
+      border-radius: 12px;
+      background: linear-gradient(90deg, #FBFFE8 0.03%, #FEEEC1 50.49%, #F8BF5E 100.13%);
     }
   }
 
@@ -45,7 +47,7 @@
   }
 
   &__h2 {
-    color: var(--Text-Black, #121826);
+    color: #fff;
     font-family: "SF Pro Display";
     font-size: 24px;
     font-style: normal;
@@ -66,7 +68,7 @@
     grid-template-columns: 24px 1fr;
     gap: 10px;
     align-items: start;
-    color: var(--Text-Body, #64748B);
+    color: #fff;
     font-family: "SF Pro Display";
     font-size: 14px;
     font-style: normal;
@@ -77,10 +79,11 @@
     width: 20px;
     height: 20px;
     border-radius: 999px;
-    background: #000333;
+    background: #fff;
     position: relative;
     top: -2px;
-    img{
+
+    img {
       margin-left: 5px;
       margin-top: 6px;
     }
@@ -91,52 +94,65 @@
     background: var(--Input-Field, #F1F5F9);
     width: 100%;
   }
-.abc{
-  position: absolute;
-  bottom: 0px;
-  border-radius: 24px 24px 0 0;
-  height: 234px;
-  background: var(--Input-Field, #F1F5F9);
-  width: 100%;
-}
+
+  .abc {
+    position: absolute;
+    bottom: 0px;
+    border-radius: 24px 24px 0 0;
+    min-height: 360px;
+    border-radius: 34px 34px 0 0;
+    background: rgba(255, 255, 255, 0.30);
+    width: 100%;
+  }
+
   &__offer-card {
     position: absolute;
     bottom: 115px;
     right: 24px;
     left: 24px;
     width: 88%;
-    border-radius: 16px;
-    background: #F1F5F9;
+    border-radius: 12px;
+    background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    backdrop-filter: blur(6px);
     padding: 16px;
-    border: 2px solid #204E29;
-
   }
 
   &__offer-title {
     font-family: "SF Pro Display";
     font-weight: 700;
     font-size: 14px;
-    color: #121826;
+    color: #FFF;
     margin-bottom: 6px;
   }
 
   &__offer-price {
+    color: #FF922D;
     font-family: "SF Pro Display";
-    font-weight: 800;
-    font-size: 20px;
-    color: #121826;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 140%;
+    letter-spacing: 0.2px;
   }
 
   &__offer-note {
-    font-weight: 600;
-    font-size: 14px;
-    color: #475569;
-    margin-left: 4px;
+    color: rgba(255, 106, 204, 0.84);
+    font-family: "SF Pro Display";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: 0.2px;
   }
 
   &__offer-sub {
-    color: #64748B;
+    color: #FFF;
+    font-family: "SF Pro Display";
     font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.2px;
     margin-top: 6px;
   }
 
@@ -185,4 +201,10 @@
     font-style: normal;
     font-weight: 700;
   }
+}
+.sub__offer-card-month{
+  position: absolute;
+  bottom: 230px;
+  right: 24px;
+  left: 24px;
 }

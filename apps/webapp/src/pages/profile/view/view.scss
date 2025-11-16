@@ -3,7 +3,7 @@
 }
 
 .pv__card {
-  background: #fff;
+  background: transparent;
   padding: 4px 14px 32px 14px;
   margin-bottom: 32px;
   border-bottom: 1px solid #F1F5F9;
@@ -21,7 +21,7 @@
 }
 
 .pv__key {
-  color: #242424;
+  color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
@@ -29,7 +29,7 @@
 }
 
 .pv__val {
-  color: #64748B;
+  color: #FFF;
   text-align: right;
   font-family: "SF Pro Display";
   font-size: 14px;

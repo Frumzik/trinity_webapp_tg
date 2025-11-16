@@ -9,16 +9,17 @@
   transition: background 0.2s;
 
   &.is-on {
-    background: var(--Linear, linear-gradient(180deg, #B4713D 0%, #D1AF68 100%));
+    border-radius: 1000px;
+    background: radial-gradient(173.21% 172.66% at 50% 46.09%, #FF922D 0%, #FFFDCC 100%), linear-gradient(180deg, #B4713D 0%, #D1AF68 100%);
   }
 
   &__thumb {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
+    top: 0px;
+    left: 0px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: #fff;
     transition: transform 0.2s;

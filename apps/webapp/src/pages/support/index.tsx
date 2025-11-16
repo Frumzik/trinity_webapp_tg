@@ -1,12 +1,12 @@
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
-import GreyTile from "../../widgets/tiles/GreyTile/GreyTile.tsx";
-import TopBar from "../../widgets/topbar/topbar.tsx";
-import Footer from "../../widgets/footer/footer.tsx";
-import BurgerMenu from "../../widgets/menuBurger/burger.tsx";
-import ChannelImg from "../../assets/icons/chanelTile.svg";
-import ChatImg from "../../assets/icons/chatTile.svg";
-import SupportImg from "../../assets/icons/supportTile.svg";
+import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
+import TopBar from "../../widgets/topbar/topbar";
+import Footer from "../../widgets/footer/footer";
+import BurgerMenu from "../../widgets/menuBurger/burger";
+import ChannelImg from "../../assets/homePage/tile3.svg";
+import ChatImg from "../../assets/homePage/tile4.svg";
+import SupportImg from "../../assets/homePage/tile5.svg";
 
 import "./support.scss";
 import { useState } from "react";
@@ -24,29 +24,28 @@ export default function SupportPage() {
 
           <div className="supportPage__cards">
             <GreyTile
-              title="Канал"
+              title="Информационный Канал"
               imageUrl={ChannelImg}
               buttonText={"Перейти"}
-              href="#"
+              href="https://t.me/trinity_channel"
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
-              title="Чат"
+              title="Чат Сообщества"
               imageUrl={ChatImg}
               buttonText={"Перейти"}
-              href="#"
+              href="https://t.me/trinity_space"
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
               title={
                 <>
-                  Связаться
-                  <br />с поддержкой
+                  Помощь<br />и Поддержка
                 </>
               }
               buttonText={"Перейти"}
               imageUrl={SupportImg}
-              href="#"
+              href="https://t.me/trinity_light"
               style={{ height: "110px" }}
               buttonStyle={{ width: "78px" }}
             />

@@ -39,7 +39,7 @@
   font-weight: 400;
 }
 .tp__item.is-active{
-  color: var(--Text-Black, #121826);
+  color: rgba(70, 10, 60, 0.41);
   text-align: right;
   font-family: "SF Pro Display";
   font-size: 32px;
@@ -55,8 +55,6 @@
   left: 0; right: 0;
   height: 36px;
 }
-.tp__fade--top{ top: 0; background: linear-gradient(180deg, rgba(255,255,255, 0.3), rgba(255,255,255,0)); }
-.tp__fade--bottom{ bottom: 0; background: linear-gradient(0deg, rgba(255,255,255,.95), rgba(255,255,255,0)); }
 
 .tp__focus{
   pointer-events: none;
@@ -68,8 +66,9 @@
   transform: translate(-50%, -50%);
   outline-offset: -2px;
   border-radius: 5px;
-  border: 2px solid #204E29;
-  background: var(--Input-Field, #F1F5F9);
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.52);
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%), #F1F5F9;
   box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.25) inset;
 
 }
@@ -77,8 +76,8 @@
 .tp__vline{
   pointer-events: none;
   position: absolute;
-  top: 8px; bottom: 8px;
-  width: 1px;
+  top: 0px; bottom: 0px;
+  width: 0.3px;
   background: #E2E8F0;
   z-index: 1;
 }

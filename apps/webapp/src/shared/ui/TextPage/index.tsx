@@ -2,7 +2,7 @@ import clsx from "clsx";
 import styles from "./text-page.module.scss";
 
 type Section = {
-  title?: string;
+  title?: string;        // h1
   paragraphs?: string[];
   list?: string[];
   ordered?: boolean;
@@ -20,11 +20,16 @@ export default function TextPage({ sections, className }: TextPageProps) {
         {sections.map((s, i) => (
           <section key={i} className={styles.section}>
 
+            {s.title && (
+              <h1 className={styles.h1}>{s.title}</h1>
+            )}
+
             {s.paragraphs?.map((p, j) => (
               <p key={j} className={styles.p}>
                 {p}
               </p>
             ))}
+
             {!!s.list?.length &&
               (s.ordered ? (
                 <ol className={styles.list}>
