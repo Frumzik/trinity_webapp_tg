@@ -32,8 +32,10 @@ export default function ExitConfirm() {
   };
 
   return (
+    <div className="session__wrapper">
     <div className="session session--blur" style={{ backgroundImage: `url(${t?.artworkUrl})` }}>
       <div className="session__shade" />
+
       <div className="session__center">
         <div className="session__title" style={{ color: "#FFF" }}>{t?.title}</div>
         {t?.subtitle && <div className="session__subtitle" style={{ color: "#FFF" }}>{t.subtitle}</div>}
@@ -58,6 +60,7 @@ export default function ExitConfirm() {
           Закончить сессию без сохранения
         </button>
       </div>
+    </div>
     </div>
   );
 }

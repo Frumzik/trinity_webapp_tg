@@ -73,7 +73,6 @@ const Index = () => {
     [stats]
   );
   const pickAppUserId = (u?: any) => {
-    // чаще всего это число; но если строка — просто приведём к строке
     const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
     return id == null ? undefined : String(id);
   };
@@ -86,14 +85,11 @@ const Index = () => {
     const botDeepLink =
       `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
       (appUserId ? `?startapp=${appUserId}` : "");
-
     const share = new URL("https://t.me/share/url");
     share.searchParams.set("url", botDeepLink);
     share.searchParams.set("text", "Присоединяйся к проекту ✨");
-
     return share.toString();
   }, [u]);
-
   function LogoutButton() {
     const handleLogout = () => {
       try {
@@ -104,7 +100,6 @@ const Index = () => {
         window.location.reload();
       }
     };
-
     return (
       <button
         onClick={handleLogout}
@@ -126,14 +121,11 @@ const Index = () => {
       </button>
     );
   }
-
   return (
-    <div className="app">
+    <div className="app lk-bg">
       <img src={Blur} className={"blur"} alt="" />
-
       <TopBar onMenu={() => setMenuOpen(true)} />
       <main className="screen" style={{ paddingTop: "20px" }}>
-
         <Title
           right={
             <Link to="/account" className="icon-btn">
@@ -152,7 +144,6 @@ const Index = () => {
           balance={balanceText}
           onStatusClick={() => nav('/subscription')}
         />
-
         <section className="scrollBox stack">
             <div className="tiles">
               <IncomeTile
@@ -169,17 +160,13 @@ const Index = () => {
             <div className="scrollBox__title-cont">
               <div className="scrollBox__title">Единомышленники</div>
             </div>
-
-            <ReferralsTile rightImageUrl={Card5} count={totalReferrals} href="/referrals" />
-
+            <ReferralsTile  clickable={false} rightImageUrl={Card5} count={totalReferrals} href="/referrals" />
             <div className="list__referals">
               <div className="list__referals-subtitle">
                 <div className="list__referals-title-levels">Поколения</div>
                 <div className="list__referals-title-levels-count">{levelsCount}</div>
               </div>
             </div>
-
-
               <div className="list">
                 {(stats ?? []).map((row) => (
                   <div
@@ -199,21 +186,16 @@ const Index = () => {
                     <span className="row__count">{row.totalEarn} OM</span>
                   </div>
                 ))}
-
               </div>
-
         </div>
         </section>
-
         <div className="screen__spacer"/>
       </main>
-
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
           <GradientButton href={inviteHref} target="_blank">Пригласить</GradientButton>
         </div>
       </div>
-
       <PresentationSentModal open={openModal} onClose={() => setOpenModal(false)} fileName="Trinity.pdf" fileSizeText="9.1 MB" durationText="00:00" />
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer/>

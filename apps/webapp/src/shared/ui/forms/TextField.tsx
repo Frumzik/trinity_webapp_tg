@@ -87,9 +87,9 @@ export default function TextField({
                 aria-label="Increase"
                 onClick={() => inc(step)}
             >
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-                <path d="M1 5L5 1L9 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="7" viewBox="0 0 8 7" fill="none">
+<path d="M3.89697 0L7.79409 6.75H-0.000141621L3.89697 0Z" fill="white"/>
+</svg>
             </button>
             <button
                 type="button"
@@ -97,9 +97,9 @@ export default function TextField({
                 aria-label="Decrease"
                 onClick={() => inc(-step)}
             >
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="7" viewBox="0 0 8 7" fill="none">
+  <path d="M3.89697 6.75L-0.000140554 -7.34099e-07L7.79409 -5.27059e-08L3.89697 6.75Z" fill="white"/>
+</svg>
             </button>
           </span>
                 )}

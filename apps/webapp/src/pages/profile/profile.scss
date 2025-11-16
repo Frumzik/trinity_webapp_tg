@@ -1,4 +1,8 @@
+
+
 .stack {
+
+
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -20,14 +24,17 @@
   font-style: normal;
   font-weight: 700;
 }
+
 .scrollBox__title-cont {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .scrollBox__icon {
   a {
     padding: 10px 10px 10px 10px;
+
     img {
       margin-top: 3px;
       width: 10.5px;
@@ -35,6 +42,7 @@
     }
   }
 }
+
 .list {
   display: grid;
   gap: 8px;
@@ -50,6 +58,7 @@
   border-radius: 15px;
   background: #e7e7e7;
   width: 100%;
+
   &__num {
     color: #FFF;
     font-family: "SF Pro Display";
@@ -66,6 +75,7 @@
     align-items: center;
     justify-content: center;
   }
+
   &__count {
     color: #575757;
     font-family: "SF Pro Display";
@@ -91,13 +101,14 @@
 }
 
 .list__referals {
-  height:64px;
+  height: 64px;
   border-radius: 19.36px 19.36px 0px 0px;
 
   background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
   backdrop-filter: blur(6px);
   margin-bottom: -32px;
 }
+
 .list__referals-title {
   height: 46px;
   display: flex;
@@ -106,6 +117,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
+
   &-up {
     color: #FFF;
     font-family: "SF Pro Display";
@@ -113,6 +125,7 @@
     font-style: normal;
     font-weight: 300;
   }
+
   &-balance {
     color: #FFF;
     text-align: right;
@@ -121,6 +134,7 @@
     font-style: normal;
     font-weight: 300;
   }
+
   &-levels {
     color: #FFF;
     font-family: "SF Pro Display";
@@ -128,6 +142,7 @@
     font-style: normal;
     font-weight: 300;
   }
+
   &-levels-count {
     color: #FFF;
 
@@ -138,6 +153,7 @@
     font-weight: 300;
   }
 }
+
 .list__referals-subtitle {
   border-radius: 19.36px;
   background: #e4e4e4;
@@ -146,16 +162,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  margin-top: 0!important;
+  margin-top: 0 !important;
 }
 
-.profile-wrapper{
+.profile-wrapper {
   margin-top: 24px;
   display: flex;
   gap: 24px;
   flex-direction: column;
 }
-.list{
-  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%)!important;
+
+.list {
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.30) 2.37%, rgba(255, 191, 245, 0.22) 16.08%, rgba(255, 162, 240, 0.31) 35.96%, rgba(255, 159, 240, 0.36) 57.32%, rgba(255, 145, 237, 0.30) 73.23%, rgba(255, 148, 238, 0.14) 89.62%) !important;
   backdrop-filter: blur(6px);
 }

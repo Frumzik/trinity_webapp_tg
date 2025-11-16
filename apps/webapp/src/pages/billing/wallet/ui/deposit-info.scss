@@ -2,7 +2,6 @@
   padding: 8px 14px 24px;
   display: grid;
   gap: 14px;
-  background: #fff;
 }
 
 .dep__head {
@@ -20,7 +19,7 @@
 }
 
 .dep__title {
-  color: var(--Gray-gray-900, #24292E);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Display";
   font-size: 20px;
@@ -30,7 +29,7 @@
 
 .dep__caption {
   white-space: pre-line;
-  color: var(--Gray-500, #667085);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Text";
   font-size: 14px;
@@ -53,32 +52,35 @@
 }
 
 .dep__warn {
-  color: var(--Gray-gray-900, #24292E);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Text";
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   opacity: 0.78;
+  letter-spacing: -0.15px;
 }
 
 .dep__strong {
-  color: #000;
+  color: #FFF;
   font-family: "SF Pro Text";
   font-size: 14px;
   font-style: normal;
   font-weight: 600;
+  letter-spacing: -0.15px;
 }
 
 .dep__note {
 
   white-space: pre-line;
-  color: var(--Gray-500, #667085);
+  color: #FFF;
   text-align: center;
   font-family: "SF Pro Text";
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
+  letter-spacing: -0.15px;
 }
 
 .dep__addr {
@@ -87,7 +89,7 @@
 }
 
 .dep__hint {
-  color: #667085;
+  color: #FFF;
   text-align: center;
   font-family: "SF Pro Text";
   font-size: 14px;

@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import "./FriendsTile.scss";
-import TileWrapper from "../TileWrapper";
+import type { ReactNode } from 'react';
+import './FriendsTile.scss';
+import TileWrapper from '../TileWrapper';
 
 type Referral = { id: string | number };
 
@@ -19,50 +19,59 @@ type Props = {
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
-  layout?: "overlay" | "split";
+  layout?: 'overlay' | 'split';
   height?: number;
   imgCol?: string;
+  clickable?: boolean;
+  background?: string;
 };
 
 export default function ReferralsCard({
-                                        imageUrl,
-                                        bgImageUrl,
-                                        rightImageUrl,
-                                        titleTop = "Структура",
-                                        labelBottom = "Всего",
-                                        referrals,
-                                        count,
-                                        href,
-                                        onClick,
-                                        className,
-                                        ariaLabel,
-                                        layout = "overlay",
-                                        height,
-                                        imgCol = "40%",
-                                      }: Props) {
+  imageUrl,
+  bgImageUrl,
+  rightImageUrl,
+  titleTop = 'Структура',
+  labelBottom = 'Всего',
+  referrals,
+  count,
+  href,
+  onClick,
+  className,
+  ariaLabel,
+  layout = 'overlay',
+  height,
+  imgCol = '40%',
+  clickable = true,
+  background,
+}: Props) {
   const backgroundImage = bgImageUrl ?? imageUrl;
 
-  const hasExplicitCount = typeof count === "number";
-  const computedFromRefs =
-    Array.isArray(referrals) ? referrals.length : undefined;
+  const hasExplicitCount = typeof count === 'number';
+  const computedFromRefs = Array.isArray(referrals)
+    ? referrals.length
+    : undefined;
   const total = hasExplicitCount ? count : computedFromRefs;
-  const showCount = typeof total === "number";
+  const showCount = typeof total === 'number';
+  const isInteractive = clickable && (href || onClick);
 
   const cls = [
-    "refCard",
-    layout === "split" ? "refCard--split" : "",
-    href || onClick ? "is-clickable" : "",
+    'refCard',
+    layout === 'split' ? 'refCard--split' : '',
+    isInteractive ? 'is-clickable' : '',
+    !isInteractive ? 'refCard--disabled' : '',
     className,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
-  const rootStyle = height ? { height: `${height}px` } : undefined;
-
+  const rootStyle: React.CSSProperties = {
+    ...(height ? { height: `${height}px` } : {}),
+    ...(background ? { background } : {}),
+  };
   return (
     <TileWrapper
-      href={href}
-      onClick={onClick}
+      href={isInteractive ? href : undefined}
+      onClick={isInteractive ? onClick : undefined}
       className={cls}
       ariaLabel={ariaLabel}
       style={rootStyle}
@@ -87,7 +96,7 @@ export default function ReferralsCard({
         {showCount && <div className="refCard__count">{total}</div>}
       </div>
 
-      {layout === "split" && (
+      {layout === 'split' && (
         <style>{`.refCard--split{grid-template-columns:1fr ${imgCol};}`}</style>
       )}
     </TileWrapper>

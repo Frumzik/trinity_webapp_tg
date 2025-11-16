@@ -9,7 +9,7 @@
 .drawer {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  z-index: 3001;
   pointer-events: none;
 }
 
@@ -85,4 +85,8 @@
   font-weight: 300;
   right: 10px;
   bottom: calc(12px + env(safe-area-inset-bottom));
+}
+.drawer_wrapper{
+  position: absolute;
+  top: 13vh;
 }

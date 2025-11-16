@@ -53,6 +53,7 @@
     border-radius: 20px;
     background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
     backdrop-filter: blur(6px);
+    opacity: 0.5;
     color: #FFF;
     text-align: center;
     font-family: "SF Pro Display";
@@ -60,6 +61,7 @@
     font-weight: 500;
 
     &.is-active {
+      opacity: 1;
       border-radius: 20px;
       border: 0.1px solid #FFF;
       background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
@@ -142,27 +144,29 @@
     z-index: 1;
     display: grid;
     gap: 6px;
-    padding: 12px;
-    border-radius: 14px;
-    background: rgba(18, 24, 38, 0.32);
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    padding: 30px 30px 34px 14px;
+    border-radius: 0 0 12px 12px;
+    background: rgba(20, 98, 65, 0.20);
+    backdrop-filter: blur(7.5px);
     color: #fff;
   }
 
   &__title {
     position: absolute;
-    top: -70px;
+    top: 10px;
     left: 14px;
     width: 139px;
     color: #fff;
     font-family: "SF Pro Display";
     font-size: 16px;
     font-weight: 700;
+    text-transform: capitalize;
   }
 
   &__subtitle {
+    position: absolute;
+    top: -80px;
+    left: 14px;
     color: #fff;
     font-family: "SF Pro Display";
     font-size: 16px;
@@ -176,6 +180,9 @@
   }
 
   &__time {
+    position: absolute;
+    bottom: 14px;
+    left: 12px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -190,6 +197,7 @@
   &__status {
     margin-left: auto;
     display: inline-flex;
+    position: absolute;
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
@@ -209,7 +217,12 @@
     }
 
     &--progress {
-      background: rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%);
+      box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
+      position: absolute;
+      right: 13px;
+      bottom: 7px;
     }
   }
 
@@ -250,10 +263,10 @@
     font-size: 12px;
     font-weight: 600;
     color: #fff;
-    background: rgba(18, 24, 38, 0.55);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.40);
+    box-shadow: 0 4px 20px 0 rgba(15, 23, 42, 0.04);
+    backdrop-filter: blur(4px);
   }
 
   &__hud {
@@ -293,4 +306,9 @@
       }
     }
   }
+}
+.lvl__unlock-status{
+  display: block;
+  text-align: center;
+  width: 137px;
 }
