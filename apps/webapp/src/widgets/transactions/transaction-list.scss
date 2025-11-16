@@ -1,26 +1,28 @@
 .trx-list {
   margin-top: 18px;
   border-radius: 16px 16px 0 0;
-  background: var(--White, #fff);
-  box-shadow:
-    0 0 2px 0 rgba(0, 0, 0, 0.08),
-    0 2px 24px 0 rgba(0, 0, 0, 0.08);
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(190deg, #603D93 0.36%, #524097 14.32%, #3D40A5 29.96%, #3347AA 45.29%, #2246BE 64.23%, #1A46B6 83.58%, #2B5AB6 98.55%), #FFF;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.08), 0 2px 24px 0 rgba(0, 0, 0, 0.08);
   padding: 0;
   overflow: hidden;
+  min-height: 58.5vh;
 }
 .trx-list__day {
   padding: 12px 16px 16px;
-  color: var(--Gray-500, #667085);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
 }
 .trx-list-title {
   padding: 16px 16px 24px;
-  color: var(--Black, #000);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 16px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
 }
+
+

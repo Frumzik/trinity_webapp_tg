@@ -1,14 +1,14 @@
-import TextPage from "../../shared/ui/TextPage/index.tsx";
+import TextPage from "../../shared/ui/TextPage/index";
 import { aboutContent } from "./content";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel.tsx";
-import TopBar from "../../widgets/topbarTextpage/index.tsx";
+import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
+import TopBar from "../../widgets/topbarTextpage/index";
 
-import Footer from "../../widgets/footer/footer.tsx";
+import Footer from "../../widgets/footer/footer";
 
 export default function Index() {
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-      <TopBar title="Условия использования" />
+      <TopBar title="Пользовательское соглашение" />
 
       <main className="screen">
         <ScrollPanel

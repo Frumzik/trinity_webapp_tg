@@ -19,7 +19,7 @@ export default function TransactionItem({ item, showDivider = true }: Props) {
           {sign}
           {intPretty}
           <span className="trx__cents">.{fracPart}</span>
-          <span className="trx__cur"> $</span>
+          <span className="trx__cur"> OM</span>
         </div>
         <div className="trx__title">{item.title}</div>
       </div>
