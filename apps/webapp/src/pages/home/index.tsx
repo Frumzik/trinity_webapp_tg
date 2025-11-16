@@ -87,6 +87,7 @@ export default function SupportPage() {
                 labelBottom="Перейти"
                 href="/practice"
                 className="refCard--imgRight refCard--166x123"
+                background="rgba(255, 255, 255, 0.3)"
               />
               <ReferralsCard
                 imageUrl={Card4}
@@ -94,6 +95,7 @@ export default function SupportPage() {
                 labelBottom="2 ступень"
                 href="/levels"
                 className="refCard--imgRight refCard--166x123"
+                background="rgba(255, 255, 255, 0.3)"
               />
             </div>
 

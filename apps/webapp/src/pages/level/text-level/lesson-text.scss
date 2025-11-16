@@ -1,12 +1,12 @@
 .preview {
   position: relative;
-  min-height: 100dvh;
+  //min-height: 100dvh;
 }
 
 .preview__hero {
   position: relative;
-  height: 44dvh;
-  max-height: 360px;
+  height: 64dvh;
+  max-height: 500px;
   overflow: hidden;
 }
 
@@ -20,7 +20,7 @@
 
 .preview__topbar {
   position: fixed;
-  top: 16px;
+  top: 12vh;
   left: 24px;
   right: 24px;
   display: flex;
@@ -36,7 +36,7 @@
   place-items: center;
   border: 0;
   border-radius: 10px;
-  //background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(6px);
   color: #fff;
 }
@@ -73,22 +73,24 @@
 }
 
 .preview__sheet {
+  background-image: url("/bg/bgmain.jpg");
   position: relative;
   margin-top: -20px;
-  background: #fff;
+  z-index: 1000;
+  //background: #fff;
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   padding: 25px;
   min-height: calc(56dvh + 20px);
   h2 {
-    color: var(--Text-Black, #121826);
+    color: #FFF;
     font-family: "SF Pro Display";
     font-size: 14px;
     font-style: normal;
     font-weight: 500;
   }
   p {
-    color: var(--Text-Black, #121826);
+    color: #FFF;
     font-family: "SF Pro Display";
     font-size: 12px;
     font-style: normal;
@@ -97,7 +99,7 @@
 }
 
 .preview__sheet-head {
-  color: var(--Text-Black, #121826);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 18px;
   font-style: normal;

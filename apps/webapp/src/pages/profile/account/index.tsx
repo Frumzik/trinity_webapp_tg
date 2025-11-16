@@ -4,9 +4,12 @@ import GradientButton from '../../../shared/ui/gradient-button'
 import TextField from '../../../shared/ui/forms/TextField'
 import Segmented from '../../../shared/ui/forms/Segmented'
 import arrowRight from "../../../assets/image/level/chevron-right-black.svg"
-import femalePng from "../../../assets/image/level/women.svg"
-import malePng from "../../../assets/image/level/men.svg"
+import Female from "../../../assets/image/level/women.svg"
+import FemaleGrey  from "../../../assets/image/level/womengrey.svg"
+import MaleGrey  from "../../../assets/image/level/mengrey.svg"
+import Male  from "../../../assets/image/level/men.svg"
 import './account.scss'
+
 import {
   useGetUserQuery,
   useUpdateFinPasswordMutation,
@@ -138,8 +141,28 @@ export default function AccountPage() {
             value={gender}
             onChange={(v) => setGender(v as 'm' | 'f')}
             options={[
-              { label: 'Мужской', value: 'm', icon: <img src={malePng} alt="" /> },
-              { label: 'Женский', value: 'f', icon: <img src={femalePng} alt="" /> },
+              {
+                label: 'Мужской',
+                value: 'm',
+                icon: (active) => (
+                  <img
+                    src={active ? Male : MaleGrey}
+                    alt=""
+                    className="acc__gender-icon"
+                  />
+                ),
+              },
+              {
+                label: 'Женский',
+                value: 'f',
+                icon: (active) => (
+                  <img
+                    src={active ? Female : FemaleGrey}
+                    alt=""
+                    className="acc__gender-icon"
+                  />
+                ),
+              },
             ]}
           />
         </section>

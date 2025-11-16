@@ -1,5 +1,5 @@
 // src/pages/pin/create/index.tsx
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../../../widgets/topbarTextpage';
 import GradientButton from '../../../shared/ui/gradient-button';
@@ -119,7 +119,12 @@ export default function PinCreatePage() {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+    document.body.classList.add('body--pin');
+    return () => {
+      document.body.classList.remove('body--pin');
+    };
+  }, []);
   return (
     <div className="pin">
       <TopBar title="Пин код" hideBackButton />
