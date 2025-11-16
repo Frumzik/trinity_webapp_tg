@@ -32,13 +32,11 @@ export default function Index() {
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  // находим ветку "Ступени духа"
   const spiritRoot: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
     return roots.find((r) => r.tag === "stages_spirit");
   }, [data]);
 
-  // собираем все "stage" (ступени) из всех уровней
   const { totalStages, completedStages } = useMemo(() => {
     const levels = (spiritRoot?.childrens ?? []).filter(
       (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
@@ -76,7 +74,7 @@ export default function Index() {
               ) : null
             }
           >
-            Академия души
+            Академия духа
           </Title>
 
           <div className="supportPage__cards">

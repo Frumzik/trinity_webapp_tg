@@ -10,7 +10,7 @@ export default function BillingHistoryPage() {
 
   return (
     <>
-      <TopBar title="Общий доход" />
+      <TopBar title="Кошелек" />
       <div className="billing-history">
         <BalanceCard
           amount={isLoading ? 0 : amount}

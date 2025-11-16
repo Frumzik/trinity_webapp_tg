@@ -32,7 +32,6 @@ export function Index() {
     const raw: any = data as any;
     const cats: any[] = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
 
-    // Каждый элемент cats — это блок вида { tag, title, favorites: [...] }
     return cats.map((cat, ci) => {
       const items: SliderItem[] = (cat.favorites ?? []).map((f: any, fi: number) => {
         const lessonType = String(f.lesson?.type || "").toLowerCase();
@@ -123,7 +122,7 @@ export function Index() {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={() => navigate(-1)}>Назад</GradientButton>
+          <GradientButton onClick={() => navigate('/home')}>Назад</GradientButton>
         </div>
       </div>
 

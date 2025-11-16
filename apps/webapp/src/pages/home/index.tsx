@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import MiniCardSlider from "../../widgets/card-slider-homePage";
@@ -24,12 +24,106 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+
+// --- тип и пара утилит такие же, как на странице уровней ---
+type BNode = {
+  _id: string;
+  trainingId: number;
+  type: "training" | "product";
+  tag?: string | null;
+  title: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  duration?: string | null;
+  coverUrl?: string | null;
+  iconUrl?: string | null;
+  accessStatus: "available" | "locked";
+  progressStatus: "not_started" | "in_progress" | "completed";
+  price?: number | null;
+  salePrice?: number | null;
+  stage?: number | null;
+  stageLevel?: number | null;
+  childrens?: BNode[];
+  lessons?: any[];
+};
+
+const numFromTitle = (t?: string) => {
+  const m = (t || "").match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate();
 
   const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
+
+  // дерево "Ступени духа"
+  const { data: tree } = useGetTrainingTreeQuery();
+  const stagesRoot: BNode | undefined = useMemo(() => {
+    const roots = (tree?.data ?? []) as BNode[];
+    return roots.find((r) => r.tag === "stages_spirit");
+  }, [tree]);
+
+  // считаем текущий прогресс: уровень / ступень
+  const currentStageLabel = useMemo(() => {
+    const root = stagesRoot;
+    if (!root) return undefined;
+
+    const levelNodes = (root.childrens ?? [])
+      .filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number") as BNode[];
+
+    if (!levelNodes.length) return undefined;
+
+    // сортируем уровни
+    levelNodes.sort((a, b) => {
+      const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
+      const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
+
+    // ищем первую НЕДОделанную ступень – это и есть "текущая"
+    for (const lvl of levelNodes) {
+      const levelIndex = lvl.stageLevel ?? numFromTitle(lvl.title);
+      const stages = (lvl.childrens ?? [])
+        .filter((s) => s.tag === "stage" || typeof s.stage === "number") as BNode[];
+
+      stages.sort((a, b) => {
+        const A = a.stage ?? numFromTitle(a.title) ?? 0;
+        const B = b.stage ?? numFromTitle(b.title) ?? 0;
+        return A - B;
+      });
+
+      for (const st of stages) {
+        const done = st.progressStatus === "completed";
+        if (!done) {
+          const stageIndex = st.stage ?? numFromTitle(st.title);
+          if (levelIndex && stageIndex) {
+            return `${levelIndex} ур / ${stageIndex} ступень`;
+          }
+        }
+      }
+    }
+
+    // если все ступени завершены – показываем последнюю
+    const lastLevel = levelNodes[levelNodes.length - 1];
+    const levelIndex = lastLevel.stageLevel ?? numFromTitle(lastLevel.title) ?? levelNodes.length;
+    const lastStages = (lastLevel.childrens ?? [])
+      .filter((s) => s.tag === "stage" || typeof s.stage === "number") as BNode[];
+
+    if (!lastStages.length) return undefined;
+    lastStages.sort((a, b) => {
+      const A = a.stage ?? numFromTitle(a.title) ?? 0;
+      const B = b.stage ?? numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
+    const lastStage = lastStages[lastStages.length - 1];
+    const stageIndex = lastStage.stage ?? numFromTitle(lastStage.title) ?? lastStages.length;
+
+    return `${levelIndex} ур / ${stageIndex} ступень`;
+  }, [stagesRoot]);
 
   const handleCardClick = (it: { id: string | number }) => {
     const src = banners.find(b => String(b.id) === String(it.id));
@@ -71,7 +165,6 @@ export default function SupportPage() {
               to="/academy"
             />
             <FeatureTile
-              // className="featureTile--noBtn"
               title="Все продукты"
               description=""
               bgImageUrl={Tile2}
@@ -92,7 +185,7 @@ export default function SupportPage() {
               <ReferralsCard
                 imageUrl={Card4}
                 titleTop="Ступени духа"
-                labelBottom="2 ступень"
+                labelBottom={currentStageLabel || "Ступени духа"}
                 href="/levels"
                 className="refCard--imgRight refCard--166x123"
                 background="rgba(255, 255, 255, 0.3)"

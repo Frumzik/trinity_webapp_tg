@@ -17,22 +17,23 @@ export default function BalanceCard({ amount, onDeposit, onWithdraw }: Props) {
   return (
     <div className="balance">
       <div className="balance__sum">
-        <span className="balance__cur">$</span> {intPart}
-        <span className="balance__cents">.{fracPart}</span>
+        {intPart}.
+        <span className="balance__cents" style={{color: '#6A501752'}}>{fracPart}</span>
+        <span className="balance__cur" style={{marginLeft: 5}}> OM</span>
       </div>
       <div className="balance__note">Основной баланс</div>
 
       <div className="balance__actions">
+        <NavLink to="/withdraw">
+          <button className="balance__btn" onClick={onWithdraw}>
+            Получить
+          </button>
+        </NavLink>
           <NavLink to="/wallet">
         <button className="balance__btn" onClick={onDeposit}>
-          Пополнение
+          Добавить
         </button>
       </NavLink>
-          <NavLink to="/withdraw">
-        <button className="balance__btn" onClick={onWithdraw}>
-          Вывод
-        </button>
-              </NavLink>
       </div>
     </div>
   );

@@ -1,13 +1,12 @@
-// SubscriptionManagePage.tsx
+
 import {useMemo} from 'react'
 import TopBar from '../../../widgets/topbarTextpage'
 import GradientButton from '../../../shared/ui/gradient-button'
 import ChekImg from "../../../assets/image/level/check.svg"
 import './subscription.scss'
-import { useGetUserQuery } from '../../../shared/api/user.api' // путь подправь под свой проект
+import { useGetUserQuery } from '../../../shared/api/user.api'
 
 type Props = {
-  // Эти пропсы теперь не обязательны — данные приходят из API
   priceYearUSD?: number
   priceMonthUSD?: number
 }
@@ -62,7 +61,7 @@ export default function SubscriptionManagePage({
   if (isLoading) {
     return (
       <div className="sub">
-        <TopBar title="Управление подпиской"/>
+        <TopBar title="Управление доступом"/>
         <main className="sub__main"><div className="sub__loading">Загрузка…</div></main>
       </div>
     )
@@ -71,7 +70,7 @@ export default function SubscriptionManagePage({
   if (isError) {
     return (
       <div className="sub">
-        <TopBar title="Управление подпиской"/>
+        <TopBar title="Управление доступом"/>
         <main className="sub__main"><div className="sub__error">Не удалось получить данные пользователя</div></main>
       </div>
     )
@@ -80,7 +79,7 @@ export default function SubscriptionManagePage({
   if (status === 'premium') {
     return (
       <div className="sub">
-        <TopBar title="Управление подпиской"/>
+        <TopBar title="Управление доступом"/>
         <main className="sub__main">
           <section className="sub__section">
             <Pill tone="grad" label="Premium" right="Premium"/>
@@ -107,10 +106,9 @@ export default function SubscriptionManagePage({
     )
   }
 
-  // FREE
   return (
     <div className="sub">
-      <TopBar title="Управление подпиской"/>
+      <TopBar title="Управление доступом"/>
       <main className="sub__main">
         <section className="sub__section">
           <Pill tone="dark" label="Бесплатно" right="Бесплатно"/>
@@ -136,11 +134,18 @@ export default function SubscriptionManagePage({
             </div>
             <div className="sub__offer-sub">(${priceMonthUSD.toFixed(2)} / месяц)</div>
           </div>
+          <div className="sub__offer-card sub__offer-card-month">
+            <div className="sub__offer-title">Оформить на месяц</div>
+            <div className="sub__offer-price">
+              ${priceYearUSD.toFixed(2)} <span className="sub__offer-note">/ год</span>
+            </div>
+            <div className="sub__offer-sub">(${priceMonthUSD.toFixed(2)} / месяц)</div>
+          </div>
 
           <div className="gbtn-bar sub__cta egg">
             <div className="gbtn-bar__inner ">
               <GradientButton onClick={() => location.assign('/billing/checkout?plan=premium_year')}>
-                Приобрести
+                Активировать
               </GradientButton>
             </div>
           </div>

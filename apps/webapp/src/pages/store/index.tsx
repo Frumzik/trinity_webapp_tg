@@ -11,10 +11,11 @@ import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Bg1 from "../../assets/icons/bg1.svg";
 import OrangeBg from "../../assets/image/Differentbg/orangeBg.svg";
 import BgBlue from "../../assets/icons/bgblue.svg";
-import CardPlaceholder from "../../assets/icons/products/card5.svg";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
 import Info from "../../assets/icons/popup.svg";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import Tile1 from '../../assets/homePage/tile1.svg';
+import Card1 from '../../assets/homePage/card9.svg';
 
 type Node = {
   _id: string;
@@ -126,7 +127,7 @@ export default function Index() {
       <TopBar onMenu={() => setMenuOpen(true)} />
       <main className="screen">
         <div className="supportPage">
-          <Title>Магазин</Title>
+          <Title>Лавка Изобилия</Title>
 
           {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
           {isError && (
@@ -155,21 +156,30 @@ export default function Index() {
                   </div>
                 )}
 
-                {/*{items.map((n) => (*/}
-                {/*  <FeatureTile*/}
-                {/*    key={n._id}*/}
-                {/*    title={n.title}*/}
-                {/*    description={*/}
-                {/*      n.shortDescription ||*/}
-                {/*      n.description ||*/}
-                {/*      toPriceText(n.price ?? null, n.salePrice ?? null)*/}
-                {/*    }*/}
-                {/*    bgImageUrl={pickBg(n.tag)}*/}
-                {/*    rightImageUrl={n.iconUrl || n.coverUrl || CardPlaceholder}*/}
-                {/*    enabled*/}
-                {/*    onClick={() => handleTileClick(n)}*/}
-                {/*  />*/}
-                {/*))}*/}
+                <FeatureTile
+                  title="Академия духа"
+                  description=""
+                  bgImageUrl={Tile1}
+                  rightImageUrl={Card1}
+                  enabled
+                  to="/academy"
+                />
+                <FeatureTile
+                  title="Товары"
+                  description="..."
+                  bgImageUrl={Tile1}
+                  rightImageUrl={Card1}
+                  enabled={false}
+                  to="/academy"
+                />
+                <FeatureTile
+                  title="Услуги"
+                  description="..."
+                  bgImageUrl={Tile1}
+                  rightImageUrl={Card1}
+                  enabled={false}
+                  to="/academy"
+                />
               </ScrollPanel>
             </div>
           )}

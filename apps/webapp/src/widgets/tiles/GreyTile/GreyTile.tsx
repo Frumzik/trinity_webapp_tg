@@ -6,8 +6,8 @@ type Props = {
     title: ReactNode;
     imageUrl: string;
     href?: string;
-    onClick?: () => void;              // клик по всей карточке
-    buttonText?: string;               // просто визуальная подпись, без отдельного клика
+    onClick?: () => void;
+    buttonText?: string;
     imageAlt?: string;
     className?: string;
     style?: React.CSSProperties;

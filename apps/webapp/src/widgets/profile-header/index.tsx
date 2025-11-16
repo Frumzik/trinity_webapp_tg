@@ -40,12 +40,7 @@ export default function ProfileHeader({
     {premium ? 'Активен' : 'Неактивен'}
   </span>
                 </div>
-                <button className="profileHeader__balance" onClick={onBalanceClick}>
-          <span className="profileHeader__balanceIcon">
-            <div className="img-wrap"><img src={WalletIcon} alt="кошелек"/></div>
-          </span>
-                    <span className="profileHeader__balanceText">{balance}</span>
-                </button>
+
             </div>
         </div>
     );
