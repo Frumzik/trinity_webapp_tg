@@ -10,7 +10,7 @@
   grid-template-rows: auto 1fr;
   border-radius: 16px;
   background: transparent;
-  min-height: 220px;
+  min-height: 100px;
 }
 
 .scrollBox__title-det {
@@ -43,7 +43,8 @@
 .row__title {
   display: inline-flex;
   align-items: center;
-  background: #fff;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
   color: #FFF;
   font-family: "SF Pro Display";
   font-size: 14px;
@@ -94,14 +95,15 @@
 
 .list__referals-det {
   height: 94px;
-  border-radius: 19.36px 19.36px 0px 0px;
-  background: #f0f0f0;
+  border-radius: 20px;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
   margin-bottom: -32px;
 }
 .list__referals-title-det {
   height: 46px;
   display: flex;
-  background: #e4e4e4;
+  background: rgba(255, 255, 255, 0.30);
   border-radius: 19.36px;
   justify-content: space-between;
   align-items: center;

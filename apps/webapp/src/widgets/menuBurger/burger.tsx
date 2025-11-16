@@ -17,6 +17,7 @@ export default function BurgerMenu({ open, onClose }: Props) {
     <div className={`drawer ${open ? "drawer--open" : ""}`} onClick={onClose}>
       <div className="drawer__overlay" />
       <aside className="drawer__panel" onClick={(e) => e.stopPropagation()}>
+        <div className="drawer_wrapper">
         <nav className="drawer__list">
           <a className="drawer__item" href="/settings">
             Настройки
@@ -29,6 +30,7 @@ export default function BurgerMenu({ open, onClose }: Props) {
             <br /> презентацию <img src={DownloadIcon} alt="" />
           </a>
         </nav>
+        </div>
         <div className="drawer__footer">Trinity</div>
       </aside>
 

@@ -1,14 +1,13 @@
-// src/pages/detailing/index.tsx
 import { useMemo, useState } from "react";
 import Footer from "../../widgets/footer/footer";
 import TopBar from "../../widgets/topbar/topbar";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import Title from "../../shared/ui/title/Title";
-import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import GradientButton from "../../shared/ui/gradient-button";
 import "./detailing.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
+import { useGetUserQuery } from "../../shared/api/user.api";
 
 const formatName = (r: any) => {
   const u =
@@ -25,24 +24,34 @@ const formatName = (r: any) => {
   if (!u) return "—";
   const s = String(u).trim();
   const hasHandle = !!(r.username || r.tgUsername);
-  return hasHandle
-    ? (s.startsWith("@") ? s : `@${s}`)
-    : s;
+  return hasHandle ? (s.startsWith("@") ? s : `@${s}`) : s;
 };
 
 const formatOM = (v: unknown) => `${Number(v ?? 0).toLocaleString("ru-RU")} OM`;
 
+const pickAppUserId = (u?: any) => {
+  const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
+  return id == null ? undefined : String(id);
+};
+
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const nav = useNavigate();
   const location = useLocation();
   const levelFromState = (location.state as any)?.level as number | undefined;
-
-  const { data, isLoading, isError, refetch } = useGetReferralsLevelsQuery();
   const level = levelFromState ?? 1;
 
+  const { data: userData } = useGetUserQuery({ populate: true });
+  const u = userData?.data;
+
+  const {
+    data: levelsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetReferralsLevelsQuery();
+
   const current = useMemo(() => {
-    const list = data ?? [];
+    const list = levelsData ?? [];
     return (
       list.find((x) => x.level === level) || {
         level,
@@ -50,7 +59,21 @@ const Index = () => {
         referrals: [] as any[],
       }
     );
-  }, [data, level]);
+  }, [levelsData, level]);
+
+  const inviteHref = useMemo(() => {
+    const appUserId = pickAppUserId(u);
+    const BOT_USERNAME = "TrinityFrontTestBot";
+    const WEBAPP_SHORT_NAME = "TrinityFront";
+
+    const botDeepLink =
+      `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
+      (appUserId ? `?startapp=${appUserId}` : "");
+    const share = new URL("https://t.me/share/url");
+    share.searchParams.set("url", botDeepLink);
+    share.searchParams.set("text", "Присоединяйся к проекту ✨");
+    return share.toString();
+  }, [u]);
 
   return (
     <div className="app">
@@ -59,7 +82,11 @@ const Index = () => {
       <main className="screen">
         <Title
           right={
-            <button className="icon-btn" onClick={() => refetch()} aria-label="Обновить" />
+            <button
+              className="icon-btn"
+              onClick={() => refetch()}
+              aria-label="Обновить"
+            />
           }
         >
           <div style={{ fontSize: "27px" }}>Детализация</div>
@@ -82,31 +109,18 @@ const Index = () => {
           )}
 
           {!isLoading && !isError && (
-            <ScrollPanel
-              maxHeight="200px"
-              vars={{
-                railRight: "0px",
-                railTop: "0px",
-                railBottom: "6px",
-                railWidth: "3px",
-                railColor: "#ededed",
-                thumbColor: "#b0b0b0",
-                zIndex: 999,
-              }}
-            >
-              <div className="list">
-                {current.referrals.length === 0 && (
-                  <div style={{ padding: 16, opacity: 0.7 }}>Пока пусто</div>
-                )}
+            <div className="list">
+              {current.referrals.length === 0 && (
+                <div style={{ padding: 16, opacity: 0.7 }}>Пока пусто</div>
+              )}
 
-                {current.referrals.map((r, i) => (
-                  <div className="row" key={r.id ?? r.userId ?? i}>
-                    <span className="row__title">{formatName(r)}</span>
-                    <span className="row__count">{formatOM(r.amount)}</span>
-                  </div>
-                ))}
-              </div>
-            </ScrollPanel>
+              {current.referrals.map((r, i) => (
+                <div className="row" key={r.id ?? r.userId ?? i}>
+                  <span className="row__title">{formatName(r)}</span>
+                  <span className="row__count">{formatOM(r.amount)}</span>
+                </div>
+              ))}
+            </div>
           )}
         </section>
 
@@ -115,7 +129,9 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={() => nav(-1)}>Назад</GradientButton>
+          <GradientButton href={inviteHref} target="_blank">
+            Пригласительная ссылка
+          </GradientButton>
         </div>
       </div>
 

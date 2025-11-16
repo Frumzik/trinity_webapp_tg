@@ -23,7 +23,7 @@ export default function TopBar({
         {!hideBackButton && (
           <button
             className="topbar__btn-text topbar__btn--ghost-text"
-            onClick={() => navigate("/", { replace: true })}
+            onClick={() => navigate("/home", { replace: true })}
           >
             <img src={BackIcon} alt="Назад" />
           </button>
