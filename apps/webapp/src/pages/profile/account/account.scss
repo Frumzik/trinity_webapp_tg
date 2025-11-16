@@ -3,7 +3,7 @@
 }
 
 .acc__card {
-  background: #fff;
+  background: transparent;
   border-radius: 16px;
   padding: 0px;
   display: grid;
@@ -28,7 +28,7 @@
 }
 
 .acc__title {
-  color: var(--Text-Secondary, #252D41);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 18px;
   font-style: normal;
@@ -41,7 +41,7 @@
 }
 
 .acc__group-title {
-  color: var(--Text-Secondary, #252D41);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 18px;
   font-style: normal;
@@ -60,7 +60,7 @@
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid #EEF2F7;
-  color: var(--Text-Black, #121826);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 16px;
   font-style: normal;
@@ -73,7 +73,7 @@
 }
 
 .acc__chev {
-  color: var(--Text-Body, #64748B);
+  color:#fff;
   font-family: "SF Pro Display";
   font-size: 14px;
   font-style: normal;

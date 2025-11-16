@@ -22,6 +22,7 @@ export type LevelItem = {
   subtitle?: string;
   durationMin?: number;
   image: string;
+  description: string,
   status: "available" | "done" | "locked";
   priceUSDT?: number;
 };
@@ -348,7 +349,7 @@ export default function Index() {
           >
             <div className="levels__list" aria-busy={isBuying}>
               {items.map((l) => (
-                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)} />
+                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)}  />
               ))}
             </div>
           </ScrollPanel>

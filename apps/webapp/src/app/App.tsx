@@ -30,11 +30,40 @@ export default function App() {
       navigator.userAgent
     );
 
+  const getBackgroundImage = () => {
+    if (location.pathname === '/home') {
+      return "url('/bg/bgmain.jpg')";
+    }
+    if (
+      location.pathname.startsWith('/profile') ||
+      location.pathname.startsWith('/detailing')
+    ) {
+      return "url('/bg/bglk.jpg')";
+    }
+    if (
+      location.pathname.startsWith('/pin/create') ||
+      location.pathname.startsWith('/pin/login')
+    ) {
+      return "url('/bg/bgpin.jpg')";
+    }
+
+    return "url('/bg/bgmain.jpg')";
+  };
+  const shouldShowTopRect = () => {
+    if (!isMobile) return false;
+    const withoutRect = ['/level', '/lesson', '/player'];
+    return !withoutRect.some((path) => location.pathname.startsWith(path));
+  };
+  const layoutStyle: React.CSSProperties = {
+    backgroundImage: getBackgroundImage(),
+    ...(loading ? { pointerEvents: 'none' } : {}),
+  };
+
   return (
     <FooterTabProvider>
       {loading && <Preloader />}
-      <div className="app-layout" style={loading ? { pointerEvents: 'none' } : undefined}>
-        {isMobile && <div className="top-rectangle"></div>}
+      <div className="app-layout" style={layoutStyle}>
+        {shouldShowTopRect() && <div className="top-rectangle"></div>}
         <Outlet />
       </div>
     </FooterTabProvider>
