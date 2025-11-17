@@ -13,7 +13,7 @@ import "./preview.scss";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 
 const toSections = (text: string) => [
-  { title: "Описание", paragraphs: text.trim() ? [text] : [] },
+  { title: "", paragraphs: text.trim() ? [text] : [] },
 ];
 
 type State = {

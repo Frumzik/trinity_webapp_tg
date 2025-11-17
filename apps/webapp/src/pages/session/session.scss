@@ -30,7 +30,7 @@
   padding: 0 20px 24px;
 }
 .session__title {
-  color: var(--Text-Secondary, #252d41);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Display";
   font-size: 24px;
@@ -39,7 +39,7 @@
 }
 .session__subtitle {
   margin-top: 10px;
-  color: var(--Text-Secondary, #252d41);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Display";
   font-size: 14px;
@@ -50,16 +50,14 @@
   display: inline-block;
   margin-top: 10px;
   padding: 6px 10px;
-  color: var(--Text-Black, #121826);
+  color: #fff;
   font-family: "SF Pro Display";
   font-size: 13.55px;
   font-style: normal;
   font-weight: 500;
-  border-radius: 8.13px;
-  background: var(--Input-Field, #f1f5f9);
-  box-shadow: 0 5.42px 27.1px 0 rgba(15, 23, 42, 0.04);
-  backdrop-filter: blur(5.419917106628418px);
-}
+  border-radius: 20px;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);}
 
 .session__actions {
   z-index: 1;
@@ -81,7 +79,6 @@
 
 /* completed */
 .session--complete {
-  background: #fff;
   color: #121826;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -131,12 +128,13 @@
   padding: 48px 24px 48px 24px;
   display: grid;
   gap: 32px;
-  background: #f6f7fb;
+  background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+  backdrop-filter: blur(6px);
   border-top-left-radius: 48px;
   border-top-right-radius: 48px;
 }
 .session__done-banner {
-  color: var(--Text-Secondary, #252d41);
+  color: #fff;
   text-align: center;
   font-family: "SF Pro Display";
   font-size: 18px;

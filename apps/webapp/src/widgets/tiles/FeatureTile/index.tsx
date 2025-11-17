@@ -72,10 +72,6 @@ export default function FeatureTile({
                 <button
                     type="button"
                     className={`featureTile__btn${enabled ? "" : " is-disabled"}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (enabled) onOpen?.();
-                    }}
                     disabled={!enabled}
                 >
                     {enabled ? buttonTextEnabled : buttonTextDisabled}
