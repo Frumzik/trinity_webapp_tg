@@ -43,6 +43,7 @@ type BNode = {
   salePrice?: number | null;
   stage?: number | null;
   stageLevel?: number | null;
+  parentId?: number | null;
   childrens?: BNode[];
   lessons?: any[];
 };
@@ -60,17 +61,24 @@ export default function SupportPage() {
   const [addView] = useAddBannerViewMutation();
 
   const { data: tree } = useGetTrainingTreeQuery();
-  const stagesRoot: BNode | undefined = useMemo(() => {
-    const roots = (tree?.data ?? []) as BNode[];
-    return roots.find((r) => r.tag === "stages_spirit");
+  const allNodes = useMemo(() => {
+    return (tree?.data ?? []) as BNode[];
   }, [tree]);
+  const stagesRoot = useMemo(() => {
+    return allNodes.find((r) => r.tag === "stages_spirit" && (r.parentId == null));
+  }, [allNodes]);
 
   const currentStageLabel = useMemo(() => {
     const root = stagesRoot;
     if (!root) return undefined;
 
-    const levelNodes = (root.childrens ?? [])
-      .filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number") as BNode[];
+    // уровни (1,2,3)
+    const levelNodes = allNodes
+      .filter(
+        (n) =>
+          (n.tag === "stage_level" || typeof n.stageLevel === "number") &&
+          n.parentId === root.trainingId
+      );
 
     if (!levelNodes.length) return undefined;
 
@@ -82,8 +90,12 @@ export default function SupportPage() {
 
     for (const lvl of levelNodes) {
       const levelIndex = lvl.stageLevel ?? numFromTitle(lvl.title);
-      const stages = (lvl.childrens ?? [])
-        .filter((s) => s.tag === "stage" || typeof s.stage === "number") as BNode[];
+
+      const stages = allNodes.filter(
+        (s) =>
+          (s.tag === "stage" || typeof s.stage === "number") &&
+          s.parentId === lvl.trainingId
+      );
 
       stages.sort((a, b) => {
         const A = a.stage ?? numFromTitle(a.title) ?? 0;
@@ -102,24 +114,30 @@ export default function SupportPage() {
       }
     }
 
-    // если все ступени завершены – показываем последнюю
     const lastLevel = levelNodes[levelNodes.length - 1];
-    const levelIndex = lastLevel.stageLevel ?? numFromTitle(lastLevel.title) ?? levelNodes.length;
-    const lastStages = (lastLevel.childrens ?? [])
-      .filter((s) => s.tag === "stage" || typeof s.stage === "number") as BNode[];
+    const levelIndex =
+      lastLevel.stageLevel ?? numFromTitle(lastLevel.title) ?? levelNodes.length;
+
+    const lastStages = allNodes.filter(
+      (s) =>
+        (s.tag === "stage" || typeof s.stage === "number") &&
+        s.parentId === lastLevel.trainingId
+    );
 
     if (!lastStages.length) return undefined;
+
     lastStages.sort((a, b) => {
       const A = a.stage ?? numFromTitle(a.title) ?? 0;
       const B = b.stage ?? numFromTitle(b.title) ?? 0;
       return A - B;
     });
+
     const lastStage = lastStages[lastStages.length - 1];
-    const stageIndex = lastStage.stage ?? numFromTitle(lastStage.title) ?? lastStages.length;
+    const stageIndex =
+      lastStage.stage ?? numFromTitle(lastStage.title) ?? lastStages.length;
 
-    return `${levelIndex} ур / ${stageIndex} ступень`;
-  }, [stagesRoot]);
-
+    return `${stageIndex} ступень`;
+  }, [stagesRoot, allNodes]);
   const handleCardClick = (it: { id: string | number }) => {
     const src = banners.find(b => String(b.id) === String(it.id));
     if (!src) return;

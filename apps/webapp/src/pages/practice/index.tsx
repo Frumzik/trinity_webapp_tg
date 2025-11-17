@@ -129,9 +129,9 @@ export default function Index() {
                   className={"left-block-color-yellow"}
                 />
 
-                {practices.length === 0 && (
-                  <div style={{ padding: 16, opacity: 0.7 }}>Пока нет практик</div>
-                )}
+                {/*{practices.length === 0 && (*/}
+                {/*  <div style={{ padding: 16, opacity: 0.7 }}>Пока нет практик</div>*/}
+                {/*)}*/}
               </ScrollPanel>
             </div>
           )}

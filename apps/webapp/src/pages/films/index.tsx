@@ -184,14 +184,6 @@ export default function Index() {
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar
         title="Фильмы"
-        rightIconUrl={helpIcon}
-        onRightClick={() =>
-          window.open(
-            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
-            "_blank",
-            "noopener,noreferrer"
-          )
-        }
       />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>

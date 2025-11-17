@@ -5,19 +5,19 @@ import '../shared/styles/main.scss';
 import { useSyncTelegramAvatar } from '../shared/lib/hooks/useSyncTelegramAvatar';
 import Preloader from '../widgets/preloader';
 
-function DesktopOnlyScreen() {
-  return (
-    <main className="screen desktop-only">
-      <div className="desktop-only__inner">
-        <h1>Откройте приложение с телефона</h1>
-        <p>
-          Это приложение рассчитано на использование на мобильных устройствах.
-          Пожалуйста, зайдите сюда с телефона.
-        </p>
-      </div>
-    </main>
-  );
-}
+// function DesktopOnlyScreen() {
+//   return (
+//     <main className="screen desktop-only">
+//       <div className="desktop-only__inner">
+//         <h1>Откройте приложение с телефона</h1>
+//         <p>
+//           Это приложение рассчитано на использование на мобильных устройствах.
+//           Пожалуйста, зайдите сюда с телефона.
+//         </p>
+//       </div>
+//     </main>
+//   );
+// }
 
 export default function App() {
   useSyncTelegramAvatar();
@@ -39,10 +39,10 @@ export default function App() {
     return () => clearTimeout(t);
   }, [location.pathname]);
 
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+  // const isMobile =
+  //   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+  //     navigator.userAgent
+  //   );
 
   const getBackgroundImage = () => {
     if (location.pathname === '/home') {
@@ -73,6 +73,7 @@ export default function App() {
       /^\/level(\/|$)/,
       /^\/lesson(\/|$)/,
       /^\/player(\/|$)/,
+      /^\/preview(\/|$)/,
     ];
 
     return !withoutRect.some((re) => re.test(normalizedPathname));
@@ -87,7 +88,8 @@ export default function App() {
       {loading && <Preloader />}
       <div className="app-layout" style={layoutStyle}>
         {shouldShowTopRect() && <div className="top-rectangle"></div>}
-        {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
+        {/*{!isMobile ? <DesktopOnlyScreen /> : <Outlet />}*/}
+        <Outlet />
       </div>
     </FooterTabProvider>
   );

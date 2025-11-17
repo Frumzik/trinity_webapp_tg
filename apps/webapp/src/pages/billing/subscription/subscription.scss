@@ -121,6 +121,7 @@
                     rgba(255, 145, 237, 0.40) 73.23%,
                     rgba(255, 148, 238, 0.34) 89.62%
     );
+    -webkit-tap-highlight-color: transparent;
     backdrop-filter: blur(6px);
     padding: 16px;
     border: 2px solid transparent;
@@ -223,4 +224,10 @@
   bottom: 230px;
   right: 24px;
   left: 24px;
+}
+.sub__pill--active{
+  .sub__pill-left,
+  .sub__pill-right {
+    color: #6A5017;
+  }
 }
