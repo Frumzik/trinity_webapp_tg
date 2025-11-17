@@ -55,7 +55,7 @@ export default function BillingSettingsPage() {
           />
 
           <div className="settings__group">
-            <SettingsRow label="Мой аккаунт" onClick={() => nav('/account')} />
+            <SettingsRow label="Профиль" onClick={() => nav('/view')} />
             <SettingsRow
               label="Уведомления"
               onClick={() => nav('/notifications')}
@@ -71,17 +71,8 @@ export default function BillingSettingsPage() {
           <div className="settings__group">
             <SettingsRow label="Частые вопросы" onClick={() => nav('/faq')} />
             <SettingsRow
-              label="Политика конфиденциальности"
-              onClick={() => nav('/policy')}
-            />
-            <SettingsRow
               label="Пользовательское соглашение"
-              onClick={() => {
-                const tg = (window as any).Telegram?.WebApp;
-                tg?.openLink
-                  ? tg.openLink('https://telegram.org/tos/mini-apps')
-                  : window.open('https://telegram.org/tos/mini-apps', '_blank');
-              }}
+              onClick={() => nav('/policy')}
             />
           </div>
           {/*<button className="settings__logout" onClick={() => nav("/logout")}>*/}

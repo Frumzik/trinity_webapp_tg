@@ -1,10 +1,11 @@
 
-import {useMemo} from 'react'
+import {useMemo, useState} from 'react'
 import TopBar from '../../../widgets/topbarTextpage'
 import GradientButton from '../../../shared/ui/gradient-button'
 import ChekImg from "../../../assets/image/level/check.svg"
 import './subscription.scss'
 import { useGetUserQuery } from '../../../shared/api/user.api'
+
 
 type Props = {
   priceYearUSD?: number
@@ -14,7 +15,7 @@ type Props = {
 function Pill({tone, label, right}: { tone: 'dark' | 'grad', label: string, right?: string }) {
   return (
     <div className={`sub__pill ${tone === 'grad' ? 'sub__pill--grad' : ''}`}>
-      <div className="sub__pill-left">Подписка</div>
+      <div className="sub__pill-left">Доступ</div>
       <div className="sub__pill-right">{right ?? label}</div>
     </div>
   )
@@ -37,6 +38,7 @@ export default function SubscriptionManagePage({
                                                }: Props) {
 
   const { data, isLoading, isError } = useGetUserQuery({ populate: true })
+  const [selectedPlan, setSelectedPlan] = useState<'year' | 'month'>('year')
 
   const status: 'free' | 'premium' = useMemo(() => {
     const t = data?.data?.subscription?.type
@@ -111,7 +113,7 @@ export default function SubscriptionManagePage({
       <TopBar title="Управление доступом"/>
       <main className="sub__main">
         <section className="sub__section">
-          <Pill tone="dark" label="Бесплатно" right="Бесплатно"/>
+          <Pill tone="dark" label="Неактивен" right="Неактивен"/>
         </section>
 
         <section className="sub__pitch">
@@ -127,24 +129,36 @@ export default function SubscriptionManagePage({
 
       <section className="sub__offer">
         <div className="abc">
-          <div className="sub__offer-card">
+          <div
+            className={`sub__offer-card ${selectedPlan === 'year' ? 'sub__offer-card--active' : ''}`}
+            onClick={() => setSelectedPlan('year')}
+          >
             <div className="sub__offer-title">Оформить на год</div>
             <div className="sub__offer-price">
               ${priceYearUSD.toFixed(2)} <span className="sub__offer-note">/ год</span>
             </div>
-            <div className="sub__offer-sub">(${priceMonthUSD.toFixed(2)} / месяц)</div>
+            <div className="sub__offer-sub">(${(priceYearUSD / 12).toFixed(2)} / месяц)</div>
           </div>
-          <div className="sub__offer-card sub__offer-card-month">
+
+          <div
+            className={`sub__offer-card sub__offer-card-month ${selectedPlan === 'month' ? 'sub__offer-card--active' : ''}`}
+            onClick={() => setSelectedPlan('month')}
+          >
             <div className="sub__offer-title">Оформить на месяц</div>
             <div className="sub__offer-price">
-              ${priceYearUSD.toFixed(2)} <span className="sub__offer-note">/ год</span>
+              ${priceMonthUSD.toFixed(2)} <span className="sub__offer-note">/ месяц</span>
             </div>
-            <div className="sub__offer-sub">(${priceMonthUSD.toFixed(2)} / месяц)</div>
+            <div className="sub__offer-sub">({(priceMonthUSD * 12).toFixed(2)} / год)</div>
           </div>
 
           <div className="gbtn-bar sub__cta egg">
             <div className="gbtn-bar__inner ">
-              <GradientButton onClick={() => location.assign('/billing/checkout?plan=premium_year')}>
+              <GradientButton
+                onClick={() => {
+                  const plan = selectedPlan === 'year' ? 'premium_year' : 'premium_month'
+                  location.assign(`/billing/checkout?plan=${plan}`)
+                }}
+              >
                 Активировать
               </GradientButton>
             </div>
