@@ -29,6 +29,7 @@ export class LessonEntity implements ILesson {
   content: ILessonContent = { html: '' } as ILessonTextContent;
   coverUrl: string | null = null;
   bgUrl: string | null = null;
+  iconUrl: string | null = null;
 
   // Условия доступности
   accessRules: TypeContentAccess[] = [];

@@ -94,6 +94,7 @@ export interface ILesson {
   duration: string | null;
   coverUrl: string | null;
   bgUrl: string | null;
+  iconUrl: string | null;
   content?: ILessonContent | null;
 
   // Условия доступности
