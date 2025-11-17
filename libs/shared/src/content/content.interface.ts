@@ -8,6 +8,7 @@ import { FavoritesTag } from '../favorites/favorites.interface.js';
 // Тренинги
 export enum TrainingType {
   TRAINING = 'training',
+  PRACTISE = 'practise',
   PRODUCT = 'product',
 }
 
@@ -22,6 +23,7 @@ export enum TrainingTag {
   USEFUL_MATERIALS = 'userful_materials',
   KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
   HEALTH_LAB = 'health_lab',
+  PRACTISE = 'practise',
   COURSE = 'course',
 }
 
@@ -72,6 +74,7 @@ export enum LessonType {
   AUDIO = 'audio',
   TEXT = 'text',
   FILM = 'film',
+  PRACTISE = 'practise'
 }
 
 export interface ILesson {
@@ -117,6 +120,10 @@ export interface ILessonTextContent {
   html: string;
 }
 
+export interface ILessonPractiseContent {
+  html: string;
+}
+
 export type ILessonContent =
   | ILessonVideoContent
   | ILessonAudioContent
@@ -142,7 +149,12 @@ export interface ILessonText extends ILesson {
   content: ILessonTextContent;
 }
 
-export type TypeLesson = ILessonVideo | ILessonAudio | ILessonText;
+export interface ILessonPractise extends ILesson {
+  type: LessonType.PRACTISE;
+  content: ILessonTextContent;
+}
+
+export type TypeLesson = ILessonVideo | ILessonAudio | ILessonText | ILessonFilm | ILessonPractise;
 
 // Условия доступности
 export enum ContentAccessType {
