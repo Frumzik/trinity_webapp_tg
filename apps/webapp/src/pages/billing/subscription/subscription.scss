@@ -112,9 +112,25 @@
     left: 24px;
     width: 88%;
     border-radius: 12px;
-    background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    background: linear-gradient(
+                    255deg,
+                    rgba(255, 210, 248, 0.60) 2.37%,
+                    rgba(255, 191, 245, 0.52) 16.08%,
+                    rgba(255, 162, 240, 0.41) 35.96%,
+                    rgba(255, 159, 240, 0.46) 57.32%,
+                    rgba(255, 145, 237, 0.40) 73.23%,
+                    rgba(255, 148, 238, 0.34) 89.62%
+    );
     backdrop-filter: blur(6px);
     padding: 16px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+
+  &__offer-card--active {
+    border-color: rgba(255, 291, 245, 0.52);
   }
 
   &__offer-title {

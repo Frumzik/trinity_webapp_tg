@@ -116,7 +116,7 @@ export default function AccountPage() {
 
   return (
     <div className="acc">
-      <TopBar title="Мой аккаунт"/>
+      <TopBar title="Профиль"/>
       <main className="acc__main">
         <section className="acc__card">
           <TextField label="ФИО" value={name} onChange={setName} placeholder="Введите ФИО"/>

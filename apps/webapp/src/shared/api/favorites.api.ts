@@ -1,4 +1,3 @@
-// src/shared/api/favorites.api.ts
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithAuth } from "./base";
 
