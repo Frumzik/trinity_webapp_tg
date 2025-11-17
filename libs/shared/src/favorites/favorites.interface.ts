@@ -8,18 +8,20 @@ export enum FavoriteType {
 
 export enum FavoritesTag {
   STANDART= 'standart',
-  FILMS = 'films',
+  FILM = 'film',
   MUSIC = 'music',
   MEDITATION = 'meditation',
+  BOOK = 'book',
   PRODUCT = 'product',
 }
 
 export enum FavoritesTagTitle {
   STANDART= 'Избранное',
-  FILMS = 'Фильмы',
+  FILM = 'Фильмы',
   MUSIC = 'Музыка',
   MEDITATION = 'Медитации',
   PRODUCT = 'Продукты',
+  BOOK = 'Книги',
 }
 
 export interface IFavorite {
