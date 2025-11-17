@@ -82,7 +82,8 @@ export default function SessionComplete() {
 
   return (
     <div className="session session--complete">
-      <TopBar title="Сессия завершилась" />
+      <TopBar title="Сессия завершилась"   backTo={state?.returnTo ?? '/level'}
+      />
       <main className="session__main">
         {t?.artworkUrl && (
           <img className="session__thumb" src={t.artworkUrl} alt="" />
