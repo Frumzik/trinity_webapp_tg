@@ -5,3 +5,4 @@ export * from './events';
 export * from './guards';
 export * from './file';
 export * from './interceptors';
+export * from './logger';

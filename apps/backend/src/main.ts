@@ -10,13 +10,18 @@ import { AppModule } from './app/app.module';
 import {
   AllExceptionsFilter,
   ResponseTransformInterceptor,
+  winstonConfig,
 } from './app/service';
+import { WinstonModule } from 'nest-winston';
 
 async function bootstrap() {
   const globalPrefix = '';
   const port = process.env.PORT || 3000;
 
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    logger: WinstonModule.createLogger(winstonConfig),
+  });
 
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(
