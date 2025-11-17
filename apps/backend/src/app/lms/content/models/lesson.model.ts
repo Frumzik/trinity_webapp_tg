@@ -53,6 +53,9 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
   coverUrl!: string | null;
 
   @Prop({ type: String, default: null })
+  iconUrl!: string | null;
+
+  @Prop({ type: String, default: null })
   bgUrl!: string | null;
 
   // Контент (в зависимости от типа урока)

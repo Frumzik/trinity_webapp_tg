@@ -418,6 +418,14 @@ export class ContentAddLessonRequestDto {
   })
   @IsOptional()
   @IsString()
+  iconUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url иконки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
   bgUrl?: string;
 
   @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
@@ -478,6 +486,12 @@ export class ContentLessonInfoResponseDto implements ILesson {
     example: 'https://cdn.site/cover.png',
   })
   coverUrl!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'URL иконки',
+    example: 'https://cdn.site/icon.png',
+  })
+  iconUrl!: string | null;
 
   @ApiPropertyOptional({
     description: 'URL фона',
