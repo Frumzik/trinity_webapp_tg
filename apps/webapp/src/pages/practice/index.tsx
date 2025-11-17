@@ -8,9 +8,11 @@ import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Bg1 from "../../assets/icons/bg1.svg";
 import OrangeBg from "../../assets/image/Differentbg/orangeBg.svg";
-import Card1 from "../../assets/icons/products/card9.svg";
-import Card2 from "../../assets/icons/products/card10.svg";
-import Card3 from "../../assets/icons/products/card11.svg";
+import Card1 from "../../assets/homePage/tile1.svg";
+import Card5 from "../../assets/homePage/tile6.svg";
+import Card2 from "../../assets/homePage/card10.svg";
+import Card3 from "../../assets/homePage/card11.svg";
+import Card4 from "../../assets/homePage/card12.svg";
 import "./practise.scss";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
@@ -100,17 +102,32 @@ export default function Index() {
                   zIndex: 20,
                 }}
               >
-                {practices.map((t, idx) => (
                   <FeatureTile
-                    key={t._id}
-                    title={t.title}
-                    description={t.shortDescription || t.description || ""}
-                    bgImageUrl={pickBg(t.tag)}
-                    rightImageUrl={t.iconUrl || t.coverUrl || pickIconFallback(idx)}
+                    title={"Многомерная \n"+
+                      "Сессия\n" +
+                      "Очищения"}
+                    bgImageUrl={Card1}
+                    rightImageUrl={Card2}
                     enabled
-                    onClick={() => onOpenPractice(t, idx)}
+                    onClick={() => navigate("/preview")}
+                    className='left-block-big left-block-color'
                   />
-                ))}
+                <FeatureTile
+                  title={"Сессия Очищения\n"+"и Раскрытия\n"+"Потенциала Рода"}
+                  bgImageUrl={Card1}
+                  rightImageUrl={Card4}
+                  enabled
+                  onClick={() => navigate("/practice")}
+                  className='left-block-big left-block-color'
+                />
+                <FeatureTile
+                  title={"Консультация\n" + "Мастера"}
+                  bgImageUrl={Card5}
+                  rightImageUrl={Card3}
+                  enabled
+                  onClick={() => navigate("/practice")}
+                  className={"left-block-color-yellow"}
+                />
 
                 {practices.length === 0 && (
                   <div style={{ padding: 16, opacity: 0.7 }}>Пока нет практик</div>

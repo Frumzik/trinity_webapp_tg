@@ -73,11 +73,8 @@
   font-style: normal;
   font-weight: 500;
 
-  background:
-    linear-gradient(0deg, rgba(0, 0, 0, 0.21) 0%, rgba(0, 0, 0, 0.21) 100%),
-    rgba(255, 255, 255, 0.04);
   border-radius: 15px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(7.2px);
-  -webkit-backdrop-filter: blur(7.2px);
+  background: rgba(21, 1, 40, 0.64);
+  box-shadow: 10px -5px 55px 30px rgba(163, 154, 255, 0.30);
+  backdrop-filter: blur(4.699999809265137px);
 }

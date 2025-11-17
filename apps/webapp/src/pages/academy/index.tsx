@@ -11,9 +11,11 @@ import { useNavigate } from "react-router-dom";
 
 import Bg1 from "../../assets/icons/bg1.svg";
 import OrangeBg from "../../assets/image/Differentbg/orangeBg.svg";
-import Card1 from "../../assets/icons/products/card9.svg";
-import Card2 from "../../assets/icons/products/card10.svg";
-import Card3 from "../../assets/icons/products/card11.svg";
+import Card1 from "../../assets/homePage/card13.svg";
+import Card2 from "../../assets/homePage/card14.svg";
+import Card3 from "../../assets/homePage/card15.svg";
+import Tile2 from "../../assets/homePage/tile6.svg";
+import Tile1 from "../../assets/homePage/tile1.png";
 
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import "./academy.scss";
@@ -74,7 +76,7 @@ export default function Index() {
               ) : null
             }
           >
-            Академия духа
+            Академия Души
           </Title>
 
           <div className="supportPage__cards">
@@ -91,30 +93,33 @@ export default function Index() {
               }}
             >
               <FeatureTile
-                title="Ступени духа"
+                title="Ступени Духа"
                 description={desc}
-                bgImageUrl={Bg1}
+                bgImageUrl={Tile1}
                 rightImageUrl={Card1}
                 enabled
                 to="/levels"
+                className={"left-block-color"}
               />
 
               <FeatureTile
-                title="Полезные материалы"
+                title="Полезные Материалы"
                 description=""
-                bgImageUrl={Bg1}
+                bgImageUrl={Tile1}
                 rightImageUrl={Card2}
                 enabled
                 to="/materials"
+                className={"left-block-color"}
               />
 
               <FeatureTile
-                title="Мастерская знаний"
+                title="Мастерская Знаний"
                 description=""
-                bgImageUrl={OrangeBg}
+                bgImageUrl={Tile2}
                 rightImageUrl={Card3}
                 enabled
                 to="/workshop"
+                className={"left-block-color-yellow"}
               />
             </ScrollPanel>
           </div>

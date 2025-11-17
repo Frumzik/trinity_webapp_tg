@@ -80,7 +80,7 @@ export default function TopBar({
             <span>{balanceText}</span>
           </button>
         </NavLink>
-        <NavLink to="/account">
+        <NavLink to="/view">
           <div className="topbar__avatarlk">
             {avatarUrl ? (
               <img src={avatarUrl} alt="" width={36} height={36} />
