@@ -86,10 +86,6 @@ export default function IncomeCard({
             <div className="incomeMini__panel">
               <button
                 className="incomeMini__btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onWithdraw?.();
-                }}
               >
                 Получить
               </button>
