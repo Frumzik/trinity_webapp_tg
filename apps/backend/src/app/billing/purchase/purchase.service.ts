@@ -51,7 +51,7 @@ export class PurchaseService {
       let user = await this.usersService.find({ userId });
 
       if (!user) {
-        throw new NotFoundException('Пользователь не найден');
+        throw new NotFoundException('пользователь не найден');
       }
 
       // Проверка что контент существует
@@ -173,7 +173,7 @@ export class PurchaseService {
 
           const transaction = await this.transactionsService.create({
             type: TransactionType.PURCHASE,
-            user: user,
+            userId: user.userId,
             sum: transactionSum,
             description: transactionDescription,
           });
@@ -214,7 +214,7 @@ export class PurchaseService {
       } else if (dto.type == PurchaseType.SUBSCRIPTION) {
         const transaction = await this.transactionsService.create({
           type: TransactionType.SUBSCRIPTION,
-          user: user,
+          userId: user.userId,
           sum: totalPrice,
           description: `Продление подписки на ${dto.subscriptionDays} дней`,
         });
