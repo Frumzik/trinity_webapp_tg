@@ -157,12 +157,13 @@ export default function Index() {
                 )}
 
                 <FeatureTile
-                  title="Академия духа"
+                  title="Практики"
                   description=""
                   bgImageUrl={Tile1}
                   rightImageUrl={Card1}
                   enabled
-                  to="/academy"
+                  to="/practice"
+                  className={"left-block-color"}
                 />
                 <FeatureTile
                   title="Товары"
@@ -171,6 +172,7 @@ export default function Index() {
                   rightImageUrl={Card1}
                   enabled={false}
                   to="/academy"
+                  className={"left-block-color"}
                 />
                 <FeatureTile
                   title="Услуги"
@@ -179,6 +181,7 @@ export default function Index() {
                   rightImageUrl={Card1}
                   enabled={false}
                   to="/academy"
+                  className={"left-block-color"}
                 />
               </ScrollPanel>
             </div>

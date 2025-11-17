@@ -11,7 +11,7 @@ import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
-import Bg1 from "../../assets/icons/bg1.svg";
+import Bg1 from "../../assets/homePage/tile1.png";
 import Card1 from "../../assets/image/level/genkeys.svg";
 
 import "./workshop.scss";
@@ -95,27 +95,26 @@ export default function Index() {
                 zIndex: 20,
               }}
             >
-              {tiles.length === 0 && !isLoading && !isError && (
                 <FeatureTile
                   title="Курс: Генные ключи"
                   description=""
                   bgImageUrl={Bg1}
                   rightImageUrl={Card1}
                   enabled
+                  className={"left-block-color"}
                 />
-              )}
 
-              {tiles.map((t) => (
-                <FeatureTile
-                  key={t.id}
-                  title={t.title}
-                  description={t.description}
-                  bgImageUrl={Bg1}
-                  rightImageUrl={t.coverUrl || Card1}
-                  enabled={t.enabled}
-                  onClick={() => t.enabled && openCourse(t.id)}
-                />
-              ))}
+              {/*{tiles.map((t) => (*/}
+              {/*  <FeatureTile*/}
+              {/*    key={t.id}*/}
+              {/*    title={t.title}*/}
+              {/*    description={t.description}*/}
+              {/*    bgImageUrl={Bg1}*/}
+              {/*    rightImageUrl={t.coverUrl || Card1}*/}
+              {/*    enabled={t.enabled}*/}
+              {/*    onClick={() => t.enabled && openCourse(t.id)}*/}
+              {/*  />*/}
+              {/*))}*/}
             </ScrollPanel>
           </div>
         </div>

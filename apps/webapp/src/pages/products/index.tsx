@@ -11,10 +11,16 @@ import { useNavigate } from "react-router-dom";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
 import Bg1 from "../../assets/icons/bg1.svg";
-import OrangeBg from "../../assets/image/Differentbg/orangeBg.svg";
-import Bgblue from "../../assets/icons/bgblue.svg";
 
 import "./products.scss";
+import Tile2 from '../../assets/homePage/tile6.svg';
+import Card5 from '../../assets/homePage/card5.svg';
+import Tile1 from '../../assets/homePage/tile1.png';
+import Tile3 from '../../assets/homePage/tile2.png';
+import Card1 from '../../assets/homePage/card13.svg';
+import Card2 from '../../assets/homePage/card14.svg';
+import Card3 from '../../assets/homePage/card15.svg';
+import Card4 from '../../assets/homePage/card9.svg';
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,23 +97,72 @@ export default function Index() {
                 zIndex: 20,
               }}
             >
-              {trainings.map((t) => (
-                <FeatureTile
-                  key={t._id}
-                  title={t.title}
-                  description={t.shortDescription || ""}
-                  bgImageUrl={
-                    t.type === "stages_spirit"
-                      ? Bg1
-                      : t.type === "course"
-                        ? OrangeBg
-                        : Bgblue
-                  }
-                  rightImageUrl={t.iconUrl || Bg1}
-                  enabled={t.accessStatus === "available"}
-                  onClick={() => handleClick(t)}
-                />
-              ))}
+              {/*{trainings.map((t) => (*/}
+              {/*  <FeatureTile*/}
+              {/*    key={t._id}*/}
+              {/*    title={t.title}*/}
+              {/*    description={t.shortDescription || ""}*/}
+              {/*    bgImageUrl={*/}
+              {/*      t.type === "stages_spirit"*/}
+              {/*        ? Bg1*/}
+              {/*        : t.type === "course"*/}
+              {/*          ? OrangeBg*/}
+              {/*          : Bgblue*/}
+              {/*    }*/}
+              {/*    rightImageUrl={t.iconUrl || Bg1}*/}
+              {/*    enabled={t.accessStatus === "available"}*/}
+              {/*    onClick={() => handleClick(t)}*/}
+              {/*  />*/}
+              {/*))}*/}
+
+              <FeatureTile
+                title="Ступени Духа"
+                description={"Пройдено 0/13"}
+                bgImageUrl={Tile1}
+                rightImageUrl={Card1}
+                enabled
+                to="/levels"
+                className={"left-block-color"}
+              />
+
+              <FeatureTile
+                title="Полезные Материалы"
+                description=""
+                bgImageUrl={Tile1}
+                rightImageUrl={Card2}
+                enabled
+                to="/materials"
+                className={"left-block-color"}
+              />
+
+              <FeatureTile
+                title="Мастерская Знаний"
+                description=""
+                bgImageUrl={Tile2}
+                rightImageUrl={Card3}
+                enabled
+                to="/workshop"
+                className={"left-block-color-yellow"}
+              />
+              <FeatureTile
+                title="Практики"
+                description=""
+                bgImageUrl={Tile1}
+                rightImageUrl={Card4}
+                enabled
+                to="/practice"
+                className={"left-block-color"}
+              />
+              <FeatureTile
+                title="Лаборатория здоровья"
+                description=""
+                bgImageUrl={Tile3}
+                enabled
+                rightImageUrl={Card5}
+                className="featureTile--altFont"
+                to="/health-lab"
+              />
+
             </ScrollPanel>
           </div>
         </div>

@@ -26,7 +26,6 @@ import {
 
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
-// --- тип и пара утилит такие же, как на странице уровней ---
 type BNode = {
   _id: string;
   trainingId: number;
@@ -60,14 +59,12 @@ export default function SupportPage() {
   const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
 
-  // дерево "Ступени духа"
   const { data: tree } = useGetTrainingTreeQuery();
   const stagesRoot: BNode | undefined = useMemo(() => {
     const roots = (tree?.data ?? []) as BNode[];
     return roots.find((r) => r.tag === "stages_spirit");
   }, [tree]);
 
-  // считаем текущий прогресс: уровень / ступень
   const currentStageLabel = useMemo(() => {
     const root = stagesRoot;
     if (!root) return undefined;
@@ -77,14 +74,12 @@ export default function SupportPage() {
 
     if (!levelNodes.length) return undefined;
 
-    // сортируем уровни
     levelNodes.sort((a, b) => {
       const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
       const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
       return A - B;
     });
 
-    // ищем первую НЕДОделанную ступень – это и есть "текущая"
     for (const lvl of levelNodes) {
       const levelIndex = lvl.stageLevel ?? numFromTitle(lvl.title);
       const stages = (lvl.childrens ?? [])
@@ -101,7 +96,7 @@ export default function SupportPage() {
         if (!done) {
           const stageIndex = st.stage ?? numFromTitle(st.title);
           if (levelIndex && stageIndex) {
-            return `${levelIndex} ур / ${stageIndex} ступень`;
+            return `${stageIndex} ступень`;
           }
         }
       }
@@ -157,10 +152,11 @@ export default function SupportPage() {
         <div className="supportPage" style={{marginTop:10}}>
           <div className="supportPage__cards" style={{ gap: "10px" }}>
             <FeatureTile
-              title="Академия духа"
+              title="Академия Души"
               description=""
               bgImageUrl={Tile1}
               rightImageUrl={Card1}
+              className="featureTile--altFont"
               enabled
               to="/academy"
             />
@@ -170,13 +166,14 @@ export default function SupportPage() {
               bgImageUrl={Tile2}
               enabled
               rightImageUrl={Card2}
+              className="featureTile--altFont"
               to="/products"
             />
 
             <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
               <ReferralsCard
                 imageUrl={Card3}
-                titleTop="Пройти практику"
+                titleTop="Пройти Практику"
                 labelBottom="Перейти"
                 href="/practice"
                 className="refCard--imgRight refCard--166x123"
@@ -184,8 +181,8 @@ export default function SupportPage() {
               />
               <ReferralsCard
                 imageUrl={Card4}
-                titleTop="Ступени духа"
-                labelBottom={currentStageLabel || "Ступени духа"}
+                titleTop="Ступени Духа"
+                labelBottom={currentStageLabel || "Ступени Духа"}
                 href="/levels"
                 className="refCard--imgRight refCard--166x123"
                 background="rgba(255, 255, 255, 0.3)"
@@ -198,6 +195,7 @@ export default function SupportPage() {
               bgImageUrl={Tile2}
               enabled
               rightImageUrl={Card5}
+              className="featureTile--altFont"
               to="/health-lab"
             />
           </div>

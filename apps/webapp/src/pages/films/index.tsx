@@ -197,17 +197,7 @@ export default function Index() {
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <div className="levels">
           <div className="levels__header">
-
-            <div className="levels__tabs">
-              <div className="levels__tabs-title">Уровни</div>
-              <Tabs
-                value={group}
-                options={groups.map((n) => ({ label: String(n), value: n }))}
-                onChange={setGroup}
-              />
-            </div>
           </div>
-
           {isLoading && (
             <div
               style={{
