@@ -96,13 +96,7 @@ export default function Index() {
                   key={t._id}
                   title={t.title}
                   description={t.shortDescription || ""}
-                  bgImageUrl={
-                    t.type === "stages_spirit"
-                      ? Bg1
-                      : t.type === "course"
-                        ? OrangeBg
-                        : Bgblue
-                  }
+                  bgImageUrl={t.coverUrl || Bg1}
                   rightImageUrl={t.iconUrl || Bg1}
                   enabled={t.accessStatus === "available"}
                   onClick={() => handleClick(t)}

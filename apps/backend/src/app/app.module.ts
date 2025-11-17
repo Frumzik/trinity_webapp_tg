@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CountersModule, getMongoConfig, FileModule } from './service';
+import { CountersModule, getMongoConfig, FileModule, LoggingMiddleware } from './service';
 import { AuthModule, UsersModule } from './account';
 import { SubscriptionsModule } from './billing';
 import { ContentModule } from './lms';
@@ -42,4 +42,8 @@ import { FundsModule, ReferralsModule } from './referrals';
   providers: [],
   exports: [EventEmitterModule],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}
