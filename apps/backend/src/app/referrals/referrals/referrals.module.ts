@@ -19,7 +19,7 @@ import { PurchaseModule, TransactionsModule } from '../../billing';
     forwardRef(() => ContentModule),
     FundsModule,
     TransactionsModule,
-    PurchaseModule
+    forwardRef(() => PurchaseModule),
   ],
   providers: [ReferralsService, ReferralsRepository, ReferralsListener],
   exports: [ReferralsService],

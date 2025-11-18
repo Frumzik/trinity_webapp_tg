@@ -20,6 +20,7 @@ import { PurchaseModule } from './billing/purchase/purchase.module';
 import { BannersModule } from './banners/banners.module';
 import { FundsModule, ReferralsModule } from './referrals';
 import { AcquiringModule } from './billing/acquiring/acquiring.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AcquiringModule } from './billing/acquiring/acquiring.module';
     BannersModule,
     FundsModule,
     AcquiringModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],
