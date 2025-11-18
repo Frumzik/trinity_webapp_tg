@@ -47,8 +47,8 @@ jobs:
           npx nx run-many --target=build --all --prod
           npx nx run backend:copy-workspace-modules
           npx nx run webapp:build --mode=production
-          docker-compose -f docker-compose.production.yml down
-          docker-compose -f docker-compose.production.yml build
-          docker-compose -f docker-compose.production.yml up -d
+          docker compose -f docker-compose.production.yml down
+          docker compose -f docker-compose.production.yml build
+          docker compose -f docker-compose.production.yml up -d
           docker image prune --filter="dangling=true" --force
               
