@@ -1,5 +1,5 @@
 // pages/preview/index.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
@@ -8,47 +8,36 @@ import Hero from "./ui/Hero";
 import TopActions from "./ui/TopActions";
 import Sheet from "./ui/Sheet";
 import Price from "./ui/Price";
-import TextPage from "../../shared/ui/TextPage";
 import "./preview.scss";
 
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
+import type { LearningNode } from "../../shared/api/learning.api";
 
-const toSections = (text: string) => [
-  { title: "", paragraphs: text.trim() ? [text] : [] },
-];
+import FlexibleModal from "../../widgets/flexible-modal"; // путь поправь под себя
+import helpIcon from "../../assets/icons/closeIcon.png";      // сюда нужную иконку
 
 type State = {
   trainingId: number;
   returnTo?: string;
 };
 
-type TrainingResponse = {
-  data: {
-    trainingId: number;
-    title: string;
-    description?: string | null;
-    shortDescription?: string | null;
-    coverUrl?: string | null;
-    iconUrl?: string | null;
-    price?: number | null;
-    salePrice?: number | null;
-  };
-};
-
-const stripHtml = (html?: string | null) =>
-  (html ?? "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "")
-    .trim();
+type ModalKind = "success" | "no-balance" | "error";
 
 export default function PreviewPage() {
   const navigate = useNavigate();
-  const [fav, setFav] = useState(false);
 
   const st = (useLocation().state || {}) as Partial<State>;
   const trainingId = st.trainingId;
+
+  // ------- состояние модалки результата -------
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultKind, setResultKind] = useState<ModalKind>("success");
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultItems, setResultItems] = useState<string[] | undefined>();
+  const [resultDesc, setResultDesc] = useState<string | undefined>();
+  const [resultCta, setResultCta] = useState<string | undefined>();
+  const [resultOnCta, setResultOnCta] = useState<(() => void) | undefined>();
 
   // если trainingId нет – уходим назад
   useEffect(() => {
@@ -59,35 +48,73 @@ export default function PreviewPage() {
 
   if (!trainingId) return null;
 
-  // тянем конкретный тренинг/практику по id
-  const { data, isLoading, isError } = useGetTrainingTreeQuery(
-    trainingId
-  ) as {
-    data?: TrainingResponse;
+  // грузим практику / тренинг
+  const { data, isLoading, isError } = useGetUserTrainingByIdQuery({
+    id: trainingId,
+  }) as {
+    data?: { success: true; data: LearningNode };
     isLoading: boolean;
     isError: boolean;
   };
 
   const node = data?.data;
-
   const title = node?.title || "Практика";
-  const desc =
-    stripHtml(node?.shortDescription) || stripHtml(node?.description) || "";
-  const image = node?.coverUrl || undefined;
+  const descHtml = node?.description || "";
+  const image = (node as any)?.bgUrl || node?.coverUrl || undefined;
   const price = node?.salePrice ?? node?.price ?? 0;
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
   const handlePurchase = async () => {
     try {
-      await addPurchase({ trainingId }).unwrap();
-      navigate(`/trainings/${trainingId}`, { replace: true });
+      await addPurchase({
+        type: "Training",
+        content: [trainingId],
+      }).unwrap();
+
+      // ------- успешная покупка -------
+      setResultKind("success");
+      setResultTitle("Успешно");
+      setResultItems(undefined);
+      setResultDesc(
+        "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
+      );
+      setResultCta("Обновить");
+      // важно: оборачиваем в функцию, чтобы не вызвать сразу
+      setResultOnCta(() => () => window.location.reload());
+      setResultOpen(true);
     } catch (e: any) {
-      const msg =
-        e?.data?.message?.[0] ||
-        e?.error ||
-        "Покупка не оформлена. Попробуй ещё раз.";
-      alert(msg);
+      const rawMsg: string | undefined = e?.data?.message?.[0] || e?.error;
+
+      const isBalanceError =
+        rawMsg && rawMsg.toLowerCase().includes("баланс");
+
+      if (isBalanceError) {
+        // ------- мало баланса -------
+        setResultKind("no-balance");
+        setResultTitle("Недостаточно баланса\nдля совершения платежа");
+        setResultItems(undefined);
+        setResultDesc(rawMsg);
+        setResultCta("Пополнить");
+        // сюда потом подвяжешь экран пополнения
+        setResultOnCta(() => () => {
+          // navigate("/balance");
+          setResultOpen(false);
+        });
+      } else {
+        // ------- общая ошибка -------
+        setResultKind("error");
+        setResultTitle("");
+        setResultItems(undefined);
+        setResultDesc(
+          rawMsg ||
+          "Покупка не оформлена. Попробуй ещё раз."
+        );
+        setResultCta("Понятно");
+        setResultOnCta(() => () => setResultOpen(false));
+      }
+
+      setResultOpen(true);
     }
   };
 
@@ -95,9 +122,9 @@ export default function PreviewPage() {
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={fav}
+          isFav={false}
           onBack={() => navigate(-1)}
-          onToggleFav={() => setFav((v) => !v)}
+          onToggleFav={() => {}}
           onMenu={() => {}}
         />
       </Hero>
@@ -127,9 +154,9 @@ export default function PreviewPage() {
                 zIndex: 20,
               }}
             >
-              <TextPage
-                sections={toSections(desc)}
+              <div
                 className="preview__text"
+                dangerouslySetInnerHTML={{ __html: descHtml }}
               />
             </ScrollPanel>
 
@@ -145,6 +172,16 @@ export default function PreviewPage() {
           </>
         )}
       </Sheet>
+      <FlexibleModal
+        open={resultOpen}
+        title={resultTitle}
+        items={resultItems}
+        description={resultDesc}
+        ctaLabel={resultCta}
+        onCta={resultOnCta}
+        closeIconUrl={helpIcon}
+        onClose={() => setResultOpen(false)}
+      />
     </div>
   );
 }
