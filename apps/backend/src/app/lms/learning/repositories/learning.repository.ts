@@ -243,6 +243,13 @@ export class LearningsRepository {
         },
       },
       { $unwind: '$training' },
+      // Фильтруем только те тренинги, у которых есть stage и stageLevel
+      {
+        $match: {
+          'training.stage': { $exists: true, $ne: null },
+          'training.stageLevel': { $exists: true, $ne: null },
+        },
+      },
       {
         $sort: {
           'training.stageLevel': -1,
