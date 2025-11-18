@@ -137,7 +137,7 @@ export class LearningsRepository {
 
     // Загружаем все learning-записи (например, для конкретного userId)
     const learnings = await this.learningModel
-      .find(condition ?? {})
+      .find({ userId: condition?.userId })
       .lean()
       .exec();
 
