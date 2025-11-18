@@ -339,6 +339,15 @@ export class ContentAddLessonRequestDto {
   @IsString()
   description?: string;
 
+
+  @ApiPropertyOptional({
+    description: 'Короткое описание урока',
+    example: 'Практика',
+  })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
   @ApiPropertyOptional({
     description: 'Длительность урока',
     example: '10 min',
@@ -463,6 +472,12 @@ export class ContentLessonInfoResponseDto implements ILesson {
     example: 'Медитативное дыхание',
   })
   description!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Короткое описание',
+    example: 'Практика',
+  })
+  shortDescription!: string | null;
 
   @ApiPropertyOptional({
     description: 'Длительность',
