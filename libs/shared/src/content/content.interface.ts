@@ -93,6 +93,7 @@ export interface ILesson {
   // Метаданные
   title: string | null;
   description: string | null;
+  shortDescription: string | null;
   duration: string | null;
   coverUrl: string | null;
   bgUrl: string | null;

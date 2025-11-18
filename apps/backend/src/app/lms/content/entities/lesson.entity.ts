@@ -25,6 +25,7 @@ export class LessonEntity implements ILesson {
   // Метаданные
   title: string | null = null;
   description: string | null = null;
+  shortDescription: string | null = null;
   duration: string | null = null;
   content: ILessonContent = { html: '' } as ILessonTextContent;
   coverUrl: string | null = null;
