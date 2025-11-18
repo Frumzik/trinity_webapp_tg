@@ -45,11 +45,7 @@ export class SubscriptionsService {
     try {
       const subscription = await this.subscriptionsRepository.find(condition);
 
-      if (!subscription) {
-        throw new NotFoundException('Подиска не найдена');
-      }
-
-      return await this.subscriptionsRepository.update(subscription.validate());
+      return subscription ? await this.subscriptionsRepository.update(subscription.validate()) : null;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
