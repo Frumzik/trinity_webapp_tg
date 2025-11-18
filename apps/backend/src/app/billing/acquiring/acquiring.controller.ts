@@ -27,8 +27,6 @@ import {
 import { UsersService } from '../../account';
 
 @ApiTags('Acquiring')
-@ApiBearerAuth('access_token')
-@UseGuards(JWTAuthGuard)
 @Controller('acquiring')
 export class AcquiringController {
   constructor(
@@ -40,6 +38,8 @@ export class AcquiringController {
   // -------------------------
   // Получение адреса для пополнения
   // -------------------------
+  @ApiBearerAuth('access_token')
+  @UseGuards(JWTAuthGuard)
   @Get('deposit-address')
   @ApiOperation({ summary: 'Получить адрес для пополнения' })
   @ApiResponse({
@@ -67,6 +67,8 @@ export class AcquiringController {
   // -------------------------
   // Вывод средств
   // -------------------------
+  @ApiBearerAuth('access_token')
+  @UseGuards(JWTAuthGuard)
   @Post('withdraw')
   @ApiOperation({ summary: 'Вывести средства на указанный адрес' })
   @ApiBody({ type: AcquiringWithdrawRequestDto })
