@@ -101,6 +101,14 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining> {
   })
   @IsOptional()
   @IsString()
+  bgUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Url иконки',
+    example: 'https://...',
+  })
+  @IsOptional()
+  @IsString()
   iconUrl?: string;
 
   @ApiPropertyOptional({
@@ -269,6 +277,12 @@ export class ContentTrainingInfoResponseDto implements ITraining {
     example: 'https://cdn.site/icon.jpg',
   })
   iconUrl!: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Обложка',
+    example: 'https://cdn.site/bg.jpg',
+  })
+  bgUrl!: string | null;
 
   @ApiProperty({ description: 'Правила доступа', type: () => [Object] })
   accessRules!: TypeContentAccess[];
