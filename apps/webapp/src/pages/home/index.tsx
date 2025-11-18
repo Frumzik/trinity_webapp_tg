@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import MiniCardSlider from "../../widgets/card-slider-homePage";
 import TopBar from "../../widgets/topbarlk/topbarlk";
@@ -24,7 +23,8 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetTrainingTreeQuery, useGetCurrentStageQuery } from "../../shared/api/learning.api";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type BNode = {
   _id: string;
@@ -55,12 +55,14 @@ const numFromTitle = (t?: string) => {
 
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const nav = useNavigate();
+  const nav = useAppNavigate();
 
   const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
 
   const { data: tree } = useGetTrainingTreeQuery();
+  const { data: currentStageRes } = useGetCurrentStageQuery();
+
   const allNodes = useMemo(() => {
     return (tree?.data ?? []) as BNode[];
   }, [tree]);
@@ -68,11 +70,10 @@ export default function SupportPage() {
     return allNodes.find((r) => r.tag === "stages_spirit" && (r.parentId == null));
   }, [allNodes]);
 
-  const currentStageLabel = useMemo(() => {
+  const fallbackStageLabel = useMemo(() => {
     const root = stagesRoot;
     if (!root) return undefined;
 
-    // уровни (1,2,3)
     const levelNodes = allNodes
       .filter(
         (n) =>
@@ -115,8 +116,6 @@ export default function SupportPage() {
     }
 
     const lastLevel = levelNodes[levelNodes.length - 1];
-    const levelIndex =
-      lastLevel.stageLevel ?? numFromTitle(lastLevel.title) ?? levelNodes.length;
 
     const lastStages = allNodes.filter(
       (s) =>
@@ -138,6 +137,17 @@ export default function SupportPage() {
 
     return `${stageIndex} ступень`;
   }, [stagesRoot, allNodes]);
+
+  const currentStageLabel = useMemo(() => {
+    const node = currentStageRes?.data;
+    if (node) {
+      if (typeof node.stage === "number") return `${node.stage} ступень`;
+      const n = numFromTitle(node.title);
+      if (n) return `${n} ступень`;
+    }
+    return fallbackStageLabel;
+  }, [currentStageRes, fallbackStageLabel]);
+
   const handleCardClick = (it: { id: string | number }) => {
     const src = banners.find(b => String(b.id) === String(it.id));
     if (!src) return;

@@ -1,10 +1,11 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import { useAppSelector } from './store';
 import { useLazyCheckTgQuery } from '../shared/api/auth.api';
+import { useAppNavigate } from '../shared/lib/hooks/useAppNavigate';
 
 export default function AuthGate() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const { pathname } = useLocation();
   const token = useAppSelector(s => s.session.token);
 

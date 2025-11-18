@@ -10,10 +10,10 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Card1 from "../../assets/homePage/tile1.png";
-import Card5 from "../../assets/homePage/tile5.png";
-import Card2 from "../../assets/homePage/card10.svg";
-import Card3 from "../../assets/homePage/card11.svg";
-import Card4 from "../../assets/homePage/card12.svg";
+import Card5 from "../../assets/homePage/tile3.png";
+import Card2 from "../../assets/products/card10.png";
+import Card3 from "../../assets/products/card11.png";
+import Card4 from "../../assets/products/card9.png";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
