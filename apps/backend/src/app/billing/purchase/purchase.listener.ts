@@ -18,7 +18,7 @@ import { UsersService } from '../../account';
 import { FundsService } from '../../referrals';
 
 @Injectable()
-export class ReferralsListener {
+export class PurchaseListener {
   constructor(
     @Inject(forwardRef(() => ContentService))
     private readonly contentService: ContentService,
@@ -26,6 +26,7 @@ export class ReferralsListener {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => PurchaseService))
     private readonly purchaseService: PurchaseService,
+    @Inject(forwardRef(() => TransactionsService))
     private readonly transactionsService: TransactionsService,
     private readonly fundsService: FundsService
   ) {}

@@ -11,14 +11,16 @@ import { ReferralsRepository } from './repositories';
 import { ReferralEntity } from './entities';
 import { Referral } from './models';
 import { UserEntity, UsersService } from '../../account';
-import { IUser } from '@trinity/shared';
+import { IUser, ReferralRegisteredEvent, RefferalEvents } from '@trinity/shared';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ReferralsService {
   constructor(
     private readonly referralsRepository: ReferralsRepository,
     @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async create(
@@ -45,6 +47,12 @@ export class ReferralsService {
         });
 
         const created = await this.referralsRepository.create(referralEntity);
+
+        // Событие
+        this.eventEmitter.emit(
+          RefferalEvents.REGISTERED,
+          new ReferralRegisteredEvent(currentPartner.userId, referral.userId, level)
+        );
 
         if (level === 1) firstLevelReferral = created;
 

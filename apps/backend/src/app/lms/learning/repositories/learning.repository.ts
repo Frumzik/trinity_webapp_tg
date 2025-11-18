@@ -185,7 +185,7 @@ export class LearningsRepository {
 
       training.childrens = childrenTrainings;
 
-      // Рассчитываем progressPercent
+      // Рассчитываем progressPercent и добавляем количество уроков
       const allLessons = [
         ...lessonsWithStatus,
         ...childrenTrainings.flatMap((child) => getAllLessons(child)),
@@ -199,6 +199,10 @@ export class LearningsRepository {
         allLessons.length > 0
           ? Math.round((completedCount / allLessons.length) * 100)
           : 0;
+
+      // Добавляем новые поля
+      training.totalLessons = allLessons.length;
+      training.completedLessons = completedCount;
 
       return training;
     };
@@ -225,5 +229,47 @@ export class LearningsRepository {
     // Иначе возвращаем массив всех корневых деревьев
     const roots = allTrainings.filter((t) => !t.parentId);
     return roots.map((r) => new TrainingEntity(buildTree(r)));
+  }
+
+  async getCurrentStage(userId: number) {
+    const [learning] = await this.learningModel.aggregate([
+      { $match: { userId, accessStatus: 'available' } },
+      {
+        $lookup: {
+          from: 'trainings', // имя коллекции training
+          localField: 'training',
+          foreignField: '_id',
+          as: 'training',
+        },
+      },
+      { $unwind: '$training' },
+      {
+        $sort: {
+          'training.stageLevel': -1,
+          'training.stage': -1,
+        },
+      },
+      { $limit: 1 },
+      {
+        $project: {
+          accessStatus: 1,
+          progressStatus: 1,
+          training: {
+            stage: 1,
+            stageLevel: 1,
+            trainingId: 1,
+            title: 1,
+          },
+        },
+      },
+    ]);
+
+    if (!learning || !learning.training) return null;
+
+    return new TrainingEntity({
+      ...learning.training, // данные тренинга
+      accessStatus: learning.accessStatus,
+      progressStatus: learning.progressStatus,
+    });
   }
 }

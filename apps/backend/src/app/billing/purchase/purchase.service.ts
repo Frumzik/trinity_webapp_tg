@@ -54,6 +54,19 @@ export class PurchaseService {
         throw new NotFoundException('пользователь не найден');
       }
 
+      // Проверка существует ли покупка
+      for (const contentId of dto.content as number[]) {
+        const existPurchase = await this.find({
+          type: dto.type,
+          contentId,
+          userId,
+        });
+
+        if (existPurchase) {
+          throw new Error('Покупка уже существует');
+        }
+      }
+
       // Проверка что контент существует
       let totalPrice = 0;
       switch (dto.type) {

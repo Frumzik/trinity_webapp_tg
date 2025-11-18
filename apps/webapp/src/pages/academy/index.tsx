@@ -9,12 +9,10 @@ import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Bg1 from "../../assets/icons/bg1.svg";
-import OrangeBg from "../../assets/image/Differentbg/orangeBg.svg";
-import Card1 from "../../assets/homePage/card13.svg";
-import Card2 from "../../assets/homePage/card14.svg";
-import Card3 from "../../assets/homePage/card15.svg";
-import Tile2 from "../../assets/homePage/tile6.svg";
+import Card1 from "../../assets/products/card1.png";
+import Card2 from "../../assets/products/card2.png";
+import Card3 from "../../assets/products/card3.png";
+import Tile2 from "../../assets/homePage/tile3.png";
 import Tile1 from "../../assets/homePage/tile1.png";
 
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";

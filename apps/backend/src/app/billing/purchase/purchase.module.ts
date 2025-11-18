@@ -9,6 +9,8 @@ import { UsersModule } from '../../account';
 import { SubscriptionsModule } from '../subscriptions';
 import { TransactionsModule } from '../transactions';
 import { ContentModule } from '../../lms';
+import { PurchaseListener } from './purchase.listener';
+import { FundsModule } from '../../referrals';
 
 @Module({
   imports: [
@@ -20,8 +22,9 @@ import { ContentModule } from '../../lms';
     forwardRef(() => SubscriptionsModule),
     forwardRef(() => TransactionsModule),
     forwardRef(() => ContentModule),
+    FundsModule
   ],
-  providers: [PurchaseService, PurchasesRepository],
+  providers: [PurchaseService, PurchasesRepository, PurchaseListener],
   controllers: [PurchaseController],
   exports: [PurchaseService],
 })

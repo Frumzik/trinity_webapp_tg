@@ -26,7 +26,6 @@ export class LearningController {
 
   // 📚 Получить всё дерево обучения для пользователя
   @Get('training')
-  @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({ summary: 'Получить дерево всех тренингов пользователя' })
   @ApiResponse({
@@ -42,7 +41,6 @@ export class LearningController {
 
   // 📘 Получить конкретный тренинг по ID
   @Get('training/:id')
-  @Roles(UserRole.Admin, UserRole.Moderator)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({ summary: 'Получить конкретный тренинг пользователя по ID' })
   @ApiParam({
@@ -62,4 +60,21 @@ export class LearningController {
   ): Promise<ITraining[] | ITraining | null> {
     return await this.learningService.getLearningTree({ userId, trainingId });
   }
+
+
+  // 📘 Получить конкретный тренинг по ID
+  @Get('current-stage')
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Получить прогресс по текущей ступени' })
+  @ApiResponse({
+    status: 200,
+    description: 'Информация о тренинге с прогрессом пользователя',
+    type: Object, 
+  })
+  async getCurrentStage(
+    @UserId() userId: number
+  ): Promise<ITraining | null> {
+    return await this.learningService.getCurrentStage(userId);
+  }
+  
 }

@@ -45,6 +45,9 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: '$2b$10$hashedpassword', nullable: true })
   finPasswordHash!: string | null;
 
+  @ApiProperty({ example: '0x13fasda...', nullable: true })
+  address!: string | null;
+
   @ApiProperty({ example: 'Иван Иванов', nullable: true })
   name!: string | null;
 

@@ -15,7 +15,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UsersService } from '../users';
-import { SubscriptionsService } from '../../billing';
+import { AcquiringService, SubscriptionsService } from '../../billing';
 import { ReferralsService } from '../../referrals';
 
 @Injectable()
@@ -25,7 +25,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly referralsService: ReferralsService
+    private readonly referralsService: ReferralsService,
+    private readonly acquiringService: AcquiringService
   ) {}
 
   public async register(
@@ -49,6 +50,9 @@ export class AuthService {
 
     let newUser = await this.usersService.create({ ...dto }, { referralPath });
     let newSubscription = await this.subscriptionsService.create();
+    const newWallet = await this.acquiringService.createAccount(
+      newUser.userId.toString()
+    );
 
     newUser = await this.usersService.bindSubscription(
       newUser,
@@ -57,6 +61,11 @@ export class AuthService {
     newSubscription = await this.subscriptionsService.bindUser(
       newSubscription,
       newUser
+    );
+
+    newUser = await this.usersService.bindAddress(
+      { userId: newUser.userId },
+      newWallet.address
     );
 
     if (dto.partnerId) {

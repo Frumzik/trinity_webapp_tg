@@ -6,6 +6,10 @@ services:
     networks:
       - proxy
 
+    depends_on:
+      loki:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -19,6 +23,10 @@ services:
       - "3100:3100"
     networks:
       - proxy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      retries: 5
 
   backend:
     build:
@@ -46,6 +54,13 @@ services:
       - ./apps/bot/envs/.env.production
     ports:
       - "3001:3001"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.backend.rule=Host(`bot.3nity.space`)"
+    #   - "traefik.http.routers.backend.entrypoints=websecure"
+    #   - "traefik.http.services.backend.loadbalancer.server.port=3001"
+    #   - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
+    #   - "traefik.http.routers.backend.tls=true"
     networks:
       - proxy
 
