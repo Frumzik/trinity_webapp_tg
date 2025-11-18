@@ -57,6 +57,15 @@ export class User extends Document<Types.ObjectId> implements IUser {
 
   @Prop({ type: String, default: '' })
   referralPath!: string;
+
+  @Prop({ type: String, default: '10:00' })
+  meditationNotifications!: string;
+
+  @Prop({ type: Boolean, default: true })
+  contentNotifications!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  promoNotifications!: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

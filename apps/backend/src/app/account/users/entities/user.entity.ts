@@ -31,6 +31,10 @@ export class UserEntity implements IUser {
   role: UserRole = UserRole.User;
   balance = 0;
 
+  meditationNotifications = '10:00';
+  contentNotifications = true;
+  promoNotifications = false;
+
   // Рефералка
   referralPath = '';
 
@@ -133,6 +137,18 @@ export class UserEntity implements IUser {
 
   public updateEmail(email: string) {
     this.email = email;
+
+    return this;
+  }
+
+  public updateNotifications(body: {
+    meditationNotifications: string;
+    contentNotifications: boolean;
+    promoNotifications: boolean;
+  }) {
+    this.meditationNotifications = body.meditationNotifications;
+    this.contentNotifications = body.contentNotifications;
+    this.promoNotifications = body.promoNotifications;
 
     return this;
   }
