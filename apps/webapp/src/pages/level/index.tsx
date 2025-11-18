@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Hero from './ui/Hero';
 import TopActions from './ui/TopActions';
 import Sheet from './ui/Sheet';
@@ -8,8 +8,8 @@ import PracticeSlider from '../../widgets/practise-card-slider';
 import SectionHeader from './ui/Sectionheader';
 import { useGetUserTrainingByIdQuery } from '../../shared/api/learning.api';
 import { useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
-/** ---------- Local progress (front-only) ---------- */
 type LocalProgress = {
   seconds: number;
   duration: number;
@@ -58,7 +58,7 @@ const mergeStatus = (lesson: any, lp: Record<string, LocalProgress>) => {
 };
 
 export default function Index() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 

@@ -12,11 +12,11 @@ import Card1 from "../../assets/icons/products/card7.png";
 import Card2 from "../../assets/icons/products/card8.svg";
 import Bgblue from "../../assets/icons/bgblue.svg";
 import GradientButton from "../../shared/ui/gradient-button";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
