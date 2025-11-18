@@ -5,14 +5,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import {
   PurchaseCreatedEvent,
   PurchaseEvents,
   PurchaseType,
+  ReferralBuyEvent,
+  ReferralBuyStageEvent,
+  ReferralReserveEvent,
+  RefferalEvents,
   TransactionType,
 } from '@trinity/shared';
-import { PurchaseService, TransactionsService } from '../../billing';
+import { PurchaseService, SubscriptionsService, TransactionsService } from '../../billing';
 import { ContentService } from '../../lms';
 import { ReferralsService } from './referrals.service';
 import { UsersService } from '../../account';
@@ -27,9 +31,12 @@ export class ReferralsListener {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => PurchaseService))
     private readonly purchaseService: PurchaseService,
+    @Inject(forwardRef(() => SubscriptionsService))
+    private readonly subscriptionsService: SubscriptionsService,
     private readonly referralsService: ReferralsService,
     private readonly transactionsService: TransactionsService,
-    private readonly fundsService: FundsService
+    private readonly fundsService: FundsService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   @OnEvent(PurchaseEvents.CREATED)
@@ -86,6 +93,8 @@ export class ReferralsListener {
             throw new Error('Реферал не найден');
           }
 
+          
+
           // Если куплена ступень
           if (training.stage && training.stageLevel) {
             const referralPurchase = await this.purchaseService.find({
@@ -112,6 +121,18 @@ export class ReferralsListener {
                 description: 'Реферальное вознаграждение',
               });
 
+              await this.eventEmitter.emit(
+                RefferalEvents.BUY_STAGE,
+                new ReferralBuyStageEvent(
+                  referral.partnerId,
+                  referral.referralId,
+                  referral.level,
+                  sum,
+                  training.stageLevel,
+                  training.stage
+                )
+              );
+
               // Пополняем банк
               await this.fundsService.incMain(transaction.sum * fundPercent);
             } else {
@@ -121,7 +142,30 @@ export class ReferralsListener {
                 stage: training.stage,
                 stageLevel: training.stageLevel,
               });
+
+              await this.eventEmitter.emit(
+                RefferalEvents.RESERVE,
+                new ReferralReserveEvent(
+                  referral.partnerId,
+                  referral.referralId,
+                  referral.level,
+                  sum,
+                  training.stageLevel,
+                  training.stage
+                )
+              );
             }
+          } else {
+            await this.eventEmitter.emit(
+              RefferalEvents.BUY,
+              new ReferralBuyEvent(
+                referral.partnerId,
+                referral.referralId,
+                referral.level,
+                sum,
+                'null'
+              )
+            );
           }
         }
 
