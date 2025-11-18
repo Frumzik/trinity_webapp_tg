@@ -7,7 +7,7 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import PromoSlider from "../../widgets/card-slider-favoritesPage";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Bgmini from "../../assets/homePage/miniTile.svg";
+import Bgmini from "../../assets/products/minitile.png";
 import CardFallback1 from "../../assets/icons/products/card1.svg";
 import CardFallback2 from "../../assets/icons/products/card2.svg";
 import CardFallback3 from "../../assets/icons/products/card3.svg";

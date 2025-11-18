@@ -8,13 +8,13 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Blur from "../../../public/blurs/blur-1.png"
-import Card1 from "../../assets/homePage/card1.svg";
-import Card2 from "../../assets/homePage/card2.svg";
-import Card3 from "../../assets/homePage/card3.svg";
-import Card4 from "../../assets/homePage/card4.svg";
-import Card5 from "../../assets/homePage/card5.svg";
-import Tile1 from "../../assets/homePage/tile1.svg";
-import Tile2 from "../../assets/homePage/tile2.svg";
+import Card1 from "../../assets/home/card1.png";
+import Card2 from "../../assets/home/card2.png";
+import Card3 from "../../assets/home/card3.png";
+import Card4 from "../../assets/home/card4.png";
+import Card5 from "../../assets/home/card5.png";
+import Tile1 from "../../assets/homePage/tile1.png";
+import Tile2 from "../../assets/homePage/tile2.png";
 
 import "./home.scss";
 import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
@@ -190,20 +190,20 @@ export default function SupportPage() {
 
             <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
               <ReferralsCard
-                imageUrl={Card3}
+                imageUrl={Card4}
                 titleTop="Пройти Практику"
                 labelBottom="Перейти"
                 href="/practice"
-                className="refCard--imgRight refCard--166x123"
-                background="rgba(255, 255, 255, 0.3)"
+                className="refCard--imgRight refCard--166x123 "
+                background="none"
               />
               <ReferralsCard
-                imageUrl={Card4}
+                imageUrl={Card3}
                 titleTop="Ступени Духа"
                 labelBottom={currentStageLabel || "Ступени Духа"}
                 href="/levels"
-                className="refCard--imgRight refCard--166x123"
-                background="rgba(255, 255, 255, 0.3)"
+                className="refCard--imgRight refCard--166x123 "
+                background="none"
               />
             </div>
 

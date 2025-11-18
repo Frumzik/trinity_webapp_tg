@@ -4,6 +4,7 @@ import GradientButton from '../../../../shared/ui/gradient-button'
 import { useGetUserQuery } from '../../../../shared/api/user.api'
 import { getTelegramUser } from '../../../../shared/telegram/telegram'
 import './withdraw-form.scss'
+import { Link } from 'react-router-dom';
 
 type Props = {
   // avatarSrc можно оставить, но он опционален
@@ -134,7 +135,7 @@ export default function WithdrawForm({ avatarSrc, title, subtitle, balance, subm
 
       <div className="wform__agree">
         Нажимая кнопку «вывести»,<br />
-        я подтверждаю, что ознакомился<br />с <a href="#">Правилами сервиса</a>
+        я подтверждаю, что ознакомился<br />с <Link to={"/policy"}>Правилами сервиса</Link>
       </div>
 
       <div className="gbtn-bar rectangle-btn">
