@@ -170,8 +170,8 @@ export class LearningService {
     try {
       // 1️⃣ Получаем существующий прогресс
       const learning = await this.learningRepository.find({
-        user: user.userId,
-        training: training.trainingId,
+        userId: user.userId,
+        trainingId: training.trainingId,
       });
 
       // --- Вычисляем доступ для родительского тренинга ---
