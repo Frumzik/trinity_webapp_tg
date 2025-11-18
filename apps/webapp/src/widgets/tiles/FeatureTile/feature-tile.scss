@@ -75,7 +75,7 @@
   }
   .featureTile__btn {
     border-radius: 12px;
-    background: rgba(255, 106, 204, 0.84);
+    background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
     box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
   }
 }
@@ -86,10 +86,9 @@
     backdrop-filter: blur(2.6871166229248047px);
   }
   .featureTile__btn {
-    border-radius: 20.153px;
-    background: #FFC34F;
-    backdrop-filter: blur(7.658282279968262px);
-    box-shadow: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
+    box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
   }
 }
 

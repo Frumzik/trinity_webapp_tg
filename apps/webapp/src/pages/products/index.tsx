@@ -137,11 +137,11 @@ export default function Index() {
               <FeatureTile
                 title="Мастерская Знаний"
                 description=""
-                bgImageUrl={Tile2}
+                bgImageUrl={Tile1}
                 rightImageUrl={Card3}
                 enabled
                 to="/workshop"
-                className={"left-block-color-yellow"}
+                className={"left-block-color"}
               />
               <FeatureTile
                 title="Практики"
@@ -158,7 +158,7 @@ export default function Index() {
                 bgImageUrl={Tile3}
                 enabled
                 rightImageUrl={Card5}
-                className="featureTile--altFont"
+                className="left-block-color"
                 to="/health-lab"
               />
 
