@@ -5,6 +5,9 @@ services:
       - "3101:3000"
     networks:
       - default
+    depends_on:
+      loki:
+        condition: service_healthy
 
   prometheus:
     image: prom/prometheus:latest
@@ -19,6 +22,10 @@ services:
       - "3100:3100"
     networks:
       - default
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      retries: 5
 
 
 networks:

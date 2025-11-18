@@ -4,7 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CountersModule, getMongoConfig, FileModule, LoggingMiddleware } from './service';
+import {
+  CountersModule,
+  getMongoConfig,
+  FileModule,
+  LoggingMiddleware,
+} from './service';
 import { AuthModule, UsersModule } from './account';
 import { SubscriptionsModule } from './billing';
 import { ContentModule } from './lms';
@@ -14,6 +19,7 @@ import { TransactionsModule } from './billing/transactions/transactions.module';
 import { PurchaseModule } from './billing/purchase/purchase.module';
 import { BannersModule } from './banners/banners.module';
 import { FundsModule, ReferralsModule } from './referrals';
+import { AcquiringModule } from './billing/acquiring/acquiring.module';
 
 @Module({
   imports: [
@@ -37,6 +43,7 @@ import { FundsModule, ReferralsModule } from './referrals';
     PurchaseModule,
     BannersModule,
     FundsModule,
+    AcquiringModule,
   ],
   controllers: [],
   providers: [],
