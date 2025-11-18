@@ -16,6 +16,7 @@ import {
   UserRole,
   UserUpdateEmailRequestDto,
   UserUpdateFinPasswordRequestDto,
+  UserUpdateNotificationsRequestDto,
   UserUpdatePasswordRequestDto,
   UserUpdatePinRequestDto,
   UserUpdateProfileRequestDto,
@@ -154,5 +155,16 @@ export class UsersController {
     @Body() updateData: UserBalanceDecRequestDto
   ): Promise<UserUpdateResponseDto> {
     return this.usersService.decBalance({ userId }, updateData);
+  }
+
+  @Post('update/notifications')
+  @ApiOperation({ summary: 'Изменить уведомления пользователя' })
+  @ApiBody({ type: UserUpdateNotificationsRequestDto })
+  @ApiResponse({ type: UserUpdateResponseDto })
+  async updateNotifications(
+    @UserId() userId: number,
+    @Body() updateData: UserUpdateNotificationsRequestDto
+  ): Promise<UserUpdateResponseDto> {
+    return this.usersService.updateNotifications({ userId }, updateData);
   }
 }

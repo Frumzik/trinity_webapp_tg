@@ -404,4 +404,38 @@ export class UsersService {
       throw new InternalServerErrorException(message);
     }
   }
+
+  async updateNotifications(
+    condition: FilterQuery<User>,
+    updateData: {
+      meditationNotifications: string;
+      contentNotifications: boolean;
+      promoNotifications: boolean;
+    }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.updateNotifications(updateData)
+      );
+
+      this.eventEmitter.emit(
+        UserEvents.UPDATED,
+        new UserUpdatedEvent(user.userId)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении уведомлений пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
 }

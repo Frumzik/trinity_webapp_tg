@@ -9,7 +9,7 @@ export enum UserRole {
 
 export enum UserGender {
   MALE = 'Male',
-  FEMALE = 'Female'
+  FEMALE = 'Female',
 }
 
 export interface IUser {
@@ -25,7 +25,7 @@ export interface IUser {
   pinHash: string | null;
   email: string | null;
   passwordHash: string | null;
-  
+
   finPasswordHash: string | null;
   address: string | null;
 
@@ -40,6 +40,10 @@ export interface IUser {
   // Other
   role: UserRole;
   balance: number;
+
+  meditationNotifications: string;
+  contentNotifications: boolean;
+  promoNotifications: boolean;
 
   // Рефералка
   referralPath: string;
