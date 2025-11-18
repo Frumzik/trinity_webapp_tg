@@ -58,6 +58,7 @@ export interface ITraining {
   duration: string | null;
   coverUrl: string | null;
   iconUrl: string | null;
+  bgUrl: string | null;
 
   // Условия доступности
   accessRules: TypeContentAccess[];
