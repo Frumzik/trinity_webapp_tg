@@ -14,8 +14,8 @@ import BgBlue from "../../assets/icons/bgblue.svg";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
 import Info from "../../assets/icons/popup.svg";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
-import Tile1 from '../../assets/homePage/tile1.svg';
-import Card1 from '../../assets/homePage/card9.svg';
+import Tile1 from '../../assets/homePage/tile1.png';
+import Card1 from '../../assets/products/card5.png';
 
 type Node = {
   _id: string;

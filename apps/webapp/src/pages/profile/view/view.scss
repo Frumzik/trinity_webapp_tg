@@ -66,3 +66,21 @@
     border-top: 0;
   }
 }
+
+.acc__row--select {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.acc__select {
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+}

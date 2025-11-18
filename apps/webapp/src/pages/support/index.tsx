@@ -4,9 +4,9 @@ import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
 import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
-import ChannelImg from "../../assets/homePage/tile3.svg";
-import ChatImg from "../../assets/homePage/tile4.svg";
-import SupportImg from "../../assets/homePage/tile5.svg";
+import ChannelImg from "../../assets/homePage/tile4.png";
+import ChatImg from "../../assets/homePage/tile6.png";
+import SupportImg from "../../assets/homePage/tile5.png";
 
 import "./support.scss";
 import { useState } from "react";

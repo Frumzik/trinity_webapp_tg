@@ -48,6 +48,10 @@ export default function AccountPage() {
   const hasFinPassword = !!user?.finPasswordHash
   const [showFinForm, setShowFinForm] = useState(false)
 
+
+  const [language, setLanguage] = useState<'ru'>('ru')
+  const [country, setCountry] = useState<'ru'>('ru')
+
   useEffect(() => {
     if (!user) return
     setName(user.name ?? '')
@@ -178,7 +182,7 @@ export default function AccountPage() {
         <section className="acc__card acc__group">
           <div className="acc__group-title">Безопасность</div>
           <button className="acc__row" onClick={() => { setShowFinForm(true); setFinPass1(''); setFinPass2(''); }}>
-            <span>Сменить фин.пароль</span><span className="acc__chev">Изменить <img src={arrowRight} alt=""/></span>
+            <span>Сменить защитный пароль</span><span className="acc__chev">Изменить <img src={arrowRight} alt=""/></span>
           </button>
           <button className="acc__row" onClick={() => nav('/security/change-pin')}>
             <span>Сменить PIN-код</span><span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
@@ -187,12 +191,28 @@ export default function AccountPage() {
 
         <section className="acc__card acc__group">
           <div className="acc__group-title">Настройки приложения</div>
-          <button className="acc__row" >
-            <span>Язык</span><span className="acc__chev">Изменить <img src={arrowRight} alt=""/></span>
-          </button>
-          <button className="acc__row" >
-            <span>Страна</span><span className="acc__chev">Изменить <img src={arrowRight} alt=""/></span>
-          </button>
+
+          <div className="acc__row acc__row--select">
+            <span>Язык</span>
+            <select
+              className="acc__select"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'ru')}
+            >
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+
+          <div className="acc__row acc__row--select">
+            <span>Страна</span>
+            <select
+              className="acc__select"
+              value={country}
+              onChange={(e) => setCountry(e.target.value as 'ru')}
+            >
+              <option value="ru">Россия</option>
+            </select>
+          </div>
         </section>
       </main>
 
