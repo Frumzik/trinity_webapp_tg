@@ -80,7 +80,7 @@ export class LearningService {
       });
 
       if (!subscription) {
-        throw new Error('Не найдена подписка для пользователя');
+        return LearningAccessStatus.LOCKED;
       }
 
       // Пробегаем по каждому условию
@@ -153,8 +153,6 @@ export class LearningService {
             }
             break;
           }
-          default:
-            return LearningAccessStatus.LOCKED;
         }
       }
 
