@@ -87,7 +87,6 @@ const Index = () => {
       (appUserId ? `?startapp=${appUserId}` : "");
     const share = new URL("https://t.me/share/url");
     share.searchParams.set("url", botDeepLink);
-    share.searchParams.set("text", "Присоединяйся к проекту ✨");
     return share.toString();
   }, [u]);
   function LogoutButton() {
