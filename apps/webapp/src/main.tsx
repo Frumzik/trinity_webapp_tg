@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
       <RouteLoaderProvider>
         <Suspense fallback={<Preloader />}>
           <RouterProvider router={router} />
-          <span
+          <div
             className="exit"
             onClick={() => {
               localStorage.removeItem('access_token');
@@ -25,7 +25,7 @@ createRoot(document.getElementById('root')!).render(
             }}
           >
             ...
-          </span>
+          </div>
         </Suspense>
       </RouteLoaderProvider>
     </Provider>
