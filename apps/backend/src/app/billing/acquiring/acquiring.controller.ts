@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  forwardRef,
+  Get,
+  Inject,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JWTAuthGuard, UserId } from '../../service';
 import { AcquiringService } from './acquiring.service';
 import {
@@ -10,14 +18,24 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AcquiringDepositWebhookDto, AcquiringErrorWebhookDto, AcquiringWithdrawRequestDto, AcquiringWithdrawWebhookDto } from '@trinity/shared';
+import {
+  AcquiringDepositWebhookDto,
+  AcquiringErrorWebhookDto,
+  AcquiringWithdrawRequestDto,
+  AcquiringWithdrawWebhookDto,
+} from '@trinity/shared';
+import { UsersService } from '../../account';
 
 @ApiTags('Acquiring')
 @ApiBearerAuth('access_token')
 @UseGuards(JWTAuthGuard)
 @Controller('acquiring')
 export class AcquiringController {
-  constructor(private readonly acquiringService: AcquiringService) {}
+  constructor(
+    private readonly acquiringService: AcquiringService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService
+  ) {}
 
   // -------------------------
   // Получение адреса для пополнения
@@ -37,6 +55,7 @@ export class AcquiringController {
       // Если кошелька нет — создаём
       if (err?.response?.status === 404) {
         account = await this.acquiringService.createAccount(userId.toString());
+        await this.usersService.bindAddress({ userId }, account.address);
       } else {
         throw err;
       }
@@ -67,11 +86,11 @@ export class AcquiringController {
     } catch (err: any) {
       if (err?.response?.status === 404) {
         account = await this.acquiringService.createAccount(userId.toString());
+        await this.usersService.bindAddress({ userId }, account.address);
       } else {
         throw err;
       }
     }
-
 
     // Выполняем вывод
     await this.acquiringService.withdraw(dto.address, dto.amount);
@@ -83,7 +102,7 @@ export class AcquiringController {
   // Вебхуки
   // -------------------------
 
-    @Post('webhook/deposit')
+  @Post('webhook/deposit')
   @ApiOperation({ summary: 'Входящее уведомление о депозите' })
   @ApiBody({ type: AcquiringDepositWebhookDto })
   async handleDepositWebhook(@Body() body: AcquiringDepositWebhookDto) {
@@ -100,7 +119,9 @@ export class AcquiringController {
   @Post('webhook/insufficient-balance')
   @ApiOperation({ summary: 'Входящее уведомление о недостаточном балансе' })
   @ApiBody({ type: AcquiringErrorWebhookDto })
-  async handleInsufficientBalanceWebhook(@Body() body: AcquiringErrorWebhookDto) {
+  async handleInsufficientBalanceWebhook(
+    @Body() body: AcquiringErrorWebhookDto
+  ) {
     return this.acquiringService.handleInsufficientBalance(body);
   }
 
