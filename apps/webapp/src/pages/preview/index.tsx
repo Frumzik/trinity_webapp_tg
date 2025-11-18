@@ -1,4 +1,5 @@
-import { useState } from "react";
+// pages/preview/index.tsx
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
@@ -11,6 +12,7 @@ import TextPage from "../../shared/ui/TextPage";
 import "./preview.scss";
 
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 
 const toSections = (text: string) => [
   { title: "", paragraphs: text.trim() ? [text] : [] },
@@ -18,43 +20,76 @@ const toSections = (text: string) => [
 
 type State = {
   trainingId: number;
-  title: string;
-  description: string;
-  coverUrl?: string | null;
-  bg?: string;
-  icon?: string;
-  price: number;
   returnTo?: string;
 };
 
-export default function Index() {
+type TrainingResponse = {
+  data: {
+    trainingId: number;
+    title: string;
+    description?: string | null;
+    shortDescription?: string | null;
+    coverUrl?: string | null;
+    iconUrl?: string | null;
+    price?: number | null;
+    salePrice?: number | null;
+  };
+};
+
+const stripHtml = (html?: string | null) =>
+  (html ?? "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+
+export default function PreviewPage() {
   const navigate = useNavigate();
   const [fav, setFav] = useState(false);
+
   const st = (useLocation().state || {}) as Partial<State>;
+  const trainingId = st.trainingId;
 
-  const title = st.title || "Тренинг";
-  const desc = st.description || "";
-  const image = st.bg || st.coverUrl || undefined;
+  // если trainingId нет – уходим назад
+  useEffect(() => {
+    if (!trainingId) {
+      navigate(st.returnTo || "/", { replace: true });
+    }
+  }, [trainingId, navigate, st.returnTo]);
 
-  const [addPurchase, { isLoading }] = useAddPurchaseMutation();
+  if (!trainingId) return null;
+
+  // тянем конкретный тренинг/практику по id
+  const { data, isLoading, isError } = useGetTrainingTreeQuery(
+    trainingId
+  ) as {
+    data?: TrainingResponse;
+    isLoading: boolean;
+    isError: boolean;
+  };
+
+  const node = data?.data;
+
+  const title = node?.title || "Практика";
+  const desc =
+    stripHtml(node?.shortDescription) || stripHtml(node?.description) || "";
+  const image = node?.coverUrl || undefined;
+  const price = node?.salePrice ?? node?.price ?? 0;
+
+  const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
   const handlePurchase = async () => {
-    if (!st.trainingId) {
-      alert("Не указан trainingId для покупки")
-      navigate(st.returnTo || "/", { replace: true })
-      return
-    }
     try {
-      await addPurchase({ trainingId: st.trainingId }).unwrap()
-      navigate(`/trainings/${st.trainingId}`, { replace: true })
+      await addPurchase({ trainingId }).unwrap();
+      navigate(`/trainings/${trainingId}`, { replace: true });
     } catch (e: any) {
       const msg =
         e?.data?.message?.[0] ||
         e?.error ||
-        "Покупка не оформлена. Попробуй ещё раз."
-      alert(msg)
+        "Покупка не оформлена. Попробуй ещё раз.";
+      alert(msg);
     }
-  }
+  };
 
   return (
     <div className="preview">
@@ -68,29 +103,47 @@ export default function Index() {
       </Hero>
 
       <Sheet head="Описание">
-        <ScrollPanel
-          maxHeight="33dvh"
-          vars={{
-            railRight: "-15px",
-            railTop: "4px",
-            railBottom: "4px",
-            railWidth: "3px",
-            railColor: "#E8E8E8",
-            thumbColor: "#C7C7C7",
-            zIndex: 20,
-          }}
-        >
-          <TextPage sections={toSections(desc)} className="preview__text" />
-        </ScrollPanel>
+        {isLoading && (
+          <div style={{ padding: 16 }}>Загрузка описания…</div>
+        )}
 
-        <Price value={st.price ?? 0} />
-        <GradientButton
-          className="preview__cta"
-          onClick={handlePurchase}
-          disabled={isLoading}
-        >
-          {isLoading ? "Покупка..." : "Приобрести"}
-        </GradientButton>
+        {isError && !isLoading && (
+          <div style={{ padding: 16 }}>
+            Не удалось загрузить описание. Попробуй ещё раз позже.
+          </div>
+        )}
+
+        {!isLoading && !isError && (
+          <>
+            <ScrollPanel
+              maxHeight="33dvh"
+              vars={{
+                railRight: "-15px",
+                railTop: "4px",
+                railBottom: "4px",
+                railWidth: "3px",
+                railColor: "#E8E8E8",
+                thumbColor: "#C7C7C7",
+                zIndex: 20,
+              }}
+            >
+              <TextPage
+                sections={toSections(desc)}
+                className="preview__text"
+              />
+            </ScrollPanel>
+
+            <Price value={price} />
+
+            <GradientButton
+              className="preview__cta"
+              onClick={handlePurchase}
+              disabled={isBuying}
+            >
+              {isBuying ? "Покупка..." : "Приобрести"}
+            </GradientButton>
+          </>
+        )}
       </Sheet>
     </div>
   );

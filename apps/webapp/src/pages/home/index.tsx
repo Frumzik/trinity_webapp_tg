@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import MiniCardSlider from "../../widgets/card-slider-homePage";
 import TopBar from "../../widgets/topbarlk/topbarlk";
@@ -8,13 +7,13 @@ import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Blur from "../../../public/blurs/blur-1.png"
-import Card1 from "../../assets/homePage/card1.svg";
-import Card2 from "../../assets/homePage/card2.svg";
-import Card3 from "../../assets/homePage/card3.svg";
-import Card4 from "../../assets/homePage/card4.svg";
-import Card5 from "../../assets/homePage/card5.svg";
-import Tile1 from "../../assets/homePage/tile1.svg";
-import Tile2 from "../../assets/homePage/tile2.svg";
+import Card1 from "../../assets/home/card1.png";
+import Card2 from "../../assets/home/card2.png";
+import Card3 from "../../assets/home/card3.png";
+import Card4 from "../../assets/home/card4.png";
+import Card5 from "../../assets/home/card5.png";
+import Tile1 from "../../assets/homePage/tile1.png";
+import Tile2 from "../../assets/homePage/tile2.png";
 
 import "./home.scss";
 import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
@@ -24,7 +23,8 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetTrainingTreeQuery, useGetCurrentStageQuery } from "../../shared/api/learning.api";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type BNode = {
   _id: string;
@@ -55,12 +55,14 @@ const numFromTitle = (t?: string) => {
 
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const nav = useNavigate();
+  const nav = useAppNavigate();
 
   const { data: banners = [] } = useGetBannersQuery();
   const [addView] = useAddBannerViewMutation();
 
   const { data: tree } = useGetTrainingTreeQuery();
+  const { data: currentStageRes } = useGetCurrentStageQuery();
+
   const allNodes = useMemo(() => {
     return (tree?.data ?? []) as BNode[];
   }, [tree]);
@@ -68,11 +70,10 @@ export default function SupportPage() {
     return allNodes.find((r) => r.tag === "stages_spirit" && (r.parentId == null));
   }, [allNodes]);
 
-  const currentStageLabel = useMemo(() => {
+  const fallbackStageLabel = useMemo(() => {
     const root = stagesRoot;
     if (!root) return undefined;
 
-    // уровни (1,2,3)
     const levelNodes = allNodes
       .filter(
         (n) =>
@@ -115,8 +116,6 @@ export default function SupportPage() {
     }
 
     const lastLevel = levelNodes[levelNodes.length - 1];
-    const levelIndex =
-      lastLevel.stageLevel ?? numFromTitle(lastLevel.title) ?? levelNodes.length;
 
     const lastStages = allNodes.filter(
       (s) =>
@@ -138,6 +137,17 @@ export default function SupportPage() {
 
     return `${stageIndex} ступень`;
   }, [stagesRoot, allNodes]);
+
+  const currentStageLabel = useMemo(() => {
+    const node = currentStageRes?.data;
+    if (node) {
+      if (typeof node.stage === "number") return `${node.stage} ступень`;
+      const n = numFromTitle(node.title);
+      if (n) return `${n} ступень`;
+    }
+    return fallbackStageLabel;
+  }, [currentStageRes, fallbackStageLabel]);
+
   const handleCardClick = (it: { id: string | number }) => {
     const src = banners.find(b => String(b.id) === String(it.id));
     if (!src) return;
@@ -190,20 +200,20 @@ export default function SupportPage() {
 
             <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
               <ReferralsCard
-                imageUrl={Card3}
+                imageUrl={Card4}
                 titleTop="Пройти Практику"
                 labelBottom="Перейти"
                 href="/practice"
-                className="refCard--imgRight refCard--166x123"
-                background="rgba(255, 255, 255, 0.3)"
+                className="refCard--imgRight refCard--166x123 "
+                background="none"
               />
               <ReferralsCard
-                imageUrl={Card4}
+                imageUrl={Card3}
                 titleTop="Ступени Духа"
                 labelBottom={currentStageLabel || "Ступени Духа"}
                 href="/levels"
-                className="refCard--imgRight refCard--166x123"
-                background="rgba(255, 255, 255, 0.3)"
+                className="refCard--imgRight refCard--166x123 "
+                background="none"
               />
             </div>
 

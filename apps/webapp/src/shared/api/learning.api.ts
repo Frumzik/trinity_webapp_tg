@@ -38,6 +38,7 @@ export type LearningNode = {
 
 export type GetTrainingTreeRes = { success: true; data: LearningNode[] }
 export type GetUserTrainingRes = { success: true; data: LearningNode }
+export type GetCurrentStageRes = { success: true; data: LearningNode; };
 
 export const learningApi = createApi({
   reducerPath: 'learningApi',
@@ -56,6 +57,10 @@ export const learningApi = createApi({
       }),
       providesTags: (_r, _e, a) => [{ type: 'Learning', id: a.id }],
     }),
+    getCurrentStage: b.query<GetCurrentStageRes, void>({
+      query: () => ({ url: '/learning/current-stage' }),
+      providesTags: ['Learning'],
+    }),
   }),
 })
 
@@ -64,4 +69,5 @@ export const {
   useLazyGetTrainingTreeQuery,
   useGetUserTrainingByIdQuery,
   useLazyGetUserTrainingByIdQuery,
+  useGetCurrentStageQuery,
 } = learningApi
