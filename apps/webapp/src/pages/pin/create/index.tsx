@@ -111,6 +111,7 @@ export default function PinCreatePage() {
       // 3. Сохраняем токен и отправляем на главную
       dispatch(sessionActions.setToken(token));
       localStorage.setItem('access_token', token);
+      localStorage.setItem('tgId', String(tgId));
 
       nav('/', { replace: true });
     } catch (e: any) {

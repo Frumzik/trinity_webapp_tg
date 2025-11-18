@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
@@ -13,6 +12,7 @@ import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purc
 import FlexibleModal from "../../widgets/flexible-modal";
 import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 export type LevelItem = {
   id: string;
@@ -123,7 +123,7 @@ type BNode = {
 };
 
 export default function Index() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const dispatch = useDispatch();
 
   const [group, setGroup] = useState(1);
@@ -171,11 +171,13 @@ export default function Index() {
     [levelNodes, group]
   );
 
-  const items: LevelItem[] = useMemo(() => {
-    const stages = ((currentLevel?.childrens ?? []) as BNode[]).filter(
+  const stages: BNode[] = useMemo(() => {
+    return ((currentLevel?.childrens ?? []) as BNode[]).filter(
       (s) => s.tag === "stage" || typeof s.stage === "number"
     );
+  }, [currentLevel]);
 
+  const items: LevelItem[] = useMemo(() => {
     return stages.map((s): LevelItem => {
       const doneLocal = isTrainingCompletedLocal(s);
 
@@ -194,21 +196,33 @@ export default function Index() {
         durationMin: minutesFromDuration(s.duration),
         image: s.coverUrl || "",
         status,
+        // если цена в OM, название можно считать условным
         priceUSDT: (s.salePrice ?? s.price) ?? undefined,
       };
     });
-  }, [currentLevel, group]);
+  }, [stages, group]);
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
     () =>
-      items.map((it, idx) => ({
-        id: it.id,
-        title: it.title,
-        priceOM: it.priceUSDT ? Math.round(it.priceUSDT * 5) : 10 + idx * 5,
-        oldPriceOM: undefined,
-        purchased: it.status !== "locked",
-      })),
-    [items]
+      stages.map((s) => {
+        const status: LevelItem["status"] =
+          s.progressStatus === "completed" || isTrainingCompletedLocal(s)
+            ? "done"
+            : s.accessStatus === "available"
+              ? "available"
+              : "locked";
+
+        return {
+          id: String(s.trainingId),
+          title: s.title,
+          // актуальная цена: сначала salePrice, если есть, иначе price
+          price: s.salePrice ?? s.price ?? 0,
+          // старая цена: если есть salePrice, то base = price
+          salePrice: s.salePrice != null ? s.price ?? undefined : undefined,
+          purchased: status !== "locked",
+        };
+      }),
+    [stages]
   );
 
   const handleCardClick = (l: LevelItem) => {

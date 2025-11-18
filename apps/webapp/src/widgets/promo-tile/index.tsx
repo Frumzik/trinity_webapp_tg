@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import type { ComponentType, SVGProps } from "react";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type Img = string | ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -19,7 +19,7 @@ export default function PromoTile({
                                   }: Props) {
     const Bg = typeof bgSrc === "string" ? null : bgSrc;
     const Fg = imageUrl && typeof imageUrl !== "string" ? imageUrl : null;
-    const navigate = useNavigate();
+    const navigate = useAppNavigate();
 
     const handleClick = () => {
         if (onClick) return onClick();

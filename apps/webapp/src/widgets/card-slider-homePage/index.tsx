@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 
 export type MiniCardItem = {
@@ -33,7 +33,7 @@ export default function MiniCardSlider({
                                          onViewed,
                                          pinnedIdOrTitle = "Дары",
                                        }: Props) {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const seenRef = useRef<Record<string, true>>(loadSeen());
 
   const isPinned = (it: MiniCardItem) => {

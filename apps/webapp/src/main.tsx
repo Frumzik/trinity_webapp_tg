@@ -7,15 +7,18 @@ import { store } from './app/store';
 import { router } from './app/router';
 import { initTelegram } from './shared/telegram/init';
 import Preloader from './widgets/preloader';
+import { RouteLoaderProvider } from './shared/ui/route-loader/RouteLoaderContext';
 
 initTelegram();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <Suspense fallback={< Preloader />}>
-        <RouterProvider router={router} />
-      </Suspense>
+      <RouteLoaderProvider>
+        <Suspense fallback={<Preloader />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </RouteLoaderProvider>
     </Provider>
   </StrictMode>
 );

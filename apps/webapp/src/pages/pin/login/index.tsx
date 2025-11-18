@@ -44,6 +44,7 @@ export default function PinLoginPage() {
 
       dispatch(sessionActions.setToken(token));
       localStorage.setItem('access_token', token);
+      localStorage.setItem('tgId', String(tgId));
       setTimeout(() => nav('/home', { replace: true }), 0);
     } catch (e: any) {
       setErr(e?.data?.message?.[0] || e?.message || 'Ошибка');

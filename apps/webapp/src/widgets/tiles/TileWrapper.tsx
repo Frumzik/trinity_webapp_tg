@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type Props = {
   to?: string;
@@ -22,7 +22,7 @@ export default function TileWrapper({
   children,
   disabled,
 }: Props) {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const isActive = !disabled && (to || href || onClick);
 
   const handleActivate = () => {
