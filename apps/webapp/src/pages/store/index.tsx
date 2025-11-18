@@ -1,7 +1,6 @@
 
 import "./store.scss";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Title from "../../shared/ui/title/Title";
 import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
@@ -16,6 +15,7 @@ import Info from "../../assets/icons/popup.svg";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import Tile1 from '../../assets/homePage/tile1.png';
 import Card1 from '../../assets/products/card5.png';
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type Node = {
   _id: string;
@@ -70,7 +70,7 @@ function flattenPaywalled(roots: Node[]): Node[] {
 }
 
 export default function Index() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const all = (data?.data ?? []) as Node[];

@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
-import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
 import TopBar from "../../widgets/topbarTextpage";
-import helpIcon from "../../assets/icons/helpIcon.svg";
 import Info from "../../assets/icons/popup.svg";
 import "./films.scss";
 import Footer from "../../widgets/footer/footer";
@@ -12,9 +10,11 @@ import LevelPurchaseModal, {
   type PurchaseLevel,
 } from "../../widgets/level-purchase-modal";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 
 export type LevelItem = {
-  id: string;
+  id: string;                 // lessonId
+  parentTrainingId: number;   // trainingId, нужен для роутинга
   group: number;
   badge?: { text: string; tone?: "info" | "warn" };
   title: string;
@@ -25,11 +25,28 @@ export type LevelItem = {
   priceUSDT?: number;
 };
 
-// минимальный тип узла из дерева
+type LessonNode = {
+  _id: string;
+  lessonId: number;
+  type: string;
+  favoritesTag?: string | null;
+  title: string;
+  description?: string | null;
+  duration?: string | null;
+  shortDescription?: string | null;
+  coverUrl?: string | null;
+  bgUrl?: string | null;
+  price?: number | null;
+  salePrice?: number | null;
+  accessStatus: "available" | "locked";
+  progressStatus: "not_started" | "in_progress" | "completed";
+};
+
 type BNode = {
   _id: string;
   trainingId: number;
-  type: "training" | "product";
+  type: "training" | "product" | string;
+  favoritesTag?: string | null;
   tag?: string | null;
   title: string;
   description?: string | null;
@@ -43,11 +60,7 @@ type BNode = {
   salePrice?: number | null;
   stageLevel?: number | null;
   childrens?: BNode[];
-};
-
-const numFromTitle = (t?: string) => {
-  const m = (t || "").match(/\d+/);
-  return m ? Number(m[0]) : undefined;
+  lessons?: LessonNode[];
 };
 
 const minutesFromDuration = (d?: string | null) => {
@@ -56,109 +69,93 @@ const minutesFromDuration = (d?: string | null) => {
   return m ? Number(m[0]) : undefined;
 };
 
+// Собираем все уроки с favoritesTag = films / film по всему дереву
+type FilmWithParent = {
+  lesson: LessonNode;
+  parentTrainingId: number;
+  parentCover?: string | null;
+  parentIcon?: string | null;
+};
+
+const collectFilmLessons = (nodes: BNode[]): FilmWithParent[] => {
+  const result: FilmWithParent[] = [];
+
+  const walk = (node: BNode) => {
+    const lessons = (node.lessons ?? []) as LessonNode[];
+
+    const isFilmContainer =
+      node.favoritesTag === "film" ||
+      node.tag === "film" ||
+      node.title?.trim().toLowerCase() === "фильмы";
+
+    for (const l of lessons) {
+      const lessonIsFilm =
+        l.favoritesTag === "films" || l.favoritesTag === "film";
+      if (lessonIsFilm || isFilmContainer) {
+        result.push({
+          lesson: l,
+          parentTrainingId: node.trainingId,
+          parentCover: node.coverUrl,
+          parentIcon: node.iconUrl,
+        });
+      }
+    }
+
+    (node.childrens ?? []).forEach(walk);
+  };
+
+  nodes.forEach(walk);
+  return result;
+};
 export default function Index() {
-  const navigate = useNavigate();
-  const [group, setGroup] = useState(1);
+  const navigate = useAppNavigate();
+  const location = useLocation();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  // ищем корень "Фильмы" в дереве
-  const filmsRoot: BNode | undefined = useMemo(() => {
-    const roots = (data?.data ?? []) as BNode[];
+  const group = 1; // на будущее, если захочешь группировать
 
-    // приоритет: films с tag=stages_spirit, потом просто по title
-    return (
-      roots.find(
-        (r) => r.tag === "stages_spirit" && r.title === "Фильмы"
-      ) ||
-      roots.find((r) => r.tag === "stage_level" && r.title === "Фильмы") ||
-      roots.find((r) => r.title === "Фильмы")
-    );
-  }, [data]);
+  const filmItems: LevelItem[] = useMemo(() => {
+    const roots = (data?.data ?? []) as unknown as BNode[];
+    if (!roots.length) return [];
 
-  // уровни внутри «Фильмов» (если они будут, как 1 Уровень / 2 Уровень)
-  const levelNodes: BNode[] = useMemo(() => {
-    if (!filmsRoot) return [];
-    const arr = (filmsRoot.childrens ?? []) as BNode[];
-    const onlyLevels = arr.filter(
-      (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
-    );
+    const films = collectFilmLessons(roots);
 
-    // если бэкенд пока не заводит stage_level — можно просто взять всех детей
-    const base = onlyLevels.length ? onlyLevels : arr;
-
-    return [...base].sort((a, b) => {
-      const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
-      const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
-      return A - B;
-    });
-  }, [filmsRoot]);
-
-  const groups = useMemo(() => {
-    const nums = levelNodes
-      .map((n) => n.stageLevel ?? numFromTitle(n.title))
-      .filter((x): x is number => typeof x === "number");
-    return nums.length ? nums : [1];
-  }, [levelNodes]);
-
-  useEffect(() => {
-    if (!groups.includes(group) && groups.length) {
-      setGroup(groups[0]);
-    }
-  }, [groups, group]);
-
-  // текущий "уровень" фильмов (если их несколько)
-  const currentLevel: BNode | undefined = useMemo(() => {
-    // если levels нет — считаем, что всё лежит прямо под filmsRoot
-    if (!levelNodes.length) return filmsRoot;
-    return levelNodes.find(
-      (n) => (n.stageLevel ?? numFromTitle(n.title)) === group
-    );
-  }, [levelNodes, group, filmsRoot]);
-
-  // карточки для рендера
-  const items: LevelItem[] = useMemo(() => {
-    if (!currentLevel) return [];
-
-    // если есть вложенные children — берём их, иначе рендерим сам currentLevel как один item
-    const src: BNode[] =
-      (currentLevel.childrens ?? []).length > 0
-        ? (currentLevel.childrens as BNode[])
-        : [currentLevel];
-
-    return src.map((s): LevelItem => {
+    return films.map(({ lesson, parentTrainingId, parentCover, parentIcon }) => {
       const status: LevelItem["status"] =
-        s.progressStatus === "completed"
+        lesson.progressStatus === "completed"
           ? "done"
-          : s.accessStatus === "available"
+          : lesson.accessStatus === "available"
             ? "available"
             : "locked";
 
       return {
-        id: String(s.trainingId),
+        id: String(lesson.lessonId),
+        parentTrainingId,
         group,
-        title: s.title,
-        subtitle: s.shortDescription ?? undefined,
-        durationMin: minutesFromDuration(s.duration),
-        image: s.coverUrl || s.iconUrl || "",
+        title: lesson.title,
+        subtitle: lesson.description ?? undefined,
+        durationMin: minutesFromDuration(lesson.duration),
+        image: lesson.coverUrl || parentCover || parentIcon || "",
         status,
-        priceUSDT: (s.salePrice ?? s.price) ?? undefined,
+        priceUSDT: (lesson.salePrice ?? lesson.price) ?? undefined,
       };
     });
-  }, [currentLevel, group]);
+  }, [data]);
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
     () =>
-      items.map((it, idx) => ({
+      filmItems.map((it) => ({
         id: it.id,
         title: it.title,
-        priceOM: it.priceUSDT ? Math.round(it.priceUSDT * 5) : 10 + idx * 5,
-        oldPriceOM: undefined,
+        price: it.priceUSDT ? Math.round(it.priceUSDT * 5) : 0,
+        salePrice: undefined,
         purchased: it.status !== "locked",
       })),
-    [items]
+    [filmItems]
   );
 
   const handleCardClick = (l: LevelItem) => {
@@ -167,8 +164,11 @@ export default function Index() {
       setModalOpen(true);
       return;
     }
-    // если у тебя есть отдельная страница для фильмов — поменяй роут здесь
-    navigate(`/level/${l.id}`, { state: { returnTo: location.pathname } });
+
+    // у тебя есть роут /lesson/:trainingId/:lessonId
+    navigate(`/lesson/${l.parentTrainingId}/${l.id}`, {
+      state: { returnTo: location.pathname },
+    });
   };
 
   const purchase = (_p: {
@@ -176,20 +176,20 @@ export default function Index() {
     totalOM: number;
     discountedOM?: number;
   }) => {
-    // пока без реальной покупки, просто закрываем модалку
+    // пока покупки не делаем
     setModalOpen(false);
   };
 
+  const hasContent = filmItems.length > 0;
+
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-      <TopBar
-        title="Фильмы"
-      />
+      <TopBar title="Фильмы" />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <div className="levels">
-          <div className="levels__header">
-          </div>
+          <div className="levels__header" />
+
           {isLoading && (
             <div
               style={{
@@ -213,25 +213,25 @@ export default function Index() {
             <ScrollPanel
               maxHeight="66dvh"
               vars={{
-                railRight: "-15px",
+                railRight: "-10px",
                 railTop: "10px",
                 railBottom: "4px",
                 railWidth: "3px",
-                railColor: "#E8E8E8",
+                railColor: "rgba(255, 255, 255, 0.25)",
                 thumbColor: "#C7C7C7",
                 zIndex: 10,
               }}
             >
               <div className="levels__list">
-                {items.map((l) => (
+                {filmItems.map((l) => (
                   <LevelCard
-                    key={l.id}
+                    key={`${l.parentTrainingId}-${l.id}`}
                     item={l}
                     onClick={() => handleCardClick(l)}
                   />
                 ))}
 
-                {items.length === 0 && (
+                {!hasContent && (
                   <div style={{ padding: "8px 4px", opacity: 0.7 }}>
                     Фильмы пока недоступны
                   </div>

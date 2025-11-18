@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import clsx from "clsx";
 import GradientButton from "../../shared/ui/gradient-button";
 import "./modal.scss";
@@ -6,9 +6,9 @@ import "./modal.scss";
 export type PurchaseLevel = {
   id: string | number;
   title: string;
-  priceOM: number;
+  price: number;      // АКТУАЛЬНАЯ цена (discounted)
+  salePrice?: number;      // СТАРАЯ цена (до скидки)
   purchased?: boolean;
-  oldPriceOM?: number;
 };
 
 type Props = {
@@ -33,7 +33,7 @@ export default function LevelPurchaseModal({
                                              defaultSelectedId,
                                              rateText = "1 OM = 1 USDT",
                                              title = "Следующий уровень",
-                                             discountPercentAll = 8,
+                                             discountPercentAll = 8, // не используется, но оставлен в сигнатуре
                                              onClose,
                                              onPurchase,
                                              InfoIcon,
@@ -41,74 +41,102 @@ export default function LevelPurchaseModal({
   const [selected, setSelected] = useState<(string | number)[]>([]);
   const [checkAll, setCheckAll] = useState(false);
 
-  // сбрасываем выбор при открытии
-  useEffect(() => {
-    if (!open) return;
-    const def = defaultSelectedId !== undefined ? [defaultSelectedId] : [];
-    setSelected(def.filter((id) => !lockedLevels.find((l) => l.id === id)?.purchased));
-    setCheckAll(false);
-  }, [open, defaultSelectedId, lockedLevels]);
+  const firstSelectableIndex = useMemo(
+    () => lockedLevels.findIndex((l) => !l.purchased),
+    [lockedLevels]
+  );
 
   const selectable = useMemo(
     () => lockedLevels.filter((l) => !l.purchased),
     [lockedLevels]
   );
 
-  const priceById = useMemo(() => {
-    return new Map<string | number, number>(lockedLevels.map((l) => [l.id, l.priceOM]));
-  }, [lockedLevels]);
+  const allSelected =
+    selected.length === selectable.length && selectable.length > 0;
 
-  const discountFactor = useMemo(() => 1 - discountPercentAll / 100, [discountPercentAll]);
+  // строим ids ступеней из диапазона [firstSelectableIndex..toIndex], только не купленные
+  const buildRangeIds = useCallback(
+    (toIndex: number): (string | number)[] => {
+      if (firstSelectableIndex < 0) return [];
+      const from = firstSelectableIndex;
+      const to = Math.max(from, toIndex);
 
-  const discountedPriceById = useMemo(() => {
-    const m = new Map<string | number, number>();
-    lockedLevels.forEach((l) => {
-      const p = Math.round(l.priceOM * discountFactor);
-      m.set(l.id, Math.max(0, p));
-    });
-    return m;
-  }, [lockedLevels, discountFactor]);
-
-  const allSelected = selected.length === selectable.length && selectable.length > 0;
-
-  const showAllDiscount = selectable.length > 1 && (allSelected || checkAll);
-
-  const effectivePriceById = useMemo(
-    () => (showAllDiscount ? discountedPriceById : priceById),
-    [showAllDiscount, discountedPriceById, priceById]
+      return lockedLevels
+        .slice(from, to + 1)
+        .filter((l) => !l.purchased)
+        .map((l) => l.id);
+    },
+    [lockedLevels, firstSelectableIndex]
   );
 
-  const fullSum = useMemo(
-    () => selectable.reduce((acc, l) => acc + (priceById.get(l.id) ?? l.priceOM), 0),
-    [selectable, priceById]
-  );
-
-  const fullDiscountedSum = useMemo(
-    () => selectable.reduce((acc, l) => acc + (discountedPriceById.get(l.id) ?? l.priceOM), 0),
-    [selectable, discountedPriceById]
-  );
-
-  const sum = useMemo(
-    () => selected.reduce<number>((acc, id) => acc + (effectivePriceById.get(id) ?? 0), 0),
-    [selected, effectivePriceById]
-  );
-
+  // сбрасываем выбор при открытии модалки
   useEffect(() => {
     if (!open) return;
-    if (checkAll) setSelected(selectable.map((l) => l.id));
-  }, [checkAll, selectable, open]);
 
+    setCheckAll(false);
+
+    if (defaultSelectedId !== undefined && firstSelectableIndex >= 0) {
+      const idx = lockedLevels.findIndex((l) => l.id === defaultSelectedId);
+      if (idx >= firstSelectableIndex) {
+        setSelected(buildRangeIds(idx));
+        return;
+      }
+    }
+
+    setSelected([]);
+  }, [open, defaultSelectedId, lockedLevels, firstSelectableIndex, buildRangeIds]);
+
+  // сумма по выбранным ступеням (по актуальной цене)
+  const sum = useMemo(
+    () =>
+      selected.reduce<number>((acc, id) => {
+        const lvl = lockedLevels.find((l) => l.id === id);
+        return acc + (lvl?.price ?? 0);
+      }, 0),
+    [selected, lockedLevels]
+  );
+
+  // суммарная "старая" и "новая" цена для блока "при покупке всех"
+  const fullOldSum = useMemo(
+    () =>
+      selectable.reduce(
+        (acc, l) => acc + (l.salePrice ?? l.price), // старая или обычная
+        0
+      ),
+    [selectable]
+  );
+
+  const fullNewSum = useMemo(
+    () => selectable.reduce((acc, l) => acc + l.price, 0), // актуальная
+    [selectable]
+  );
+
+  const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
+
+  // чекбокс "Активировать все"
+  useEffect(() => {
+    if (!open) return;
+    if (checkAll && firstSelectableIndex >= 0) {
+      setSelected(buildRangeIds(lockedLevels.length - 1));
+    }
+  }, [checkAll, open, buildRangeIds, lockedLevels.length, firstSelectableIndex]);
+
+  // клик по ячейке: покупаем всё от первой доступной до выбранной
   const toggle = (id: string | number, disabled: boolean) => {
-    if (disabled) return;
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    if (disabled || firstSelectableIndex < 0) return;
+
+    const idx = lockedLevels.findIndex((l) => l.id === id);
+    if (idx < firstSelectableIndex) return;
+
+    setCheckAll(false);
+    setSelected(buildRangeIds(idx));
   };
 
   const onBuy = () => {
-    const useDiscount = selected.length === selectable.length && selectable.length > 1;
     onPurchase({
       levelIds: selected,
       totalOM: sum,
-      discountedOM: useDiscount ? fullDiscountedSum : undefined,
+      // discountedOM можно не передавать — на бэке всё равно своя логика
     });
   };
 
@@ -132,14 +160,19 @@ export default function LevelPurchaseModal({
           {lockedLevels.map((l, i) => {
             const isBought = !!l.purchased;
             const isSel = selected.includes(l.id);
-            const base = l.priceOM;
-            const eff = effectivePriceById.get(l.id) ?? base;
-            const showDiscountHere = showAllDiscount && !isBought && eff < base;
+
+            const basePrice = l.salePrice ?? l.price; // старая цена (если есть), иначе price
+            const actualPrice = l.price;         // текущая / со скидкой
+            const hasDiscount = !isBought && basePrice > actualPrice;
 
             return (
               <button
                 key={l.id}
-                className={clsx("lp-cell", isSel && "is-selected", isBought && "is-bought")}
+                className={clsx(
+                  "lp-cell",
+                  isSel && "is-selected",
+                  isBought && "is-bought"
+                )}
                 onClick={() => toggle(l.id, isBought)}
                 aria-disabled={isBought}
               >
@@ -149,17 +182,29 @@ export default function LevelPurchaseModal({
                 </div>
 
                 <div className="lp-cell-bottom">
-                  {!isBought && (showDiscountHere || l.oldPriceOM) && (
-                    <span className="lp-old-mini">{(showDiscountHere ? base : l.oldPriceOM) ?? base} OM</span>
+                  {!isBought && hasDiscount && (
+                    <span className="lp-old-mini">{basePrice} OM</span>
                   )}
-                  {!isBought && <span className="lp-price">{eff} OM</span>}
+                  {!isBought && (
+                    <span className="lp-price">{actualPrice} OM</span>
+                  )}
                 </div>
 
                 {isBought && (
                   <span className="lp-badge">
                     <span className="lp-badge__dot" />
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="10" viewBox="0 0 12 10" fill="none">
-                      <path d="M2 4.5L5 7.5L10.5 2" stroke="white" strokeWidth="3" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="10"
+                      viewBox="0 0 12 10"
+                      fill="none"
+                    >
+                      <path
+                        d="M2 4.5L5 7.5L10.5 2"
+                        stroke="white"
+                        strokeWidth="3"
+                      />
                     </svg>
                   </span>
                 )}
@@ -168,13 +213,15 @@ export default function LevelPurchaseModal({
           })}
         </div>
 
-        {selectable.length > 1 && (
+        {showBulkBlock && (
           <div className="lp-bulk">
-            <span className="lp-old">{fullSum} OM</span>
-            <span className="lp-new">{fullDiscountedSum} OM</span>
+            <span className="lp-old">{fullOldSum} OM</span>
+            <span className="lp-new">{fullNewSum} OM</span>
             <span className="lp-note">
               при покупке{" "}
-              <span style={{ fontWeight: 500, color: "#FFF" }}>{selectable.length} ступеней сразу</span>
+              <span style={{ fontWeight: 500, color: "#FFF" }}>
+                {selectable.length} ступеней сразу
+              </span>
             </span>
           </div>
         )}
@@ -188,13 +235,25 @@ export default function LevelPurchaseModal({
                 onChange={(e) => {
                   const val = e.target.checked;
                   setCheckAll(val);
-                  setSelected(
-                    val
-                      ? selectable.map((l) => l.id)
-                      : defaultSelectedId
-                        ? [defaultSelectedId].filter((id) => selectable.find((s) => s.id === id))
-                        : []
-                  );
+
+                  if (!val) {
+                    // сброс: можно оставить только defaultSelectedId, если он валиден
+                    if (
+                      defaultSelectedId !== undefined &&
+                      firstSelectableIndex >= 0
+                    ) {
+                      const idx = lockedLevels.findIndex(
+                        (l) => l.id === defaultSelectedId
+                      );
+                      if (idx >= firstSelectableIndex) {
+                        setSelected(buildRangeIds(idx));
+                        return;
+                      }
+                    }
+                    setSelected([]);
+                  } else if (firstSelectableIndex >= 0) {
+                    setSelected(buildRangeIds(lockedLevels.length - 1));
+                  }
                 }}
               />
               <span className="activeall">Активировать все</span>

@@ -27,7 +27,6 @@ export const baseQueryWithAuth: BaseQueryFn<FetchArgs | string, unknown, FetchBa
     try {
       const storedTgId = window.localStorage.getItem(TG_ID_KEY)
       const webAppTgId = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id
-
       if (storedTgId && webAppTgId && storedTgId !== String(webAppTgId)) {
         api.dispatch(sessionActions.logout())
         return {

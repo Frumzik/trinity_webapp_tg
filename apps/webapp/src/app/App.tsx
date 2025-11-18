@@ -19,25 +19,43 @@ function DesktopOnlyScreen() {
   );
 }
 
+const MIN_LOADER_MS = 500;
+
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
 
+  const [showLoader, setShowLoader] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
+
+  // один раз помечаем body
   useEffect(() => {
-    setLoading(false);
     document.body.classList.add('app-loaded');
     return () => {
       document.body.classList.remove('app-loaded');
     };
   }, []);
 
+  // показываем прелоадер на каждый переход минимум на 500мс
   useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => setLoading(false), 500);
+    let timeoutId: number | undefined;
 
-    return () => clearTimeout(t);
-  }, [location.pathname]);
+    // первый рендер — не мигаем прелоадером
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+
+    setShowLoader(true);
+
+    timeoutId = window.setTimeout(() => {
+      setShowLoader(false);
+    }, MIN_LOADER_MS);
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [location.key, isFirstRender]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -64,6 +82,7 @@ export default function App() {
 
     return "url('/bg/bgmain.jpg')";
   };
+
   const shouldShowTopRect = () => {
     const normalizedPathname = location.pathname.startsWith('/')
       ? location.pathname
@@ -78,18 +97,19 @@ export default function App() {
 
     return !withoutRect.some((re) => re.test(normalizedPathname));
   };
+
   const layoutStyle: React.CSSProperties = {
     backgroundImage: getBackgroundImage(),
-    ...(loading ? { pointerEvents: 'none' } : {}),
+    ...(showLoader ? { pointerEvents: 'none' } : {}),
   };
 
   return (
     <FooterTabProvider>
-      {loading && <Preloader />}
+      {showLoader && <Preloader />}
+
       <div className="app-layout" style={layoutStyle}>
         {shouldShowTopRect() && <div className="top-rectangle"></div>}
         {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
-        {/*<Outlet />*/}
       </div>
     </FooterTabProvider>
   );
