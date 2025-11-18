@@ -9,10 +9,10 @@ import ReferralsTile from "../../widgets/tiles/FriendsTile/FriendsTile";
 import GradientButton from "../../shared/ui/gradient-button";
 import PresentationSentModal from "../../widgets/presentation-sent-modal";
 import Tile1 from "../../assets/homePage/tile1.png";
-import Card1 from "../../assets/homePage/card6.svg";
+import Card1 from "../../assets/products/card7.png";
 
-import Card3 from "../../assets/homePage/mediumTile.svg";
-import Card5 from "../../assets/homePage/card8.svg";
+import Card3 from "../../assets/products/card8.png";
+import Card5 from "../../assets/products/card9.png";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
 import { Link, useNavigate } from 'react-router-dom';
