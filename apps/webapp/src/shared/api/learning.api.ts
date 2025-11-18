@@ -16,11 +16,12 @@ export type LearningLesson = {
 export type LearningNode = {
   _id: string
   trainingId: number
-  type: 'training' | 'product'
+  type: 'training' | 'product' | 'practise'
   tag?: string | null
   title: string
   description?: string | null
   coverUrl?: string | null
+  bgUrl?: string | null
   accessStatus: 'available' | 'locked'
   accessRules: { type: AccessRuleType; value?: number; description?: string }[]
   price?: number | null
