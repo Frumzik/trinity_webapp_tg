@@ -32,8 +32,17 @@ export default function FlexibleModal({
         <div className="flexmodal__head">
           {title && <div className="flexmodal__title">{title}</div>}
         </div>
+        {items && items.length > 0 && (
+          <ul className="flexmodal__list">
+            {items.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+        )}
 
-
+        {description && (
+          <p className="flexmodal__description">{description}</p>
+        )}
         {ctaLabel && (
           <div className="flexmodal__cta">
             <GradientButton onClick={onCta}>{ctaLabel}</GradientButton>
