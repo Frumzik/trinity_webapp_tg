@@ -460,4 +460,8 @@ export class LearningService {
     }
     return await this.learningRepository.getLearningTree(condition);
   }
+
+  async getCurrentStage(userId: number) {
+    return await this.learningRepository.getCurrentStage(userId);
+  }
 }
