@@ -66,6 +66,8 @@ export interface ITraining {
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
   progressPercent?: number;
+  totalLessons?: number;
+  completedLessons?: number;
 }
 
 // Уроки
@@ -74,7 +76,7 @@ export enum LessonType {
   AUDIO = 'audio',
   TEXT = 'text',
   FILM = 'film',
-  PRACTISE = 'practise'
+  PRACTISE = 'practise',
 }
 
 export interface ILesson {
@@ -155,7 +157,12 @@ export interface ILessonPractise extends ILesson {
   content: ILessonTextContent;
 }
 
-export type TypeLesson = ILessonVideo | ILessonAudio | ILessonText | ILessonFilm | ILessonPractise;
+export type TypeLesson =
+  | ILessonVideo
+  | ILessonAudio
+  | ILessonText
+  | ILessonFilm
+  | ILessonPractise;
 
 // Условия доступности
 export enum ContentAccessType {
