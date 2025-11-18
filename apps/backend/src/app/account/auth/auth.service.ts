@@ -63,7 +63,10 @@ export class AuthService {
       newUser
     );
 
-    newUser = await this.usersService.bindAddress({userId: newUser.userId}, newWallet.address);
+    newUser = await this.usersService.bindAddress(
+      { userId: newUser.userId },
+      newWallet.address
+    );
 
     if (dto.partnerId) {
       const partner = await this.usersService.find({ userId: dto.partnerId });
