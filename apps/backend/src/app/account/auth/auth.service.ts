@@ -50,9 +50,18 @@ export class AuthService {
 
     let newUser = await this.usersService.create({ ...dto }, { referralPath });
     let newSubscription = await this.subscriptionsService.create();
+
+    let walletAddress = null;
+
+    try {
     const newWallet = await this.acquiringService.createAccount(
       newUser.userId.toString()
     );
+      walletAddress = newWallet.address
+    } catch(err) {
+      console.log(err)
+    }
+
 
     newUser = await this.usersService.bindSubscription(
       newUser,
@@ -63,10 +72,12 @@ export class AuthService {
       newUser
     );
 
-    newUser = await this.usersService.bindAddress(
-      { userId: newUser.userId },
-      newWallet.address
-    );
+    if (walletAddress) {
+      newUser = await this.usersService.bindAddress(
+        { userId: newUser.userId },
+        walletAddress
+      );
+    }
 
     if (dto.partnerId) {
       const partner = await this.usersService.find({ userId: dto.partnerId });
