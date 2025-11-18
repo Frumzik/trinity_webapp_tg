@@ -39,6 +39,7 @@ export class TrainingEntity implements ITraining {
   description: string | null = null;
   shortDescription: string | null = null;
   coverUrl: string | null = null;
+  bgUrl: string | null = null;
   iconUrl: string | null = null;
   duration: string | null = null;
 
