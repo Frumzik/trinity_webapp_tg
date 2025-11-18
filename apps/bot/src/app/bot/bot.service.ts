@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
 import { Context, Telegraf } from 'telegraf';
 
 @Injectable()
@@ -31,10 +32,9 @@ export class BotService implements OnModuleInit {
   private async sendPresentation(ctx: Context) {
     try {
       await ctx.reply('Отправляю презентацию...');
-
       return await ctx.replyWithDocument({
-        source: 'files/presentation.pdf', // положи файл в папку /files
-        filename: 'Trinity_Presentation.pdf',
+        url: 'https://s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/prod/1763442729467-%C3%90%C2%A2%C3%90%C2%A0%C3%90%C2%98%C3%90%C2%9D%C3%90%C2%98%C3%90%C2%A2%C3%90%C2%98.pdf',
+        filename: 'ТРИНИТИ.pdf',
       });
     } catch (error) {
       console.error('Failed to send presentation:', error);

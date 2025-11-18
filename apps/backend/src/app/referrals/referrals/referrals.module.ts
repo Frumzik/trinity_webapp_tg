@@ -8,7 +8,7 @@ import { ReferralsController } from './referrals.controller';
 import { ReferralsListener } from './referrals.listener';
 import { ContentModule } from '../../lms';
 import { FundsModule } from '../funds';
-import { PurchaseModule, TransactionsModule } from '../../billing';
+import { PurchaseModule, SubscriptionsModule, TransactionsModule } from '../../billing';
 
 @Module({
   imports: [
@@ -20,6 +20,7 @@ import { PurchaseModule, TransactionsModule } from '../../billing';
     FundsModule,
     TransactionsModule,
     forwardRef(() => PurchaseModule),
+    forwardRef(() => SubscriptionsModule),
   ],
   providers: [ReferralsService, ReferralsRepository, ReferralsListener],
   exports: [ReferralsService],
