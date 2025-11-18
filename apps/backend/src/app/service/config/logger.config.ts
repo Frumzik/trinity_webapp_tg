@@ -5,7 +5,7 @@ import LokiTransport from 'winston-loki';
 export const winstonConfig = {
   transports: [
     new LokiTransport({
-      host: 'http://localhost:3100', // URL Loki
+      host: 'http://loki:3100', // URL Loki
       labels: { service: 'trinity' },
       json: true,
       replaceTimestamp: true,
