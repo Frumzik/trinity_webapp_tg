@@ -55,15 +55,20 @@ export class PurchaseService {
       }
 
       // Проверка существует ли покупка
-      for (const contentId of dto.content as number[]) {
-        const existPurchase = await this.find({
-          type: dto.type,
-          contentId,
-          userId,
-        });
+      if (
+        dto.type == PurchaseType.LESSON ||
+        dto.type == PurchaseType.TRAINING
+      ) {
+        for (const contentId of dto.content as number[]) {
+          const existPurchase = await this.find({
+            type: dto.type,
+            contentId,
+            userId,
+          });
 
-        if (existPurchase) {
-          throw new Error('Покупка уже существует');
+          if (existPurchase) {
+            throw new Error('Покупка уже существует');
+          }
         }
       }
 
