@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
@@ -14,7 +13,9 @@ import CardFallback2 from "../../assets/icons/products/card2.svg";
 import CardFallback3 from "../../assets/icons/products/card3.svg";
 
 import "./gifts.scss";
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
+
+import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
 
 type SliderItem = {
   id: string | number;
@@ -23,47 +24,56 @@ type SliderItem = {
   onClick?: () => void;
 };
 
+const GIFTS_TRAINING_ID = 35;
+
 export function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useAppNavigate();
 
-  // тянем «дары» с бэка (аналогично избранному)
-  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery({ populate: true });
+  const { data, isLoading, isError, refetch } =
+    useGetUserTrainingByIdQuery({ id: GIFTS_TRAINING_ID, populate: true });
 
   const blocks = useMemo(() => {
     const fallbacks = [CardFallback1, CardFallback2, CardFallback3];
 
-    const raw: any = data as any;
-    const cats: any[] = Array.isArray(raw)
-      ? raw
-      : Array.isArray(raw?.data)
-        ? raw.data
-        : [];
+    const root = data?.data;
+    if (!root) return [];
 
-    return cats.map((cat, ci) => {
-      // предполагаем, что на бэке массив называется gifts (как favorites),
-      // если поле другое — просто поменяешь здесь
-      const items: SliderItem[] = (cat.gifts ?? cat.favorites ?? []).map(
-        (g: any, fi: number) => {
-          const lessonType = String(g.lesson?.type || "").toLowerCase();
-          const img =
-            g.lesson?.coverUrl ||
-            g.training?.coverUrl ||
-            g.training?.iconUrl ||
-            fallbacks[(ci + fi) % 3];
+    // Категории — это children тренинга 35: Фильмы, Музыка, Медитации
+    return (root.childrens ?? []).map((category, ci) => {
+      // Что рендерим внутри категории:
+      // 1) если есть lessons — берём их,
+      // 2) иначе берём childrens (если подарки завязаны на под-тренинги).
+      const rawItems: any[] =
+        (category.lessons && category.lessons.length > 0
+          ? category.lessons
+          : category.childrens) ?? [];
 
-          const item: SliderItem = {
-            id: g.lessonId ?? g._id ?? `${ci}-${fi}`,
-            title: g.lesson?.title || g.training?.title || "Дар",
-            imageUrl: img,
-            onClick: () => {
-              // поведение такое же, как в избранном
+      const items: SliderItem[] = rawItems.map((node, ni) => {
+        const isLesson = typeof node.lessonId === "number"; // отличаем урок от training-ноды
+        const lessonType = isLesson ? String((node as any).type || "").toLowerCase() : "";
+
+        const img =
+          (isLesson ? node.coverUrl : node.coverUrl || node.iconUrl) ||
+          fallbacks[(ci + ni) % fallbacks.length];
+
+        const id = isLesson ? node.lessonId ?? node._id ?? `${ci}-${ni}` : node.trainingId ?? node._id ?? `${ci}-${ni}`;
+        const title = node.title || (isLesson ? "Материал" : "Дар");
+
+        const item: SliderItem = {
+          id,
+          title,
+          imageUrl: img,
+          onClick: () => {
+            // если это урок — можем сразу вести в плеер/урок,
+            // если это под-тренинг — в страницу тренинга
+            if (isLesson) {
               if (lessonType === "audio") {
                 const q = [
                   {
-                    id: g.lessonId as number,
-                    title: g.lesson?.title || "Урок",
-                    subtitle: g.lesson?.duration || undefined,
+                    id: node.lessonId,
+                    title: node.title || "Урок",
+                    subtitle: node.duration || undefined,
                     artworkUrl: img,
                     mediaUrl: undefined as string | undefined,
                   },
@@ -72,16 +82,16 @@ export function Index() {
                   state: {
                     queue: q,
                     index: 0,
-                    trainingId: g.trainingId as number,
+                    trainingId: category.trainingId,
                     returnTo: "/gifts",
                   },
                 });
               } else if (lessonType === "video") {
                 const q = [
                   {
-                    id: g.lessonId as number,
-                    title: g.lesson?.title || "Урок",
-                    subtitle: g.lesson?.duration || undefined,
+                    id: node.lessonId,
+                    title: node.title || "Урок",
+                    subtitle: node.duration || undefined,
                     artworkUrl: img,
                     videoUrl: undefined as string | undefined,
                   },
@@ -90,30 +100,35 @@ export function Index() {
                   state: {
                     queue: q,
                     index: 0,
-                    trainingId: g.trainingId as number,
+                    trainingId: category.trainingId,
                     returnTo: "/gifts",
                   },
                 });
-              } else if (g.trainingId && g.lessonId) {
-                navigate(`/lesson/${g.trainingId}/${g.lessonId}`, {
+              } else {
+                // текст / другое
+                navigate(`/lesson/${category.trainingId}/${node.lessonId}`, {
                   state: { returnTo: "/gifts" },
                 });
               }
-            },
-          };
+            } else {
+              // под-тренинг внутри категории
+              navigate(`/training/${node.trainingId}`, {
+                state: { returnTo: "/gifts" },
+              });
+            }
+          },
+        };
 
-          return item;
-        }
-      );
+        return item;
+      });
 
       return {
-        key: cat.tag ?? `block-${ci}`,
-        title: cat.title ?? "Дары",
+        key: category._id,
+        title: category.title || "Категория",
         items,
       };
     });
   }, [data, navigate]);
-
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
