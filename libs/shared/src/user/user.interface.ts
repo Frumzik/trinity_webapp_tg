@@ -27,6 +27,7 @@ export interface IUser {
   passwordHash: string | null;
   
   finPasswordHash: string | null;
+  address: string | null;
 
   // Метаинформация
   name: string | null;

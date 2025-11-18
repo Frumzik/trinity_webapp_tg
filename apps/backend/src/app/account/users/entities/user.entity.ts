@@ -17,6 +17,7 @@ export class UserEntity implements IUser {
   email: string | null = null;
   passwordHash: string | null = null;
   finPasswordHash: string | null = null;
+  address: string | null = null;
 
   // Метаинформация
   name: string | null = null;
@@ -70,6 +71,12 @@ export class UserEntity implements IUser {
     }
 
     return compare(pin, this.pinHash);
+  }
+
+  public async setAddress(address: string) {
+    this.address = address;
+
+    return this;
   }
 
   public updateProfile(
