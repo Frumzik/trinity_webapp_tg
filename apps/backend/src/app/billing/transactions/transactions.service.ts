@@ -66,6 +66,20 @@ export class TransactionsService {
     }
   }
 
+  async findAll(
+    condition: FilterQuery<Transaction>
+  ): Promise<TransactionEntity[]> {
+    try {
+      const transactions = await this.transactionsRepository.findAll(condition);
+
+      return transactions;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске транзакции';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async delete(
     condition: FilterQuery<Transaction>
   ): Promise<{ deleted: boolean }> {
@@ -84,11 +98,11 @@ export class TransactionsService {
 
   async populate(
     condition: FilterQuery<Transaction>
-  ): Promise<TransactionEntity | null> {
+  ): Promise<TransactionEntity[]> {
     try {
-      const transaction = await this.transactionsRepository.populate(condition);
+      const transactions = await this.transactionsRepository.populate(condition);
 
-      return transaction;
+      return transactions;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске транзакции';

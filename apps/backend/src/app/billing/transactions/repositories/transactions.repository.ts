@@ -28,6 +28,19 @@ export class TransactionsRepository {
     return transaction ? new TransactionEntity(transaction.toObject()) : null;
   }
 
+  async findAll(
+    condition: FilterQuery<Transaction>
+  ): Promise<TransactionEntity[]> {
+    const transactions = await this.transactionModel
+      .find(condition)
+      .lean()
+      .exec();
+
+    return transactions.map(
+      (transaction) => new TransactionEntity(transaction)
+    );
+  }
+
   // Обновление транзакции
   async update(
     transactionEntity: TransactionEntity
@@ -65,9 +78,9 @@ export class TransactionsRepository {
   // Получение с пользователем
   async populate(
     condition: FilterQuery<Transaction>
-  ): Promise<TransactionEntity | null> {
-    const transaction = await this.transactionModel
-      .findOne(condition)
+  ): Promise<TransactionEntity[]> {
+    const transactions = await this.transactionModel
+      .find(condition)
       .populate([
         {
           path: 'user',
@@ -76,6 +89,8 @@ export class TransactionsRepository {
       .lean()
       .exec();
 
-    return transaction ? new TransactionEntity(transaction) : null;
+    return transactions.map(
+      (transaction) => new TransactionEntity(transaction)
+    );
   }
 }
