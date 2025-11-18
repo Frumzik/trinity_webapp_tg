@@ -379,4 +379,29 @@ export class UsersService {
       throw new InternalServerErrorException(message);
     }
   }
+
+  async bindAddress(
+    condition: FilterQuery<User>,
+    address: string
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.find(condition);
+
+      if (!user) {
+        throw new Error('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.setAddress(address)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
 }

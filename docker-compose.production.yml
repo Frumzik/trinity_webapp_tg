@@ -6,6 +6,10 @@ services:
     networks:
       - proxy
 
+    depends_on:
+      loki:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -19,6 +23,10 @@ services:
       - "3100:3100"
     networks:
       - proxy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      retries: 5
 
   backend:
     build:

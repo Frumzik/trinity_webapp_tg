@@ -52,6 +52,9 @@ export class User extends Document<Types.ObjectId> implements IUser {
   @Prop({ type: String })
   finPasswordHash!: string | null;
 
+  @Prop({ type: String })
+  address!: string | null;
+
   @Prop({ type: String, default: '' })
   referralPath!: string;
 }
