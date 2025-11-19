@@ -16,7 +16,7 @@ import {
   PurchaseEvents,
   PurchaseType,
   SubscriptionEvents,
-  SubscriptionUpdatedEvent,
+  SubscriptionExpiredEvent,
   TrainingAccessRulesUpdatedEvent,
   TrainingCreatedEvent,
   UserEvents,
@@ -77,8 +77,6 @@ export class LearningListener {
 
   @OnEvent(PurchaseEvents.CREATED)
   async onPurchaseCreated({ purchaseId }: PurchaseCreatedEvent) {
-    console.log(`✅ Покупка ${purchaseId} создана`);
-
     const purchase = await this.purchaseService.populate({ purchaseId });
 
     if (!purchase) {
@@ -92,6 +90,7 @@ export class LearningListener {
     }
 
     switch (purchase.type) {
+      case PurchaseType.PRACTISE:
       case PurchaseType.TRAINING: {
         const training = await this.contentService.findTraining({
           trainingId: purchase.contentId,
@@ -171,8 +170,8 @@ export class LearningListener {
     return await this.learningService.recalculateForUser(payload.userId);
   }
 
-  @OnEvent(SubscriptionEvents.UPDATED)
-  async onSubscriptionChanged(payload: SubscriptionUpdatedEvent) {
+  @OnEvent(SubscriptionEvents.EXPIRED)
+  async onSubscriptionChanged(payload: SubscriptionExpiredEvent) {
     const subscirption = await this.subscriptionsService.find({
       subscriptionId: payload.subscriptionId,
     });

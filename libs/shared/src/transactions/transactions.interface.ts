@@ -4,6 +4,7 @@ import { IUser } from '../user/user.interface.js';
 export enum TransactionType {
   STANDART = 'Standart',
   REFERRAL = 'Referral',
+  MERCHANT = 'Merchant',
   PURCHASE = 'Purchase',
   SUBSCRIPTION = 'Subscription',
   REPLENISHMENT = 'Replenishment',

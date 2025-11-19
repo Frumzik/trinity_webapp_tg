@@ -30,6 +30,18 @@ export class SubscriptionsRepository {
       : null;
   }
 
+  // Поиск подписки
+  async findAll(
+    condition: FilterQuery<Subscription> = {}
+  ): Promise<SubscriptionEntity[]> {
+    const subscriptions = await this.subscriptionModel
+      .find(condition)
+      .lean()
+      .exec();
+
+    return subscriptions.map((el) => new SubscriptionEntity(el));
+  }
+
   // Обновление подписки
   async update(
     subscriptionEntity: SubscriptionEntity
@@ -78,8 +90,6 @@ export class SubscriptionsRepository {
       .lean()
       .exec();
 
-    return subscription
-      ? new SubscriptionEntity(subscription)
-      : null;
+    return subscription ? new SubscriptionEntity(subscription) : null;
   }
 }

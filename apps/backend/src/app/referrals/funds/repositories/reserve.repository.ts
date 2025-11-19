@@ -12,20 +12,44 @@ export class ReserveFundItemsRepository {
   ) {}
 
   // Создание реферала
-  async create(reserveFundItemEntity: ReserveFundItemEntity): Promise<ReserveFundItemEntity> {
-    const created = await new this.reserveFundItemModel(reserveFundItemEntity).save();
+  async create(
+    reserveFundItemEntity: ReserveFundItemEntity
+  ): Promise<ReserveFundItemEntity> {
+    const created = await new this.reserveFundItemModel(
+      reserveFundItemEntity
+    ).save();
     return new ReserveFundItemEntity(created.toObject());
   }
 
   // Поиск реферала
-  async find(condition: FilterQuery<ReserveFundItem>): Promise<ReserveFundItemEntity | null> {
-    const reserveFundItem = await this.reserveFundItemModel.findOne(condition).exec();
+  async find(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<ReserveFundItemEntity | null> {
+    const reserveFundItem = await this.reserveFundItemModel
+      .findOne(condition)
+      .exec();
 
-    return reserveFundItem ? new ReserveFundItemEntity(reserveFundItem.toObject()) : null;
+    return reserveFundItem
+      ? new ReserveFundItemEntity(reserveFundItem.toObject())
+      : null;
+  }
+
+  // Поиск реферала
+  async findAll(
+    condition: FilterQuery<ReserveFundItem> = {}
+  ): Promise<ReserveFundItemEntity[]> {
+    const reserveFundItems = await this.reserveFundItemModel
+      .find(condition)
+      .lean()
+      .exec();
+
+    return reserveFundItems.map((item) => new ReserveFundItemEntity(item));
   }
 
   // Обновление реферала
-  async update(reserveFundItemEntity: ReserveFundItemEntity): Promise<ReserveFundItemEntity> {
+  async update(
+    reserveFundItemEntity: ReserveFundItemEntity
+  ): Promise<ReserveFundItemEntity> {
     if (!reserveFundItemEntity._id) {
       throw new Error('Фонд не имеет _id');
     }
@@ -39,14 +63,18 @@ export class ReserveFundItemsRepository {
       .exec();
 
     if (!updated) {
-      throw new NotFoundException(`Фонд с id ${reserveFundItemEntity._id} не найдена`);
+      throw new NotFoundException(
+        `Фонд с id ${reserveFundItemEntity._id} не найдена`
+      );
     }
 
     return new ReserveFundItemEntity(updated.toObject());
   }
 
   // Удаление реферала
-  async delete(condition: FilterQuery<ReserveFundItem>): Promise<{ deleted: boolean }> {
+  async delete(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<{ deleted: boolean }> {
     const result = await this.reserveFundItemModel.deleteOne(condition).exec();
 
     return { deleted: result.deletedCount !== 0 };
