@@ -236,7 +236,6 @@ export default function Index() {
 
   const openSuccessModal = (titles: string[]) => {
     setResultTitle("Новый уровень открыт");
-    setResultItems(titles);
     setResultCta("Открыть");
     const first = purchaseLevels.find((pl) => titles.includes(pl.title));
     setResultOnCta(() => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false)));

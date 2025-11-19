@@ -19,14 +19,14 @@ function DesktopOnlyScreen() {
   );
 }
 
-const MIN_LOADER_MS = 500;
+const MIN_LOADER_MS = 500; // сколько минимум висит прелоадер
 
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  const [showLoader, setShowLoader] = useState(false);
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  // по умолчанию сразу показываем прелоадер
+  const [showLoader, setShowLoader] = useState(true);
 
   // один раз помечаем body
   useEffect(() => {
@@ -36,26 +36,22 @@ export default function App() {
     };
   }, []);
 
-  // показываем прелоадер на каждый переход минимум на 500мс
+  // прелоадер на каждый переход — ВСЕГДА
   useEffect(() => {
-    let timeoutId: number | undefined;
+    let timer: number | undefined;
 
-    // первый рендер — не мигаем прелоадером
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
-    }
-
+    // включаем прелоадер сразу при смене location
     setShowLoader(true);
 
-    timeoutId = window.setTimeout(() => {
+    // через MIN_LOADER_MS скрываем
+    timer = window.setTimeout(() => {
       setShowLoader(false);
     }, MIN_LOADER_MS);
 
     return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
+      if (timer) window.clearTimeout(timer);
     };
-  }, [location.key, isFirstRender]);
+  }, [location.key]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
