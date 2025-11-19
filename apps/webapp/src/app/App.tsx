@@ -19,16 +19,15 @@ function DesktopOnlyScreen() {
   );
 }
 
-const MIN_LOADER_MS = 500; // сколько минимум висит прелоадер
+const MIN_LOADER_MS = 500;
 
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  // по умолчанию сразу показываем прелоадер
   const [showLoader, setShowLoader] = useState(true);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
-  // один раз помечаем body
   useEffect(() => {
     document.body.classList.add('app-loaded');
     return () => {
@@ -36,14 +35,17 @@ export default function App() {
     };
   }, []);
 
-  // прелоадер на каждый переход — ВСЕГДА
+  // Прелоадер на первый рендер + на каждый переход
   useEffect(() => {
     let timer: number | undefined;
 
-    // включаем прелоадер сразу при смене location
+    // первый раз тоже показываем прелоадер
+    if (isFirstRender) {
+      setIsFirstRender(false);
+    }
+
     setShowLoader(true);
 
-    // через MIN_LOADER_MS скрываем
     timer = window.setTimeout(() => {
       setShowLoader(false);
     }, MIN_LOADER_MS);
@@ -51,7 +53,7 @@ export default function App() {
     return () => {
       if (timer) window.clearTimeout(timer);
     };
-  }, [location.key]);
+  }, [location.key, isFirstRender]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -96,16 +98,20 @@ export default function App() {
 
   const layoutStyle: React.CSSProperties = {
     backgroundImage: getBackgroundImage(),
-    ...(showLoader ? { pointerEvents: 'none' } : {}),
   };
 
   return (
     <FooterTabProvider>
-      {showLoader && <Preloader />}
-
       <div className="app-layout" style={layoutStyle}>
-        {shouldShowTopRect() && <div className="top-rectangle"></div>}
+        {shouldShowTopRect() && <div className="top-rectangle" />}
+
         {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
+
+        {showLoader && (
+          <div className="global-preloader">
+            <Preloader />
+          </div>
+        )}
       </div>
     </FooterTabProvider>
   );
