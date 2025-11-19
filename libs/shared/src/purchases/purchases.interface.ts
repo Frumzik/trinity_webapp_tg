@@ -4,6 +4,7 @@ import { ITransaction } from "../transactions/transactions.interface.js";
 
 export enum PurchaseType {
   TRAINING = 'Training',
+  PRACTISE = 'Practise',
   SUBSCRIPTION = 'Subscription',
   LESSON = 'Lesson',
 }
