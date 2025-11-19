@@ -19,12 +19,19 @@ export interface IFund {
   balance: number;
 }
 
+export enum ReserveFundItemType {
+  STAGE = "Stage",
+  SUBSCRIPTION = "Subscription",
+  PRACTISE = "Practise"
+}
+
 export interface IReserveFundItem {
   _id?: Types.ObjectId;
+  type: ReserveFundItemType,
   userId: number;
   sum: number;
-  stage: number;
-  stageLevel: number;
-  endDate: Date;
-  isReturned: boolean;
+  stage?: number;
+  stageLevel?: number;
+  trainingId?: number;
+  endDate: Date | null;
 }

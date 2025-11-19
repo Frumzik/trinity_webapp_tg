@@ -20,12 +20,14 @@ import {
   PurchaseCreateRequestDto,
   PurchaseEvents,
   PurchaseType,
+  ReserveFundItemType,
   TransactionType,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
 import { UsersService } from '../../account';
 import { ContentService } from '../../lms';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FundsService } from '../../referrals';
 
 @Injectable()
 export class PurchaseService {
@@ -40,6 +42,7 @@ export class PurchaseService {
     private readonly transactionsService: TransactionsService,
     private readonly purchasesRepository: PurchasesRepository,
     private readonly countersService: CountersService,
+    private readonly fundsService: FundsService,
     private readonly eventEmitter: EventEmitter2
   ) {}
 
@@ -75,6 +78,7 @@ export class PurchaseService {
       // Проверка что контент существует
       let totalPrice = 0;
       switch (dto.type) {
+        case PurchaseType.PRACTISE:
         case PurchaseType.TRAINING: {
           const trainings = await Promise.all(
             (dto.content ?? []).map((trainingId) =>
@@ -141,6 +145,7 @@ export class PurchaseService {
 
       if (
         dto.type == PurchaseType.LESSON ||
+        dto.type == PurchaseType.PRACTISE ||
         dto.type == PurchaseType.TRAINING
       ) {
         for (const contentId of dto.content as number[]) {
@@ -149,6 +154,7 @@ export class PurchaseService {
           let transactionDescription = '';
 
           switch (dto.type) {
+            case PurchaseType.PRACTISE:
             case PurchaseType.TRAINING: {
               const training = await this.contentService.findTraining({
                 trainingId: contentId,
@@ -163,7 +169,19 @@ export class PurchaseService {
                   ? training.salePrice ?? 0
                   : training.price ?? 0;
 
-              transactionDescription = `Покупка курса ${training.title}`;
+              transactionDescription = `Покупка ${
+                dto.type == PurchaseType.PRACTISE ? 'практики' : 'курса'
+              } "${training.title}"`;
+
+              if (dto.type == PurchaseType.PRACTISE) {
+                await this.fundsService.createReserveItem({
+                  type: ReserveFundItemType.PRACTISE,
+                  trainingId: training.trainingId,
+                  sum: -transactionSum,
+                  userId: user.userId,
+                  endDate: null
+                });
+              }
 
               break;
             }
@@ -192,7 +210,7 @@ export class PurchaseService {
           const transaction = await this.transactionsService.create({
             type: TransactionType.PURCHASE,
             userId: user.userId,
-            sum: transactionSum,
+            sum: -transactionSum,
             description: transactionDescription,
           });
 
@@ -233,7 +251,7 @@ export class PurchaseService {
         const transaction = await this.transactionsService.create({
           type: TransactionType.SUBSCRIPTION,
           userId: user.userId,
-          sum: totalPrice,
+          sum: -totalPrice,
           description: `Продление подписки на ${dto.subscriptionDays} дней`,
         });
 

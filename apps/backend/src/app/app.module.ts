@@ -21,6 +21,7 @@ import { BannersModule } from './banners/banners.module';
 import { FundsModule, ReferralsModule } from './referrals';
 import { AcquiringModule } from './billing/acquiring/acquiring.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       isGlobal: true, // чтобы ConfigModule был доступен везде
       envFilePath: 'apps/backend/envs/.env.development',
     }),
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync(getMongoConfig()),
     PassportModule,
     EventEmitterModule.forRoot(),
