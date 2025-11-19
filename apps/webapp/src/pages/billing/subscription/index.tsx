@@ -102,17 +102,12 @@ export default function SubscriptionManagePage({
   const currentDays = selectedPlan === 'year' ? 365 : 30;
 
   const openSuccessModal = () => {
-    setResultTitle('Подписка активирована');
+    setResultTitle('Доступ активен');
     setResultItems(undefined);
-    setResultDesc(
-      selectedPlan === 'year'
-        ? 'Вы оформили годовую Premium-подписку.'
-        : 'Вы оформили месячную Premium-подписку.'
-    );
-    setResultCta('К урокам');
+    setResultCta('В главное меню');
     setResultOnCta(() => () => {
       setResultOpen(false);
-      navigate('/levels');
+      navigate('/home');
     });
     setResultOpen(true);
   };
