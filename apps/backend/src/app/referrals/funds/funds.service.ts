@@ -9,16 +9,27 @@ import {
   FundCreateRequestDto,
   FundTitle,
   FundType,
+  ReferralReserveExpiredEvent,
+  ReferralEvents,
   ReserveFundItemCreateRequestDto,
+  ReferralReserveStageReturnedEvent,
+  ReserveFundItemType,
+  ReferralReserveSubscriptionReturnedEvent,
+  ReferralReserveDaysLeftEvent,
+  PurchaseEvents,
+  PurchasePractiseDoneEvent,
+  PurchasePractiseAbortEvent,
 } from '@trinity/shared';
 import { FundEntity, ReserveFundItemEntity } from './entities';
 import { Fund, ReserveFundItem } from './models';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FundsService {
   constructor(
     private readonly fundsRepository: FundsRepository,
-    private readonly reserveFundItemsRepository: ReserveFundItemsRepository
+    private readonly reserveFundItemsRepository: ReserveFundItemsRepository,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async onModuleInit() {
@@ -135,11 +146,9 @@ export class FundsService {
     dto: ReserveFundItemCreateRequestDto
   ): Promise<ReserveFundItemEntity> {
     try {
-      const newFundItem = new ReserveFundItemEntity({
-        ...dto,
-        endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-        isReturned: false
-      });
+      const newFundItem = new ReserveFundItemEntity(dto);
+
+      await this.incReserve(dto.sum);
 
       return await this.reserveFundItemsRepository.create(newFundItem);
     } catch (error: unknown) {
@@ -161,11 +170,51 @@ export class FundsService {
     }
   }
 
+  async findReserveItemAll(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<ReserveFundItemEntity[]> {
+    try {
+      const fundItems = await this.reserveFundItemsRepository.findAll(
+        condition
+      );
+
+      return fundItems;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async deleteReserveItem(
     condition: FilterQuery<ReserveFundItem>
   ): Promise<{ deleted: boolean }> {
     try {
-      const result = await this.reserveFundItemsRepository.delete(condition);
+      const fundItem = await this.findReserveItem(condition);
+
+      if (!fundItem) {
+        throw new NotFoundException('Элемент резервного фонда не найден');
+      }
+
+      const result = await this.reserveFundItemsRepository.delete(fundItem);
+
+      await this.decReserve(fundItem.sum);
+      await this.incMain(fundItem.sum);
+
+      // Событие
+      if (fundItem.type == ReserveFundItemType.PRACTISE) {
+        await this.eventEmitter.emit(
+          PurchaseEvents.PRACTISE_ABORT,
+          new PurchasePractiseAbortEvent(
+            fundItem.userId,
+            fundItem.trainingId as number
+          )
+        );
+      } else {
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_EXPIRED,
+          new ReferralReserveExpiredEvent(fundItem.userId, fundItem.sum)
+        );
+      }
 
       return result;
     } catch (error: unknown) {
@@ -174,10 +223,9 @@ export class FundsService {
     }
   }
 
-  async setIsReturnReserveItem(
-    condition: FilterQuery<ReserveFundItem>,
-    updateData: { isReturned: boolean }
-  ): Promise<ReserveFundItemEntity> {
+  async returnReserveItem(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<{ deleted: boolean }> {
     try {
       const fundItem = await this.findReserveItem(condition);
 
@@ -185,14 +233,65 @@ export class FundsService {
         throw new NotFoundException('Элемент резервного фонда не найден');
       }
 
-      const result = await this.reserveFundItemsRepository.update(
-        fundItem.setIsReturned(updateData.isReturned)
-      );
+      const result = await this.reserveFundItemsRepository.delete(fundItem);
+
+      await this.decReserve(fundItem.sum);
+
+      // Событие
+      if (fundItem.type == ReserveFundItemType.STAGE) {
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_STAGE_RETURNED,
+          new ReferralReserveStageReturnedEvent(fundItem.userId, fundItem.sum)
+        );
+      } else if (fundItem.type == ReserveFundItemType.SUBSCRIPTION) {
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
+          new ReferralReserveSubscriptionReturnedEvent(
+            fundItem.userId,
+            fundItem.sum
+          )
+        );
+      } else if (fundItem.type == ReserveFundItemType.PRACTISE) {
+        await this.eventEmitter.emit(
+          PurchaseEvents.PRACTISE_DONE,
+          new PurchasePractiseDoneEvent(
+            fundItem.userId,
+            fundItem.trainingId as number
+          )
+        );
+      }
 
       return result;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Ошибка';
       throw new InternalServerErrorException(message);
+    }
+  }
+
+  async checkAndUpdateAll() {
+    const fundItems = await this.reserveFundItemsRepository.findAll();
+
+    const now = new Date();
+
+    for (const fundItem of fundItems) {
+      if (!fundItem.endDate) continue;
+
+      const diffMs = fundItem.endDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      // осталось 3 дня
+      if (diffDays == 3) {
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_DAYS_LEFT,
+          new ReferralReserveDaysLeftEvent(
+            fundItem.userId,
+            fundItem.sum,
+            diffDays
+          )
+        );
+      } else if (fundItem.endDate <= now) {
+        await this.deleteReserveItem(fundItem);
+      }
     }
   }
 }

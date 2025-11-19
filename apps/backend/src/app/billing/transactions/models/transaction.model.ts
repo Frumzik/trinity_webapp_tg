@@ -23,7 +23,7 @@ export class Transaction
   })
   type!: TransactionType;
 
-  @Prop({ type: Number, required: true, min: 0 })
+  @Prop({ type: Number, required: true })
   sum!: number;
 
   @Prop({ type: Date, required: true, default: Date.now() })
