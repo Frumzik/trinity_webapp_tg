@@ -25,35 +25,38 @@ export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  const [showLoader, setShowLoader] = useState(true);
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  const [domReady, setDomReady] = useState(false);
+  const [minTimePassed, setMinTimePassed] = useState(false);
 
   useEffect(() => {
-    document.body.classList.add('app-loaded');
+    const handleReady = () => setDomReady(true);
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      handleReady();
+    } else {
+      window.addEventListener('DOMContentLoaded', handleReady, { once: true } as any);
+    }
+
     return () => {
-      document.body.classList.remove('app-loaded');
+      window.removeEventListener('DOMContentLoaded', handleReady as any);
     };
   }, []);
 
-  // Прелоадер на первый рендер + на каждый переход
   useEffect(() => {
-    let timer: number | undefined;
+    const t = window.setTimeout(() => setMinTimePassed(true), MIN_LOADER_MS);
+    return () => window.clearTimeout(t);
+  }, []);
 
-    // первый раз тоже показываем прелоадер
-    if (isFirstRender) {
-      setIsFirstRender(false);
+  const showLoader = !(domReady && minTimePassed);
+
+  useEffect(() => {
+    if (!showLoader) {
+      document.body.classList.add('app-loaded');
     }
-
-    setShowLoader(true);
-
-    timer = window.setTimeout(() => {
-      setShowLoader(false);
-    }, MIN_LOADER_MS);
-
     return () => {
-      if (timer) window.clearTimeout(timer);
+      document.body.classList.remove('app-loaded');
     };
-  }, [location.key, isFirstRender]);
+  }, [showLoader]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(

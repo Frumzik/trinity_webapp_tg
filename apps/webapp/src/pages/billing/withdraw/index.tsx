@@ -1,17 +1,28 @@
+import "./index.scss";
 import TopBar from "../../../widgets/topbarTextpage";
 import WithdrawForm from "./ui/WithdrawForm";
-import { submitWithdraw } from "../../../entities/wallet/api/walet.api";
-import "./index.scss";
+import { useGetUserQuery } from "../../../shared/api/user.api";
+import { useWithdrawMutation } from "../../../shared/api/acquiring.api";
 
 export default function WithdrawPage() {
+  const { data } = useGetUserQuery({ populate: false });
+  const balance = data?.data?.balance ?? 0;
+
+  const [withdraw, { isLoading }] = useWithdrawMutation();
+
   return (
     <div className="withdraw">
       <TopBar title="Кошелек" />
       <WithdrawForm
         title="Получить"
         subtitle="на кошелек"
-        submit={async (v, a, n) => {
-          await submitWithdraw(v, a, n);
+        balance={balance}
+        loading={isLoading}
+        submit={async (value, address) => {
+          await withdraw({
+            address: address.trim(),
+            amount: String(value),
+          }).unwrap();
         }}
       />
     </div>

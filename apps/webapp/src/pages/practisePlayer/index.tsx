@@ -347,7 +347,6 @@ export default function PlayerScreen() {
     );
   })();
 
-  // фуллскрин/ландшафт
   const [isFs, setIsFs] = useState(false);
   const toggleFullscreenLandscape = async () => {
     const el = document.fullscreenElement
