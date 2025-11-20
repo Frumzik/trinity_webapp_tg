@@ -1,6 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { join } from 'path';
 import { Context, Telegraf } from 'telegraf';
 
 @Injectable()
@@ -44,5 +43,13 @@ export class BotService implements OnModuleInit {
 
   async sendMessage(tgId: number, message: string) {
     return this.bot.telegram.sendMessage(tgId, message);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async sendNewPractiseMessage(user: any, practise: any) {
+    return this.bot.telegram.sendMessage(
+      this.configService.get('BOT_ADMIN_CHAT') || 0,
+      `Новая покупка практики:\n\nПрактика: ${practise.title}\nПользователь: ${user.name} - ${user.username}`
+    );
   }
 }

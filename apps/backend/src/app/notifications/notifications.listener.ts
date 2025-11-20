@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   ReferralBuyStageEvent,
@@ -28,6 +28,7 @@ import { UsersService } from '../account';
 export class NotificationsListener {
   constructor(
     private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService
   ) {}
 
