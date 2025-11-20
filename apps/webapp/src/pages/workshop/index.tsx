@@ -51,7 +51,11 @@ export default function Index() {
     () => roots.find((r) => r.tag === "practise" || r.type === "practise"),
     [roots]
   );
+  const isEnabled = (t: any) => {
+    if (t.accessRules?.some((r: any) => r.type === "free")) return true;
 
+    return t.accessStatus === "available";
+  };
   const tiles: Tile[] = useMemo(() => {
     if (!workshopRoot) return [];
 
@@ -117,7 +121,7 @@ export default function Index() {
                     title={t.title}
                     bgImageUrl={t.bgImageUrl}
                     rightImageUrl={t.rightImageUrl}
-                    enabled={t.enabled}
+                    enabled={isEnabled(workshopRoot)}
                     className="left-block-color"
                     onClick={() => t.enabled && openPreview(t.id)}
                   />
