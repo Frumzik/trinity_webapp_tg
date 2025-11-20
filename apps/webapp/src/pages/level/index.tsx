@@ -131,7 +131,6 @@ export default function Index() {
         title: l.title,
         subtitle: l.duration ?? undefined,
         artworkUrl: l.coverUrl ?? training?.coverUrl ?? undefined,
-        // ключевой момент: для видео используем videoUrl (подставим позже)
         videoUrl: undefined as string | undefined,
       }));
   }, [training]);

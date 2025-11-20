@@ -9,8 +9,8 @@ export type MediaTrack = {
   id: string | number;
   title: string;
   subtitle?: string;
-  mediaUrl?: string;     // AUDIO
-  videoUrl?: string;     // VIDEO
+  mediaUrl?: string;
+  videoUrl?: string;
   artworkUrl?: string;
   isFavorite?: boolean;
 };
