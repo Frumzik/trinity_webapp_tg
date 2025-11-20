@@ -6,9 +6,9 @@ services:
     networks:
       - proxy
 
-    depends_on:
-      loki:
-        condition: service_healthy
+    # depends_on:
+    #   loki:
+    #     condition: service_healthy
     volumes:
     - grafana_data:/var/lib/grafana
 
