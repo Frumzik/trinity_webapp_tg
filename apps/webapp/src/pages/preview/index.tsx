@@ -112,7 +112,6 @@ export default function PreviewPage() {
         setResultDesc(
           "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
         );
-        setResultCta("Понятно");
         setResultOnCta(() => () => setResultOpen(false));
         setResultOpen(true);
         return;
