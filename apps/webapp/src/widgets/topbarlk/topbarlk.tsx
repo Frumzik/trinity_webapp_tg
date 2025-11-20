@@ -52,7 +52,12 @@ export default function TopBar({
     );
   }, [u, tg, displayUsername, displayName]);
 
-  const balanceText = useMemo(() => `${u?.balance ?? 0} OM`, [u]);
+  const balanceText = useMemo(() => {
+    const raw = Number(u?.balance ?? 0);
+    const int = Number.isFinite(raw) ? Math.trunc(raw) : 0;
+    return `${int} OM`;
+  }, [u?.balance]);
+
 
   return (
     <div className="topbar">

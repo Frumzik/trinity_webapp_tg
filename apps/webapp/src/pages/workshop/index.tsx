@@ -17,7 +17,6 @@ import {
 
 import Bg1 from "../../assets/homePage/tile1.png";
 import Card1 from "../../assets/image/level/genkeys.svg";
-import Card2 from "../../assets/image/bg.svg";
 
 import "./workshop.scss";
 
@@ -39,38 +38,53 @@ export default function Index() {
   const navigate = useNavigate();
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
-
   const roots = (data?.data ?? []) as BNode[];
 
+  // корень "Мастерская знаний"
   const workshopRoot: BNode | undefined = useMemo(
     () => roots.find((r) => r.tag === "knowledge_workshop"),
     [roots]
   );
 
-  const practiseRoot: BNode | undefined = useMemo(
-    () => roots.find((r) => r.tag === "practise" || r.type === "practise"),
-    [roots]
+  // сам курс "Генные ключи" — ребёнок мастерской (tag === "course")
+  const geneKeysCourse: BNode | undefined = useMemo(
+    () =>
+      workshopRoot?.childrens?.find(
+        (c: any) => c.tag === "course"
+      ) as BNode | undefined,
+    [workshopRoot]
   );
-  const isEnabled = (t: any) => {
-    if (t.accessRules?.some((r: any) => r.type === "free")) return true;
 
-    return t.accessStatus === "available";
-  };
   const tiles: Tile[] = useMemo(() => {
-    if (!workshopRoot) return [];
+    if (!workshopRoot || !geneKeysCourse) return [];
 
     return [
       {
-        id: workshopRoot.trainingId,
-        title: "Генные ключи",
+        id: geneKeysCourse.trainingId, // 26
+        title: geneKeysCourse.title || "Генные ключи",
         description:
-          workshopRoot.shortDescription || workshopRoot.description || "",
-        bgImageUrl: workshopRoot.bgUrl || workshopRoot.coverUrl || Bg1,
-        rightImageUrl: workshopRoot.iconUrl || workshopRoot.coverUrl || Card1,
+          geneKeysCourse.shortDescription ||
+          geneKeysCourse.description ||
+          workshopRoot.shortDescription ||
+          workshopRoot.description ||
+          "",
+        bgImageUrl:
+          (geneKeysCourse as any).bgUrl ||
+          geneKeysCourse.coverUrl ||
+          workshopRoot.bgUrl ||
+          workshopRoot.coverUrl ||
+          Bg1,
+        rightImageUrl:
+          geneKeysCourse.iconUrl ||
+          workshopRoot.iconUrl ||
+          geneKeysCourse.coverUrl ||
+          workshopRoot.coverUrl ||
+          Card1,
+        // курс всегда кликабелен — дальше решаем в onClick
         enabled: true,
       },
     ];
-  }, [workshopRoot]);
+  }, [workshopRoot, geneKeysCourse]);
 
   const openPreview = (id: number) => {
     navigate("/preview", {
@@ -79,6 +93,26 @@ export default function Index() {
         returnTo: "/workshop",
       },
     });
+  };
+
+  // логика «если НЕ куплен — превью, если куплен — тренинги»
+  const handleTileClick = () => {
+    if (!geneKeysCourse) return;
+
+    const storageKey = `training_bought_${geneKeysCourse.trainingId}`;
+    const isBought =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem(storageKey) === "1";
+
+    if (isBought) {
+      // уже куплен → сразу в модули
+      navigate(`/trainings/${geneKeysCourse.trainingId}`, {
+        state: { returnTo: "/workshop" },
+      });
+    } else {
+      // ещё не куплен → превью
+      openPreview(geneKeysCourse.trainingId);
+    }
   };
 
   return (
@@ -123,7 +157,7 @@ export default function Index() {
                     rightImageUrl={t.rightImageUrl}
                     enabled={t.enabled}
                     className="left-block-color"
-                    onClick={() => t.enabled && openPreview(t.id)}
+                    onClick={t.enabled ? handleTileClick : undefined}
                   />
                 ))}
 

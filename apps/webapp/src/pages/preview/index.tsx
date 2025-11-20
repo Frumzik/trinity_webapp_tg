@@ -13,9 +13,10 @@ import "./preview.scss";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
 import type { LearningNode } from "../../shared/api/learning.api";
+import { useGetUserQuery } from "../../shared/api/user.api";
 
-import FlexibleModal from "../../widgets/flexible-modal"; // путь поправь под себя
-import helpIcon from "../../assets/icons/closeIcon.png"; // сюда нужную иконку
+import FlexibleModal from "../../widgets/flexible-modal";
+import helpIcon from "../../assets/icons/closeIcon.png";
 
 type State = {
   trainingId: number;
@@ -30,7 +31,6 @@ export default function PreviewPage() {
   const st = (useLocation().state || {}) as Partial<State>;
   const trainingId = st.trainingId;
 
-  // ------- состояние модалки результата -------
   const [resultOpen, setResultOpen] = useState(false);
   const [resultKind, setResultKind] = useState<ModalKind>("success");
   const [resultTitle, setResultTitle] = useState("");
@@ -39,7 +39,6 @@ export default function PreviewPage() {
   const [resultCta, setResultCta] = useState<string | undefined>();
   const [resultOnCta, setResultOnCta] = useState<(() => void) | undefined>();
 
-  // если trainingId нет – уходим назад
   useEffect(() => {
     if (!trainingId) {
       navigate(st.returnTo || "/", { replace: true });
@@ -48,7 +47,6 @@ export default function PreviewPage() {
 
   if (!trainingId) return null;
 
-  // грузим практику / тренинг
   const { data, isLoading, isError } = useGetUserTrainingByIdQuery({
     id: trainingId,
   }) as {
@@ -57,31 +55,12 @@ export default function PreviewPage() {
     isError: boolean;
   };
 
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
+  const subscriptionType = userRes?.data.subscription?.type;
+  const hasPaidSubscription =
+    subscriptionType === "pro" || subscriptionType === "premium";
+
   const node = data?.data;
-
-  // ---- спец-логика для "Мастерской знаний" ----
-  const isWorkshopRoot = node?.tag === "knowledge_workshop";
-  const hasChildren = (node?.childrens ?? []).length > 0;
-  const hasAccess = node?.accessStatus === "available";
-
-  // если это мастерская знаний, у неё есть модули и доступ уже есть —
-  // не показываем превью вообще, а сразу кидаем на страницу с модулями
-  useEffect(() => {
-    if (!isLoading && !isError && isWorkshopRoot && hasChildren && hasAccess && node) {
-      navigate(`/trainings/${node.trainingId}`, {
-        replace: true,
-        state: {
-          returnTo: "/workshop",
-        },
-      });
-    }
-  }, [isLoading, isError, isWorkshopRoot, hasChildren, hasAccess, node, navigate]);
-
-  // пока редиректимся — ничего не рендерим
-  if (isWorkshopRoot && hasChildren && hasAccess) {
-    return null;
-  }
-
   const title = node?.title || "Практика";
   const descHtml = node?.description || "";
   const image = (node as any)?.bgUrl || node?.coverUrl || undefined;
@@ -89,53 +68,77 @@ export default function PreviewPage() {
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
+  const isTraining = node?.type === "training";
+  const isPractise = node?.type === "practise" || node?.tag === "practise";
+
   const handlePurchase = async () => {
+    if (!hasPaidSubscription) {
+      setResultKind("error");
+      setResultTitle("Недоступно");
+      setResultItems(undefined);
+      setResultDesc("У вас не активен доступ к приложению");
+      setResultCta("Активировать");
+      setResultOnCta(() => () => {
+        setResultOpen(false);
+        navigate("/subscription");
+      });
+      setResultOpen(true);
+      return;
+    }
+
     try {
       await addPurchase({
         type: "Training",
         content: [trainingId],
       }).unwrap();
 
-      // ---- если это мастерская знаний — сразу на страницу модулей ----
-      if (node?.tag === "knowledge_workshop") {
+      if (isTraining) {
+        if (typeof window !== "undefined") {
+          const key = `training_bought_${trainingId}`;
+          window.localStorage.setItem(key, "1");
+        }
+
         navigate(`/trainings/${trainingId}`, {
           replace: true,
-          state: { returnTo: "/workshop" },
+          state: { returnTo: st.returnTo || "/workshop" },
         });
         return;
       }
 
-      // ------- успешная покупка (остальные кейсы) -------
+      if (isPractise) {
+        setResultKind("success");
+        setResultTitle("Успешно");
+        setResultItems(undefined);
+        setResultDesc(
+          "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
+        );
+        setResultOnCta(() => () => setResultOpen(false));
+        setResultOpen(true);
+        return;
+      }
+
       setResultKind("success");
       setResultTitle("Успешно");
       setResultItems(undefined);
-      setResultDesc(
-        "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
-      );
-      setResultCta("Обновить");
-      // важно: оборачиваем в функцию, чтобы не вызвать сразу
-      setResultOnCta(() => () => window.location.reload());
+      setResultDesc("Покупка оформлена.");
+      setResultCta("Понятно");
+      setResultOnCta(() => () => setResultOpen(false));
       setResultOpen(true);
     } catch (e: any) {
       const rawMsg: string | undefined = e?.data?.message?.[0] || e?.error;
-
       const isBalanceError =
         rawMsg && rawMsg.toLowerCase().includes("баланс");
 
       if (isBalanceError) {
-        // ------- мало баланса -------
         setResultKind("no-balance");
         setResultTitle("Недостаточно баланса\nдля совершения платежа");
         setResultItems(undefined);
         setResultDesc(rawMsg);
         setResultCta("Пополнить");
-        // сюда потом подвяжешь экран пополнения
         setResultOnCta(() => () => {
-          // navigate("/balance");
           setResultOpen(false);
         });
       } else {
-        // ------- общая ошибка -------
         setResultKind("error");
         setResultTitle("");
         setResultItems(undefined);
@@ -149,7 +152,6 @@ export default function PreviewPage() {
       setResultOpen(true);
     }
   };
-
   return (
     <div className="preview">
       <Hero imageSrc={image} title={title}>
@@ -197,7 +199,7 @@ export default function PreviewPage() {
             <GradientButton
               className="preview__cta"
               onClick={handlePurchase}
-              disabled={isBuying}
+              disabled={isBuying || isUserLoading}
             >
               {isBuying ? "Покупка..." : "Приобрести"}
             </GradientButton>
@@ -214,7 +216,6 @@ export default function PreviewPage() {
         onCta={resultOnCta}
         closeIconUrl={helpIcon}
         onClose={() => setResultOpen(false)}
-        kind={resultKind} // если у FlexibleModal есть такой проп, оставь; если нет – убери
       />
     </div>
   );
