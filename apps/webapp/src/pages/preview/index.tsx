@@ -15,7 +15,7 @@ import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
 import type { LearningNode } from "../../shared/api/learning.api";
 
 import FlexibleModal from "../../widgets/flexible-modal"; // путь поправь под себя
-import helpIcon from "../../assets/icons/closeIcon.png";      // сюда нужную иконку
+import helpIcon from "../../assets/icons/closeIcon.png"; // сюда нужную иконку
 
 type State = {
   trainingId: number;
@@ -58,6 +58,30 @@ export default function PreviewPage() {
   };
 
   const node = data?.data;
+
+  // ---- спец-логика для "Мастерской знаний" ----
+  const isWorkshopRoot = node?.tag === "knowledge_workshop";
+  const hasChildren = (node?.childrens ?? []).length > 0;
+  const hasAccess = node?.accessStatus === "available";
+
+  // если это мастерская знаний, у неё есть модули и доступ уже есть —
+  // не показываем превью вообще, а сразу кидаем на страницу с модулями
+  useEffect(() => {
+    if (!isLoading && !isError && isWorkshopRoot && hasChildren && hasAccess && node) {
+      navigate(`/trainings/${node.trainingId}`, {
+        replace: true,
+        state: {
+          returnTo: "/workshop",
+        },
+      });
+    }
+  }, [isLoading, isError, isWorkshopRoot, hasChildren, hasAccess, node, navigate]);
+
+  // пока редиректимся — ничего не рендерим
+  if (isWorkshopRoot && hasChildren && hasAccess) {
+    return null;
+  }
+
   const title = node?.title || "Практика";
   const descHtml = node?.description || "";
   const image = (node as any)?.bgUrl || node?.coverUrl || undefined;
@@ -72,7 +96,16 @@ export default function PreviewPage() {
         content: [trainingId],
       }).unwrap();
 
-      // ------- успешная покупка -------
+      // ---- если это мастерская знаний — сразу на страницу модулей ----
+      if (node?.tag === "knowledge_workshop") {
+        navigate(`/trainings/${trainingId}`, {
+          replace: true,
+          state: { returnTo: "/workshop" },
+        });
+        return;
+      }
+
+      // ------- успешная покупка (остальные кейсы) -------
       setResultKind("success");
       setResultTitle("Успешно");
       setResultItems(undefined);
@@ -107,8 +140,7 @@ export default function PreviewPage() {
         setResultTitle("");
         setResultItems(undefined);
         setResultDesc(
-          rawMsg ||
-          "Покупка не оформлена. Попробуй ещё раз."
+          rawMsg || "Покупка не оформлена. Попробуй ещё раз."
         );
         setResultCta("Понятно");
         setResultOnCta(() => () => setResultOpen(false));
@@ -172,6 +204,7 @@ export default function PreviewPage() {
           </>
         )}
       </Sheet>
+
       <FlexibleModal
         open={resultOpen}
         title={resultTitle}
@@ -181,6 +214,7 @@ export default function PreviewPage() {
         onCta={resultOnCta}
         closeIconUrl={helpIcon}
         onClose={() => setResultOpen(false)}
+        kind={resultKind} // если у FlexibleModal есть такой проп, оставь; если нет – убери
       />
     </div>
   );
