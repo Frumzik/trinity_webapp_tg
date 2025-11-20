@@ -29,6 +29,10 @@ services:
       test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
       interval: 10s
       retries: 5
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+    - ./loki-config.yaml:/etc/loki/loki-config.yaml   # <-- подключаем из корня
+    - loki_data:/loki                                 # <-- хранилище
 
   backend:
     build:
@@ -108,3 +112,4 @@ networks:
 
 volumes:
   grafana_data:
+  loki_data:
