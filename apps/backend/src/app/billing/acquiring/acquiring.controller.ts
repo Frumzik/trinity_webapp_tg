@@ -6,6 +6,7 @@ import {
   forwardRef,
   Get,
   Inject,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -92,6 +93,16 @@ export class AcquiringController {
       } else {
         throw err;
       }
+    }
+
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    if (user.balance < +dto.amount) {
+      throw new Error('Недостаточный баланс');
     }
 
     // Выполняем вывод

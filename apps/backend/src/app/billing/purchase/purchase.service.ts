@@ -28,6 +28,7 @@ import { UsersService } from '../../account';
 import { ContentService } from '../../lms';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FundsService } from '../../referrals';
+import { NotificationsService } from '../../notifications';
 
 @Injectable()
 export class PurchaseService {
@@ -43,7 +44,9 @@ export class PurchaseService {
     private readonly purchasesRepository: PurchasesRepository,
     private readonly countersService: CountersService,
     private readonly fundsService: FundsService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService: NotificationsService
   ) {}
 
   async create(
@@ -179,8 +182,12 @@ export class PurchaseService {
                   trainingId: training.trainingId,
                   sum: -transactionSum,
                   userId: user.userId,
-                  endDate: null
                 });
+
+                await this.notificationsService.sendBotNewPractise(
+                  user,
+                  training
+                );
               }
 
               break;

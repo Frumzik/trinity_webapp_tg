@@ -9,5 +9,6 @@ import { NotificationsListener } from './notifications.listener';
   imports: [HttpModule, forwardRef(() => UsersModule)],
   providers: [NotificationsService, NotificationsListener],
   controllers: [NotificationsController],
+  exports: [NotificationsService]
 })
 export class NotificationsModule {}
