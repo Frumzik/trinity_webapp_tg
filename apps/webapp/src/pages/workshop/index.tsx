@@ -67,7 +67,7 @@ export default function Index() {
           workshopRoot.shortDescription || workshopRoot.description || "",
         bgImageUrl: workshopRoot.bgUrl || workshopRoot.coverUrl || Bg1,
         rightImageUrl: workshopRoot.iconUrl || workshopRoot.coverUrl || Card1,
-        enabled: workshopRoot.accessStatus !== "locked",
+        enabled: true,
       },
     ];
   }, [workshopRoot]);
@@ -121,7 +121,7 @@ export default function Index() {
                     title={t.title}
                     bgImageUrl={t.bgImageUrl}
                     rightImageUrl={t.rightImageUrl}
-                    enabled={isEnabled(workshopRoot)}
+                    enabled={t.enabled}
                     className="left-block-color"
                     onClick={() => t.enabled && openPreview(t.id)}
                   />
