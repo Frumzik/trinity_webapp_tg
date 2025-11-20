@@ -6,9 +6,6 @@ services:
     networks:
       - proxy
 
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=4jgam_@481!
-      - GF_SECURITY_ADMIN_USER=admin
     depends_on:
       loki:
         condition: service_healthy
