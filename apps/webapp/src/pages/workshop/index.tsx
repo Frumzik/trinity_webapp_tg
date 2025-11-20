@@ -42,16 +42,10 @@ export default function Index() {
 
   const roots = (data?.data ?? []) as BNode[];
 
-  const workshopRoot: BNode | undefined = useMemo(() => {
-    const byType =
-      roots.find((r) => r.type === "workshop") ||
-      roots.find((r) => r.tag === "knowledge_workshop");
-    if (byType) return byType;
-
-    return roots.find((r) =>
-      (r.title || "").toLowerCase().includes("мастерская")
-    );
-  }, [roots]);
+  const workshopRoot: BNode | undefined = useMemo(
+    () => roots.find((r) => r.tag === "knowledge_workshop"),
+    [roots]
+  );
 
   const practiseRoot: BNode | undefined = useMemo(
     () => roots.find((r) => r.tag === "practise" || r.type === "practise"),
@@ -59,32 +53,20 @@ export default function Index() {
   );
 
   const tiles: Tile[] = useMemo(() => {
-    const result: Tile[] = [];
+    if (!workshopRoot) return [];
 
-    (workshopRoot?.childrens ?? []).forEach((n, idx) => {
-      result.push({
-        id: n.trainingId,
-        title: n.title,
-        description: n.shortDescription || n.description || "",
-        bgImageUrl: n.bgUrl || n.coverUrl || Bg1,
-        rightImageUrl: n.iconUrl || n.coverUrl || Card1,
-        enabled: n.accessStatus !== "locked",
-      });
-    });
-
-    (practiseRoot?.childrens ?? []).forEach((n, idx) => {
-      result.push({
-        id: n.trainingId,
-        title: n.title,
-        description: n.shortDescription || n.description || "",
-        bgImageUrl: n.bgUrl || n.coverUrl || Bg1,
-        rightImageUrl: n.iconUrl || n.coverUrl || Card2,
-        enabled: n.accessStatus !== "locked",
-      });
-    });
-
-    return result;
-  }, [workshopRoot, practiseRoot]);
+    return [
+      {
+        id: workshopRoot.trainingId,
+        title: "Генные ключи",
+        description:
+          workshopRoot.shortDescription || workshopRoot.description || "",
+        bgImageUrl: workshopRoot.bgUrl || workshopRoot.coverUrl || Bg1,
+        rightImageUrl: workshopRoot.iconUrl || workshopRoot.coverUrl || Card1,
+        enabled: workshopRoot.accessStatus !== "locked",
+      },
+    ];
+  }, [workshopRoot]);
 
   const openPreview = (id: number) => {
     navigate("/preview", {
