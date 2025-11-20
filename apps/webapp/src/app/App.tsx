@@ -20,43 +20,45 @@ function DesktopOnlyScreen() {
 }
 
 const MIN_LOADER_MS = 500;
+const CONTENT_DELAY_MS = 80;
 
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  const [domReady, setDomReady] = useState(false);
-  const [minTimePassed, setMinTimePassed] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
+  const [canRenderContent, setCanRenderContent] = useState(false);
+  const [isContentVisible, setIsContentVisible] = useState(false);
 
   useEffect(() => {
-    const handleReady = () => setDomReady(true);
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      handleReady();
-    } else {
-      window.addEventListener('DOMContentLoaded', handleReady, { once: true } as any);
-    }
-
-    return () => {
-      window.removeEventListener('DOMContentLoaded', handleReady as any);
-    };
-  }, []);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => setMinTimePassed(true), MIN_LOADER_MS);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  const showLoader = !(domReady && minTimePassed);
-
-  useEffect(() => {
-    if (!showLoader) {
-      document.body.classList.add('app-loaded');
-    }
+    document.body.classList.add('app-loaded');
     return () => {
       document.body.classList.remove('app-loaded');
     };
-  }, [showLoader]);
+  }, []);
+
+  useEffect(() => {
+    let loaderTimer: number | undefined;
+    let contentTimer: number | undefined;
+
+    setShowLoader(true);
+    setCanRenderContent(false);
+    setIsContentVisible(false);
+
+    contentTimer = window.setTimeout(() => {
+      setCanRenderContent(true);
+    }, CONTENT_DELAY_MS);
+
+    loaderTimer = window.setTimeout(() => {
+      setShowLoader(false);
+      setIsContentVisible(true);
+    }, MIN_LOADER_MS);
+
+    return () => {
+      if (loaderTimer) window.clearTimeout(loaderTimer);
+      if (contentTimer) window.clearTimeout(contentTimer);
+    };
+  }, [location.key]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -103,12 +105,28 @@ export default function App() {
     backgroundImage: getBackgroundImage(),
   };
 
+  const contentClassName = `app-content ${
+    isContentVisible ? 'app-content--visible' : ''
+  }`;
+
   return (
     <FooterTabProvider>
       <div className="app-layout" style={layoutStyle}>
         {shouldShowTopRect() && <div className="top-rectangle" />}
 
-        {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
+        {!isMobile ? (
+          canRenderContent && (
+            <div className={contentClassName}>
+              <DesktopOnlyScreen />
+            </div>
+          )
+        ) : (
+          canRenderContent && (
+            <div className={contentClassName}>
+              <Outlet />
+            </div>
+          )
+        )}
 
         {showLoader && (
           <div className="global-preloader">

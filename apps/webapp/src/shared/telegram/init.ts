@@ -11,19 +11,32 @@ export function initTelegram() {
 
   try {
     WebApp.ready();
-  } catch (e) { /* empty */ }
+  } catch {}
+
+  requestAnimationFrame(() => {
+    try {
+      WebApp.expand();
+      WebApp.requestFullscreen?.();
+    } catch {}
+  });
 
   setTimeout(() => {
     try {
       WebApp.expand();
-    } catch (e) { /* empty */ }
-  }, 100);
+      WebApp.requestFullscreen?.();
+    } catch {}
+  }, 300);
+
+  setTimeout(() => {
+    try {
+      WebApp.expand();
+      WebApp.requestFullscreen?.();
+    } catch {}
+  }, 1000);
 
   return {
     initData: WebApp.initData || "",
     user: WebApp.initDataUnsafe?.user || null,
     colorScheme: WebApp.colorScheme,
   };
-
-
 }
