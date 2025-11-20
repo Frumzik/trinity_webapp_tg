@@ -16,7 +16,7 @@ import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 type Node = {
   _id: string;
   trainingId: number;
-  type: "training" | "product";
+  type: "training" | "product" | "practise";
   tag?: string | null;
   parentId?: number | null;
   title: string;
@@ -32,7 +32,7 @@ type Node = {
 
 const iconFallback = (i: number) => [Card1, Card2][i % 2];
 
-export default function Index() {
+export default function HealthLabIndex() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,42 +46,43 @@ export default function Index() {
   const healthLab = useMemo(() => {
     return (
       roots.find((r) => r.tag === "health_lab") ||
-      roots.find((r) => r.title?.trim().toLowerCase() === "лаборатория здоровья")
+      roots.find(
+        (r) => r.title?.trim().toLowerCase() === "лаборатория здоровья"
+      )
     );
   }, [roots]);
 
   const items = healthLab?.childrens ?? [];
 
   const openItem = (t: Node, idx: number) => {
-    if (t.accessStatus === "available") {
-      navigate(`/trainings/${t.trainingId}`, { state: { returnTo: location.pathname } });
-    } else {
-      navigate("/preview", {
-        state: {
-          trainingId: t.trainingId,
-          title: t.title,
-          description: t.shortDescription || t.description || "",
-          coverUrl: t.coverUrl,
-          price: t.salePrice ?? t.price ?? 0,
-          bg: Bg1,
-          icon: t.iconUrl || iconFallback(idx),
-          returnTo: location.pathname,
-        },
-      });
-    }
+    navigate("/preview", {
+      state: {
+        trainingId: t.trainingId,
+        title: t.title,
+        description: t.shortDescription || t.description || "",
+        coverUrl: t.coverUrl,
+        price: t.salePrice ?? t.price ?? 0,
+        bg: Bg1,
+        icon: t.iconUrl || iconFallback(idx),
+        returnTo: location.pathname,
+      },
+    });
   };
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
+
       <main className="screen">
         <div className="supportPage">
           <Title>Лаборатория здоровья</Title>
 
           {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
+
           {isError && (
             <div style={{ padding: 16 }}>
-              Не удалось загрузить. <button onClick={() => refetch()}>Повторить</button>
+              Не удалось загрузить.{" "}
+              <button onClick={() => refetch()}>Повторить</button>
             </div>
           )}
 
