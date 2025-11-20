@@ -21,10 +21,16 @@ export default function BillingHistoryPage() {
   } = useGetTransactionsQuery({ populate: true });
 
   const items: Transaction[] = useMemo(
-    () =>
-      (trxData?.data ?? []).map((t) => {
-        // в БЭКе type: "Purchase" | ...
-        // для твоего UI — Purchase считаем списанием (withdraw)
+    () => {
+      const src = (trxData?.data ?? []).slice();
+
+      src.sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+      });
+
+      return src.map((t) => {
         const mappedType: Transaction["type"] =
           t.type === "Purchase" ? "withdraw" : "deposit";
 
@@ -35,7 +41,8 @@ export default function BillingHistoryPage() {
           title: t.description || "Транзакция",
           date: t.date,
         } as Transaction;
-      }),
+      });
+    },
     [trxData]
   );
 

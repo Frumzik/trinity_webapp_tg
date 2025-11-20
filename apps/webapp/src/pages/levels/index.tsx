@@ -12,7 +12,8 @@ import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purc
 import FlexibleModal from "../../widgets/flexible-modal";
 import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
-import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
+import { useGetUserQuery } from "../../shared/api/user.api";
 
 export type LevelItem = {
   id: string;
@@ -22,7 +23,7 @@ export type LevelItem = {
   subtitle?: string;
   durationMin?: number;
   image: string;
-  description: string,
+  description: string;
   status: "available" | "done" | "locked";
   priceUSDT?: number;
 };
@@ -31,49 +32,67 @@ const numFromTitle = (t?: string) => {
   const m = (t || "").match(/\d+/);
   return m ? Number(m[0]) : undefined;
 };
+
 type LocalProgress = {
   seconds: number;
   duration: number;
-  status: 'in_progress' | 'completed';
+  status: "in_progress" | "completed";
 };
-const LP_KEY = 'lessonProgress';
+
+const LP_KEY = "lessonProgress";
 
 const lpLoad = (): Record<string, LocalProgress> => {
-  try { return JSON.parse(localStorage.getItem(LP_KEY) || '{}'); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(LP_KEY) || "{}");
+  } catch {
+    return {};
+  }
 };
+
 const lpSave = (obj: Record<string, LocalProgress>) => {
-  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+  try {
+    localStorage.setItem(LP_KEY, JSON.stringify(obj));
+  } catch {}
 };
 
 const readLegacyLesson = (lessonId: number | string) => {
   try {
     const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
     if (!raw) return null;
-    const j = JSON.parse(raw); // { lessonId, current, duration, completed }
+    const j = JSON.parse(raw);
     const current = Math.max(0, Math.round(j?.current || 0));
     const duration = Math.max(0, Math.round(j?.duration || 0));
-    const completed = Boolean(j?.completed) || (duration > 0 && current >= duration);
-    return { seconds: current, duration, status: completed ? 'completed' as const : 'in_progress' as const };
-  } catch { return null; }
+    const completed =
+      Boolean(j?.completed) || (duration > 0 && current >= duration);
+    return {
+      seconds: current,
+      duration,
+      status: completed ? ("completed" as const) : ("in_progress" as const),
+    };
+  } catch {
+    return null;
+  }
 };
 
 const lpMigrateFromLegacy = () => {
   const lp = lpLoad();
   try {
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i) || '';
-      if (!key.startsWith('lessonProgress:')) continue;
-      const id = key.split(':')[1];
+      const key = localStorage.key(i) || "";
+      if (!key.startsWith("lessonProgress:")) continue;
+      const id = key.split(":")[1];
       if (!id) continue;
       const legacy = readLegacyLesson(id);
       if (legacy) {
-        // аккуратно объединяем
         const prev = lp[id];
         lp[id] = prev
           ? {
             seconds: Math.max(prev.seconds || 0, legacy.seconds || 0),
             duration: Math.max(prev.duration || 0, legacy.duration || 0),
-            status: (prev.status === 'completed' || legacy.status === 'completed') ? 'completed' : 'in_progress',
+            status:
+              prev.status === "completed" || legacy.status === "completed"
+                ? "completed"
+                : "in_progress",
           }
           : legacy;
       }
@@ -82,19 +101,29 @@ const lpMigrateFromLegacy = () => {
   } catch {}
 };
 
-const isLessonCompletedLocal = (lessonId: number | string, store?: Record<string, LocalProgress>) => {
+const isLessonCompletedLocal = (
+  lessonId: number | string,
+  store?: Record<string, LocalProgress>
+) => {
   const lp = store ?? lpLoad();
-  const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId); // учитываем и legacy
+  const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId);
   if (!rec) return false;
-  return rec.status === 'completed' || (rec.duration > 0 && rec.seconds >= rec.duration);
+  return (
+    rec.status === "completed" || (rec.duration > 0 && rec.seconds >= rec.duration)
+  );
 };
 
 const isTrainingCompletedLocal = (node: BNode) => {
   const lp = lpLoad();
   const lessons = node.lessons ?? [];
   if (!lessons.length) return false;
-  return lessons.every((l: any) => l.progressStatus === 'completed' || isLessonCompletedLocal(l.lessonId, lp));
+  return lessons.every(
+    (l: any) =>
+      l.progressStatus === "completed" ||
+      isLessonCompletedLocal(l.lessonId, lp)
+  );
 };
+
 const minutesFromDuration = (d?: string | null) => {
   if (!d) return undefined;
   const m = d.match(/\d+/);
@@ -139,6 +168,11 @@ export default function Index() {
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
+
+  const subscriptionType = userRes?.data.subscription?.type;
+  const hasPaidSubscription =
+    subscriptionType === "pro" || subscriptionType === "premium";
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
@@ -147,7 +181,9 @@ export default function Index() {
 
   const levelNodes: BNode[] = useMemo(() => {
     const arr = (root?.childrens ?? []) as BNode[];
-    const onlyLevels = arr.filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number");
+    const onlyLevels = arr.filter(
+      (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
+    );
     return [...onlyLevels].sort((a, b) => {
       const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
       const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
@@ -167,7 +203,10 @@ export default function Index() {
   }, [groups, group]);
 
   const currentLevel: BNode | undefined = useMemo(
-    () => levelNodes.find((n) => (n.stageLevel ?? numFromTitle(n.title)) === group),
+    () =>
+      levelNodes.find(
+        (n) => (n.stageLevel ?? numFromTitle(n.title)) === group
+      ),
     [levelNodes, group]
   );
 
@@ -196,8 +235,8 @@ export default function Index() {
         durationMin: minutesFromDuration(s.duration),
         image: s.coverUrl || "",
         status,
-        // если цена в OM, название можно считать условным
-        priceUSDT: (s.salePrice ?? s.price) ?? undefined,
+        priceUSDT: s.salePrice ?? s.price ?? undefined,
+        description: s.shortDescription || s.description || "",
       };
     });
   }, [stages, group]);
@@ -215,9 +254,7 @@ export default function Index() {
         return {
           id: String(s.trainingId),
           title: s.title,
-          // актуальная цена: сначала salePrice, если есть, иначе price
           price: s.salePrice ?? s.price ?? 0,
-          // старая цена: если есть salePrice, то base = price
           salePrice: s.salePrice != null ? s.price ?? undefined : undefined,
           purchased: status !== "locked",
         };
@@ -238,27 +275,32 @@ export default function Index() {
     setResultTitle("Новый уровень открыт");
     setResultCta("Открыть");
     const first = purchaseLevels.find((pl) => titles.includes(pl.title));
-    setResultOnCta(() => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false)));
+    setResultOnCta(
+      () => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false))
+    );
     setResultOpen(true);
   };
-
 
   const openErrorModal = (message?: string | string[], isInsufficient?: boolean) => {
     const msg = Array.isArray(message) ? message.join("\n") : message;
 
-    setResultTitle(msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка"));
+    setResultTitle(
+      msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка")
+    );
     setResultItems(undefined);
 
     setResultCta(isInsufficient ? "Пополнить баланс" : "Продолжить");
 
-    setResultOnCta(() => () => {
-      if (isInsufficient) {
-        navigate("/wallet");
-        setResultOpen(false);
-      } else {
-        setResultOpen(false);
+    setResultOnCta(
+      () => () => {
+        if (isInsufficient) {
+          navigate("/wallet");
+          setResultOpen(false);
+        } else {
+          setResultOpen(false);
+        }
       }
-    });
+    );
 
     setResultOpen(true);
   };
@@ -270,7 +312,22 @@ export default function Index() {
   }) => {
     setModalOpen(false);
 
-    const ids = _p.levelIds.map((id) => Number(id)).filter(Number.isFinite) as number[];
+    if (!hasPaidSubscription) {
+      setResultTitle("Недоступно");
+      setResultItems(undefined);
+      setResultDesc("У вас не активен доступ к приложению");
+      setResultCta("Активировать");
+      setResultOnCta(() => () => {
+        setResultOpen(false);
+        navigate("/subscription");
+      });
+      setResultOpen(true);
+      return;
+    }
+
+    const ids = _p.levelIds
+      .map((id) => Number(id))
+      .filter((n) => Number.isFinite(n)) as number[];
     if (ids.length === 0) return;
 
     try {
@@ -281,19 +338,27 @@ export default function Index() {
       }).unwrap();
 
       dispatch(
-        learningApi.util.updateQueryData("getTrainingTree", undefined, (draft: any) => {
-          const nodes: any[] = draft?.data ?? [];
-          for (const root of nodes) {
-            const walk = (n: any) => {
-              if (typeof n?.trainingId === "number" && ids.includes(n.trainingId)) {
-                n.accessStatus = "available";
-                if (n.progressStatus !== "completed") n.progressStatus = "not_started";
-              }
-              (n.childrens ?? []).forEach(walk);
-            };
-            walk(root);
+        learningApi.util.updateQueryData(
+          "getTrainingTree",
+          undefined,
+          (draft: any) => {
+            const nodes: any[] = draft?.data ?? [];
+            for (const root of nodes) {
+              const walk = (n: any) => {
+                if (
+                  typeof n?.trainingId === "number" &&
+                  ids.includes(n.trainingId)
+                ) {
+                  n.accessStatus = "available";
+                  if (n.progressStatus !== "completed")
+                    n.progressStatus = "not_started";
+                }
+                (n.childrens ?? []).forEach(walk);
+              };
+              walk(root);
+            }
           }
-        })
+        )
       );
       const titles = purchaseLevels
         .filter((pl) => ids.includes(Number(pl.id)))
@@ -310,7 +375,9 @@ export default function Index() {
       openErrorModal(msg, isInsufficient);
     }
   };
+
   const anyModalOpen = modalOpen || resultOpen;
+
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar
@@ -339,13 +406,20 @@ export default function Index() {
           </div>
 
           {isLoading && (
-            <div style={{ padding: "8px 0 0 4px", fontSize: 14, opacity: 0.7 }}>
+            <div
+              style={{
+                padding: "8px 0 0 4px",
+                fontSize: 14,
+                opacity: 0.7,
+              }}
+            >
               Загрузка…
             </div>
           )}
           {isError && (
             <div style={{ padding: "8px 0 0 4px", fontSize: 14 }}>
-              Не удалось загрузить. <button onClick={() => refetch()}>Повторить</button>
+              Не удалось загрузить.{" "}
+              <button onClick={() => refetch()}>Повторить</button>
             </div>
           )}
 
@@ -361,9 +435,9 @@ export default function Index() {
               zIndex: 10,
             }}
           >
-            <div className="levels__list" aria-busy={isBuying}>
+            <div className="levels__list" aria-busy={isBuying || isUserLoading}>
               {items.map((l) => (
-                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)}  />
+                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)} />
               ))}
             </div>
           </ScrollPanel>

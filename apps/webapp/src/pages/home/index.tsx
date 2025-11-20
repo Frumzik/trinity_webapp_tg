@@ -214,7 +214,7 @@ export default function SupportPage() {
                 href="/levels"
                 className="refCard--imgRight refCard--166x123 "
                 background="none"
-              />
+                />
             </div>
 
             <FeatureTile
