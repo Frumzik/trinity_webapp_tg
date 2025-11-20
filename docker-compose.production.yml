@@ -29,6 +29,10 @@ services:
       test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
       interval: 10s
       retries: 5
+    # volumes:
+    # - ./loki-config.yaml:/etc/loki/loki-config.yaml   # <- локальный конфиг
+    # - loki_data:/loki                                 # <- постоянное хранилище
+    # command: -config.file=/etc/loki/loki-config.yaml
 
   backend:
     build:
@@ -108,3 +112,4 @@ networks:
 
 volumes:
   grafana_data:
+  loki_data:
