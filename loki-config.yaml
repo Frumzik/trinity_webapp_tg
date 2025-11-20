@@ -4,19 +4,18 @@ server:
   http_listen_port: 3100
 
 limits_config:
-  volume_enabled: true # <-- ВАЖНО
-
-pattern_ingester:
-  enabled: true
+  volume_enabled: true
+  enforce_metric_name: false
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
 
 ingester:
+  chunk_idle_period: 5m
+  max_chunk_age: 1h
   lifecycler:
-    address: 127.0.0.1
     ring:
       kvstore:
         store: inmemory
-  chunk_idle_period: 5m
-  max_chunk_age: 1h
 
 schema_config:
   configs:
@@ -35,8 +34,3 @@ storage_config:
     shared_store: filesystem
   filesystem:
     directory: /loki/chunks
-
-limits_config:
-  enforce_metric_name: false
-  reject_old_samples: true
-  reject_old_samples_max_age: 168h
