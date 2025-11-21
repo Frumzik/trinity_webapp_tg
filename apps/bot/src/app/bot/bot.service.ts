@@ -52,4 +52,11 @@ export class BotService implements OnModuleInit {
       `Новая покупка практики:\n\nПрактика: ${practise.title}\nПользователь: ${user.name} - ${user.username}`
     );
   }
+
+  async sendErrorMessage(message: string) {
+    return this.bot.telegram.sendMessage(
+      this.configService.get('BOT_ERRORS_CHAT') || 0,
+      `Ошибка: ${message}`
+    );
+  }
 }

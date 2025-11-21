@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   AcquiringDepositEvent,
   AcquiringDepositWebhookDto,
+  AcquiringErrorEvent,
   AcquiringErrorWebhookDto,
   AcquiringEvents,
   AcquiringWithdrawWebhookDto,
@@ -250,6 +251,11 @@ export class AcquiringService {
   }
 
   async handleRuntimeError(body: AcquiringErrorWebhookDto) {
+    await this.eventEmitter.emit(
+      AcquiringEvents.ERROR,
+      new AcquiringErrorEvent(body.message)
+    );
+
     console.log('Runtime error webhook received:', body);
     return { ok: true };
   }

@@ -12,10 +12,17 @@ class sendMessageDto {
 
 class sendNewPractiseDto {
   @IsObject()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any;
 
   @IsObject()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   practise: any;
+}
+
+class sendErrorDto {
+  @IsString()
+  message!: string;
 }
 
 @Controller('bot')
@@ -31,6 +38,12 @@ export class BotController {
   @Post('practise')
   async practise(@Body() dto: sendNewPractiseDto) {
     await this.botService.sendNewPractiseMessage(dto.user, dto.practise);
+    return { ok: true };
+  }
+
+  @Post('error')
+  async error(@Body() dto: sendErrorDto) {
+    await this.botService.sendErrorMessage(dto.message);
     return { ok: true };
   }
 }

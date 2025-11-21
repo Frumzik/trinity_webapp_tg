@@ -44,4 +44,17 @@ export class NotificationsService {
       console.log(error);
     }
   }
+
+  async sendBotError(message: string) {
+    try {
+      const res = await firstValueFrom(
+        this.http.post(`${this.BOT_URL}/bot/error`, { message })
+      );
+
+      return res.data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log(error);
+    }
+  }
 }
