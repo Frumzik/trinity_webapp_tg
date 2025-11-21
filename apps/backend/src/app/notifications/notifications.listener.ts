@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   ReferralBuyStageEvent,
@@ -23,6 +28,7 @@ import {
   AcquiringEvents,
   AcquiringDepositEvent,
   AcquiringWithdrawEvent,
+  AcquiringErrorEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -304,7 +310,11 @@ ${sum} OM отправлены в Фонд Света`
   }
 
   @OnEvent(PurchaseEvents.BUY_STAGE)
-  async onPurchaseBuyStage({ userId, stage, stageLevel }: PurchaseBuyStageEvent) {
+  async onPurchaseBuyStage({
+    userId,
+    stage,
+    stageLevel,
+  }: PurchaseBuyStageEvent) {
     const user = await this.usersService.find({ userId });
 
     if (!user) {
@@ -343,5 +353,10 @@ ${sum} OM отправлены в Фонд Света`
       user.tgId as number,
       `Выведено ${sum} ОМ`
     );
+  }
+
+  @OnEvent(AcquiringEvents.ERROR)
+  async onAcquringError({ message }: AcquiringErrorEvent) {
+    await this.notificationsService.sendBotError(message);
   }
 }
