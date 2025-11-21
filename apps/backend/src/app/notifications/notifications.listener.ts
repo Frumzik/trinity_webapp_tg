@@ -20,6 +20,9 @@ import {
   PurchaseEvents,
   PurchaseBuyEvent,
   PurchaseBuyStageEvent,
+  AcquiringEvents,
+  AcquiringDepositEvent,
+  AcquiringWithdrawEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -311,6 +314,34 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Поздравляем! Вы открыли ${stage} Ступень Духа ${stageLevel} уровня`
+    );
+  }
+
+  @OnEvent(AcquiringEvents.DEPOSIT)
+  async onAcquringDeposit({ userId, sum }: AcquiringDepositEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Баланс пополнен на ${sum} ОМ`
+    );
+  }
+
+  @OnEvent(AcquiringEvents.WITHDRAW)
+  async onAcquringWithdraw({ userId, sum }: AcquiringWithdrawEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Выведено ${sum} ОМ`
     );
   }
 }
