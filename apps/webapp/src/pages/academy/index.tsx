@@ -130,7 +130,7 @@ export default function Index() {
       : isError || isStageError
         ? "Ступени духа"
         : totalStages > 0
-          ? `Пройдено ${lastBought}/${totalStages}`
+          ? `Пройдено ${lastBought}/${totalStages - 1}`
           : "Пройдено 0/0";
 
   return (
