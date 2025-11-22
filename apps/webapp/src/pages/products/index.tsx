@@ -159,7 +159,7 @@ export default function Index() {
     isLoading || isStageLoading
       ? "Загрузка…"
       : totalStages > 0
-        ? `Пройдено ${lastBought}/${totalStages}`
+        ? `Пройдено ${lastBought}/${totalStages - 1}`
         : "Пройдено 0/0";
 
   if (isLoading) {
