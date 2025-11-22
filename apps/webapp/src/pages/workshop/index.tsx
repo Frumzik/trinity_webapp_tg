@@ -155,7 +155,7 @@ export default function Index() {
                     title={t.title}
                     bgImageUrl={t.bgImageUrl}
                     rightImageUrl={t.rightImageUrl}
-                    enabled={t.enabled}
+                    enabled={false}
                     className="left-block-color"
                     onClick={t.enabled ? handleTileClick : undefined}
                   />

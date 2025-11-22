@@ -275,7 +275,7 @@ export default function Index() {
                 title="Лаборатория здоровья"
                 description=""
                 bgImageUrl={Tile3}
-                enabled
+                enabled={false}
                 rightImageUrl={Card5}
                 className="left-block-color"
                 to="/health-lab"
