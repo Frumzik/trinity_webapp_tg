@@ -14,7 +14,11 @@
 .featureTile.is-clickable {
   cursor: pointer;
 }
-
+.featureTile__lock {
+  position: absolute;
+  right: 100px;
+  top: 30px;
+}
 .featureTile__bg {
   position: absolute;
   inset: 0;

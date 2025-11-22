@@ -248,11 +248,9 @@ export default function AccountPage() {
           </section>
         )}
 
-        {/* Блок "Безопасность" */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Безопасность</div>
 
-          {/* Пункт "Защитный пароль" — только если он уже создан */}
           {hasFinPassword && (
             <button
               className="acc__row"
@@ -304,7 +302,6 @@ export default function AccountPage() {
         </section>
       </main>
 
-      {/* нижняя большая кнопка — только профиль + email */}
       {dirty && (
         <div className="gbtn-bar egg">
           <div className="gbtn-bar__inner ">
