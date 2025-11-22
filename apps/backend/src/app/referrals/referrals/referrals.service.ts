@@ -11,7 +11,7 @@ import { ReferralsRepository } from './repositories';
 import { ReferralEntity } from './entities';
 import { Referral } from './models';
 import { UserEntity, UsersService } from '../../account';
-import { IUser, ReferralRegisteredEvent, RefferalEvents } from '@trinity/shared';
+import { IUser, ReferralRegisteredEvent, ReferralEvents } from '@trinity/shared';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class ReferralsService {
 
         // Событие
         this.eventEmitter.emit(
-          RefferalEvents.REGISTERED,
+          ReferralEvents.REGISTERED,
           new ReferralRegisteredEvent(currentPartner.userId, referral.userId, level)
         );
 
