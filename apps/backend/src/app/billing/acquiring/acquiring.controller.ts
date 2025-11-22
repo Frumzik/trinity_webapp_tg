@@ -6,6 +6,7 @@ import {
   forwardRef,
   Get,
   Inject,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -94,6 +95,16 @@ export class AcquiringController {
       }
     }
 
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    if (user.balance < +dto.amount) {
+      throw new Error('Недостаточный баланс');
+    }
+
     // Выполняем вывод
     await this.acquiringService.withdraw(dto.address, dto.amount);
 
@@ -104,14 +115,14 @@ export class AcquiringController {
   // Вебхуки
   // -------------------------
 
-  @Post('webhook/deposit')
+  @Post('webhook/deposits')
   @ApiOperation({ summary: 'Входящее уведомление о депозите' })
   @ApiBody({ type: AcquiringDepositWebhookDto })
   async handleDepositWebhook(@Body() body: AcquiringDepositWebhookDto) {
     return this.acquiringService.handleDeposit(body);
   }
 
-  @Post('webhook/withdraw')
+  @Post('webhook/withdraws')
   @ApiOperation({ summary: 'Входящее уведомление о выводе' })
   @ApiBody({ type: AcquiringWithdrawWebhookDto })
   async handleWithdrawWebhook(@Body() body: AcquiringWithdrawWebhookDto) {
@@ -127,7 +138,7 @@ export class AcquiringController {
     return this.acquiringService.handleInsufficientBalance(body);
   }
 
-  @Post('webhook/runtime-error')
+  @Post('webhook/runtime-errors')
   @ApiOperation({ summary: 'Входящее уведомление о runtime ошибке' })
   @ApiBody({ type: AcquiringErrorWebhookDto })
   async handleRuntimeErrorWebhook(@Body() body: AcquiringErrorWebhookDto) {

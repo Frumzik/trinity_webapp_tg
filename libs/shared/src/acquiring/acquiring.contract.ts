@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AcquiringWithdrawRequestDto {
   @IsString()
@@ -25,7 +25,7 @@ export class AcquiringDepositWebhookDto {
   toUserId!: string;
 
   @ApiProperty()
-  @IsInt()
+  @IsNumber()
   amount!: number;
 }
 
@@ -47,7 +47,7 @@ export class AcquiringWithdrawWebhookDto {
   toAddress!: string;
 
   @ApiProperty()
-  @IsInt()
+  @IsNumber()
   amount!: number;
 }
 

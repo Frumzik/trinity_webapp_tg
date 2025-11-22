@@ -5,7 +5,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsDate,
-  ValidateIf,
 } from 'class-validator';
 import { FundType, ReserveFundItemType } from './funds.interface.js';
 import { Type } from 'class-transformer';
@@ -42,8 +41,7 @@ export class ReserveFundItemCreateRequestDto {
   trainingId?: number;
 
   @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @Type(() => Date)
   @IsDate()
+  @Type(() => Date)
   endDate?: Date | null;
 }

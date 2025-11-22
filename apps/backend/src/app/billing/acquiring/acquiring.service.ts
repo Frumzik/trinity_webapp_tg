@@ -1,22 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Injectable,
-  HttpException,
-  Inject,
-  forwardRef,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, HttpException, Inject, forwardRef } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import {
+  AcquiringDepositEvent,
   AcquiringDepositWebhookDto,
+  AcquiringErrorEvent,
   AcquiringErrorWebhookDto,
+  AcquiringEvents,
   AcquiringWithdrawWebhookDto,
   TransactionType,
 } from '@trinity/shared';
 import { UsersService } from '../../account';
 import { TransactionsService } from '../transactions';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AcquiringService {
@@ -29,7 +27,8 @@ export class AcquiringService {
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => TransactionsService))
-    private readonly transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService,
+    private readonly eventEmitter: EventEmitter2
   ) {
     this.BASE_URL = this.configService.get('ACQUIRING_URL') || '';
     this.TOKEN = this.configService.get('ACQUIRING_TOKEN') || '';
@@ -202,14 +201,19 @@ export class AcquiringService {
   async handleDeposit(body: AcquiringDepositWebhookDto) {
     await this.usersService.incBalance(
       { userId: +body.toUserId },
-      { inc: body.amount }
+      { inc: +body.amount }
     );
     await this.transactionsService.create({
       userId: +body.toUserId,
       type: TransactionType.REPLENISHMENT,
-      sum: body.amount,
+      sum: +body.amount,
       description: 'Пополнение счёта',
     });
+
+    await this.eventEmitter.emit(
+      AcquiringEvents.DEPOSIT,
+      new AcquiringDepositEvent(+body.toUserId, +body.amount)
+    );
 
     return { ok: true };
   }
@@ -218,7 +222,8 @@ export class AcquiringService {
     const user = await this.usersService.find({ address: body.fromAddress });
 
     if (!user) {
-      throw new NotFoundException('Пользователь не найден');
+      // throw new NotFoundException('Пользователь не найден');
+      return { ok: false };
     }
 
     await this.usersService.decBalance(
@@ -232,6 +237,11 @@ export class AcquiringService {
       description: 'Вывод средств',
     });
 
+    await this.eventEmitter.emit(
+      AcquiringEvents.WITHDRAW,
+      new AcquiringDepositEvent(+user.userId, +body.amount)
+    );
+
     return { ok: true };
   }
 
@@ -241,6 +251,11 @@ export class AcquiringService {
   }
 
   async handleRuntimeError(body: AcquiringErrorWebhookDto) {
+    await this.eventEmitter.emit(
+      AcquiringEvents.ERROR,
+      new AcquiringErrorEvent(body.message)
+    );
+
     console.log('Runtime error webhook received:', body);
     return { ok: true };
   }

@@ -25,7 +25,7 @@ export class ReserveFundItem
   @Prop({ required: false })
   trainingId?: number;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: false, default: null })
   endDate!: Date | null;
 }
 

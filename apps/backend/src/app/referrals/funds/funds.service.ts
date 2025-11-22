@@ -150,6 +150,8 @@ export class FundsService {
 
       await this.incReserve(dto.sum);
 
+      console.log(newFundItem)
+
       return await this.reserveFundItemsRepository.create(newFundItem);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Ошибка';

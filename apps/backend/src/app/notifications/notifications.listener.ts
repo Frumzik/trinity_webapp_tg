@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   ReferralBuyStageEvent,
@@ -20,6 +25,10 @@ import {
   PurchaseEvents,
   PurchaseBuyEvent,
   PurchaseBuyStageEvent,
+  AcquiringEvents,
+  AcquiringDepositEvent,
+  AcquiringWithdrawEvent,
+  AcquiringErrorEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -28,6 +37,7 @@ import { UsersService } from '../account';
 export class NotificationsListener {
   constructor(
     private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService
   ) {}
 
@@ -300,7 +310,11 @@ ${sum} OM отправлены в Фонд Света`
   }
 
   @OnEvent(PurchaseEvents.BUY_STAGE)
-  async onPurchaseBuyStage({ userId, stage, stageLevel }: PurchaseBuyStageEvent) {
+  async onPurchaseBuyStage({
+    userId,
+    stage,
+    stageLevel,
+  }: PurchaseBuyStageEvent) {
     const user = await this.usersService.find({ userId });
 
     if (!user) {
@@ -311,5 +325,38 @@ ${sum} OM отправлены в Фонд Света`
       user.tgId as number,
       `Поздравляем! Вы открыли ${stage} Ступень Духа ${stageLevel} уровня`
     );
+  }
+
+  @OnEvent(AcquiringEvents.DEPOSIT)
+  async onAcquringDeposit({ userId, sum }: AcquiringDepositEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Баланс пополнен на ${sum} ОМ`
+    );
+  }
+
+  @OnEvent(AcquiringEvents.WITHDRAW)
+  async onAcquringWithdraw({ userId, sum }: AcquiringWithdrawEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Выведено ${sum} ОМ`
+    );
+  }
+
+  @OnEvent(AcquiringEvents.ERROR)
+  async onAcquringError({ message }: AcquiringErrorEvent) {
+    await this.notificationsService.sendBotError(message);
   }
 }

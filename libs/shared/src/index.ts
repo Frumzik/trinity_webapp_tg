@@ -40,3 +40,4 @@ export * from './funds/funds.contract.js';
 
 
 export * from './acquiring/acquiring.contract.js'
+export * from './acquiring/acquiring.events.js'
