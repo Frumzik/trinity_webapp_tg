@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import Footer from "../../widgets/footer/footer";
-import TopBar from "../../widgets/topbar/topbar";
+import TopBar from "../../widgets/topbarTextpage";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
@@ -8,6 +8,7 @@ import "./detailing.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
+import helpIcon from '../../assets/icons/helpIcon.svg';
 
 const formatName = (r: any) => {
   const u =
@@ -76,9 +77,18 @@ const Index = () => {
 
   return (
     <div className="app">
-      <TopBar onMenu={() => setMenuOpen(true)} />
-
-      <main className="screen">
+      <TopBar
+        // title="Ступени духа"
+        rightIconUrl={helpIcon}
+        onRightClick={() =>
+          window.open(
+            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
+            "_blank",
+            "noopener,noreferrer"
+          )
+        }
+      />
+      <main className="screen" style={{marginTop: 36}}>
         <Title
           right={
             <button
@@ -94,7 +104,7 @@ const Index = () => {
         <section className="scrollBox stack" style={{ marginTop: "20px" }}>
           <div className="list__referals-det">
             <div className="list__referals-title-det">
-              <div className="list__referals-title-up-det">Поколения</div>
+              <div className="list__referals-title-up-det">Поколение</div>
               <div className="list__referals-title-balance-det">{level}</div>
             </div>
           </div>
@@ -129,7 +139,7 @@ const Index = () => {
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
           <GradientButton href={inviteHref} target="_blank">
-            Пригласительная ссылка
+            Пригласить
           </GradientButton>
         </div>
       </div>

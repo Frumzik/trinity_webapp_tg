@@ -6,9 +6,10 @@ import "./modal.scss";
 export type PurchaseLevel = {
   id: string | number;
   title: string;
-  price: number;      // АКТУАЛЬНАЯ цена (discounted)
-  salePrice?: number;      // СТАРАЯ цена (до скидки)
+  price: number;
+  salePrice?: number;
   purchased?: boolean;
+  stepIndex?: number;
 };
 
 type Props = {
@@ -33,7 +34,7 @@ export default function LevelPurchaseModal({
                                              defaultSelectedId,
                                              rateText = "1 OM = 1 USDT",
                                              title = "Следующий уровень",
-                                             discountPercentAll = 8, // не используется, но оставлен в сигнатуре
+                                             discountPercentAll = 8,
                                              onClose,
                                              onPurchase,
                                              InfoIcon,
@@ -161,10 +162,14 @@ export default function LevelPurchaseModal({
             const isBought = !!l.purchased;
             const isSel = selected.includes(l.id);
 
-            const basePrice = l.salePrice ?? l.price; // старая цена (если есть), иначе price
-            const actualPrice = l.price;         // текущая / со скидкой
+            const basePrice = l.salePrice ?? l.price;
+            const actualPrice = l.price;
             const hasDiscount = !isBought && basePrice > actualPrice;
 
+            const stepNumber =
+              typeof l.stepIndex === "number"
+                ? l.stepIndex
+                : i;
             return (
               <button
                 key={l.id}
@@ -177,7 +182,7 @@ export default function LevelPurchaseModal({
                 aria-disabled={isBought}
               >
                 <div className="lp-cell-top">
-                  <span className="lp-step">{i + 1} ступень</span>
+                  <span className="lp-step">{stepNumber} ступень</span>
                   {isSel && !isBought && <span className="lp-tick" />}
                 </div>
 

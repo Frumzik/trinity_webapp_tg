@@ -20,7 +20,12 @@ import { useNavigate } from 'react-router-dom';
 
 const GENDER_OUT: Record<'m'|'f','Male'|'Female'> = { m: 'Male', f: 'Female' }
 const toMF = (g: unknown): 'm'|'f' => (g === 1 || g === 'Female' || g === 'FEMALE' || g === 'female' || g === 'f') ? 'f' : 'm'
-const toGenderStr = (g: unknown): 'Male'|'Female'|'' => (g === 1 || g === 'Female' || g === 'female' || g === 'FEMALE') ? 'Female' : (g === 0 || g === 'Male' || g === 'male' || g === 'MALE') ? 'Male' : ''
+const toGenderStr = (g: unknown): 'Male'|'Female'|'' =>
+  (g === 1 || g === 'Female' || g === 'female' || g === 'FEMALE')
+    ? 'Female'
+    : (g === 0 || g === 'Male' || g === 'male' || g === 'MALE')
+      ? 'Male'
+      : ''
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 
 export default function AccountPage() {
@@ -48,7 +53,6 @@ export default function AccountPage() {
   const hasFinPassword = !!user?.finPasswordHash
   const [showFinForm, setShowFinForm] = useState(false)
 
-
   const [language, setLanguage] = useState<'ru'>('ru')
   const [country, setCountry] = useState<'ru'>('ru')
 
@@ -64,15 +68,17 @@ export default function AccountPage() {
     setHeight(user.height != null ? String(user.height) : '')
     setWeight(user.weight != null ? String(user.weight) : '')
     setGender(toMF(user.gender as any))
+
+    // если пароля ещё нет – сразу показываем форму создания
     setShowFinForm(!user.finPasswordHash)
   }, [user, emailDirty])
 
+  // валидация только для профиля (рост/вес)
   const canSaveProfile = useMemo(() => {
     const hOk = !height || (+height >= 40 && +height <= 250)
     const wOk = !weight || (+weight >= 20 && +weight <= 250)
-    const finOk = !showFinForm || !finPass1 || finPass1 === finPass2
-    return hOk && wOk && finOk
-  }, [height, weight, showFinForm, finPass1, finPass2])
+    return hOk && wOk
+  }, [height, weight])
 
   const emailOk = useMemo(() => {
     if (!emailDirty) return true
@@ -93,29 +99,42 @@ export default function AccountPage() {
   }, [user, name, birth, height, weight, gender])
 
   const emailDirtyChanged = emailDirty && email.trim() !== initialEmailRef.current
-  const finDirty = showFinForm && finPass1.length > 0 && finPass1 === finPass2
-  const dirty = (profileDirty || emailDirtyChanged || finDirty) && emailOk
 
-  const onSave = async () => {
+  // для кнопки под полями пароля
+  const canSaveFin = finPass1.length > 0 && finPass1 === finPass2
+
+  // нижняя большая кнопка — только профиль + email
+  const dirty = (profileDirty || emailDirtyChanged) && emailOk
+
+  const onSaveProfile = async () => {
     const body: any = {}
     if (name.trim()) body.name = name.trim()
     if (birth) body.birthDate = new Date(birth).toISOString()
     if (height) body.height = Number(height)
     if (weight) body.weight = Number(weight)
     body.gender = GENDER_OUT[gender]
-    if (profileDirty) await updateProfile(body).unwrap()
+
+    if (profileDirty) {
+      await updateProfile(body).unwrap()
+    }
+
     if (emailDirtyChanged && emailOk) {
       await updateEmail({ email: email.trim() }).unwrap()
       initialEmailRef.current = email.trim()
       setEmailDirty(false)
     }
-    if (finDirty) {
-      await updateFinPassword({ finPassword: finPass1 }).unwrap()
-      setFinPass1('')
-      setFinPass2('')
-      setShowFinForm(false)
+
+    if (profileDirty || emailDirtyChanged) {
+      alert('Сохранено')
     }
-    alert('Сохранено')
+  }
+
+  const onSaveFin = async () => {
+    if (!canSaveFin) return
+    await updateFinPassword({ finPassword: finPass1 }).unwrap()
+    setFinPass1('')
+    setFinPass2('')
+    setShowFinForm(false)
   }
 
   return (
@@ -133,11 +152,37 @@ export default function AccountPage() {
             onChange={(v) => { setEmail(v); setEmailDirty(true) }}
             placeholder="email@example.com"
           />
-          <TextField label="Дата рождения*" type="date" value={birth} onChange={setBirth} placeholder="01.01.2000"/>
+          <TextField
+            label="Дата рождения*"
+            type="date"
+            value={birth}
+            onChange={setBirth}
+            placeholder="01.01.2000"
+          />
 
           <div className="acc__grid2">
-            <TextField label="Рост (cm)" value={height} onChange={setHeight} type="number" placeholder="175" spinner step={1} min={40} max={250}/>
-            <TextField label="Вес (kg)" value={weight} onChange={setWeight} type="number" placeholder="65" spinner step={1} min={20} max={250}/>
+            <TextField
+              label="Рост (cm)"
+              value={height}
+              onChange={setHeight}
+              type="number"
+              placeholder="175"
+              spinner
+              step={1}
+              min={40}
+              max={250}
+            />
+            <TextField
+              label="Вес (kg)"
+              value={weight}
+              onChange={setWeight}
+              type="number"
+              placeholder="65"
+              spinner
+              step={1}
+              min={20}
+              max={250}
+            />
           </div>
 
           <Segmented
@@ -171,21 +216,63 @@ export default function AccountPage() {
           />
         </section>
 
+        {/* форма создания/смены защитного пароля */}
         {showFinForm && (
           <section className="acc__card card2-nth">
-            <div className="acc__title">{hasFinPassword ? 'Сменить фин.пароль' : 'Создать фин.пароль'}</div>
-            <TextField label="Введите" type="password" value={finPass1} onChange={setFinPass1} maxLength={32}/>
-            <TextField label="Повторить" type="password" value={finPass2} onChange={setFinPass2} maxLength={32}/>
+            <div className="acc__title">
+              {hasFinPassword ? 'Сменить защитный пароль' : 'Создать защитный пароль'}
+            </div>
+            <TextField
+              label="Введите"
+              type="password"
+              value={finPass1}
+              onChange={setFinPass1}
+              maxLength={32}
+            />
+            <TextField
+              label="Повторить"
+              type="password"
+              value={finPass2}
+              onChange={setFinPass2}
+              maxLength={32}
+            />
+
+            <div className="acc__fin-actions">
+              <GradientButton
+                onClick={onSaveFin}
+                disabled={!canSaveFin || savingFin}
+              >
+                Сохранить
+              </GradientButton>
+            </div>
           </section>
         )}
 
+        {/* Блок "Безопасность" */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Безопасность</div>
-          <button className="acc__row" onClick={() => { setShowFinForm(true); setFinPass1(''); setFinPass2(''); }}>
-            <span>Сменить защитный пароль</span><span className="acc__chev">Изменить <img src={arrowRight} alt=""/></span>
-          </button>
+
+          {/* Пункт "Защитный пароль" — только если он уже создан */}
+          {hasFinPassword && (
+            <button
+              className="acc__row"
+              onClick={() => {
+                setShowFinForm(true)
+                setFinPass1('')
+                setFinPass2('')
+              }}
+            >
+              <span>Защитный пароль</span>
+              {/* точки поверх текущего фона, без текста "Изменить" */}
+              <span className="acc__chev acc__chev-password">..........</span>
+            </button>
+          )}
+
           <button className="acc__row" onClick={() => nav('/security/change-pin')}>
-            <span>Сменить PIN-код</span><span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
+            <span>Сменить PIN-код</span>
+            <span className="acc__chev">
+              Изменить <img src={arrowRight} alt=""/>
+            </span>
           </button>
         </section>
 
@@ -216,10 +303,14 @@ export default function AccountPage() {
         </section>
       </main>
 
+      {/* нижняя большая кнопка — только профиль + email */}
       {dirty && (
         <div className="gbtn-bar egg">
           <div className="gbtn-bar__inner ">
-            <GradientButton onClick={onSave} disabled={!canSaveProfile || !emailOk || savingProfile || savingFin}>
+            <GradientButton
+              onClick={onSaveProfile}
+              disabled={!canSaveProfile || !emailOk || savingProfile}
+            >
               Сохранить
             </GradientButton>
           </div>

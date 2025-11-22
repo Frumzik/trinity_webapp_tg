@@ -157,7 +157,7 @@
   font-style: normal;
   font-weight: 500;
   border-radius: 12px;
-  background: rgba(255, 106, 204, 0.84);
+  background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
   box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
 }
 .incomeCard.is-clickable {

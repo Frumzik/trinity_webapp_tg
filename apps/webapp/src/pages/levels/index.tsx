@@ -14,6 +14,7 @@ import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 import { useGetUserQuery } from "../../shared/api/user.api";
+import { useLocation } from 'react-router-dom';
 
 export type LevelItem = {
   id: string;
@@ -154,6 +155,7 @@ type BNode = {
 export default function Index() {
   const navigate = useAppNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -190,6 +192,27 @@ export default function Index() {
       return A - B;
     });
   }, [root]);
+
+  const [backTo, setBackTo] = useState<string>("/home"); // значение по умолчанию
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const fromQuery = searchParams.get("from");
+
+    const fromState = (location.state as any)?.from;
+
+    const stored = sessionStorage.getItem("levelsBackTo");
+
+    const next = fromQuery || fromState || stored || "/home";
+
+    setBackTo(next);
+
+    if (fromQuery || fromState) {
+      try {
+        sessionStorage.setItem("levelsBackTo", next);
+      } catch {}
+    }
+  }, [location]);
 
   const groups = useMemo(() => {
     const nums = levelNodes
@@ -243,7 +266,7 @@ export default function Index() {
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
     () =>
-      stages.map((s) => {
+      stages.map((s, idx) => {
         const status: LevelItem["status"] =
           s.progressStatus === "completed" || isTrainingCompletedLocal(s)
             ? "done"
@@ -251,12 +274,18 @@ export default function Index() {
               ? "available"
               : "locked";
 
+        const stepIndex =
+          typeof s.stage === "number"
+            ? s.stage
+            : numFromTitle(s.title) ?? idx;
+
         return {
           id: String(s.trainingId),
           title: s.title,
           price: s.salePrice ?? s.price ?? 0,
           salePrice: s.salePrice != null ? s.price ?? undefined : undefined,
           purchased: status !== "locked",
+          stepIndex,
         };
       }),
     [stages]
@@ -390,6 +419,7 @@ export default function Index() {
             "noopener,noreferrer"
           )
         }
+        backTo={backTo}
       />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
@@ -447,7 +477,7 @@ export default function Index() {
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
             rateText="USDT = OM"
-            InfoIcon={(props) => <img src={Info} {...props} />}
+            // InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
           />

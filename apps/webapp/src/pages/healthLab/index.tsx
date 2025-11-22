@@ -47,7 +47,7 @@ export default function HealthLabIndex() {
     return (
       roots.find((r) => r.tag === "health_lab") ||
       roots.find(
-        (r) => r.title?.trim().toLowerCase() === "лаборатория здоровья"
+        (r) => r.title?.trim().toLowerCase() === "лаборатория Здоровья"
       )
     );
   }, [roots]);
@@ -75,7 +75,7 @@ export default function HealthLabIndex() {
 
       <main className="screen">
         <div className="supportPage">
-          <Title>Лаборатория здоровья</Title>
+          <Title>Лаборатория Здоровья</Title>
 
           {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
 

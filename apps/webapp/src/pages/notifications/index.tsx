@@ -85,7 +85,7 @@ export default function NotificationsPage() {
         <div className="notif__block">
           <div className="notif__row">
             <div className="notif__col">
-              <div className="notif__title">Уведомления о контенте</div>
+              <div className="notif__title">Уведомления о новом контенте</div>
               <div className="notif__sub">Получать ежедневный контент</div>
             </div>
             <Switch
@@ -98,8 +98,8 @@ export default function NotificationsPage() {
         <div className="notif__block">
           <div className="notif__row">
             <div className="notif__col">
-              <div className="notif__title">Промо-предложения</div>
-              <div className="notif__sub">Уведомлять о специальных ценах</div>
+              <div className="notif__title">Уведомления о специальных предложениях</div>
+              <div className="notif__sub">Уведомлять о специальных ценностях</div>
             </div>
             <Switch
               checked={promoOn}

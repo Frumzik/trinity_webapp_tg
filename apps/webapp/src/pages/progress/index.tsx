@@ -1,22 +1,15 @@
 import { useMemo, useState } from 'react';
 
 import MiniCardSlider from "../../widgets/card-slider-homePage";
-import TopBar from "../../widgets/topbarlk/topbarlk";
+import TopBar from "../../widgets/topbarprogress/topbarpr";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
-import FeatureTile from "../../widgets/tiles/FeatureTile";
 
 import Blur from "../../../public/blurs/blur-1.png"
-import Card1 from "../../assets/home/card1.png";
-import Card2 from "../../assets/home/card2.png";
-import Card3 from "../../assets/home/card3.png";
-import Card4 from "../../assets/home/card4.png";
-import Card5 from "../../assets/home/card5.png";
-import Tile1 from "../../assets/homePage/tile1.png";
-import Tile2 from "../../assets/homePage/tile2.png";
-
-import "./home.scss";
-import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
+import bg from "../../../public/bg/progress_bg.png"
+import infoIcon from "../../assets/icons/popup.svg"
+import lockImg from "../../assets/icons/lock.svg"
+import "./progress.scss";
 
 import {
   useAddBannerViewMutation,
@@ -28,6 +21,7 @@ import {
   useGetCurrentStageQuery
 } from "../../shared/api/learning.api";
 import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import LevelProgress from '../level/ui/LevelProgress';
 
 type BNode = {
   _id: string;
@@ -181,7 +175,18 @@ export default function SupportPage() {
     const path = url.startsWith('/') ? url : `/${url}`;
     nav(path);
   };
+  const allTrainings = useMemo(
+    () => allNodes.filter((n) => n.type === "training"),
+    [allNodes]
+  );
 
+// всего тренингов
+  const totalTrainings = allTrainings.length;
+
+// сколько тренингов завершено
+  const completedTrainings = allTrainings.filter(
+    (t) => t.progressStatus === "completed"
+  ).length;
   const handleHealthLabClick = () => {
     const lab = healthLabRoot;
     if (!lab) {
@@ -206,59 +211,21 @@ export default function SupportPage() {
       <img src={Blur} className={"blur"} alt="" />
       <TopBar onMenu={() => setMenuOpen(true)} />
 
-      <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
-        <MiniCardSlider items={banners} onItemClick={handleCardClick} />
-
-        <div className="supportPage" style={{ marginTop: 10 }}>
-          <div className="supportPage__cards" style={{ gap: "10px" }}>
-            <FeatureTile
-              title="Академия Духа"
-              description=""
-              bgImageUrl={Tile1}
-              rightImageUrl={Card1}
-              className="featureTile--altFont"
-              enabled
-              to="/academy"
-            />
-            <FeatureTile
-              title="Все Продукты"
-              description=""
-              bgImageUrl={Tile2}
-              enabled
-              rightImageUrl={Card2}
-              className="featureTile--altFont"
-              to="/products"
-            />
-
-            <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
-              <ReferralsCard
-                imageUrl={Card4}
-                titleTop="Пройти Практику"
-                labelBottom="Перейти"
-                href="/practice"
-                className="refCard--imgRight refCard--166x123 "
-                background="none"
-              />
-              <ReferralsCard
-                imageUrl={Card3}
-                titleTop="Ступени Духа"
-                labelBottom={currentStageLabel || "Ступени Духа"}
-                href="/levels?from=/home"
-                className="refCard--imgRight refCard--166x123 "
-                background="none"
-              />
-            </div>
-
-            <FeatureTile
-              title="Лаборатория Здоровья"
-              description=""
-              bgImageUrl={Tile2}
-              enabled
-              rightImageUrl={Card5}
-              className="featureTile--altFont"
-              onClick={handleHealthLabClick}
-            />
+      <main className="screen" style={{ padding: "5px 0px 0px 0px" }}>
+        <div className="progressPage-bar" style={{ padding: "5px 16px 0px 16px" }}>
+          <div className="progress-label">
+            <div className="progress-label-title">Прогресс</div>
+            <img src={infoIcon} alt="" />
           </div>
+          <LevelProgress
+            current={completedTrainings}
+            total={totalTrainings || 1}
+            variant="secondary"
+          />
+        </div>
+        <div className="progressPage" style={{ marginTop: 10 }}>
+          <img className={"progressPage-img"} src={bg} alt="bg" />
+          <img className={"lockimg"} src={lockImg} alt="" />
         </div>
       </main>
 

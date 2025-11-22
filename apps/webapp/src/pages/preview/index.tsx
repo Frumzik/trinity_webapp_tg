@@ -201,7 +201,7 @@ export default function PreviewPage() {
               onClick={handlePurchase}
               disabled={isBuying || isUserLoading}
             >
-              {isBuying ? "Покупка..." : "Приобрести"}
+              {isBuying ? "Покупка..." : "Пройти"}
             </GradientButton>
           </>
         )}

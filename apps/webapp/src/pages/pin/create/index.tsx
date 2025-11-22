@@ -103,7 +103,6 @@ export default function PinCreatePage() {
         ...(partnerIdNum !== undefined ? { partnerId: partnerIdNum } : {}),
       }).unwrap();
 
-      // 2. Сразу же логиним тем же PIN
       const resp = await loginTg({ type: 'TG', tgId, pin: pin1 }).unwrap();
       const token = pickToken(resp);
       if (!token) throw new Error('Токен не получен');
@@ -128,8 +127,9 @@ export default function PinCreatePage() {
   }, []);
   return (
     <div className="pin">
-      <TopBar title="Пин код" hideBackButton />
+      {/*<TopBar title={"Добро пожаловать в ТРИНИТИ!\n Установите PIN-код, чтобы защитить ваш доступ."} hideBackButton />*/}
       <main className="pin__main">
+        <div className="pin__main-title">Добро пожаловать в ТРИНИТИ! Установите PIN-код, чтобы защитить ваш доступ.</div>
         <div className="pin__form">
           <div className="pin__field">
             <input

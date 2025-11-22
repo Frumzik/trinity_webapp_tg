@@ -59,19 +59,18 @@ export default function ProfileViewPage() {
   const [fin2, setFin2] = useState('')
   const [updateFinPassword, { isLoading: savingFin }] = useUpdateFinPasswordMutation()
 
-  // локальный стейт для языка и страны (ничего не делают)
   const [language, setLanguage] = useState<'ru'>('ru')
   const [country, setCountry] = useState<'ru'>('ru')
 
+  // если у пользователя ещё нет защитного пароля — сразу показываем форму создания
   useEffect(() => {
     setShowFinForm(!hasFin)
   }, [hasFin])
 
   const canSaveFin = fin1.length > 0 && fin1 === fin2
-  const dirty = showFinForm && canSaveFin
 
   const onSave = async () => {
-    if (!dirty) return
+    if (!canSaveFin) return
     await updateFinPassword({ finPassword: fin1 }).unwrap()
     setFin1('')
     setFin2('')
@@ -79,9 +78,18 @@ export default function ProfileViewPage() {
     await refetch()
   }
 
+  const isCreating = !hasFin
+  const finTitle = isCreating ? 'Создать защитный пароль' : 'Сменить защитный пароль'
+
   return (
     <div className="pv">
-      <TopBar title="Профиль" rightIconUrl={SettingsIcon} onRightClick={() => nav("/account")} />
+      <TopBar
+        title="Профиль"
+        rightIconUrl={SettingsIcon}
+        onRightClick={() => nav("/account")}
+
+      />
+
       <main className="pv__main">
         <div className="pv__card">
           {rows.map(([k, v]) => (
@@ -92,27 +100,66 @@ export default function ProfileViewPage() {
           ))}
         </div>
 
+        {/* Блок «Безопасность» */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Безопасность</div>
-          <button className="acc__row" onClick={() => { setShowFinForm(true); setFin1(''); setFin2('') }}>
-            <span>Сменить защитный пароль</span>
-            <span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
-          </button>
+
+          {/* Пункт "Защитный пароль" показываем только если он уже создан */}
+          {hasFin && (
+            <button
+              className="acc__row"
+              onClick={() => {
+                setShowFinForm(true)
+                setFin1('')
+                setFin2('')
+              }}
+            >
+              <span>Защитный пароль</span>
+              {/* просто точки поверх текущего фона, без стрелки */}
+              <span className="acc__chev acc__chev-password">..........</span>
+            </button>
+          )}
+
           <button className="acc__row" onClick={() => nav('/security/change-pin')}>
             <span>Сменить PIN-код</span>
-            <span className="acc__chev">Изменить <img src={arrowRight} alt="" /></span>
+            <span className="acc__chev">
+              Изменить <img src={arrowRight} alt="" />
+            </span>
           </button>
         </section>
 
+        {/* Форма создания/смены защитного пароля */}
         {showFinForm && (
           <section className="acc__card card2-nth">
-            <div className="acc__title">{hasFin ? 'Сменить фин.пароль' : 'Создать фин.пароль'}</div>
-            <TextField label="Введите" type="password" value={fin1} onChange={setFin1} maxLength={32} />
-            <TextField label="Повторить" type="password" value={fin2} onChange={setFin2} maxLength={32} />
+            <div className="acc__title">{finTitle}</div>
+
+            <TextField
+              label="Введите"
+              type="password"
+              value={fin1}
+              onChange={setFin1}
+              maxLength={32}
+            />
+            <TextField
+              label="Повторить"
+              type="password"
+              value={fin2}
+              onChange={setFin2}
+              maxLength={32}
+            />
+
+            <div className="acc__fin-actions">
+              <GradientButton
+                onClick={onSave}
+                disabled={!canSaveFin || savingFin || isFetching}
+              >
+                Сохранить
+              </GradientButton>
+            </div>
           </section>
         )}
 
-        {/* Настройки приложения с выпадающими списками */}
+        {/* Настройки приложения */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Настройки приложения</div>
 
@@ -139,16 +186,6 @@ export default function ProfileViewPage() {
           </div>
         </section>
       </main>
-
-      {dirty && (
-        <div className="gbtn-bar egg">
-          <div className="gbtn-bar__inner">
-            <GradientButton onClick={onSave} disabled={savingFin || isFetching}>
-              Сохранить
-            </GradientButton>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
