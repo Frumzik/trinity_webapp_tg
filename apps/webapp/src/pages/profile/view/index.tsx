@@ -62,7 +62,6 @@ export default function ProfileViewPage() {
   const [language, setLanguage] = useState<'ru'>('ru')
   const [country, setCountry] = useState<'ru'>('ru')
 
-  // если у пользователя ещё нет защитного пароля — сразу показываем форму создания
   useEffect(() => {
     setShowFinForm(!hasFin)
   }, [hasFin])
@@ -100,11 +99,9 @@ export default function ProfileViewPage() {
           ))}
         </div>
 
-        {/* Блок «Безопасность» */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Безопасность</div>
 
-          {/* Пункт "Защитный пароль" показываем только если он уже создан */}
           {hasFin && (
             <button
               className="acc__row"

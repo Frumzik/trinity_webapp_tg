@@ -279,6 +279,7 @@ export default function Index() {
                 rightImageUrl={Card5}
                 className="left-block-color"
                 to="/health-lab"
+                showImageWhenDisabled
               />
             </ScrollPanel>
           </div>

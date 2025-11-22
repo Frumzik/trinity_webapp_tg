@@ -14,7 +14,7 @@ type Props = {
   submit: (value: number, to: string) => Promise<void>;
 };
 
-const PERCENT_FEE = 5;
+const PERCENT_FEE = 0.5;
 
 function avatarFrom(username?: string | null, name?: string | null) {
   const seed = username || name || "user";
@@ -71,7 +71,7 @@ export default function WithdrawForm({
     return [i, f];
   }, [amount]);
 
-  const fee = useMemo(() => (amount * PERCENT_FEE) / 100, [amount]);
+  const fee = useMemo(() => (amount) / 100, [amount]);
   const total = useMemo(() => amount + fee, [amount, fee]);
 
   const totalText = useMemo(
@@ -131,9 +131,10 @@ export default function WithdrawForm({
 
       <div className="wform__fee">
         Комиссия составит <b>{fee.toFixed(2)} OM</b>
-        <div className="wform__fee-sub">(фиксированная {PERCENT_FEE}%)</div>
+        <div className="wform__fee-sub">(фиксированная {PERCENT_FEE} USDT)</div>
         {!hasBalance && (
-          <div className="wform__fee-error">Недостаточно средств для вывода</div>
+
+          <div className="wform__fee-error"><br />Недостаточно OM для вывода</div>
         )}
       </div>
 
@@ -160,7 +161,7 @@ export default function WithdrawForm({
             onClick={onSend}
             disabled={!canSend}
           >
-            ПОЛУЧИТЬ {totalText} USDT
+            ПОЛУЧИТЬ {amount.toFixed(2)} USDT
           </GradientButton>
         </div>
       </div>
