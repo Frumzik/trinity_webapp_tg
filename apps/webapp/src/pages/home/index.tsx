@@ -253,7 +253,7 @@ export default function SupportPage() {
               title="Лаборатория Здоровья"
               description=""
               bgImageUrl={Tile2}
-              enabled
+              enabled={false}
               rightImageUrl={Card5}
               className="featureTile--altFont"
               onClick={handleHealthLabClick}
