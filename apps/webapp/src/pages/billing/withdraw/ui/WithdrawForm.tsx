@@ -106,7 +106,7 @@ export default function WithdrawForm({
       </div>
 
       <div className="wform__amount">
-        <div className="wform__label">Введите сумму</div>
+        <div className="wform__label">Введите количество OM</div>
         <div className="wform__input-wrap">
           <input
             className="wform__input"
@@ -130,7 +130,7 @@ export default function WithdrawForm({
       </div>
 
       <div className="wform__fee">
-        Комиссия составит <b>{fee.toFixed(2)} $</b>
+        Комиссия составит <b>{fee.toFixed(2)} OM</b>
         <div className="wform__fee-sub">(фиксированная {PERCENT_FEE}%)</div>
         {!hasBalance && (
           <div className="wform__fee-error">Недостаточно средств для вывода</div>
@@ -140,14 +140,14 @@ export default function WithdrawForm({
       <div className="wform__addr">
         <input
           className="wform__addr-input"
-          placeholder="Вставьте адрес USDT BEP 20"
+          placeholder="Вставьте адрес USDT (BEP-20)"
           value={addr}
           onChange={(e) => setAddr(e.target.value)}
         />
       </div>
 
       <div className="wform__agree">
-        Нажимая кнопку «вывести»,<br />
+        Нажимая кнопку «получить»,<br />
         я подтверждаю, что ознакомился
         <br />
         с <Link to="/policy">Правилами сервиса</Link>
@@ -160,7 +160,7 @@ export default function WithdrawForm({
             onClick={onSend}
             disabled={!canSend}
           >
-            ВЫВЕСТИ $ {totalText}
+            ПОЛУЧИТЬ {totalText} USDT
           </GradientButton>
         </div>
       </div>

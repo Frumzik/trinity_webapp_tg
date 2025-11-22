@@ -55,12 +55,11 @@ export default function WalletPage() {
       <TopBar title="Кошелек" />
       <DepositInfo
         avatarSrc={avatarUrl}
-        title="Пополнить счёт"
-        captionTop={"Это ваш адрес для пополнения"}
-        warnTop={"Скопируйте и внимательно проверьте, один"}
+        title="Добавить ОМ"
+        warnTop={"Скопируйте и внимательно проверьте свой адрес для пополнения, один"}
         warnStrong={" пропущенный символ приведет к потере средств!"}
         warnBottom=""
-        note={"Убедитесь в корректности сети,\n которую вы выбрали для вывода!"}
+        note={"Убедитесь в корректности сети,\n которую вы выбрали!\n\n\n1 OM = 1 USDT\n\nUSDT (BEP-20)"}
         address={addr.address}
         cta="Скопировать адрес"
       />

@@ -60,18 +60,18 @@ export default function FaqPage() {
             <TopBar title="Частые вопросы" />
 
             <main className="faq__main">
-                <label className="faq__search">
-                    <span className="faq__search-ico" aria-hidden ><img src={SearchIcon} alt=""/></span>
-                    <input
-                        className="faq__search-input"
-                        placeholder="Найти…"
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        type="search"
-                        autoCorrect="off"
-                        spellCheck={false}
-                    />
-                </label>
+                {/*<label className="faq__search">*/}
+                {/*    <span className="faq__search-ico" aria-hidden ><img src={SearchIcon} alt=""/></span>*/}
+                {/*    <input*/}
+                {/*        className="faq__search-input"*/}
+                {/*        placeholder="Найти…"*/}
+                {/*        value={query}*/}
+                {/*        onChange={e => setQuery(e.target.value)}*/}
+                {/*        type="search"*/}
+                {/*        autoCorrect="off"*/}
+                {/*        spellCheck={false}*/}
+                {/*    />*/}
+                {/*</label>*/}
 
                 <ul className="faq__list">
                     {list.map(i => (

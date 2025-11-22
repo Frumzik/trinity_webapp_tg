@@ -13,16 +13,27 @@ import Card3 from "../../assets/products/card3.png";
 import Tile2 from "../../assets/homePage/tile3.png";
 import Tile1 from "../../assets/homePage/tile1.png";
 
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import {
+  useGetTrainingTreeQuery,
+  useGetCurrentStageQuery,
+} from "../../shared/api/learning.api";
 import "./academy.scss";
-import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 
 type BNode = {
   tag?: string | null;
   stage?: number | null;
   stageLevel?: number | null;
   progressStatus?: "not_started" | "in_progress" | "completed";
+  accessStatus?: "available" | "locked";
+  title?: string | null;
+  trainingId?: number;
   childrens?: BNode[];
+};
+
+const numFromTitle = (t?: string | null) => {
+  const m = (t || "").match(/\d+/);
+  return m ? Number(m[0]) : undefined;
 };
 
 export default function Index() {
@@ -30,35 +41,97 @@ export default function Index() {
   const navigate = useAppNavigate();
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
+  const {
+    data: currentStageRes,
+    isLoading: isStageLoading,
+    isError: isStageError,
+  } = useGetCurrentStageQuery();
 
   const spiritRoot: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
     return roots.find((r) => r.tag === "stages_spirit");
   }, [data]);
 
-  const { totalStages, completedStages } = useMemo(() => {
-    const levels = (spiritRoot?.childrens ?? []).filter(
+  const { totalStages, lastBought } = useMemo(() => {
+    if (!spiritRoot) return { totalStages: 0, lastBought: 0 };
+
+    const levels = (spiritRoot.childrens ?? []).filter(
       (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
     );
 
-    const stages = levels
-      .flatMap((lvl) => (lvl.childrens ?? []))
-      .filter((s) => s.tag === "stage" || typeof s.stage === "number");
+    if (!levels.length) return { totalStages: 0, lastBought: 0 };
 
-    const total = stages.length;
-    const done = stages.filter((s) => s.progressStatus === "completed").length;
+    const currentStage = currentStageRes?.data as BNode | undefined;
+    let currentLevel: BNode | undefined;
 
-    return { totalStages: total, completedStages: done };
-  }, [spiritRoot]);
+    // попробовать найти уровень по stageLevel
+    if (typeof currentStage?.stageLevel === "number") {
+      currentLevel = levels.find(
+        (lvl) => lvl.stageLevel === currentStage.stageLevel
+      );
+    }
+
+    // если не нашли — ищем уровень, в котором есть текущая ступень (trainingId)
+    if (!currentLevel && typeof currentStage?.trainingId === "number") {
+      currentLevel = levels.find((lvl) =>
+        (lvl.childrens ?? []).some(
+          (s) =>
+            (s.tag === "stage" || typeof s.stage === "number") &&
+            s.trainingId === currentStage.trainingId
+        )
+      );
+    }
+
+    // вообще ничего не нашли — берем первый уровень
+    if (!currentLevel) currentLevel = levels[0];
+
+    const stages = (currentLevel.childrens ?? []).filter(
+      (s) => s.tag === "stage" || typeof s.stage === "number"
+    );
+
+    if (!stages.length) return { totalStages: 0, lastBought: 0 };
+
+    const sortedStages = [...stages].sort((a, b) => {
+      const A =
+        typeof a.stage === "number" ? a.stage : numFromTitle(a.title) ?? 0;
+      const B =
+        typeof b.stage === "number" ? b.stage : numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
+
+    const total = sortedStages.length;
+
+    let lastBoughtIdx = 0;
+    let hasAnyBought = false;
+
+    for (const s of sortedStages) {
+      const idx =
+        typeof s.stage === "number" ? s.stage : numFromTitle(s.title) ?? 0;
+
+      const isBought =
+        s.accessStatus === "available" || s.progressStatus === "completed";
+
+      if (isBought) {
+        hasAnyBought = true;
+        if (idx > lastBoughtIdx) lastBoughtIdx = idx;
+      }
+    }
+
+    if (!hasAnyBought) {
+      return { totalStages: total, lastBought: 0 };
+    }
+
+    return { totalStages: total, lastBought: lastBoughtIdx };
+  }, [spiritRoot, currentStageRes]);
 
   const desc =
-    isLoading
+    isLoading || isStageLoading
       ? "Загрузка…"
-      : isError
-        ? "Не удалось загрузить"
+      : isError || isStageError
+        ? "Ступени духа"
         : totalStages > 0
-          ? `Пройдено ${completedStages}/${totalStages}`
-          : "—";
+          ? `Пройдено ${lastBought}/${totalStages}`
+          : "Пройдено 0/0";
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
@@ -69,11 +142,15 @@ export default function Index() {
           <Title
             right={
               isError ? (
-                <button className="icon-btn" onClick={() => refetch()} aria-label="Обновить" />
+                <button
+                  className="icon-btn"
+                  onClick={() => refetch()}
+                  aria-label="Обновить"
+                />
               ) : null
             }
           >
-            Академия Души
+            Академия Духа
           </Title>
 
           <div className="supportPage__cards">
@@ -95,7 +172,7 @@ export default function Index() {
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
                 enabled
-                to="/levels"
+                to="/levels?from=/academy"
                 className={"left-block-color"}
               />
 
@@ -125,7 +202,9 @@ export default function Index() {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={() => navigate(-1)}>Назад</GradientButton>
+          <GradientButton onClick={() => navigate("/home")}>
+            Назад
+          </GradientButton>
         </div>
       </div>
 

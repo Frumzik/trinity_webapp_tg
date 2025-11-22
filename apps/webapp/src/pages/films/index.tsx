@@ -116,7 +116,7 @@ export default function Index() {
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  const group = 1; // на будущее, если захочешь группировать
+  const group = 1;
 
   const filmItems: LevelItem[] = useMemo(() => {
     const roots = (data?.data ?? []) as unknown as BNode[];
@@ -176,7 +176,6 @@ export default function Index() {
     totalOM: number;
     discountedOM?: number;
   }) => {
-    // пока покупки не делаем
     setModalOpen(false);
   };
 
@@ -245,7 +244,6 @@ export default function Index() {
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
             rateText="1 OM = 1 USDT"
-            InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
           />

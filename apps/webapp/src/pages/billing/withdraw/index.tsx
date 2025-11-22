@@ -14,8 +14,8 @@ export default function WithdrawPage() {
     <div className="withdraw">
       <TopBar title="Кошелек" />
       <WithdrawForm
-        title="Получить"
-        subtitle="на кошелек"
+        title="Получить Вознаграждения"
+        subtitle=""
         balance={balance}
         loading={isLoading}
         submit={async (value, address) => {
