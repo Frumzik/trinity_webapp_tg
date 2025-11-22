@@ -257,6 +257,7 @@ export default function SupportPage() {
               rightImageUrl={Card5}
               className="featureTile--altFont"
               onClick={handleHealthLabClick}
+              showImageWhenDisabled
             />
           </div>
         </div>
