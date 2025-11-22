@@ -169,16 +169,6 @@ export default function PractisePage() {
                     );
                   })}
                 </ScrollPanel>
-
-                <FeatureTile
-                  title="Лаборатория Здоровья"
-                  description=""
-                  bgImageUrl={Card1}
-                  rightImageUrl={Card5}
-                  enabled
-                  className="left-block-big left-block-color"
-                  onClick={handleHealthLabClick}
-                />
               </>
             )}
           </div>
