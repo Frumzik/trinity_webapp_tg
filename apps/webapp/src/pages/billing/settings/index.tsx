@@ -61,7 +61,7 @@ export default function BillingSettingsPage() {
               onClick={() => nav('/notifications')}
             />
             <SettingsRow
-              label="Управление подпиской"
+              label="Управление доступом"
               onClick={() => nav('/subscription')}
             />
           </div>

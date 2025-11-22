@@ -23,13 +23,16 @@ import {
   useGetBannersQuery,
 } from '../../shared/api/banners.api';
 
-import { useGetTrainingTreeQuery, useGetCurrentStageQuery } from "../../shared/api/learning.api";
+import {
+  useGetTrainingTreeQuery,
+  useGetCurrentStageQuery
+} from "../../shared/api/learning.api";
 import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type BNode = {
   _id: string;
   trainingId: number;
-  type: "training" | "product";
+  type: "training" | "product" | "practise";
   tag?: string | null;
   title: string;
   description?: string | null;
@@ -66,8 +69,18 @@ export default function SupportPage() {
   const allNodes = useMemo(() => {
     return (tree?.data ?? []) as BNode[];
   }, [tree]);
+
   const stagesRoot = useMemo(() => {
-    return allNodes.find((r) => r.tag === "stages_spirit" && (r.parentId == null));
+    return allNodes.find(
+      (r) => r.tag === "stages_spirit" && r.parentId == null
+    );
+  }, [allNodes]);
+
+  // 🔹 Корневой узел Лаборатории Здоровья (trainingId 30)
+  const healthLabRoot = useMemo(() => {
+    return allNodes.find(
+      (r) => r.tag === "health_lab" && r.parentId == null
+    );
   }, [allNodes]);
 
   const fallbackStageLabel = useMemo(() => {
@@ -169,6 +182,25 @@ export default function SupportPage() {
     nav(path);
   };
 
+  const handleHealthLabClick = () => {
+    const lab = healthLabRoot;
+    if (!lab) {
+      nav("/health-lab");
+      return;
+    }
+
+    if (lab.accessStatus === "available") {
+      nav("/health-lab");
+    } else {
+      nav("/preview", {
+        state: {
+          trainingId: lab.trainingId,
+          returnTo: "/health-lab",
+        },
+      });
+    }
+  };
+
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <img src={Blur} className={"blur"} alt="" />
@@ -177,10 +209,10 @@ export default function SupportPage() {
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <MiniCardSlider items={banners} onItemClick={handleCardClick} />
 
-        <div className="supportPage" style={{marginTop:10}}>
+        <div className="supportPage" style={{ marginTop: 10 }}>
           <div className="supportPage__cards" style={{ gap: "10px" }}>
             <FeatureTile
-              title="Академия Души"
+              title="Академия Духа"
               description=""
               bgImageUrl={Tile1}
               rightImageUrl={Card1}
@@ -189,7 +221,7 @@ export default function SupportPage() {
               to="/academy"
             />
             <FeatureTile
-              title="Все продукты"
+              title="Все Продукты"
               description=""
               bgImageUrl={Tile2}
               enabled
@@ -211,20 +243,20 @@ export default function SupportPage() {
                 imageUrl={Card3}
                 titleTop="Ступени Духа"
                 labelBottom={currentStageLabel || "Ступени Духа"}
-                href="/levels"
+                href="/levels?from=/home"
                 className="refCard--imgRight refCard--166x123 "
                 background="none"
-                />
+              />
             </div>
 
             <FeatureTile
-              title="Лаборатория здоровья"
+              title="Лаборатория Здоровья"
               description=""
               bgImageUrl={Tile2}
               enabled
               rightImageUrl={Card5}
               className="featureTile--altFont"
-              to="/health-lab"
+              onClick={handleHealthLabClick}
             />
           </div>
         </div>

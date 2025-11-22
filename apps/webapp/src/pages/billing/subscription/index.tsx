@@ -53,8 +53,8 @@ function Bullet({ children }: { children: string }) {
 }
 
 export default function SubscriptionManagePage({
-                                                 priceYearUSD = 69.99,
-                                                 priceMonthUSD = 6.49,
+                                                 priceYearUSD = 33,
+                                                 priceMonthUSD = 3,
                                                }: Props) {
   const navigate = useNavigate();
 
@@ -285,14 +285,11 @@ export default function SubscriptionManagePage({
             onClick={() => !isBuying && setSelectedPlan('year')}
           >
             <div className="sub__offer-title">
-              {isRenew ? 'Продлить на год' : 'Оформить на год'}
+              {isRenew ? 'Продлить на год' : 'Активировать на год'}
             </div>
             <div className="sub__offer-price">
-              ${priceYearUSD.toFixed(2)}{' '}
+              {priceYearUSD.toFixed(2)}{' '} OM
               <span className="sub__offer-note">/ год</span>
-            </div>
-            <div className="sub__offer-sub">
-              (${(priceYearUSD / 12).toFixed(2)} / месяц)
             </div>
           </div>
 
@@ -303,14 +300,11 @@ export default function SubscriptionManagePage({
             onClick={() => !isBuying && setSelectedPlan('month')}
           >
             <div className="sub__offer-title">
-              {isRenew ? 'Продлить на месяц' : 'Оформить на месяц'}
+              {isRenew ? 'Продлить на месяц' : 'Активировать на месяц'}
             </div>
             <div className="sub__offer-price">
-              ${priceMonthUSD.toFixed(2)}{' '}
+              {priceMonthUSD.toFixed(2)}{' '} OM
               <span className="sub__offer-note">/ месяц</span>
-            </div>
-            <div className="sub__offer-sub">
-              ({(priceMonthUSD * 12).toFixed(2)} / год)
             </div>
           </div>
 

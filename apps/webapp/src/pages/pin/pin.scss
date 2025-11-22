@@ -6,6 +6,17 @@
   background-size: cover;
   background-attachment: fixed;
   &__main { padding: 12px 24px 24px; }
+  .pin__main-title{
+    color: #FFF;
+    text-align: center;
+    font-family: "SF Pro Display";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 140%;
+    letter-spacing: 0.2px;
+    text-align: center;
+  }
   &__form { display: grid; gap: 16px; margin-top: 12px; }
 
   &__field {
