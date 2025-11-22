@@ -1,0 +1,41 @@
+.progressPage{
+
+}
+.progressPage-img{
+  width: 100%;
+}
+.lprogress {
+
+  &--secondary {
+    .lprogress__bar{
+      border-radius: 20px;
+      background: linear-gradient(255deg, rgba(255, 210, 248, 0.60) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.40) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+      backdrop-filter: blur(6px);
+      box-shadow: none;
+    }
+    &__fill--secondary { border-radius: 34px;
+      background: rgba(255, 255, 255, 0.30);}
+    &__labels--secondary { background: black; }
+  }
+}
+.progress-label{
+  display: flex;
+  justify-content: space-between;
+  color: #FFF;
+  font-family: "Alegreya_Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 140%; /* 19.6px */
+  letter-spacing: 0.2px;
+  margin-bottom: 10px;
+}
+
+.lockimg{
+  position: absolute;
+  z-index: 100;
+  top:50%;
+  left: 45%;
+  width: 45px;
+  height: 60px;
+}

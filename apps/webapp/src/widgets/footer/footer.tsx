@@ -1,17 +1,41 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useFooterTab } from "../../app/footer-tab";
+
 import FavoritesIcon from "../../assets/icons/music-library-2.svg";
 import DevelopmentIcon from "../../assets/icons/icon.svg";
 import HomeIcon from "../../assets/icons/Black.svg";
 import ProfileIcon from "../../assets/icons/medal-star.svg";
 import StoreIcon from "../../assets/icons/setting-3.svg";
+
 import "./footer.scss";
+
+type FooterTab = "store" | "progress" | "home" | "favorites" | "profile";
 
 export default function Footer() {
   const nav = useNavigate();
+  const location = useLocation();
   const { tab, setTab } = useFooterTab();
 
-  const go = (path: string, t: typeof tab) => {
+  // Маппинг URL → таб
+  const getTabFromPath = (pathname: string): FooterTab => {
+    if (pathname.startsWith("/store")) return "store";
+    if (pathname.startsWith("/progress")) return "progress";
+    if (pathname.startsWith("/favorites")) return "favorites";
+    if (pathname.startsWith("/profile")) return "profile";
+    return "home";
+  };
+
+  // Синхронизируем состояние таба с текущим роутом
+  useEffect(() => {
+    const currentTab = getTabFromPath(location.pathname);
+    if (currentTab !== tab) {
+      setTab(currentTab);
+    }
+  }, [location.pathname, tab, setTab]);
+
+  const go = (path: string, t: FooterTab) => {
+    // мгновенно обновляем таб + навигация
     setTab(t);
     nav(path);
   };
@@ -32,8 +56,8 @@ export default function Footer() {
 
         <button
           type="button"
-          className={`footer__item${tab === "development" ? " is-active" : ""}`}
-          onClick={() => go("/development", "development")}
+          className={`footer__item${tab === "progress" ? " is-active" : ""}`}
+          onClick={() => go("/progress", "progress")}
         >
           <span className="icon">
             <img src={DevelopmentIcon} alt="" />
@@ -51,6 +75,7 @@ export default function Footer() {
           </span>
           <span>Главная</span>
         </button>
+
         <button
           type="button"
           className={`footer__item${tab === "favorites" ? " is-active" : ""}`}
@@ -61,6 +86,7 @@ export default function Footer() {
           </span>
           <span>Избранное</span>
         </button>
+
         <button
           type="button"
           className={`footer__item${tab === "profile" ? " is-active" : ""}`}
@@ -72,7 +98,6 @@ export default function Footer() {
           </span>
           <span>Личный кабинет</span>
         </button>
-
       </div>
     </nav>
   );
