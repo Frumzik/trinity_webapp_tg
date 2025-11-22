@@ -262,9 +262,10 @@ export default function AccountPage() {
                 setFinPass2('')
               }}
             >
-              <span>Защитный пароль</span>
-              {/* точки поверх текущего фона, без текста "Изменить" */}
-              <span className="acc__chev acc__chev-password">..........</span>
+              <span>Сменить защитный пароль</span>
+              <span className="acc__chev">
+              Изменить <img src={arrowRight} alt=""/>
+            </span>
             </button>
           )}
 
