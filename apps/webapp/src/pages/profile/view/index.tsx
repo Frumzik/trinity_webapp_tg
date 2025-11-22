@@ -108,27 +108,20 @@ export default function ProfileViewPage() {
           {hasFin && (
             <button
               className="acc__row"
-              onClick={() => {
-                setShowFinForm(true)
-                setFin1('')
-                setFin2('')
-              }}
             >
               <span>Защитный пароль</span>
-              {/* просто точки поверх текущего фона, без стрелки */}
               <span className="acc__chev acc__chev-password">..........</span>
             </button>
           )}
 
-          <button className="acc__row" onClick={() => nav('/security/change-pin')}>
-            <span>Сменить PIN-код</span>
-            <span className="acc__chev">
-              Изменить <img src={arrowRight} alt="" />
+          <button className="acc__row">
+            <span>PIN-код</span>
+            <span className="acc__chev acc__chev-password">
+              ....
             </span>
           </button>
         </section>
 
-        {/* Форма создания/смены защитного пароля */}
         {showFinForm && (
           <section className="acc__card card2-nth">
             <div className="acc__title">{finTitle}</div>
@@ -159,7 +152,6 @@ export default function ProfileViewPage() {
           </section>
         )}
 
-        {/* Настройки приложения */}
         <section className="acc__card acc__group">
           <div className="acc__group-title">Настройки приложения</div>
 
