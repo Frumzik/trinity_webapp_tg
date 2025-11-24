@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
-import giftIcon from "../../assets/home/gifts.svg"
+import giftIcon from "../../assets/home/gifts.png"
 
 export type MiniCardItem = {
   id: string | number;
