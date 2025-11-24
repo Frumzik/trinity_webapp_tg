@@ -40,7 +40,7 @@ export default function SupportPage() {
             <GreyTile
               title={
                 <>
-                  Помощь<br />и Поддержка
+                  Помощь и Поддержка
                 </>
               }
               buttonText={"Перейти"}
