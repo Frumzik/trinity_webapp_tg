@@ -51,7 +51,7 @@ const PRACTICE_TILES_CONFIG: Record<
   42: {
     bgImageUrl: Card5,
     rightImageUrl: Card3,
-    className: "left-block-big left-block-color",
+    className: "left-block-big left-block-color-yellow",
   },
 };
 
