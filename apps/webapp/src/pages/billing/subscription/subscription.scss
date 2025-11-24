@@ -143,7 +143,15 @@
   }
 
   &__offer-price {
-    color: #FF922D;
+    background: linear-gradient(
+                    180deg,
+                    #6f96ff 0%,
+                    #4169e1 50%,
+                    #243a8f 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     font-family: "SF Pro Display";
     font-size: 18px;
     font-style: normal;
@@ -153,7 +161,16 @@
   }
 
   &__offer-note {
-    color: rgba(255, 106, 204, 0.84);
+    background: linear-gradient(
+                    135deg,
+                    #6f96ff 0%,
+                    #4169e1 50%,
+                    #243a8f 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
     font-family: "SF Pro Display";
     font-size: 18px;
     font-style: normal;

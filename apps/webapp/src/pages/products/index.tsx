@@ -260,7 +260,7 @@ export default function Index() {
                 rightImageUrl={Card3}
                 enabled
                 to="/workshop"
-                className={"left-block-color"}
+                className={"left-block-color-yellow"}
               />
               <FeatureTile
                 title="Практики"
