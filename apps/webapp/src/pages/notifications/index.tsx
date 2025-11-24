@@ -66,8 +66,7 @@ export default function NotificationsPage() {
         <div className="notif__block">
           <div className="notif__row">
             <div className="notif__col">
-              <div className="notif__title">Напоминания о медитациях</div>
-              <div className="notif__sub">Ежедневное напоминание</div>
+              <div className="notif__title">Получать напоминания о <br />прохождении практик</div>
             </div>
             <Switch
               checked={reminderOn}
@@ -85,8 +84,7 @@ export default function NotificationsPage() {
         <div className="notif__block">
           <div className="notif__row">
             <div className="notif__col">
-              <div className="notif__title">Уведомления о новом контенте</div>
-              <div className="notif__sub">Получать ежедневный контент</div>
+              <div className="notif__title">Получать сообщения с посланиями света</div>
             </div>
             <Switch
               checked={contentOn}
@@ -98,8 +96,8 @@ export default function NotificationsPage() {
         <div className="notif__block">
           <div className="notif__row">
             <div className="notif__col">
-              <div className="notif__title">Уведомления о специальных предложениях</div>
-              <div className="notif__sub">Уведомлять о специальных ценностях</div>
+              <div className="notif__title">Получать уведомления о полезных <br/>материалах и предложениях</div>
+              {/*<div className="notif__sub">Уведомлять о специальных ценностях</div>*/}
             </div>
             <Switch
               checked={promoOn}

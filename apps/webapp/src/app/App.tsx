@@ -19,16 +19,14 @@ function DesktopOnlyScreen() {
   );
 }
 
-const MIN_LOADER_MS = 500;
-const CONTENT_DELAY_MS = 80;
+const LOADER_DURATION_MS = 500;
 
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  const [showLoader, setShowLoader] = useState(true);
-  const [canRenderContent, setCanRenderContent] = useState(false);
-  const [isContentVisible, setIsContentVisible] = useState(false);
+  // прелоадер включается на КАЖДЫЙ change location.key на 500 ms
+  const [showLoader, setShowLoader] = useState(false);
 
   useEffect(() => {
     document.body.classList.add('app-loaded');
@@ -38,25 +36,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let loaderTimer: number | undefined;
-    let contentTimer: number | undefined;
-
+    // каждый раз при смене маршрута:
+    // 1) включаем прелоадер
+    // 2) через 500 ms выключаем
     setShowLoader(true);
-    setCanRenderContent(false);
-    setIsContentVisible(false);
-
-    contentTimer = window.setTimeout(() => {
-      setCanRenderContent(true);
-    }, CONTENT_DELAY_MS);
-
-    loaderTimer = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setShowLoader(false);
-      setIsContentVisible(true);
-    }, MIN_LOADER_MS);
+    }, LOADER_DURATION_MS);
 
     return () => {
-      if (loaderTimer) window.clearTimeout(loaderTimer);
-      if (contentTimer) window.clearTimeout(contentTimer);
+      window.clearTimeout(timer);
     };
   }, [location.key]);
 
@@ -101,36 +90,28 @@ export default function App() {
     return !withoutRect.some((re) => re.test(normalizedPathname));
   };
 
-  const layoutStyle: React.CSSProperties = {
+  const layoutStyle = {
     backgroundImage: getBackgroundImage(),
   };
 
-  const contentClassName = `app-content ${
-    isContentVisible ? 'app-content--visible' : ''
-  }`;
-
   return (
     <FooterTabProvider>
+      {showLoader && (
+        <div className="global-preloader">
+          <Preloader />
+        </div>
+      )}
+
       <div className="app-layout" style={layoutStyle}>
         {shouldShowTopRect() && <div className="top-rectangle" />}
 
         {!isMobile ? (
-          canRenderContent && (
-            <div className={contentClassName}>
-              <DesktopOnlyScreen />
-            </div>
-          )
+          <div className="app-content">
+            <DesktopOnlyScreen />
+          </div>
         ) : (
-          canRenderContent && (
-            <div className={contentClassName}>
-              <Outlet />
-            </div>
-          )
-        )}
-
-        {showLoader && (
-          <div className="global-preloader">
-            <Preloader />
+          <div className="app-content">
+            <Outlet />
           </div>
         )}
       </div>

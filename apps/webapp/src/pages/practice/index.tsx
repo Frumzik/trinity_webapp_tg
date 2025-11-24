@@ -1,4 +1,3 @@
-// pages/practise/index.tsx
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -50,7 +49,7 @@ const PRACTICE_TILES_CONFIG: Record<
     className: "left-block-big left-block-color",
   },
   42: {
-    bgImageUrl: Card1,
+    bgImageUrl: Card5,
     rightImageUrl: Card3,
     className: "left-block-big left-block-color",
   },

@@ -65,6 +65,8 @@ export default function PinLoginPage() {
       {/*<TopBar title="PIN-код" hideBackButton />*/}
       <main className="pin__main">
         <div className="pin__main-title">
+          <span>Рады вас видеть снова!</span>
+          <br/>
           <span>Для входа в приложение</span>
         <br/>
         <span> введите свой PIN-код</span>
