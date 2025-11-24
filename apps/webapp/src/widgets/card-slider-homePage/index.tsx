@@ -1,8 +1,8 @@
 import { useMemo, useRef } from "react";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
-import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
-
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
+import giftIcon from "../../assets/home/gifts.svg"
 
 export type MiniCardItem = {
   id: string | number;
@@ -16,52 +16,70 @@ type Props = {
   className?: string;
   onItemClick?: (item: MiniCardItem) => void;
   onViewed?: (id: string | number) => void;
-  pinnedIdOrTitle?: string | number; // "Дары" или 123
 };
 
 const SEEN_KEY = "__seen_banners";
+const GIFT_ID = "gifts";
+const GIFT_TITLE = "Дары";
+
 const loadSeen = () => {
-  try { return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}");
+  } catch {
+    return {};
+  }
 };
+
 const saveSeen = (obj: Record<string, true>) => {
-  try { localStorage.setItem(SEEN_KEY, JSON.stringify(obj)); } catch {}
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify(obj));
+  } catch {}
 };
 
 export default function MiniCardSlider({
                                          items,
                                          onItemClick,
                                          onViewed,
-                                         pinnedIdOrTitle = "Дары",
                                        }: Props) {
   const navigate = useAppNavigate();
   const seenRef = useRef<Record<string, true>>(loadSeen());
 
-  const isPinned = (it: MiniCardItem) => {
-    if (String(it.id) === String(pinnedIdOrTitle)) return true;
-    if (typeof pinnedIdOrTitle === "string" && it.title?.trim() === String(pinnedIdOrTitle).trim()) return true;
+  const staticGiftsCard: MiniCardItem = {
+    id: GIFT_ID,
+    title: GIFT_TITLE,
+    imageUrl: giftIcon,
+  };
+
+  const isGifts = (it: MiniCardItem) => {
+    if (String(it.id) === GIFT_ID) return true;
+    if (it.title?.trim() === GIFT_TITLE) return true;
     return /дары/i.test(it.title || "");
   };
 
   const ordered = useMemo(() => {
     const seen = seenRef.current;
-    const pinned: MiniCardItem[] = [];
     const unseen: MiniCardItem[] = [];
     const viewed: MiniCardItem[] = [];
 
     items.forEach((i) => {
-      if (isPinned(i)) pinned.push(i);
-      else if (seen[String(i.id)]) viewed.push(i);
+      if (isGifts(i)) {
+        // пропускаем, т.к. у нас есть статичная карточка
+        return;
+      }
+      if (seen[String(i.id)]) viewed.push(i);
       else unseen.push(i);
     });
 
-    return [...pinned, ...unseen, ...viewed];
+    // Всегда первая — статичная карточка "Дары"
+    return [staticGiftsCard, ...unseen, ...viewed];
   }, [items]);
 
   const handleClick = (it: MiniCardItem, e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
 
-    if (isPinned(it) || String(it.id) === "gifts" || it.title?.trim() === "Дары") {
+    // Для "Даров" — всегда просто переход, без отметки как прочитанное
+    if (isGifts(it)) {
       navigate("/gifts");
       return;
     }
@@ -86,7 +104,7 @@ export default function MiniCardSlider({
           onClick={(e) => handleClick(it, e)}
         >
           <div className="mcs__imgCover">
-            <img className="mcs__img" src={it.imageUrl} alt={it.title} />
+            <img className="mcs__img" style={{width: "100%"}} src={it.imageUrl} alt={it.title} />
           </div>
           <div className="mcs__bar">
             <div className="mcs__barTitle">{it.title}</div>
