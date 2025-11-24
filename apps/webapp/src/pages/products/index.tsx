@@ -168,7 +168,7 @@ export default function Index() {
         <TopBar onMenu={() => setMenuOpen(true)} />
         <main className="screen">
           <div className="supportPage">
-            <Title>Все продукты</Title>
+            <Title>Основные разделы</Title>
             <p style={{ textAlign: "center", marginTop: 40 }}>Загрузка...</p>
           </div>
         </main>
@@ -183,7 +183,7 @@ export default function Index() {
         <TopBar onMenu={() => setMenuOpen(true)} />
         <main className="screen">
           <div className="supportPage">
-            <Title>Все продукты</Title>
+            <Title>Основные разделы</Title>
             <p style={{ textAlign: "center", color: "red", marginTop: 40 }}>
               Ошибка загрузки данных
             </p>
@@ -200,7 +200,7 @@ export default function Index() {
 
       <main className="screen">
         <div className="supportPage">
-          <Title>Все продукты</Title>
+          <Title>Основные разделы</Title>
 
           <div className="supportPage__cards">
             <ScrollPanel
