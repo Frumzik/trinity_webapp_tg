@@ -86,12 +86,17 @@
 .left-block-color-yellow{
   .featureTile__left{
     border-radius: 15px;
-    background: rgba(66, 50, 1, 0.41);
+    background: rgba(66, 51, 11, 0.41);
     backdrop-filter: blur(2.6871166229248047px);
   }
   .featureTile__btn {
     border-radius: 12px;
-    background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
+    background: radial-gradient(
+                    circle at 50% 40%,
+                    #FF922D 0%,
+                    #FFB953 90%,
+                    #FFFDDC 100%
+    );
     box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
   }
 }

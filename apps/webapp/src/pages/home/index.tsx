@@ -212,7 +212,7 @@ export default function SupportPage() {
         <div className="supportPage" style={{ marginTop: 10 }}>
           <div className="supportPage__cards" style={{ gap: "10px" }}>
             <FeatureTile
-              title="Академия Духа"
+              title={"Академия ㅤДуха"}
               description=""
               bgImageUrl={Tile1}
               rightImageUrl={Card1}
