@@ -221,7 +221,7 @@ export default function SupportPage() {
               to="/academy"
             />
             <FeatureTile
-              title="Основные разделы"
+              title="Основные Разделы"
               description=""
               bgImageUrl={Tile2}
               enabled
