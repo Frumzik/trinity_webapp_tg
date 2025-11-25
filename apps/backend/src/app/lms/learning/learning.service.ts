@@ -116,6 +116,19 @@ export class LearningService {
             break;
           }
 
+          case ContentAccessType.TRAINING_PURCHASED: {
+            const purchaseQuery = {
+              type: PurchaseType.TRAINING,
+              userId: user.userId,
+              contentId: rule.value,
+            };
+
+            if (!(await this.purchaseService.find(purchaseQuery))) {
+              return LearningAccessStatus.LOCKED;
+            }
+            break;
+          }
+
           case ContentAccessType.DATE_UNLOCK:
             if (rule.value && new Date() < new Date(rule.value)) {
               return LearningAccessStatus.LOCKED;
@@ -446,7 +459,7 @@ export class LearningService {
     return await this.learningRepository.delete(options);
   }
 
-  async getLearningTree(condition?: FilterQuery<Learning>) {
+  async getLearningTree(condition?: FilterQuery<Learning>, depth?: number) {
     if (condition?.trainingId) {
       const training = await this.contentService.findTraining({
         trainingId: condition.trainingId,
@@ -456,7 +469,7 @@ export class LearningService {
         throw new NotFoundException('Тренинг не найден');
       }
     }
-    return await this.learningRepository.getLearningTree(condition);
+    return await this.learningRepository.getLearningTree(condition, depth);
   }
 
   async getCurrentStage(userId: number) {

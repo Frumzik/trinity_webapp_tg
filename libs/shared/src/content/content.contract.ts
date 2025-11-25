@@ -68,7 +68,7 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining> {
     value === 'null' || value === null ? null : Number(value)
   )
   @IsInt()
-  merchantId!: number | null;
+  merchantId?: number | null;
 
   // Если ступень
   @ApiPropertyOptional({
