@@ -14,7 +14,7 @@ type Props = {
   submit: (value: number, to: string) => Promise<void>;
 };
 
-const PERCENT_FEE = 0.5;
+const FIXED_FEE_OM = 0.5;
 
 function avatarFrom(username?: string | null, name?: string | null) {
   const seed = username || name || "user";
@@ -71,8 +71,11 @@ export default function WithdrawForm({
     return [i, f];
   }, [amount]);
 
-  const fee = useMemo(() => (amount) / 100, [amount]);
-  const total = useMemo(() => amount + fee, [amount, fee]);
+  const fee = useMemo(() => (amount > 0 ? FIXED_FEE_OM : 0), [amount]);
+
+  const receive = useMemo(() => Math.max(amount - fee, 0), [amount, fee]);
+
+  const total = useMemo(() => amount, [amount]);
 
   const totalText = useMemo(
     () =>
@@ -131,10 +134,14 @@ export default function WithdrawForm({
 
       <div className="wform__fee">
         Комиссия составит <b>{fee.toFixed(2)} OM</b>
-        <div className="wform__fee-sub">(фиксированная {PERCENT_FEE} USDT)</div>
-        {!hasBalance && (
-
-          <div className="wform__fee-error"><br />Недостаточно OM для вывода</div>
+        <div className="wform__fee-sub">
+          (фиксированная {FIXED_FEE_OM} USDT)
+        </div>
+        {!hasBalance && amount > 0 && (
+          <div className="wform__fee-error">
+            <br />
+            Недостаточно OM для вывода
+          </div>
         )}
       </div>
 
@@ -154,6 +161,9 @@ export default function WithdrawForm({
         с <Link to="/policy">Правилами сервиса</Link>
       </div>
 
+      <div className="wform__info">
+      </div>
+
       <div className="gbtn-bar rectangle-btn">
         <div className="gbtn-bar__inner rectangle-btn-inner">
           <GradientButton
@@ -161,7 +171,7 @@ export default function WithdrawForm({
             onClick={onSend}
             disabled={!canSend}
           >
-            ПОЛУЧИТЬ {amount.toFixed(2)} USDT
+            ПОЛУЧИТЬ {receive.toFixed(2)} USDT
           </GradientButton>
         </div>
       </div>
