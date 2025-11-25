@@ -4,9 +4,11 @@ import "./transaction-item.scss";
 type Props = { item: Transaction; showDivider?: boolean };
 
 export default function TransactionItem({ item, showDivider = true }: Props) {
-  const sign = item.type === "withdraw" ? "-" : "+";
+  const amount = item.amount;
 
-  const amountAbs = Math.abs(item.amount);
+  const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
+  const amountAbs = Math.abs(amount);
+
   const [intPart, fracPart] = amountAbs.toFixed(2).split(".");
   const intPretty = Number(intPart).toLocaleString("en-US");
 
@@ -16,6 +18,7 @@ export default function TransactionItem({ item, showDivider = true }: Props) {
       minute: "2-digit",
     })
     : "";
+
 
   return (
     <div className="trx">

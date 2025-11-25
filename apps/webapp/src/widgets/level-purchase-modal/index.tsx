@@ -27,6 +27,7 @@ type Props = {
     discountedOM?: number;
   }) => void;
   InfoIcon?: React.ComponentType<{ className?: string }>;
+  isFirstLevel?: boolean;
 };
 
 export default function LevelPurchaseModal({
@@ -39,6 +40,7 @@ export default function LevelPurchaseModal({
                                              onClose,
                                              onPurchase,
                                              InfoIcon,
+                                             isFirstLevel = false,
                                            }: Props) {
   const [selected, setSelected] = useState<(string | number)[]>([]);
   const [checkAll, setCheckAll] = useState(false);
@@ -111,6 +113,16 @@ export default function LevelPurchaseModal({
     () => selectable.reduce((acc, l) => acc + l.price, 0), // актуальная
     [selectable]
   );
+  const bulkStepsCount = useMemo(() => {
+    const total = selectable.length;
+    if (!total) return 0;
+
+    if (isFirstLevel) {
+      return Math.max(total - 1, 1);
+    }
+
+    return total;
+  }, [selectable.length, isFirstLevel]);
 
   const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
 
@@ -233,11 +245,11 @@ export default function LevelPurchaseModal({
             <span className="lp-old">{fullOldSum} OM</span>
             <span className="lp-new">{fullNewSum} OM</span>
             <span className="lp-note">
-              при открытии{" "}
+      при открытии{" "}
               <span style={{ fontWeight: 500, color: "#FFF" }}>
-                {selectable.length} ступеней
-              </span>
-            </span>
+        {bulkStepsCount} ступеней
+      </span>
+    </span>
           </div>
         )}
 
