@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import clsx from "clsx";
 import GradientButton from "../../shared/ui/gradient-button";
 import "./modal.scss";
+import ScrollPanel from '../../shared/ui/scroll-panel/scroll-panel';
 
 export type PurchaseLevel = {
   id: string | number;
@@ -97,7 +98,6 @@ export default function LevelPurchaseModal({
     [selected, lockedLevels]
   );
 
-  // суммарная "старая" и "новая" цена для блока "при покупке всех"
   const fullOldSum = useMemo(
     () =>
       selectable.reduce(
@@ -114,7 +114,6 @@ export default function LevelPurchaseModal({
 
   const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
 
-  // чекбокс "Активировать все"
   useEffect(() => {
     if (!open) return;
     if (checkAll && firstSelectableIndex >= 0) {
@@ -155,8 +154,19 @@ export default function LevelPurchaseModal({
           </button>
         </div>
 
-        <div className="lp-rate">{rateText}</div>
-
+        <div className="lp-rate">1 OM = 1 USDT</div>
+        <ScrollPanel
+          maxHeight="30dvh"
+          vars={{
+            railRight: "-10px",
+            railTop: "10px",
+            railBottom: "4px",
+            railWidth: "3px",
+            railColor: "rgba(255, 255, 255, 0.25)",
+            thumbColor: "#C7C7C7",
+            zIndex: 10,
+          }}
+        >
         <div className="lp-grid">
           {lockedLevels.map((l, i) => {
             const isBought = !!l.purchased;
@@ -217,15 +227,15 @@ export default function LevelPurchaseModal({
             );
           })}
         </div>
-
+        </ScrollPanel>
         {showBulkBlock && (
           <div className="lp-bulk">
             <span className="lp-old">{fullOldSum} OM</span>
             <span className="lp-new">{fullNewSum} OM</span>
             <span className="lp-note">
-              при покупке{" "}
+              при открытии{" "}
               <span style={{ fontWeight: 500, color: "#FFF" }}>
-                {selectable.length} ступеней сразу
+                {selectable.length} ступеней
               </span>
             </span>
           </div>
@@ -242,7 +252,6 @@ export default function LevelPurchaseModal({
                   setCheckAll(val);
 
                   if (!val) {
-                    // сброс: можно оставить только defaultSelectedId, если он валиден
                     if (
                       defaultSelectedId !== undefined &&
                       firstSelectableIndex >= 0
@@ -261,7 +270,7 @@ export default function LevelPurchaseModal({
                   }
                 }}
               />
-              <span className="activeall">Активировать все</span>
+              <span className="activeall">Выбрать все</span>
             </label>
           </div>
         )}

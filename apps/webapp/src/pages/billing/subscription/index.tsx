@@ -242,9 +242,10 @@ export default function SubscriptionManagePage({
       </div>
     );
   }
-
-  const titleText = isRenew ? 'Продлите доступ' : 'Станьте Premium';
-  const buttonText = isBuying
+  const titleText = isRenew
+    ? <span>Продлите доступ</span>
+    : <span style={{fontSize: 20}}>Активируйте доступ и пользуйтесь полным функционалом</span>;
+    const buttonText = isBuying
     ? isRenew
       ? 'Продлеваем…'
       : 'Оформляем…'

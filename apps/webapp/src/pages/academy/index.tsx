@@ -12,6 +12,7 @@ import Card2 from "../../assets/products/card2.png";
 import Card3 from "../../assets/products/card3.png";
 import Tile2 from "../../assets/homePage/tile3.png";
 import Tile1 from "../../assets/homePage/tile1.png";
+import Tile3 from "../../assets/homePage/tile2.png";
 
 import {
   useGetTrainingTreeQuery,
@@ -179,11 +180,11 @@ export default function Index() {
               <FeatureTile
                 title="Полезные Материалы"
                 description=""
-                bgImageUrl={Tile1}
+                bgImageUrl={Tile3}
                 rightImageUrl={Card2}
                 enabled
                 to="/materials"
-                className={"left-block-color"}
+                className={"left-block-color-blue"}
               />
 
               <FeatureTile
