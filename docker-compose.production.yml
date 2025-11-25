@@ -58,13 +58,13 @@ services:
       - ./apps/bot/envs/.env.production
     ports:
       - "3001:3001"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.bot.rule=Host(`bot.3nity.space`)"
-      - "traefik.http.routers.bot.entrypoints=websecure"
-      - "traefik.http.services.bot.loadbalancer.server.port=3001"
-      - "traefik.http.routers.bot.tls.certresolver=letsEncrypt"
-      - "traefik.http.routers.bot.tls=true"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.bot.rule=Host(`bot.3nity.space`)"
+    #   - "traefik.http.routers.bot.entrypoints=websecure"
+    #   - "traefik.http.services.bot.loadbalancer.server.port=3001"
+    #   - "traefik.http.routers.bot.tls.certresolver=letsEncrypt"
+    #   - "traefik.http.routers.bot.tls=true"
     networks:
       - proxy
 
