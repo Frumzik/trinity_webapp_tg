@@ -52,19 +52,28 @@ export class AuthService {
     let newUser = await this.usersService.create({ ...dto }, { referralPath });
     let newSubscription = await this.subscriptionsService.create();
 
+    let walletAddress = null;
     try {
-      await this.acquiringService.getAccount(newUser.userId.toString());
+      const account = await this.acquiringService.getAccount(
+        newUser.userId.toString()
+      );
+      walletAddress = account.address;
     } catch (err: any) {
       // Если кошелька нет — создаём
       if (err?.response?.status === 404) {
         const account = await this.acquiringService.createAccount(
           newUser.userId.toString()
         );
-        await this.usersService.bindAddress(
-          { userId: newUser.userId },
-          account.address
-        );
+
+        walletAddress = account.address;
       }
+    }
+
+    if (walletAddress) {
+      await this.usersService.bindAddress(
+        { userId: newUser.userId },
+        walletAddress
+      );
     }
 
     newUser = await this.usersService.bindSubscription(
