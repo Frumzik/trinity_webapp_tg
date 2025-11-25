@@ -6,7 +6,6 @@ import {
   forwardRef,
   Get,
   Inject,
-  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -81,32 +80,8 @@ export class AcquiringController {
     @UserId() userId: number,
     @Body() dto: AcquiringWithdrawRequestDto
   ) {
-    let account;
-
-    // Проверяем кошелек
-    try {
-      account = await this.acquiringService.getAccount(userId.toString());
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        account = await this.acquiringService.createAccount(userId.toString());
-        await this.usersService.bindAddress({ userId }, account.address);
-      } else {
-        throw err;
-      }
-    }
-
-    const user = await this.usersService.find({ userId });
-
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
-    if (user.balance < +dto.amount) {
-      throw new Error('Недостаточный баланс');
-    }
-
     // Выполняем вывод
-    await this.acquiringService.withdraw(dto.address, dto.amount);
+    await this.acquiringService.withdraw(userId, dto.address, dto.amount);
 
     return { success: true };
   }
