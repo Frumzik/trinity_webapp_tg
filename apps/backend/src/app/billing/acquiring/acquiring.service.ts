@@ -206,6 +206,10 @@ export class AcquiringService {
 
       const toUser = await this.usersService.find({ address });
 
+      if (user.address == toUser?.address) {
+        throw new Error('Нельзя перевести самому себе');
+      }
+
       if (toUser) {
         await this.withdrawToUser(user, toUser, +amount);
       } else {
