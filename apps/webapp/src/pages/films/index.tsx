@@ -6,9 +6,6 @@ import TopBar from "../../widgets/topbarTextpage";
 import Info from "../../assets/icons/popup.svg";
 import "./films.scss";
 import Footer from "../../widgets/footer/footer";
-import LevelPurchaseModal, {
-  type PurchaseLevel,
-} from "../../widgets/level-purchase-modal";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 
@@ -111,9 +108,6 @@ export default function Index() {
   const navigate = useAppNavigate();
   const location = useLocation();
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [clickedId, setClickedId] = useState<string | number | undefined>();
-
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
   const group = 1;
@@ -146,37 +140,20 @@ export default function Index() {
     });
   }, [data]);
 
-  const purchaseLevels: PurchaseLevel[] = useMemo(
-    () =>
-      filmItems.map((it) => ({
-        id: it.id,
-        title: it.title,
-        price: it.priceUSDT ? Math.round(it.priceUSDT * 5) : 0,
-        salePrice: undefined,
-        purchased: it.status !== "locked",
-      })),
-    [filmItems]
-  );
-
   const handleCardClick = (l: LevelItem) => {
     if (l.status === "locked") {
-      setClickedId(l.id);
-      setModalOpen(true);
+      navigate("/preview", {
+        state: {
+          trainingId: l.parentTrainingId,
+          returnTo: location.pathname,
+        },
+      });
       return;
     }
 
-    // у тебя есть роут /lesson/:trainingId/:lessonId
     navigate(`/lesson/${l.parentTrainingId}/${l.id}`, {
       state: { returnTo: location.pathname },
     });
-  };
-
-  const purchase = (_p: {
-    levelIds: (string | number)[];
-    totalOM: number;
-    discountedOM?: number;
-  }) => {
-    setModalOpen(false);
   };
 
   const hasContent = filmItems.length > 0;
@@ -239,14 +216,6 @@ export default function Index() {
             </ScrollPanel>
           )}
 
-          <LevelPurchaseModal
-            open={modalOpen}
-            lockedLevels={purchaseLevels}
-            defaultSelectedId={clickedId}
-            rateText="1 OM = 1 USDT"
-            onClose={() => setModalOpen(false)}
-            onPurchase={purchase}
-          />
         </div>
       </main>
 

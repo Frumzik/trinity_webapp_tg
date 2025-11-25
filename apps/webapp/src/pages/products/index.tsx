@@ -277,7 +277,7 @@ export default function Index() {
                 bgImageUrl={Tile3}
                 enabled={false}
                 rightImageUrl={Card5}
-                className="left-block-color"
+                className="left-block-color-blue"
                 to="/health-lab"
                 showImageWhenDisabled
               />
