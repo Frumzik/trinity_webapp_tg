@@ -46,7 +46,20 @@ export function Index() {
           title: f.lesson?.title || "Урок",
           imageUrl: img,
           onClick: () => {
-            // Навигация по типу урока
+            if (f.type === "Training") {
+              // Открываем страницу превью
+              navigate("/preview", {
+                state: {
+                  trainingId: f.trainingId,
+                  returnTo: "/favorites",
+                },
+              });
+              return;
+            }
+
+            // Если это урок — открываем его по типу
+            const lessonType = String(f.lesson?.type || "").toLowerCase();
+
             if (lessonType === "audio") {
               const q = [
                 {
@@ -54,29 +67,36 @@ export function Index() {
                   title: f.lesson?.title || "Урок",
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
-                  mediaUrl: undefined as string | undefined, // плеер сам подтянет audioUrl
+                  mediaUrl: undefined,
                 },
               ];
               navigate("/player", {
-                state: { queue: q, index: 0, trainingId: f.trainingId as number, returnTo: "/favorites" },
+                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
               });
-            } else if (lessonType === "video") {
+              return;
+            }
+
+            if (lessonType === "video") {
               const q = [
                 {
                   id: f.lessonId as number,
                   title: f.lesson?.title || "Урок",
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
-                  videoUrl: undefined as string | undefined,
+                  videoUrl: undefined,
                 },
               ];
               navigate("/player", {
-                state: { queue: q, index: 0, trainingId: f.trainingId as number, returnTo: "/favorites" },
+                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
               });
-            } else {
-              navigate(`/lesson/${f.trainingId}/${f.lessonId}`, { state: { returnTo: "/favorites" } });
+              return;
             }
-          },
+
+            // Текстовые уроки
+            navigate(`/lesson/${f.trainingId}/${f.lessonId}`, {
+              state: { returnTo: "/favorites" },
+            });
+          }
         };
 
         return item;
