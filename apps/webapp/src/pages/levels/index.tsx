@@ -477,6 +477,7 @@ export default function Index() {
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
             rateText="USDT = OM"
+            title={`${group} уровень`}
             // InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
