@@ -159,6 +159,7 @@ export class PurchaseService {
       }
 
       for (const rule of accessRules) {
+        console.log(rule.type)
         switch (rule.type) {
           case ContentAccessType.SUBSCRIPTION: {
             const subscription = await this.subscirptionsService.find({
@@ -168,6 +169,9 @@ export class PurchaseService {
             if (!subscription) {
               throw new NotFoundException('Подписка не найдена');
             }
+
+            console.log(subscription)
+            console.log(subscription.isActive())
 
             if (!subscription.isActive()) {
               throw new Error(rule.description ?? 'Сначала оформите подписку');
