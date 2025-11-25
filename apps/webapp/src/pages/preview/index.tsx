@@ -1,5 +1,4 @@
-// pages/preview/index.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
@@ -12,6 +11,11 @@ import "./preview.scss";
 
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
+import {
+  useGetFavoritesQuery,
+  useAddFavoriteMutation,
+  useDeleteFavoriteMutation,
+} from "../../shared/api/favorites.api";
 import type { LearningNode } from "../../shared/api/learning.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
 
@@ -54,7 +58,21 @@ export default function PreviewPage() {
     isLoading: boolean;
     isError: boolean;
   };
-
+  const { data: favoritesData } = useGetFavoritesQuery();
+  const favoriteEntries = useMemo(
+    () =>
+      (favoritesData ?? []).flatMap((cat) => cat.favorites),
+    [favoritesData]
+  );
+  const isFav = useMemo(
+    () =>
+      favoriteEntries.some(
+        (f) =>
+          f.type === "Training" &&
+          (f.trainingId === trainingId || f.favoriteId === trainingId)
+      ),
+    [favoriteEntries, trainingId]
+  );
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
@@ -67,9 +85,24 @@ export default function PreviewPage() {
   const price = node?.salePrice ?? node?.price ?? 0;
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
-
+  const [addFavorite] = useAddFavoriteMutation();
+  const [deleteFavorite] = useDeleteFavoriteMutation();
   const isTraining = node?.type === "training";
   const isPractise = node?.type === "practise" || node?.tag === "practise";
+
+
+  const handleToggleFav = async () => {
+    try {
+      if (isFav) {
+        await deleteFavorite({ type: "Training", trainingId }).unwrap();
+      } else {
+        await addFavorite({ type: "Training", trainingId }).unwrap();
+      }
+    } catch (e) {
+      console.error("favorite toggle error", e);
+    }
+  };
+
 
   const handlePurchase = async () => {
     if (!hasPaidSubscription) {
@@ -156,9 +189,9 @@ export default function PreviewPage() {
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={false}
+          isFav={isFav}
           onBack={() => navigate(-1)}
-          onToggleFav={() => {}}
+          onToggleFav={handleToggleFav}
           onMenu={() => {}}
         />
       </Hero>
