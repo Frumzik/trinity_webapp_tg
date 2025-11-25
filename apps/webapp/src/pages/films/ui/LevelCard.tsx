@@ -66,7 +66,7 @@ export default function LevelCard({ item, onClick }: Props) {
           <div className="lvl__hud-left">
             <div className="lvl__hud-title">{item.title}</div>
             {typeof item.durationMin === "number" && (
-              <span className="lvl__time">
+              <span className="lvl__hud-time">
                 <img src={TimeIcon} alt="" />
                 {item.durationMin} min
               </span>
