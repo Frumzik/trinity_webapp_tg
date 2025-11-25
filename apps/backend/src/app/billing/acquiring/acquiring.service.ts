@@ -206,6 +206,10 @@ export class AcquiringService {
 
       const toUser = await this.usersService.find({ address });
 
+      if (user.address == toUser?.address) {
+        throw new Error('Нельзя перевести самому себе');
+      }
+
       if (toUser) {
         await this.withdrawToUser(user, toUser, +amount);
       } else {
@@ -363,15 +367,17 @@ export class AcquiringService {
     if (!user) {
       return { ok: false };
     }
+    
+    const sum = body.amount + this.withdrawComission;
 
     await this.usersService.decBalance(
       { userId: user.userId },
-      { dec: body.amount }
+      { dec: sum }
     );
     await this.transactionsService.create({
       userId: +user.userId,
       type: TransactionType.WITHDRAWAL,
-      sum: body.amount,
+      sum: sum,
       description: 'Вывод средств',
     });
 
