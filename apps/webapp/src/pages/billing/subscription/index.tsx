@@ -121,12 +121,12 @@ export default function SubscriptionManagePage({
     const msg = Array.isArray(message) ? message.join('\n') : message;
 
     setResultTitle(
-      msg || (isInsufficient ? 'Недостаточно баланса' : 'Произошла ошибка')
+      msg || (isInsufficient ? 'Недостаточно OM' : 'Произошла ошибка')
     );
     setResultItems(undefined);
     setResultDesc(undefined);
 
-    setResultCta(isInsufficient ? 'Пополнить баланс' : 'Продолжить');
+    setResultCta(isInsufficient ? 'Добавить' : 'Продолжить');
 
     setResultOnCta(() => () => {
       if (isInsufficient) {
@@ -244,7 +244,7 @@ export default function SubscriptionManagePage({
   }
   const titleText = isRenew
     ? <span>Продлите доступ</span>
-    : <span style={{fontSize: 20}}>Активируйте доступ и пользуйтесь полным функционалом</span>;
+    : <span style={{fontSize: 18, fontWeight: 500}}>После активации доступа вы получаете возможность полного погружения в пространство ТРИНИТИ:</span>;
     const buttonText = isBuying
     ? isRenew
       ? 'Продлеваем…'
@@ -269,10 +269,10 @@ export default function SubscriptionManagePage({
         <section className="sub__pitch">
           <h2 className="sub__h2">{titleText}</h2>
           <ul className="sub__ul">
-            <Bullet>— возможность пользоваться всеми функциями и инструментами;</Bullet>
-            <Bullet>— доступ ко всем разделам, материалам и обновлениям;</Bullet>
-            <Bullet>— открытие ступеней и прохождение личного пути развития;</Bullet>
-            <Bullet>— участие в программе вознаграждений и получение бонусов за активность.</Bullet>
+            <Bullet>возможность пользоваться всеми функциями и инструментами;</Bullet>
+            <Bullet>доступ ко всем разделам, материалам и обновлениям;</Bullet>
+            <Bullet>открытие ступеней и прохождение личного пути развития;</Bullet>
+            <Bullet>участие в программе вознаграждений и получение бонусов за активность.</Bullet>
           </ul>
         </section>
       </main>
@@ -289,8 +289,8 @@ export default function SubscriptionManagePage({
               {isRenew ? 'Продлить на год' : 'Активировать на год'}
             </div>
             <div className="sub__offer-price">
-              {priceYearUSD.toFixed(2)}{' '} OM
-              <span className="sub__offer-note">/ год</span>
+              {priceYearUSD}{' '} OM
+              <span className="sub__offer-note">/ 1 год</span>
             </div>
           </div>
 
@@ -304,8 +304,8 @@ export default function SubscriptionManagePage({
               {isRenew ? 'Продлить на месяц' : 'Активировать на месяц'}
             </div>
             <div className="sub__offer-price">
-              {priceMonthUSD.toFixed(2)}{' '} OM
-              <span className="sub__offer-note">/ месяц</span>
+              {priceMonthUSD}{' '} OM
+              <span className="sub__offer-note">/ 1 месяц</span>
             </div>
           </div>
 
