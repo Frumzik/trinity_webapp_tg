@@ -8,7 +8,7 @@ export enum LearningAccessStatus {
 }
 export enum LearningProgressStatus {
   NOT_STARTED = 'not_started',
-  IN_PROGRESS = 'in_progess',
+  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
 }
 

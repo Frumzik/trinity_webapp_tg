@@ -14,18 +14,16 @@ import {
   LessonProgressStatusUpdatedEvent,
   PurchaseCreatedEvent,
   PurchaseEvents,
-  PurchaseType,
   SubscriptionEvents,
   SubscriptionExpiredEvent,
   TrainingAccessRulesUpdatedEvent,
   TrainingCreatedEvent,
+  TrainingProgressStatusUpdatedEvent,
   UserEvents,
   UserRegisteredEvent,
 } from '@trinity/shared';
 import { LearningService } from './learning.service';
 import { PurchaseService, SubscriptionsService } from '../../billing';
-import { UsersService } from '../../account';
-import { ContentService } from '../content';
 
 @Injectable()
 export class LearningListener {
@@ -33,18 +31,12 @@ export class LearningListener {
     private readonly learningService: LearningService,
     @Inject(forwardRef(() => SubscriptionsService))
     private readonly subscriptionsService: SubscriptionsService,
-    @Inject(forwardRef(() => ContentService))
-    private readonly contentService: ContentService,
     @Inject(forwardRef(() => PurchaseService))
-    private readonly purchaseService: PurchaseService,
-    @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService
+    private readonly purchaseService: PurchaseService
   ) {}
 
   @OnEvent(ContentEvents.TRAINING_CREATED)
   async onTrainingCreated(payload: TrainingCreatedEvent) {
-    console.log(`✅ Тренинг ${payload.trainingId} создан`);
-
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
@@ -52,24 +44,18 @@ export class LearningListener {
 
   @OnEvent(ContentEvents.TRAINING_DELETED)
   async onTrainingDeleted({ trainingId }: TrainingCreatedEvent) {
-    console.log(`✅ Тренинг ${trainingId} удалён`);
-
     return await this.learningService.delete({ trainingId });
+  }
+
+  @OnEvent(LearningEvents.TRAINING_PROGRESS_STATUS_UPDATED)
+  async onTrainingProgressStatusUpdated(
+    payload: TrainingProgressStatusUpdatedEvent
+  ) {
+    return await this.learningService.recalculateForUser(payload.userId);
   }
 
   @OnEvent(ContentEvents.TRAINING_ACCESS_RULES_UPDATED)
   async onTrainingAccessRulesUpdated(payload: TrainingAccessRulesUpdatedEvent) {
-    console.log(`✅ Тренинг ${payload.trainingId} обновлен`);
-
-    return await this.learningService.recalculateForTraining(
-      payload.trainingId
-    );
-  }
-
-  @OnEvent(ContentEvents.LESSON_CREATED)
-  async onLessonCreated(payload: LessonCreatedEvent) {
-    console.log(`✅ Урок ${payload.lessonId} создан`);
-
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
@@ -83,63 +69,18 @@ export class LearningListener {
       throw new NotFoundException('Покупка не найдена');
     }
 
-    const user = await this.usersService.find({ userId: purchase.userId });
+    return await this.learningService.recalculateForUser(purchase.userId);
+  }
 
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
-    switch (purchase.type) {
-      case PurchaseType.PRACTISE:
-      case PurchaseType.TRAINING: {
-        const training = await this.contentService.findTraining({
-          trainingId: purchase.contentId,
-        });
-
-        if (!training) {
-          throw new NotFoundException('Тренинг не найден');
-        }
-        return await this.learningService.recalculateTrainingForUser(
-          training,
-          user
-        );
-      }
-      case PurchaseType.LESSON: {
-        const lesson = await this.contentService.findLesson({
-          lessonId: purchase.contentId,
-        });
-
-        if (!lesson) {
-          throw new NotFoundException('Урок не найден');
-        }
-
-        const training = await this.contentService.findTraining({
-          trainingId: lesson.parentId,
-        });
-
-        if (!training) {
-          throw new NotFoundException('Тренинг не найден');
-        }
-
-        return await this.learningService.recalculateTrainingForUser(
-          training,
-          user
-        );
-      }
-      case PurchaseType.SUBSCRIPTION: {
-        return await this.learningService.recalculateForUser(purchase.userId);
-      }
-
-      default: {
-        return await this.learningService.recalculateForUser(purchase.userId);
-      }
-    }
+  @OnEvent(ContentEvents.LESSON_CREATED)
+  async onLessonCreated(payload: LessonCreatedEvent) {
+    return await this.learningService.recalculateForTraining(
+      payload.trainingId
+    );
   }
 
   @OnEvent(ContentEvents.LESSON_DELETED)
   async onLessonDeleted(payload: LessonCreatedEvent) {
-    console.log(`✅ Урок ${payload.lessonId} удалён`);
-
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
@@ -149,15 +90,11 @@ export class LearningListener {
   async onLessonProgressStatusUpdated(
     payload: LessonProgressStatusUpdatedEvent
   ) {
-    return await this.learningService.recalculateForTraining(
-      payload.trainingId
-    );
+    return await this.learningService.recalculateForUser(payload.userId);
   }
 
   @OnEvent(ContentEvents.LESSON_ACCESS_RULES_UPDATED)
   async onLessonAccessReluesUpdated(payload: LessonAccessRulesUpdatedEvent) {
-    console.log(`✅ Урок ${payload.lessonId} обновлен`);
-
     return await this.learningService.recalculateForTraining(
       payload.trainingId
     );
@@ -165,8 +102,6 @@ export class LearningListener {
 
   @OnEvent(UserEvents.REGISTERED)
   async onUserChanged(payload: UserRegisteredEvent) {
-    console.log(`✅ Пользователь ${payload.userId} создан`);
-
     return await this.learningService.recalculateForUser(payload.userId);
   }
 
@@ -179,8 +114,6 @@ export class LearningListener {
     if (!subscirption) {
       return;
     }
-
-    console.log(`✅ Подписка ${payload.subscriptionId} обновлена`);
 
     return await this.learningService.recalculateForUser(
       subscirption.userId as number
