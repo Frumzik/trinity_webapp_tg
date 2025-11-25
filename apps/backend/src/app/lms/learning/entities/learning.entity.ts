@@ -56,6 +56,24 @@ export class LearningEntity implements ILearning {
       lesson.progressStatus = status;
     }
 
+    const lessonStatuses = this.lessons.map((l) => l.progressStatus);
+
+    const hasInProgress = lessonStatuses.includes(
+      LearningProgressStatus.IN_PROGRESS
+    );
+    const hasCompleted = lessonStatuses.includes(
+      LearningProgressStatus.COMPLETED
+    );
+    const allCompleted =
+      lessonStatuses.length > 0 &&
+      lessonStatuses.every((s) => s === LearningProgressStatus.COMPLETED);
+
+    if (hasInProgress || (hasCompleted && !allCompleted)) {
+      this.progressStatus = LearningProgressStatus.IN_PROGRESS;
+    } else if (allCompleted) {
+      this.progressStatus = LearningProgressStatus.COMPLETED;
+    }
+
     return this;
   }
 
