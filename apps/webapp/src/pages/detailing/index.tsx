@@ -44,6 +44,14 @@ const Index = () => {
   const { data: userData } = useGetUserQuery({ populate: true });
   const u = userData?.data;
 
+  const premium = useMemo(() => {
+    const type =
+      typeof u?.subscription === "object" && u?.subscription
+        ? u.subscription.type
+        : "free";
+    return type && type !== "free";
+  }, [u]);
+
   const {
     data: levelsData,
     isLoading,
@@ -136,13 +144,15 @@ const Index = () => {
         <div className="screen__spacer" />
       </main>
 
-      <div className="gbtn-bar">
-        <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">
-            Пригласить
-          </GradientButton>
+      {premium && (
+        <div className="gbtn-bar">
+          <div className="gbtn-bar__inner">
+            <GradientButton href={inviteHref} target="_blank">
+              Пригласить
+            </GradientButton>
+          </div>
         </div>
-      </div>
+      )}
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />

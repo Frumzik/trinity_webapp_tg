@@ -481,6 +481,7 @@ export default function Index() {
             // InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
+            isFirstLevel={group === 1}
           />
         </div>
       </main>
