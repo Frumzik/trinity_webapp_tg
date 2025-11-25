@@ -1,4 +1,7 @@
 import {useMemo, useState} from "react";
+import WebApp from "@twa-dev/sdk";
+
+
 import Footer from "../../widgets/footer/footer";
 import TopBar from "../../widgets/topbarlk/topbarlk";
 import Title from "../../shared/ui/title/Title";
@@ -29,6 +32,7 @@ function avatarFrom(username?: string|null, name?: string|null) {
 
 const Index = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const nav = useNavigate()
 
@@ -64,10 +68,49 @@ const Index = () => {
   const totalEarn = useMemo(() => (stats ?? []).reduce((s, x) => s + (x.totalEarn || 0), 0), [stats])
   const levelsCount = useMemo(() => (stats ?? []).length || 0, [stats])
 
-  const onDownload = (e?: React.MouseEvent) => {
+  const onDownload = async (e?: React.MouseEvent) => {
     e?.preventDefault();
-    setOpenModal(true);
-  }
+
+    const tgId =
+      WebApp.initDataUnsafe?.user?.id ??
+      (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
+    if (!tgId) {
+      console.error("tgId не найден, возможно, ты не в Telegram WebApp");
+      alert("Не могу найти tgId. Открой приложение внутри Telegram.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      console.log("Отправляю запрос в бота с tgId =", tgId);
+
+      const res = await fetch("https://bot.3nity.space/bot/presentation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tgId }),
+      });
+
+      console.log("Ответ от сервера:", res);
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Ошибка ответа:", res.status, text);
+        alert(`Ошибка отправки презентации: ${res.status}`);
+        return;
+      }
+
+      setOpenModal(true);
+    } catch (err) {
+      console.error("Сетевая ошибка при запросе в бота:", err);
+      alert("Не получилось достучаться до сервера бота (network error).");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const totalReferrals = useMemo(
     () => (stats ?? []).reduce((sum, x) => sum + (x.count || 0), 0),
     [stats]
@@ -153,7 +196,7 @@ const Index = () => {
                 overlayImageUrl={Card1}
                 to="/withdraw"
               />
-              <GreyTile title="О проекте" imageUrl={Card3} buttonText={"Скачать презентацию"} onClick={onDownload}/>
+              <GreyTile title="О проекте" imageUrl={Card3} buttonText={isLoading ? "Отправляем…" : "Скачать презентацию"} onClick={onDownload}/>
             </div>
         <div className="profile-wrapper">
             <div className="scrollBox__title-cont">
@@ -190,11 +233,15 @@ const Index = () => {
         </section>
         <div className="screen__spacer"/>
       </main>
-      <div className="gbtn-bar">
-        <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">Пригласить</GradientButton>
+      {!!u && premium && (
+        <div className="gbtn-bar">
+          <div className="gbtn-bar__inner">
+            <GradientButton href={inviteHref} target="_blank">
+              Пригласить
+            </GradientButton>
+          </div>
         </div>
-      </div>
+      )}
       <PresentationSentModal open={openModal} onClose={() => setOpenModal(false)} fileName="Trinity.pdf" fileSizeText="9.1 MB" durationText="00:00" />
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer/>
