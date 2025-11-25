@@ -257,6 +257,14 @@ export class AcquiringService {
     address: string,
     sum: number
   ) {
+    const existWithdraw = await this.withdrawsService.find({
+      toAddress: address,
+    });
+
+    if (existWithdraw) {
+      throw new Error('Дождитесь выполнения предыдущей заявки');
+    }
+
     const needModeration = sum <= this.moderationLimit;
 
     await this.withdrawsService.create({
