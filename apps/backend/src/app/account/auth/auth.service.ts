@@ -53,19 +53,23 @@ export class AuthService {
     let newSubscription = await this.subscriptionsService.create();
 
     let walletAddress = null;
-
     try {
       const account = await this.acquiringService.getAccount(
         newUser.userId.toString()
       );
-
-      walletAddress = account.account;
+      walletAddress = account.address;
     } catch (err: any) {
-      const account = await this.acquiringService.createAccount(
-        newUser.userId.toString()
-      );
-      walletAddress = account.account;
+      // Если кошелька нет — создаём
+      if (err?.response?.status === 404) {
+        const account = await this.acquiringService.createAccount(
+          newUser.userId.toString()
+        );
 
+        walletAddress = account.address;
+      }
+    }
+
+    if (walletAddress) {
       await this.usersService.bindAddress(
         { userId: newUser.userId },
         walletAddress

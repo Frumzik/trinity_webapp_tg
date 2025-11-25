@@ -25,6 +25,11 @@ class sendErrorDto {
   message!: string;
 }
 
+class sendPresentationDto {
+  @IsInt()
+  tgId!: number;
+}
+
 @Controller('bot')
 export class BotController {
   constructor(private readonly botService: BotService) {}
@@ -44,6 +49,12 @@ export class BotController {
   @Post('error')
   async error(@Body() dto: sendErrorDto) {
     await this.botService.sendErrorMessage(dto.message);
+    return { ok: true };
+  }
+
+  @Post('presentation')
+  async presentation(@Body() dto: sendPresentationDto) {
+    await this.botService.sendPresentation(dto.tgId);
     return { ok: true };
   }
 }

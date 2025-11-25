@@ -120,7 +120,7 @@ export class PurchaseListener {
             PurchaseEvents.BUY,
             new PurchaseBuyEvent(
               purchase.userId,
-              transaction.sum,
+              Math.abs(transaction.sum),
               training.title ?? ''
             )
           );
@@ -141,7 +141,7 @@ export class PurchaseListener {
           PurchaseEvents.BUY,
           new PurchaseBuyEvent(
             purchase.userId,
-            transaction.sum,
+            Math.abs(transaction.sum),
             lesson.title ?? ''
           )
         );

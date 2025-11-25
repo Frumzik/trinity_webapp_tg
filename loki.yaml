@@ -1,0 +1,40 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+  storage:
+    aws:
+      s3forcepathstyle: true
+      bucketnames: 13217ac8-a7451518-6949-46ca-ba80-d0cde001160c
+      endpoint: https://s3.twcstorage.ru
+      region: us-east-1
+      access_key_id: O70BCMU922FC8A7E0H0T
+      secret_access_key: TPLxj1fQs9ZjACrAyLw0vynDKCQEPGR4DwNHCdTz
+
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: boltdb-shipper
+      object_store: aws
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  aws:
+    s3: s3://O70BCMU922FC8A7E0H0T:TPLxj1fQs9ZjACrAyLw0vynDKCQEPGR4DwNHCdTz@s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/logs
+    s3forcepathstyle: true
+  boltdb_shipper:
+    shared_store: aws
+
+limits_config:
+  retention_period: 720h  # 30 days
+  retention_deletes_enabled: true

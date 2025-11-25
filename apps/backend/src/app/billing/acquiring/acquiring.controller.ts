@@ -6,6 +6,7 @@ import {
   forwardRef,
   Get,
   Inject,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -47,13 +48,29 @@ export class AcquiringController {
     description: 'Возвращает адрес депозитного кошелька пользователя',
   })
   async getDepositAddress(@UserId() userId: number) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
     let account;
 
+    // Проверяем кошелек
     try {
       account = await this.acquiringService.getAccount(userId.toString());
+
+      if (user.address != account.address) {
+        await this.usersService.bindAddress({ userId }, account.address);
+      }
     } catch (err: any) {
-      account = await this.acquiringService.createAccount(userId.toString());
-      await this.usersService.bindAddress({ userId }, account.address);
+      // Если кошелька нет — создаём
+      if (err?.response?.status === 404) {
+        account = await this.acquiringService.createAccount(userId.toString());
+        await this.usersService.bindAddress({ userId }, account.address);
+      } else {
+        throw err;
+      }
     }
 
     return { address: account.address };
