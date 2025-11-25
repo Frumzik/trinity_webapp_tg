@@ -167,27 +167,29 @@ export class AcquiringService {
   // -------------------------
   async withdraw(userId: number, address: string, amount: string) {
     try {
+      const user = await this.usersService.find({ userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
       let account;
 
       // Проверяем кошелек
       try {
         account = await this.getAccount(userId.toString());
+
+        if (user.address != account.address) {
+          await this.usersService.bindAddress({ userId }, account.address);
+        }
       } catch (err: any) {
         // Если кошелька нет — создаём
         if (err?.response?.status === 404) {
-          account = await this.createAccount(
-            userId.toString()
-          );
+          account = await this.createAccount(userId.toString());
           await this.usersService.bindAddress({ userId }, account.address);
         } else {
           throw err;
         }
-      }
-
-      const user = await this.usersService.find({ userId });
-
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
       }
 
       const sum = +amount - this.withdrawComission;
