@@ -52,13 +52,8 @@ export class AcquiringController {
     try {
       account = await this.acquiringService.getAccount(userId.toString());
     } catch (err: any) {
-      // Если кошелька нет — создаём
-      if (err?.response?.status === 404) {
-        account = await this.acquiringService.createAccount(userId.toString());
-        await this.usersService.bindAddress({ userId }, account.address);
-      } else {
-        throw err;
-      }
+      account = await this.acquiringService.createAccount(userId.toString());
+      await this.usersService.bindAddress({ userId }, account.address);
     }
 
     return { address: account.address };
