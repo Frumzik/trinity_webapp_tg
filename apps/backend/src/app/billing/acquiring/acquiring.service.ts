@@ -347,12 +347,6 @@ export class AcquiringService {
   }
 
   async handleWithdraw(body: AcquiringWithdrawWebhookDto) {
-    const withdrawer = await this.getWithdrawer();
-
-    if (body.fromAddress == withdrawer.address) {
-      return;
-    }
-
     const withdraw = await this.withdrawsService.find({
       toAddress: body.toAddress,
       // amount: body.amount,
