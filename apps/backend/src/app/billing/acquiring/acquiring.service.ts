@@ -76,7 +76,7 @@ export class AcquiringService {
   // -------------------------
   // 2. Получение аккаунта
   // -------------------------
-  async getAccount(userId: string): Promise<{ account: string }> {
+  async getAccount(userId: string): Promise<{ address: string }> {
     try {
       const res = await firstValueFrom(
         this.http.get(`${this.BASE_URL}/account/${userId}`, {
@@ -173,8 +173,15 @@ export class AcquiringService {
       try {
         account = await this.getAccount(userId.toString());
       } catch (err: any) {
-        account = await this.createAccount(userId.toString());
-        await this.usersService.bindAddress({ userId }, account.address);
+        // Если кошелька нет — создаём
+        if (err?.response?.status === 404) {
+          account = await this.createAccount(
+            userId.toString()
+          );
+          await this.usersService.bindAddress({ userId }, account.address);
+        } else {
+          throw err;
+        }
       }
 
       const user = await this.usersService.find({ userId });
