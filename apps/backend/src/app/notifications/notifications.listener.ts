@@ -85,7 +85,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш единомышленник в ${level} поколении открыл ${stageLevel}-${stage} Ступень Духа.\nВы получили +${sum} OM`
+      `Ваш единомышленник в ${level} поколении открыл ${stage} Ступень духа ${stageLevel} Уровня\nВы получили +${sum} OM`
     );
   }
 
@@ -105,7 +105,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stageLevel}-${stage} Ступени Духа
+      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
 Причина: не открыта ${stageLevel}-${stage} Ступень Духа
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
 Откройте Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
@@ -128,7 +128,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stageLevel}-${stage} Ступени Духа
+      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
 Причина: доступ к приложению не активирован
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
 Активируйте доступ, чтобы вернуть упущенное вознаграждение обратно.`
@@ -152,7 +152,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM за приобретение "${title}"
-Причина: не открыта ${stageLevel}-${stage} Ступень Духа
+Причина: не открыта ${stage} Ступень духа ${stageLevel} Уровня
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
 Откройте Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
