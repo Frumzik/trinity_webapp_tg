@@ -21,10 +21,16 @@ export class BotService implements OnModuleInit {
 
   async sendPresentation(tgId: number) {
     try {
-      return this.bot.telegram.sendDocument(tgId, 'https://s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/prod/1763442729467-%C3%90%C2%A2%C3%90%C2%A0%C3%90%C2%98%C3%90%C2%9D%C3%90%C2%98%C3%90%C2%A2%C3%90%C2%98.pdf');
+      return await this.bot.telegram.sendDocument(tgId, {
+        url: 'https://s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/prod/1763442729467-%C3%90%C2%A2%C3%90%C2%A0%C3%90%C2%98%C3%90%C2%9D%C3%90%C2%98%C3%90%C2%A2%C3%90%C2%98.pdf',
+        filename: 'ТРИНИТИ.pdf',
+      });
     } catch (error) {
       console.error('Failed to send presentation:', error);
-      return this.bot.telegram.sendMessage(tgId, 'Не удалось отправить презентацию 😔');
+      return this.bot.telegram.sendMessage(
+        tgId,
+        'Не удалось отправить презентацию 😔'
+      );
     }
   }
 
