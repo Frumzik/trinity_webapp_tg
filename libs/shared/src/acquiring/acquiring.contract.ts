@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class AcquiringWithdrawRequestDto {
   @IsString()
@@ -55,4 +55,22 @@ export class AcquiringErrorWebhookDto {
   @IsString()
   @ApiProperty()
   message!: string;
+}
+
+export class WithdrawCreateRequestDto {
+  @IsNumber()
+  @ApiProperty()
+  userId!: number;
+
+  @IsString()
+  @ApiProperty()
+  toAddress!: string;
+
+  @IsNumber()
+  @ApiProperty()
+  amount!: number;
+
+  @IsBoolean()
+  @ApiProperty()
+  needModeration!: boolean;
 }

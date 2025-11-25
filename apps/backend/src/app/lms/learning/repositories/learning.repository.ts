@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Learning } from '../models';
 import { LearningEntity } from '../entities';
 import { Training } from '../../content/models';
@@ -11,6 +12,7 @@ import {
   ITraining,
   LearningAccessStatus,
   LearningProgressStatus,
+  TrainingTag,
 } from '@trinity/shared';
 
 @Injectable()
@@ -126,39 +128,57 @@ export class LearningsRepository {
   }
 
   async getLearningTree(
-    condition?: FilterQuery<Learning>
+    condition?: FilterQuery<Learning>,
+    depth?: number
   ): Promise<TrainingEntity[] | TrainingEntity | null> {
-    // Загружаем все тренинги (с уроками)
+    // Загружаем все тренинги с уроками
     const allTrainings = await this.trainingModel
       .find()
       .populate('lessons')
       .lean()
       .exec();
 
-    // Загружаем все learning-записи (например, для конкретного userId)
+    // Загружаем все learning-записи для пользователя
     const learnings = await this.learningModel
       .find({ userId: condition?.userId })
       .lean()
       .exec();
 
-    // Создаём карту для быстрого доступа по trainingId
+    // Карта для быстрого доступа по trainingId
     const learningMap = new Map<number, ILearning>(
       learnings.map((l) => [l.trainingId, l as unknown as ILearning])
     );
 
-    // Рекурсивная функция сборки дерева и расчёта прогресса
-    const buildTree = (training: ITraining): ITraining => {
+    // Type guards
+    const filterLessons = (lessons: (Types.ObjectId | ILesson)[]): ILesson[] =>
+      lessons.filter(
+        (l): l is ILesson =>
+          typeof l !== 'string' &&
+          typeof (l as ILesson).lessonId !== 'undefined'
+      );
+
+    const filterTrainings = (
+      trainings: (Types.ObjectId | ITraining)[]
+    ): ITraining[] =>
+      trainings.filter(
+        (t): t is ITraining =>
+          typeof t !== 'string' &&
+          typeof (t as ITraining).trainingId !== 'undefined'
+      );
+
+    // Рекурсивная сборка дерева с расчётом прогресса
+    const buildTree = (training: ITraining, currentDepth = 0): ITraining => {
       const learning = learningMap.get(training.trainingId);
 
-      // Применяем статусы доступа и прогресса к тренингу
+      // Статус доступа
       training.accessStatus =
         learning?.accessStatus ?? LearningAccessStatus.LOCKED;
-      training.progressStatus =
-        learning?.progressStatus ?? LearningProgressStatus.NOT_STARTED;
 
-      // Считаем прогресс уроков текущего тренинга
-      const populatedLessons = (training.lessons ?? []) as ILesson[];
-      const lessonsWithStatus = populatedLessons.map((lesson) => {
+      // Фильтруем уроки
+      const lessons = filterLessons(training.lessons ?? []);
+
+      // Применяем статусы к урокам
+      const lessonsWithStatus = lessons.map((lesson) => {
         const lessonLearning = learning?.lessons?.find(
           (l) => l.lessonId === lesson.lessonId
         );
@@ -178,55 +198,97 @@ export class LearningsRepository {
 
       training.lessons = lessonsWithStatus;
 
-      // Рекурсивно собираем дочерние тренинги
-      const childrenTrainings = allTrainings
-        .filter((t) => t.parentId === training.trainingId)
-        .map((child) => buildTree(child));
+      // Дочерние тренинги
+      const childrenTrainings = filterTrainings(
+        allTrainings.filter((t) => t.parentId === training.trainingId)
+      ).map((child) => buildTree(child, currentDepth + 1));
 
-      training.childrens = childrenTrainings;
+      // Ограничение глубины
+      if (depth !== undefined && currentDepth + 1 >= depth) {
+        // lessons и childrens на глубине > depth заменяем ObjectId
+        training.lessons = training.lessons.map((l) =>
+          typeof l === 'object' && 'lessonId' in l ? l._id! : l
+        ) as Types.ObjectId[];
 
-      // Рассчитываем progressPercent и добавляем количество уроков
-      const allLessons = [
-        ...lessonsWithStatus,
-        ...childrenTrainings.flatMap((child) => getAllLessons(child)),
-      ];
+        training.childrens = childrenTrainings.map((c) =>
+          typeof c === 'object' && 'trainingId' in c ? c._id! : c
+        ) as Types.ObjectId[];
+      } else {
+        training.childrens = childrenTrainings;
+      }
 
-      const completedCount = allLessons.filter(
-        (l) => l.progressStatus === LearningProgressStatus.COMPLETED
-      ).length;
+      // --- Расчёт прогресса ---
+      let progressTotal = 0;
+      let progressCompleted = 0;
 
+      if (training.tag === TrainingTag.STAGES_SPIRIT) {
+        // stages_spirit: суммируем прогресс всех вложенных тренингов
+        for (const child of childrenTrainings) {
+          progressTotal += child.progressTotal ?? 0;
+          progressCompleted += child.progressCompleted ?? 0;
+        }
+      } else {
+        // Считаем текущие уроки
+        progressTotal += lessonsWithStatus.length;
+        progressCompleted += lessonsWithStatus.filter(
+          (l) => l.progressStatus === LearningProgressStatus.COMPLETED
+        ).length;
+
+        // Дочерние тренинги (не stages_spirit)
+        for (const child of childrenTrainings) {
+          if (child.tag === TrainingTag.STAGES_SPIRIT) {
+            progressTotal += child.progressTotal ?? 0;
+            progressCompleted += child.progressCompleted ?? 0;
+          } else {
+            progressTotal += 1;
+            if (child.progressStatus === LearningProgressStatus.COMPLETED) {
+              progressCompleted += 1;
+            }
+          }
+        }
+      }
+
+      training.progressTotal = progressTotal;
+      training.progressCompleted = progressCompleted;
       training.progressPercent =
-        allLessons.length > 0
-          ? Math.round((completedCount / allLessons.length) * 100)
+        progressTotal > 0
+          ? Math.round((progressCompleted / progressTotal) * 100)
           : 0;
 
-      // Добавляем новые поля
-      training.totalLessons = allLessons.length;
-      training.completedLessons = completedCount;
+      // Статус прогресса
+      const hasInProgress =
+        lessonsWithStatus.some(
+          (l) => l.progressStatus === LearningProgressStatus.IN_PROGRESS
+        ) ||
+        childrenTrainings.some(
+          (c) => c.progressStatus === LearningProgressStatus.IN_PROGRESS
+        );
+
+      const allCompleted =
+        progressTotal > 0 && progressCompleted === progressTotal;
+
+      let newProgressStatus = LearningProgressStatus.NOT_STARTED;
+      if (hasInProgress || (progressCompleted > 0 && !allCompleted)) {
+        newProgressStatus = LearningProgressStatus.IN_PROGRESS;
+      } else if (allCompleted) {
+        newProgressStatus = LearningProgressStatus.COMPLETED;
+      }
+
+      training.progressStatus = newProgressStatus;
 
       return training;
     };
 
-    // Вспомогательная функция для получения всех уроков из дерева
-    const getAllLessons = (training: ITraining): ILesson[] => {
-      const lessons = training.lessons as ILesson[];
-      const childLessons = ((training.childrens ?? []) as ITraining[]).flatMap(
-        (child) => getAllLessons(child)
-      );
-      return [...lessons, ...childLessons];
-    };
-
-    // Если передан конкретный trainingId → возвращаем дерево от него
+    // --- Если указан конкретный trainingId ---
     if (condition?.trainingId) {
       const root = allTrainings.find(
         (t) => t.trainingId === condition.trainingId
       );
       if (!root) return null;
-
       return new TrainingEntity(buildTree(root));
     }
 
-    // Иначе возвращаем массив всех корневых деревьев
+    // --- Иначе возвращаем все корневые тренинги ---
     const roots = allTrainings.filter((t) => !t.parentId);
     return roots.map((r) => new TrainingEntity(buildTree(r)));
   }

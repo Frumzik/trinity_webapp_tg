@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../users/entities/user.entity';
 import {
@@ -54,14 +55,22 @@ export class AuthService {
     let walletAddress = null;
 
     try {
-    const newWallet = await this.acquiringService.createAccount(
-      newUser.userId.toString()
-    );
-      walletAddress = newWallet.address
-    } catch(err) {
-      console.log(err)
-    }
+      const account = await this.acquiringService.getAccount(
+        newUser.userId.toString()
+      );
 
+      walletAddress = account.account;
+    } catch (err: any) {
+      const account = await this.acquiringService.createAccount(
+        newUser.userId.toString()
+      );
+      walletAddress = account.account;
+
+      await this.usersService.bindAddress(
+        { userId: newUser.userId },
+        walletAddress
+      );
+    }
 
     newUser = await this.usersService.bindSubscription(
       newUser,
@@ -71,13 +80,6 @@ export class AuthService {
       newSubscription,
       newUser
     );
-
-    if (walletAddress) {
-      newUser = await this.usersService.bindAddress(
-        { userId: newUser.userId },
-        walletAddress
-      );
-    }
 
     if (dto.partnerId) {
       const partner = await this.usersService.find({ userId: dto.partnerId });

@@ -68,7 +68,7 @@ export class ContentAddTrainingRequestDto implements Partial<ITraining> {
     value === 'null' || value === null ? null : Number(value)
   )
   @IsInt()
-  merchantId!: number | null;
+  merchantId?: number | null;
 
   // Если ступень
   @ApiPropertyOptional({
@@ -352,7 +352,6 @@ export class ContentAddLessonRequestDto {
   @IsOptional()
   @IsString()
   description?: string;
-
 
   @ApiPropertyOptional({
     description: 'Короткое описание урока',
@@ -667,6 +666,16 @@ export class ContentAccessTrainingCompletedDto extends ContentAccessBaseDto {
   value!: number;
 }
 
+export class ContentAccessTrainingPurchasedDto extends ContentAccessBaseDto {
+  @ApiProperty({
+    description: 'ID тренинга, который должен быть куплен',
+    example: 5,
+  })
+  @ValidateIf((o) => o.type === ContentAccessType.TRAINING_PURCHASED)
+  @IsNumber()
+  value!: number;
+}
+
 export class ContentAccessLessonCompletedDto extends ContentAccessBaseDto {
   @ApiProperty({
     description: 'ID урока, который должен быть завершён',
@@ -694,6 +703,10 @@ export class ContentTrainingUpdateAccessRulesRequestDto {
         {
           name: ContentAccessType.TRAINING_COMPLETED,
           value: ContentAccessTrainingCompletedDto,
+        },
+        {
+          name: ContentAccessType.TRAINING_PURCHASED,
+          value: ContentAccessTrainingPurchasedDto,
         },
         {
           name: ContentAccessType.LESSON_COMPLETED,

@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, HttpException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  Inject,
+  forwardRef,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
@@ -9,17 +15,21 @@ import {
   AcquiringErrorEvent,
   AcquiringErrorWebhookDto,
   AcquiringEvents,
+  AcquiringWithdrawEvent,
   AcquiringWithdrawWebhookDto,
   TransactionType,
 } from '@trinity/shared';
-import { UsersService } from '../../account';
+import { UserEntity, UsersService } from '../../account';
 import { TransactionsService } from '../transactions';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { WithdrawsService } from './withdraws.service';
 
 @Injectable()
 export class AcquiringService {
   private BASE_URL = '';
   private TOKEN = '';
+  private withdrawComission = 0.5;
+  private moderationLimit = 0;
 
   constructor(
     private readonly http: HttpService,
@@ -28,7 +38,8 @@ export class AcquiringService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => TransactionsService))
     private readonly transactionsService: TransactionsService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly withdrawsService: WithdrawsService
   ) {
     this.BASE_URL = this.configService.get('ACQUIRING_URL') || '';
     this.TOKEN = this.configService.get('ACQUIRING_TOKEN') || '';
@@ -65,7 +76,7 @@ export class AcquiringService {
   // -------------------------
   // 2. Получение аккаунта
   // -------------------------
-  async getAccount(userId: string) {
+  async getAccount(userId: string): Promise<{ account: string }> {
     try {
       const res = await firstValueFrom(
         this.http.get(`${this.BASE_URL}/account/${userId}`, {
@@ -82,7 +93,7 @@ export class AcquiringService {
   // -------------------------
   // 3. Получение Withdrawer
   // -------------------------
-  async getWithdrawer() {
+  async getWithdrawer(): Promise<{ address: string }> {
     try {
       const res = await firstValueFrom(
         this.http.get(`${this.BASE_URL}/account/withdrawer`, {
@@ -154,20 +165,124 @@ export class AcquiringService {
   // -------------------------
   // 7. Вывод средств
   // -------------------------
-  async withdraw(address: string, amount: string) {
+  async withdraw(userId: number, address: string, amount: string) {
     try {
-      await firstValueFrom(
-        this.http.post(
-          `${this.BASE_URL}/withdraw`,
-          { address, amount },
-          { headers: this.headers }
-        )
-      );
+      let account;
+
+      // Проверяем кошелек
+      try {
+        account = await this.getAccount(userId.toString());
+      } catch (err: any) {
+        account = await this.createAccount(userId.toString());
+        await this.usersService.bindAddress({ userId }, account.address);
+      }
+
+      const user = await this.usersService.find({ userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const sum = +amount - this.withdrawComission;
+
+      if (user.balance < sum) {
+        throw new Error('Недостаточный баланс');
+      }
+
+      if (sum <= 0) {
+        throw new Error(
+          `Вывод не может быть меньше ${this.withdrawComission} ОМ`
+        );
+      }
+
+      const toUser = await this.usersService.find({ address });
+
+      if (toUser) {
+        await this.withdrawToUser(user, toUser, +amount);
+      } else {
+        await this.withrawToAddress(user, address, sum);
+      }
 
       return { created: true };
     } catch (error: any) {
       throw this.wrapError(error);
     }
+  }
+
+  private async withdrawToUser(
+    user: UserEntity,
+    toUser: UserEntity,
+    amount: number
+  ) {
+    await this.transactionsService.create({
+      type: TransactionType.WITHDRAWAL,
+      userId: user.userId,
+      sum: -amount,
+      description: 'Перевод средств другому пользователю',
+    });
+
+    await this.transactionsService.create({
+      type: TransactionType.REPLENISHMENT,
+      userId: toUser.userId,
+      sum: amount,
+      description: 'Пополнение от другого пользователя',
+    });
+
+    await this.usersService.decBalance(
+      { userId: user.userId },
+      { dec: amount }
+    );
+    await this.usersService.incBalance(
+      { userId: toUser.userId },
+      { inc: amount }
+    );
+
+    await this.eventEmitter.emit(
+      AcquiringEvents.WITHDRAW,
+      new AcquiringWithdrawEvent(user.userId, amount)
+    );
+
+    await this.eventEmitter.emit(
+      AcquiringEvents.DEPOSIT,
+      new AcquiringDepositEvent(toUser.userId, amount)
+    );
+  }
+
+  private async withrawToAddress(
+    user: UserEntity,
+    address: string,
+    sum: number
+  ) {
+    const existWithdraw = await this.withdrawsService.find({
+      toAddress: address,
+    });
+
+    if (existWithdraw) {
+      throw new Error('Дождитесь выполнения предыдущей заявки');
+    }
+
+    const needModeration = sum <= this.moderationLimit;
+
+    await this.withdrawsService.create({
+      userId: user.userId,
+      amount: sum,
+      toAddress: address,
+      needModeration,
+    });
+
+    if (!needModeration) {
+      await this.sendWithdrawRequest(address, sum);
+    }
+  }
+
+  async sendWithdrawRequest(address: string, amount: number) {
+    await firstValueFrom(
+      this.http.post(
+        `${this.BASE_URL}/withdraw`,
+        { address, amount: amount.toString() },
+        { headers: this.headers }
+      )
+    );
   }
 
   // -------------------------
@@ -219,10 +334,24 @@ export class AcquiringService {
   }
 
   async handleWithdraw(body: AcquiringWithdrawWebhookDto) {
-    const user = await this.usersService.find({ address: body.fromAddress });
+    const withdrawer = await this.getWithdrawer();
+
+    if (body.fromAddress == withdrawer.address) {
+      return;
+    }
+
+    const withdraw = await this.withdrawsService.find({
+      toAddress: body.toAddress,
+      // amount: body.amount,
+    });
+
+    if (!withdraw) {
+      return { ok: false };
+    }
+
+    const user = await this.usersService.find({ userId: withdraw.userId });
 
     if (!user) {
-      // throw new NotFoundException('Пользователь не найден');
       return { ok: false };
     }
 
@@ -242,10 +371,17 @@ export class AcquiringService {
       new AcquiringDepositEvent(+user.userId, +body.amount)
     );
 
+    await this.withdrawsService.delete({ _id: withdraw._id });
+
     return { ok: true };
   }
 
   async handleInsufficientBalance(body: AcquiringErrorWebhookDto) {
+    await this.eventEmitter.emit(
+      AcquiringEvents.ERROR,
+      new AcquiringErrorEvent(body.message)
+    );
+
     console.log('Insufficient balance webhook received:', body);
     return { ok: true };
   }

@@ -67,8 +67,8 @@ export interface ITraining {
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
   progressPercent?: number;
-  totalLessons?: number;
-  completedLessons?: number;
+  progressTotal?: number;
+  progressCompleted?: number;
 }
 
 // Уроки
@@ -170,6 +170,7 @@ export type TypeLesson =
 export enum ContentAccessType {
   SUBSCRIPTION = 'subscription',
   ONE_TIME_PAYMENT = 'one_time_payment',
+  TRAINING_PURCHASED = 'training_purchased',
   FREE = 'free',
   DATE_UNLOCK = 'date_unlock',
   TRAINING_COMPLETED = 'training_completed',
@@ -178,7 +179,7 @@ export enum ContentAccessType {
 
 interface TypeContentAccessBase {
   type: ContentAccessType;
-  description?: string;
+  description: string | null;
 }
 
 export interface TypeContentAccessSubscription extends TypeContentAccessBase {
@@ -187,6 +188,12 @@ export interface TypeContentAccessSubscription extends TypeContentAccessBase {
 
 export interface TypeContentAccessOneTimePayment extends TypeContentAccessBase {
   type: ContentAccessType.ONE_TIME_PAYMENT;
+}
+
+export interface TypeContentAccessTrainingPurchased
+  extends TypeContentAccessBase {
+  type: ContentAccessType.TRAINING_PURCHASED;
+  value: number;
 }
 
 export interface TypeContentAccessFree extends TypeContentAccessBase {
@@ -216,4 +223,5 @@ export type TypeContentAccess =
   | TypeContentAccessFree
   | TypeContentAccessDateUnlock
   | TypeContentAccessTrainingCompleted
-  | TypeContentAccessLessonCompleted;
+  | TypeContentAccessLessonCompleted
+  | TypeContentAccessTrainingPurchased;

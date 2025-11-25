@@ -36,9 +36,8 @@ export class SubscriptionEntity implements ISubscription {
     if (
       (this.type == SubscriptionType.PREMIUM ||
         this.type == SubscriptionType.TRIAL) &&
-      this.endDate
-        ? this.endDate > new Date()
-        : true
+      this.endDate &&
+      this.endDate > new Date()
     ) {
       return true;
     }
@@ -73,7 +72,7 @@ export class SubscriptionEntity implements ISubscription {
     const now = new Date();
 
     if (this.endDate && this.endDate <= now) {
-      this.type = SubscriptionType.FREE
+      this.type = SubscriptionType.FREE;
       this.startDate = now;
       this.endDate = null;
     }
