@@ -76,7 +76,7 @@ export class AcquiringService {
   // -------------------------
   // 2. Получение аккаунта
   // -------------------------
-  async getAccount(userId: string): Promise<{ account: string }> {
+  async getAccount(userId: string): Promise<{ address: string }> {
     try {
       const res = await firstValueFrom(
         this.http.get(`${this.BASE_URL}/account/${userId}`, {
@@ -167,20 +167,29 @@ export class AcquiringService {
   // -------------------------
   async withdraw(userId: number, address: string, amount: string) {
     try {
+      const user = await this.usersService.find({ userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
       let account;
 
       // Проверяем кошелек
       try {
         account = await this.getAccount(userId.toString());
+
+        if (user.address != account.address) {
+          await this.usersService.bindAddress({ userId }, account.address);
+        }
       } catch (err: any) {
-        account = await this.createAccount(userId.toString());
-        await this.usersService.bindAddress({ userId }, account.address);
-      }
-
-      const user = await this.usersService.find({ userId });
-
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
+        // Если кошелька нет — создаём
+        if (err?.response?.status === 404) {
+          account = await this.createAccount(userId.toString());
+          await this.usersService.bindAddress({ userId }, account.address);
+        } else {
+          throw err;
+        }
       }
 
       const sum = +amount - this.withdrawComission;
@@ -196,6 +205,10 @@ export class AcquiringService {
       }
 
       const toUser = await this.usersService.find({ address });
+
+      if (user.address == toUser?.address) {
+        throw new Error('Нельзя перевести самому себе');
+      }
 
       if (toUser) {
         await this.withdrawToUser(user, toUser, +amount);
@@ -354,15 +367,17 @@ export class AcquiringService {
     if (!user) {
       return { ok: false };
     }
+    
+    const sum = body.amount + this.withdrawComission;
 
     await this.usersService.decBalance(
       { userId: user.userId },
-      { dec: body.amount }
+      { dec: sum }
     );
     await this.transactionsService.create({
       userId: +user.userId,
       type: TransactionType.WITHDRAWAL,
-      sum: body.amount,
+      sum: sum,
       description: 'Вывод средств',
     });
 
