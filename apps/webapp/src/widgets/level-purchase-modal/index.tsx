@@ -114,16 +114,18 @@ export default function LevelPurchaseModal({
     [selectable]
   );
   const bulkStepsCount = useMemo(() => {
-    const total = selectable.length;
-    if (!total) return 0;
+    if (!selectable.length) return 0;
 
     if (isFirstLevel) {
-      return Math.max(total - 1, 1);
+      const discountable = selectable.filter((l) => {
+        const idx = typeof l.stepIndex === "number" ? l.stepIndex : 0;
+        return idx > 0;
+      });
+
+      return discountable.length;
     }
-
-    return total;
-  }, [selectable.length, isFirstLevel]);
-
+    return selectable.length;
+  }, [selectable, isFirstLevel]);
   const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
 
   useEffect(() => {

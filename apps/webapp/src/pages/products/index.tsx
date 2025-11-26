@@ -234,8 +234,8 @@ export default function Index() {
               {/*))}*/}
 
               <FeatureTile
-                title="Ступени Духа"
-                description={descStages}
+                title="Ступени ㅤㅤㅤㅤДуха"
+                // description={descStages}
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
                 enabled
@@ -244,12 +244,12 @@ export default function Index() {
               />
 
               <FeatureTile
-                title="Полезные Материалы"
+                title="Практики"
                 description=""
                 bgImageUrl={Tile1}
-                rightImageUrl={Card2}
+                rightImageUrl={Card4}
                 enabled
-                to="/materials"
+                to="/practice"
                 className={"left-block-color"}
               />
 
@@ -262,13 +262,14 @@ export default function Index() {
                 to="/workshop"
                 className={"left-block-color-yellow"}
               />
+
               <FeatureTile
-                title="Практики"
+                title="Полезные Материалы"
                 description=""
                 bgImageUrl={Tile1}
-                rightImageUrl={Card4}
+                rightImageUrl={Card2}
                 enabled
-                to="/practice"
+                to="/materials"
                 className={"left-block-color"}
               />
               <FeatureTile

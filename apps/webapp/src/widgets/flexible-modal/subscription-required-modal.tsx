@@ -16,8 +16,8 @@ export default function SubscriptionRequiredModal({
     <FlexibleModal
       open={open}
       title="Недоступно"
-      description="Этот раздел доступен только пользователям с активной подпиской."
-      ctaLabel="Оформить подписку"
+      description="У вас неактивен доступ к приложению"
+      ctaLabel="Активировать"
       onCta={onGoToSubscription}
       closeIconUrl={helpIcon}
       onClose={onClose}

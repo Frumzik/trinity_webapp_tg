@@ -1,8 +1,7 @@
 import { useMemo, useRef } from "react";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
-import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
-import giftIcon from "../../assets/home/gifts.png"
+import giftIcon from "../../assets/home/gifts.png";
 
 export type MiniCardItem = {
   id: string | number;
@@ -41,7 +40,6 @@ export default function MiniCardSlider({
                                          onItemClick,
                                          onViewed,
                                        }: Props) {
-  const navigate = useAppNavigate();
   const seenRef = useRef<Record<string, true>>(loadSeen());
 
   const staticGiftsCard: MiniCardItem = {
@@ -63,14 +61,12 @@ export default function MiniCardSlider({
 
     items.forEach((i) => {
       if (isGifts(i)) {
-        // пропускаем, т.к. у нас есть статичная карточка
         return;
       }
       if (seen[String(i.id)]) viewed.push(i);
       else unseen.push(i);
     });
 
-    // Всегда первая — статичная карточка "Дары"
     return [staticGiftsCard, ...unseen, ...viewed];
   }, [items]);
 
@@ -78,13 +74,12 @@ export default function MiniCardSlider({
     e?.preventDefault();
     e?.stopPropagation();
 
-    // Для "Даров" — всегда просто переход, без отметки как прочитанное
     if (isGifts(it)) {
-      navigate("/gifts");
+      onItemClick?.(it);
       return;
     }
 
-    // остальное поведение как было
+    // Остальные баннеры — как раньше
     const seen = { ...seenRef.current, [String(it.id)]: true as const };
     seenRef.current = seen;
     saveSeen(seen);
@@ -104,7 +99,12 @@ export default function MiniCardSlider({
           onClick={(e) => handleClick(it, e)}
         >
           <div className="mcs__imgCover">
-            <img className="mcs__img" style={{width: "100%"}} src={it.imageUrl} alt={it.title} />
+            <img
+              className="mcs__img"
+              style={{ width: "100%" }}
+              src={it.imageUrl}
+              alt={it.title}
+            />
           </div>
           <div className="mcs__bar">
             <div className="mcs__barTitle">{it.title}</div>

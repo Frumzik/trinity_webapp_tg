@@ -1,6 +1,5 @@
-import {useMemo, useState} from "react";
+import { useMemo, useState } from "react";
 import WebApp from "@twa-dev/sdk";
-
 
 import Footer from "../../widgets/footer/footer";
 import TopBar from "../../widgets/topbarlk/topbarlk";
@@ -18,57 +17,72 @@ import Card3 from "../../assets/products/card8.png";
 import Card5 from "../../assets/products/card9.png";
 import EditIcon from "../../assets/icons/edit.svg";
 import "./profile.scss";
-import { Link, useNavigate } from 'react-router-dom';
-import BurgerMenu from '../../widgets/menuBurger/burger';
+import { Link, useNavigate } from "react-router-dom";
+import BurgerMenu from "../../widgets/menuBurger/burger";
 import { useGetUserQuery } from "../../shared/api/user.api";
 import { getTelegramUser } from "../../shared/telegram/telegram";
 import { useGetReferralsStatsQuery } from "../../shared/api/referrals.api";
-import Blur from '../../../public/blurs/blur-1.png';
+import Blur from "../../../public/blurs/blur-1.png";
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
 
-function avatarFrom(username?: string|null, name?: string|null) {
-  const seed = username || name || 'user'
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}`
+function avatarFrom(username?: string | null, name?: string | null) {
+  const seed = username || name || "user";
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    seed
+  )}`;
 }
 
 const Index = () => {
   const [openModal, setOpenModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const nav = useNavigate()
+  const [subModalOpen, setSubModalOpen] = useState(false);
 
-  const { data } = useGetUserQuery({ populate: true })
-  const u = data?.data
-  const tg = getTelegramUser()
+  const nav = useNavigate();
 
-  const { data: stats } = useGetReferralsStatsQuery()
-
-
+  const { data } = useGetUserQuery({ populate: true });
+  const u = data?.data;
+  const tg = getTelegramUser();
+  const { data: stats } = useGetReferralsStatsQuery();
 
   const displayName = useMemo(() => {
-    if (u?.name) return u.name
-    if (tg?.first_name || tg?.last_name) return [tg?.first_name, tg?.last_name].filter(Boolean).join(' ')
-    return 'Без имени'
-  }, [u, tg])
+    if (u?.name) return u.name;
+    if (tg?.first_name || tg?.last_name)
+      return [tg?.first_name, tg?.last_name].filter(Boolean).join(" ");
+    return "Без имени";
+  }, [u, tg]);
 
   const displayUsername = useMemo(() => {
-    return u?.username || tg?.username || '—'
-  }, [u, tg])
+    return u?.username || tg?.username || "—";
+  }, [u, tg]);
 
   const avatarUrl = useMemo(() => {
-    return (u as any)?.avatarUrl || (tg as any)?.photo_url || avatarFrom(displayUsername, displayName)
-  }, [u, tg, displayUsername, displayName])
+    return (
+      (u as any)?.avatarUrl ||
+      (tg as any)?.photo_url ||
+      avatarFrom(displayUsername, displayName)
+    );
+  }, [u, tg, displayUsername, displayName]);
 
-  const balanceText = useMemo(() => `${u?.balance ?? 0} OM`, [u])
+  const balanceText = useMemo(() => `${u?.balance ?? 0} OM`, [u]);
 
   const premium = useMemo(() => {
-    const type = typeof (u as any)?.subscription === 'object' && (u as any)?.subscription ? (u as any).subscription.type : 'free'
-    return type && type !== 'free'
-  }, [u])
+    const type =
+      typeof (u as any)?.subscription === "object" &&
+      (u as any)?.subscription
+        ? (u as any).subscription.type
+        : "free";
+    return type && type !== "free";
+  }, [u]);
 
-  const totalEarn = useMemo(() => (stats ?? []).reduce((s, x) => s + (x.totalEarn || 0), 0), [stats])
-  const levelsCount = useMemo(() => (stats ?? []).length || 0, [stats])
+  const totalEarn = useMemo(
+    () => (stats ?? []).reduce((s, x) => s + (x.totalEarn || 0), 0),
+    [stats]
+  );
+  const levelsCount = useMemo(() => (stats ?? []).length || 0, [stats]);
 
   const onDownload = async (e?: React.MouseEvent) => {
+    // если e есть (например, вызовем из <a onClick={onDownload}>), предотвратим дефолт
     e?.preventDefault();
 
     const tgId =
@@ -93,7 +107,7 @@ const Index = () => {
         body: JSON.stringify({ tgId }),
       });
 
-      console.log("Ответ от сервера:", res);
+      console.log("Ответ от сервера (PROFILE):", res);
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
@@ -104,7 +118,7 @@ const Index = () => {
 
       setOpenModal(true);
     } catch (err) {
-      console.error("Сетевая ошибка при запросе в бота:", err);
+      console.error("Сетевая ошибка при запросе в бота (PROFILE):", err);
       alert("Не получилось достучаться до сервера бота (network error).");
     } finally {
       setIsLoading(false);
@@ -132,37 +146,17 @@ const Index = () => {
     share.searchParams.set("url", botDeepLink);
     return share.toString();
   }, [u]);
-  function LogoutButton() {
-    const handleLogout = () => {
-      try {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("__tg_user");
-        window.location.reload();
-      } catch (e) {
-        window.location.reload();
-      }
-    };
-    return (
-      <button
-        onClick={handleLogout}
-        style={{
-          position: "fixed",
-          top: 8,
-          right: 8,
-          zIndex: 9999,
-          fontSize: 11,
-          padding: "6px 8px",
-          borderRadius: 6,
-          border: "1px solid #ccc",
-          background: "#fff",
-          cursor: "pointer",
-          opacity: 0.85,
-        }}
-      >
-        Разлогин
-      </button>
-    );
-  }
+
+  const handleInviteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+
+    if (premium) {
+      window.open(inviteHref, "_blank");
+    } else {
+      setSubModalOpen(true);
+    }
+  };
+
   return (
     <div className="app lk-bg">
       <img src={Blur} className={"blur"} alt="" />
@@ -171,80 +165,108 @@ const Index = () => {
         <Title
           right={
             <Link to="/account" className="icon-btn">
-              <img src={EditIcon} alt=""/>
+              <img src={EditIcon} alt="" />
             </Link>
           }
         >
           Личный кабинет
         </Title>
-        {/*<LogoutButton />*/}
+
         <ProfileHeader
           avatarUrl={avatarUrl}
           name={displayName}
           username={displayUsername}
           premium={premium}
           balance={balanceText}
-          onStatusClick={() => nav('/subscription')}
+          onStatusClick={() => nav("/subscription")}
         />
+
         <section className="scrollBox stack">
-            <div className="tiles">
-              <IncomeTile
-                title="Общие вознаграждения"
-                amountOM={totalEarn}
-                showIncome
-                imageUrl={Tile1}
-                overlayImageUrl={Card1}
-                to="/withdraw"
-              />
-              <GreyTile title="О проекте" imageUrl={Card3} buttonText={isLoading ? "Отправляем…" : "Скачать презентацию"} onClick={onDownload}/>
-            </div>
-        <div className="profile-wrapper">
+          <div className="tiles">
+            <IncomeTile
+              title="Общие вознаграждения"
+              amountOM={totalEarn}
+              showIncome
+              imageUrl={Tile1}
+              overlayImageUrl={Card1}
+              to="/withdraw"
+            />
+            <GreyTile
+              title="О проекте"
+              imageUrl={Card3}
+              buttonText={isLoading ? "Отправляем…" : "Скачать презентацию"}
+              onClick={onDownload}
+            />
+          </div>
+
+          <div className="profile-wrapper">
             <div className="scrollBox__title-cont">
               <div className="scrollBox__title">Единомышленники</div>
             </div>
-            <ReferralsTile  clickable={false} rightImageUrl={Card5} count={totalReferrals} href="/referrals" />
+            <ReferralsTile
+              clickable={false}
+              rightImageUrl={Card5}
+              count={totalReferrals}
+              href="/referrals"
+            />
             <div className="list__referals">
               <div className="list__referals-subtitle">
                 <div className="list__referals-title-levels">Поколения</div>
-                <div className="list__referals-title-levels-count">{levelsCount}</div>
+                <div className="list__referals-title-levels-count">
+                  {levelsCount}
+                </div>
               </div>
             </div>
-              <div className="list">
-                {(stats ?? []).map((row) => (
-                  <div
-                    key={row.level}
-                    className="row is-clickable"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => nav('/detailing', { state: { level: row.level } })}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        nav('/detailing', { state: { level: row.level } });
-                      }
-                    }}
-                  >
-                    <span className="row__num">{row.level}</span>
-                    <span className="row__count">{row.totalEarn} OM</span>
-                  </div>
-                ))}
-              </div>
-        </div>
-        </section>
-        <div className="screen__spacer"/>
-      </main>
-      {!!u && premium && (
-        <div className="gbtn-bar">
-          <div className="gbtn-bar__inner">
-            <GradientButton href={inviteHref} target="_blank">
-              Пригласить
-            </GradientButton>
+            <div className="list">
+              {(stats ?? []).map((row) => (
+                <div
+                  key={row.level}
+                  className="row is-clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => nav("/detailing", { state: { level: row.level } })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      nav("/detailing", { state: { level: row.level } });
+                    }
+                  }}
+                >
+                  <span className="row__num">{row.level}</span>
+                  <span className="row__count">{row.totalEarn} OM</span>
+                </div>
+              ))}
+            </div>
           </div>
+        </section>
+        <div className="screen__spacer" />
+      </main>
+
+      <div className="gbtn-bar">
+        <div className="gbtn-bar__inner">
+          <GradientButton onClick={handleInviteClick}>Пригласить</GradientButton>
         </div>
-      )}
-      <PresentationSentModal open={openModal} onClose={() => setOpenModal(false)} fileName="Trinity.pdf" fileSizeText="9.1 MB" durationText="00:00" />
+      </div>
+
+      <PresentationSentModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        fileName="Trinity.pdf"
+        fileSizeText="9.1 MB"
+        durationText="00:00"
+      />
+
+      <SubscriptionRequiredModal
+        open={subModalOpen}
+        onClose={() => setSubModalOpen(false)}
+        onGoToSubscription={() => {
+          setSubModalOpen(false);
+          nav("/subscription");
+        }}
+      />
+
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
-      <Footer/>
+      <Footer />
     </div>
   );
 };
