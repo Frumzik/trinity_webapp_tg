@@ -104,12 +104,13 @@ export default function PreviewPage() {
   };
 
 
+
   const handlePurchase = async () => {
     if (!hasPaidSubscription) {
       setResultKind("error");
       setResultTitle("Недоступно");
       setResultItems(undefined);
-      setResultDesc("У вас не активен доступ к приложению");
+      setResultDesc("У вас неактивен доступ к приложению");
       setResultCta("Активировать");
       setResultOnCta(() => () => {
         setResultOpen(false);
@@ -119,9 +120,11 @@ export default function PreviewPage() {
       return;
     }
 
+    const purchaseType: "Training" | "Practise" = isPractise ? "Practise" : "Training";
+
     try {
       await addPurchase({
-        type: "Training",
+        type: purchaseType,
         content: [trainingId],
       }).unwrap();
 
@@ -143,7 +146,7 @@ export default function PreviewPage() {
         setResultTitle("Успешно");
         setResultItems(undefined);
         setResultDesc(
-          "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
+          "В ближайшее время мастер свяжется с вами для согласования времени проведения практики."
         );
         setResultOnCta(() => () => setResultOpen(false));
         setResultOpen(true);

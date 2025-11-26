@@ -39,7 +39,6 @@ export default function Footer() {
     console.log("[goProtected] path=", path, "needsSub=", needsSub);
 
     if (needsSub) {
-      // ждём пока юзер загрузится
       if (isUserLoading) {
         console.log("[goProtected] user loading, ignore click");
         return;
@@ -48,7 +47,7 @@ export default function Footer() {
       if (!hasPaidSubscription) {
         console.log("[goProtected] NO ACCESS -> open modal");
         setModalOpen(true);
-        return; // ВАЖНО: не навигируемся!
+        return;
       }
     }
 

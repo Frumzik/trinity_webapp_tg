@@ -121,12 +121,12 @@ export default function SubscriptionManagePage({
     const msg = Array.isArray(message) ? message.join('\n') : message;
 
     setResultTitle(
-      msg || (isInsufficient ? 'Недостаточно OM' : 'Произошла ошибка')
+      msg || (isInsufficient ? 'Недостаточно OM на балансе' : 'Произошла ошибка')
     );
     setResultItems(undefined);
     setResultDesc(undefined);
 
-    setResultCta(isInsufficient ? 'Добавить' : 'Продолжить');
+    setResultCta(isInsufficient ? 'Добавить OM' : 'Продолжить');
 
     setResultOnCta(() => () => {
       if (isInsufficient) {
@@ -142,7 +142,7 @@ export default function SubscriptionManagePage({
 
   const handleActivate = async () => {
     if (balance < currentPrice) {
-      openErrorModal('Недостаточно баланса', true);
+      openErrorModal('Недостаточно OM на балансе', true);
       return;
     }
 
@@ -290,7 +290,7 @@ export default function SubscriptionManagePage({
             </div>
             <div className="sub__offer-price">
               {priceYearUSD}{' '} OM
-              <span className="sub__offer-note">/ 1 год</span>
+              <span className="sub__offer-note"> / 1 год</span>
             </div>
           </div>
 
@@ -305,7 +305,7 @@ export default function SubscriptionManagePage({
             </div>
             <div className="sub__offer-price">
               {priceMonthUSD}{' '} OM
-              <span className="sub__offer-note">/ 1 месяц</span>
+              <span className="sub__offer-note"> / 1 месяц</span>
             </div>
           </div>
 

@@ -21,8 +21,6 @@ type Props = {
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
-
-  /** Показать картинку даже когда плитка залочена */
   showImageWhenDisabled?: boolean;
 };
 
