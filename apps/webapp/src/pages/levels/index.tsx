@@ -314,11 +314,11 @@ export default function Index() {
     const msg = Array.isArray(message) ? message.join("\n") : message;
 
     setResultTitle(
-      msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка")
+      msg || (isInsufficient ? "Недостаточно OM на балансе" : "Произошла ошибка")
     );
     setResultItems(undefined);
 
-    setResultCta(isInsufficient ? "Пополнить баланс" : "Продолжить");
+    setResultCta(isInsufficient ? "Добавить OM" : "Продолжить");
 
     setResultOnCta(
       () => () => {
@@ -344,7 +344,7 @@ export default function Index() {
     if (!hasPaidSubscription) {
       setResultTitle("Недоступно");
       setResultItems(undefined);
-      setResultDesc("У вас не активен доступ к приложению");
+      setResultDesc("У вас неактивен доступ к приложению");
       setResultCta("Активировать");
       setResultOnCta(() => () => {
         setResultOpen(false);

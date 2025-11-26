@@ -38,13 +38,11 @@
 .tabs {
   display: flex;
   align-items: flex-end;
-  justify-content: left;
+  justify-content: space-around;
   height: 73px;
   width: 100%;
-  gap: 25px;
+  gap: 0px;
   margin-bottom: 10px;
-  margin-left: 14px;
-
   &__btn {
     width: 22vw;
     height: 28.82px;
