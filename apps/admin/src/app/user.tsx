@@ -7,7 +7,6 @@ import {
   Edit,
   SimpleForm,
   TextInput,
-  Create,
   Filter,
   DateInput,
   NumberInput,
@@ -201,13 +200,4 @@ export const UserEdit = () => (
       <TextInput source="pin" label="PIN" />
     </SimpleForm>
   </Edit>
-);
-
-export const UserCreate = (props: any) => (
-  <Create {...props}>
-    <SimpleForm>
-      <TextInput source="email" />
-      <TextInput source="role" />
-    </SimpleForm>
-  </Create>
 );

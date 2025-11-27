@@ -1,9 +1,11 @@
-import { Admin, Resource } from 'react-admin';
+import { Admin, Layout, Resource } from 'react-admin';
 import simpleRestProvider from 'ra-data-simple-rest';
 import { authProvider } from './authProvider';
 import { httpClient } from './httpClient';
 // Импорт кастомных компонентов (можно оставить ListGuesser на первых порах)
-import { UserList, UserEdit, UserCreate } from './user';
+import { UserList, UserEdit } from './user';
+import { MyMenu } from './menu';
+import { Dashboard } from './dashboard';
 
 // URL должен вести на твой backend /admin
 const dataProvider = simpleRestProvider(
@@ -13,18 +15,19 @@ const dataProvider = simpleRestProvider(
 
 export default function App() {
   return (
-    <Admin dataProvider={dataProvider} authProvider={authProvider}>
-      {/* Пользователи */}
+    <Admin
+      title="Trinity"
+      dataProvider={dataProvider}
+      authProvider={authProvider}
+      dashboard={Dashboard}
+      layout={(props) => <Layout {...props} menu={MyMenu} />}
+    >
       <Resource
         name="user"
         list={UserList}
         edit={UserEdit}
-        create={UserCreate}
+        options={{ label: 'Пользователи' }}
       />
-
-      {/* Можно добавить другие ресурсы */}
-      {/* <Resource name="trainings" list={TrainingList} /> */}
-      {/* <Resource name="subscriptions" list={SubscriptionList} /> */}
     </Admin>
   );
 }
