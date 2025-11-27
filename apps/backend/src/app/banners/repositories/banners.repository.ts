@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Banner } from '../models';
 import { BannerEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class BannersRepository {
@@ -25,21 +26,30 @@ export class BannersRepository {
   }
 
   // Поиск баннера
-  // Поиск только активных баннеров
-  async findAll(): Promise<BannerEntity[]> {
-    const now = new Date();
+  async findAll(options?: GetListOptions<Banner>): Promise<BannerEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
 
     const banners = await this.bannerModel
-      .find({
-        $or: [
-          { endDate: { $gt: now } }, // дата окончания в будущем
-          { endDate: null }, // или дата не указана (бессрочный баннер)
-        ],
-      })
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
       .lean()
       .exec();
 
-    return banners.map((banner) => new BannerEntity(banner));
+    return banners.map((u) => new BannerEntity(u));
+  }
+
+  // Подсчет баннера по условию
+  async count(filter: FilterQuery<Banner> = {}): Promise<number> {
+    return await this.bannerModel.countDocuments(filter).exec();
   }
 
   // Обновление баннера

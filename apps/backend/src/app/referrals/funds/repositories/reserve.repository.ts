@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { ReserveFundItem } from '../models';
 import { ReserveFundItemEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class ReserveFundItemsRepository {
@@ -34,16 +35,31 @@ export class ReserveFundItemsRepository {
       : null;
   }
 
-  // Поиск реферала
-  async findAll(
-    condition: FilterQuery<ReserveFundItem> = {}
-  ): Promise<ReserveFundItemEntity[]> {
-    const reserveFundItems = await this.reserveFundItemModel
-      .find(condition)
+  // Получение всех тренингов
+  async findAll(options?: GetListOptions<ReserveFundItem>): Promise<ReserveFundItemEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
+    const items = await this.reserveFundItemModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
       .lean()
       .exec();
 
-    return reserveFundItems.map((item) => new ReserveFundItemEntity(item));
+    return items.map((u) => new ReserveFundItemEntity(u));
+  }
+
+  // Подсчет баннера по условию
+  async count(filter: FilterQuery<ReserveFundItem> = {}): Promise<number> {
+    return await this.reserveFundItemModel.countDocuments(filter).exec();
   }
 
   // Обновление реферала

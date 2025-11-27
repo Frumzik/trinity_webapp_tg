@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Transaction } from '../models';
 import { TransactionEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class TransactionsRepository {
@@ -28,17 +29,33 @@ export class TransactionsRepository {
     return transaction ? new TransactionEntity(transaction.toObject()) : null;
   }
 
+  // Поиск транзакций
   async findAll(
-    condition: FilterQuery<Transaction>
+    options?: GetListOptions<Transaction>
   ): Promise<TransactionEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
     const transactions = await this.transactionModel
-      .find(condition)
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
       .lean()
       .exec();
 
-    return transactions.map(
-      (transaction) => new TransactionEntity(transaction)
-    );
+    return transactions.map((u) => new TransactionEntity(u));
+  }
+
+  // Подсчет транзакций по условию
+  async count(filter: FilterQuery<Transaction> = {}): Promise<number> {
+    return await this.transactionModel.countDocuments(filter).exec();
   }
 
   // Обновление транзакции

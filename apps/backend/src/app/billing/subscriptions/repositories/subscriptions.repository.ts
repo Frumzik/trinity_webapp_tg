@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Subscription } from '../models';
 import { SubscriptionEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class SubscriptionsRepository {
@@ -32,14 +33,31 @@ export class SubscriptionsRepository {
 
   // Поиск подписки
   async findAll(
-    condition: FilterQuery<Subscription> = {}
+    options?: GetListOptions<Subscription>
   ): Promise<SubscriptionEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
     const subscriptions = await this.subscriptionModel
-      .find(condition)
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
       .lean()
       .exec();
 
-    return subscriptions.map((el) => new SubscriptionEntity(el));
+    return subscriptions.map((u) => new SubscriptionEntity(u));
+  }
+
+  // Подсчет подписок по условию
+  async count(filter: FilterQuery<Subscription> = {}): Promise<number> {
+    return await this.subscriptionModel.countDocuments(filter).exec();
   }
 
   // Обновление подписки

@@ -78,40 +78,44 @@ export class PurchaseListener {
             )
           );
 
-          const reserveItem = await this.fundsService.findReserveItem({
-            type: ReserveFundItemType.STAGE,
-            userId: purchase.userId,
-            stage: training.stage,
-            stageLevel: training.stageLevel,
+          const reserveItems = await this.fundsService.findReserveItemAll({
+            filter: {
+              type: ReserveFundItemType.STAGE,
+              userId: purchase.userId,
+              stage: training.stage,
+              stageLevel: training.stageLevel,
+            },
           });
 
-          if (reserveItem && reserveItem.endDate) {
-            // Если срок ещё не истёк
-            if (
-              new Date().getTime() < new Date(reserveItem.endDate).getTime()
-            ) {
-              // Убираем из резерва
-              await this.fundsService.returnReserveItem(reserveItem);
+          for (const reserveItem of reserveItems) {
+            if (reserveItem && reserveItem.endDate) {
+              // Если срок ещё не истёк
+              if (
+                new Date().getTime() < new Date(reserveItem.endDate).getTime()
+              ) {
+                // Убираем из резерва
+                await this.fundsService.returnReserveItem(reserveItem);
 
-              await this.eventEmitter.emit(
-                ReferralEvents.RESERVE_STAGE_RETURNED,
-                new ReferralReserveStageReturnedEvent(
-                  reserveItem.userId,
-                  reserveItem.sum
-                )
-              );
+                await this.eventEmitter.emit(
+                  ReferralEvents.RESERVE_STAGE_RETURNED,
+                  new ReferralReserveStageReturnedEvent(
+                    reserveItem.userId,
+                    reserveItem.sum
+                  )
+                );
 
-              await this.transactionsService.create({
-                userId: purchase.userId,
-                type: TransactionType.REFERRAL,
-                sum: reserveItem.sum,
-                description: 'Возврат реферального вознаграждения из резерва',
-              });
+                await this.transactionsService.create({
+                  userId: purchase.userId,
+                  type: TransactionType.REFERRAL,
+                  sum: reserveItem.sum,
+                  description: 'Возврат реферального вознаграждения из резерва',
+                });
 
-              await this.usersService.incBalance(
-                { userId: purchase.userId },
-                { inc: reserveItem.sum }
-              );
+                await this.usersService.incBalance(
+                  { userId: purchase.userId },
+                  { inc: reserveItem.sum }
+                );
+              }
             }
           }
         } else {
@@ -149,8 +153,10 @@ export class PurchaseListener {
       }
       case PurchaseType.SUBSCRIPTION: {
         const reserveItems = await this.fundsService.findReserveItemAll({
-          type: ReserveFundItemType.SUBSCRIPTION,
-          userId: purchase.userId,
+          filter: {
+            type: ReserveFundItemType.SUBSCRIPTION,
+            userId: purchase.userId,
+          },
         });
 
         for (const reserveItem of reserveItems) {

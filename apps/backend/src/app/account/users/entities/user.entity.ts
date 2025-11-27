@@ -87,7 +87,7 @@ export class UserEntity implements IUser {
     data: Partial<
       Pick<
         IUser,
-        'name' | 'username' | 'weight' | 'height' | 'birthDate' | 'gender'
+        'name' | 'username' | 'email' | 'height' | 'weight' | 'birthDate' | 'gender'
       >
     >
   ) {
@@ -96,6 +96,9 @@ export class UserEntity implements IUser {
     }
     if (data.username !== undefined) {
       this.username = data.username;
+    }
+    if (data.email !== undefined) {
+      this.email = data.email;
     }
     if (data.weight !== undefined) {
       this.weight = data.weight;

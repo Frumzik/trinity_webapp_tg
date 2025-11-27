@@ -1,52 +1,56 @@
-// Uncomment this line to use CSS modules
-// import styles from './app.module.scss';
-import NxWelcome from './nx-welcome';
+import { Admin, Layout, Resource } from 'react-admin';
+import simpleRestProvider from 'ra-data-simple-rest';
+import { authProvider } from './authProvider';
+import { httpClient } from './httpClient';
+// Импорт кастомных компонентов (можно оставить ListGuesser на первых порах)
+import { UserList, UserEdit } from './user';
+import { MyMenu } from './menu';
+import { Dashboard } from './dashboard';
+import {
+  TrainingCreate,
+  TrainingEdit,
+  TrainingList,
+  TrainingShow,
+} from './training';
+import { LessonCreate, LessonEdit, LessonList, LessonShow } from './lesson';
 
-import { Route, Routes, Link } from 'react-router-dom';
+// URL должен вести на твой backend /admin
+const dataProvider = simpleRestProvider(
+  `${import.meta.env.VITE_API_URL}/admin`,
+  httpClient
+);
 
-export function App() {
+export default function App() {
   return (
-    <div>
-      <NxWelcome title="@trinity/admin" />
-
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
-    </div>
+    <Admin
+      title="Trinity"
+      dataProvider={dataProvider}
+      authProvider={authProvider}
+      dashboard={Dashboard}
+      layout={(props) => <Layout {...props} menu={MyMenu} />}
+    >
+      <Resource
+        name="user"
+        list={UserList}
+        edit={UserEdit}
+        options={{ label: 'Пользователи' }}
+      />
+      <Resource
+        name="training"
+        list={TrainingList}
+        show={TrainingShow}
+        edit={TrainingEdit}
+        create={TrainingCreate}
+        options={{ label: 'Тренинги' }}
+      />
+      <Resource
+        name="lesson"
+        list={LessonList}
+        show={LessonShow}
+        edit={LessonEdit}
+        create={LessonCreate}
+        options={{ label: 'Уроки' }}
+      />
+    </Admin>
   );
 }
-
-export default App;
