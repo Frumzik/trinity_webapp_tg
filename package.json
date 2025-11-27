@@ -42,7 +42,7 @@
     "react-i18next": "^15.7.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.2",
-    "reflect-metadata": "^0.1.13",
+    "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.0",
     "swagger-ui-express": "^5.0.1",
     "swiper": "^12.0.3",
