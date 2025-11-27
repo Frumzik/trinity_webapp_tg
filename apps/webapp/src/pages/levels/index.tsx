@@ -299,14 +299,50 @@ export default function Index() {
       navigate(`/level/${l.id}`, { state: { returnTo: location.pathname } });
     }
   };
+  const buildStepTitle = (n: number) => {
+    const lastTwo = n % 100;
+    const last = n % 10;
 
-  const openSuccessModal = (titles: string[]) => {
-    setResultTitle("Новый уровень открыт");
-    setResultCta("Перейти");
-    const first = purchaseLevels.find((pl) => titles.includes(pl.title));
-    setResultOnCta(
-      () => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false))
+    if (lastTwo >= 11 && lastTwo <= 14) {
+      return `${n} Cтупеней Духа открыто`;
+    }
+
+    if (last === 1) {
+      return `${n} Cтупень Духа открыта`;
+    }
+
+    if (last >= 2 && last <= 4) {
+      return `${n} Cтупени Духа открыты`;
+    }
+
+    return `${n} Cтупеней Духа открыто`;
+  };
+  const openSuccessModal = (openedIds: number[]) => {
+    const openedLevels = purchaseLevels.filter((pl) =>
+      openedIds.includes(Number(pl.id))
     );
+
+    const maxStep = openedLevels.reduce((max, pl) => {
+      const idx =
+        typeof pl.stepIndex === "number" ? pl.stepIndex : 0;
+      return idx > max ? idx : max;
+    }, 0);
+
+    const titleText =
+      maxStep > 0 ? buildStepTitle(maxStep) : "Новый уровень открыт";
+
+    setResultTitle(titleText);
+    setResultCta("Перейти");
+
+    const first = openedLevels[0];
+
+    setResultOnCta(
+      () =>
+        first
+          ? () => navigate(`/level/${first.id}`)
+          : () => setResultOpen(false)
+    );
+
     setResultOpen(true);
   };
 
@@ -389,10 +425,7 @@ export default function Index() {
           }
         )
       );
-      const titles = purchaseLevels
-        .filter((pl) => ids.includes(Number(pl.id)))
-        .map((pl) => pl.title);
-      openSuccessModal(titles);
+      openSuccessModal(ids);
 
       await refetch();
     } catch (e: any) {
