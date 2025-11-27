@@ -29,7 +29,7 @@ export class AdminUserService {
       };
 
       const items = await this.usersService.findAll(options);
-      const total = items.length;
+      const total = await this.usersService.count();
 
       return {
         items: items.map((u) => ({ ...u, id: u.userId })), // React-admin требует поле id
@@ -153,6 +153,6 @@ export class AdminUserService {
    * DELETE
    */
   async delete(id: string | number) {
-    return { id };
+    return false
   }
 }

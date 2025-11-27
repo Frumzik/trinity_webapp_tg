@@ -41,7 +41,7 @@ export class AdminUserController {
     res.set('Access-Control-Expose-Headers', 'Content-Range');
     res.set(
       'Content-Range',
-      `user ${options.skip}-${options.skip + options.limit}/${total}`
+      `user ${options.skip + 1}-${options.skip + options.limit + 1}/${total}`
     );
 
     return res.json(items);

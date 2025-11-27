@@ -48,6 +48,11 @@ export class UsersRepository {
     return users.map((u) => new UserEntity(u));
   }
 
+  // Подсчет пользователей по условию
+  async count(filter: FilterQuery<User> = {}): Promise<number> {
+    return await this.userModel.countDocuments(filter).exec();
+  }
+
   // Обновление пользователя
   async update(userEntity: UserEntity): Promise<UserEntity> {
     if (!userEntity._id) {
