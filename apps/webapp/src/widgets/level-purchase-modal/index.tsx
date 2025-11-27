@@ -7,8 +7,8 @@ import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 export type PurchaseLevel = {
   id: string | number;
   title: string;
-  price: number;      // актуальная цена (со скидкой, если есть)
-  salePrice?: number; // старая цена, если была скидка
+  price: number;
+  salePrice?: number;
   purchased?: boolean;
   stepIndex?: number;
 };
@@ -43,16 +43,13 @@ export default function LevelPurchaseModal({
                                              isFirstLevel = false,
                                            }: Props) {
   const [selected, setSelected] = useState<(string | number)[]>([]);
-  // базовый выбор при открытии модалки (нужен для "Выбрать все" → снять)
   const [baseSelection, setBaseSelection] = useState<(string | number)[]>([]);
 
-  // первый ещё не купленный уровень
   const firstSelectableIndex = useMemo(
     () => lockedLevels.findIndex((l) => !l.purchased),
     [lockedLevels]
   );
 
-  // якорный индекс — минимальная ступень, которую нельзя выключить
   const anchorIndex = firstSelectableIndex;
 
   const selectable = useMemo(
@@ -63,7 +60,6 @@ export default function LevelPurchaseModal({
   const allSelected =
     selected.length === selectable.length && selectable.length > 0;
 
-  // ids ступеней из диапазона [anchorIndex..toIndex], только не купленные
   const buildRangeIds = useCallback(
     (toIndex: number): (string | number)[] => {
       if (anchorIndex < 0) return [];
@@ -78,7 +74,6 @@ export default function LevelPurchaseModal({
     [lockedLevels, anchorIndex]
   );
 
-  // сбрасываем выбор при открытии модалки
   useEffect(() => {
     if (!open) return;
 
@@ -95,7 +90,6 @@ export default function LevelPurchaseModal({
     setBaseSelection(initial);
   }, [open, defaultSelectedId, lockedLevels, anchorIndex, buildRangeIds]);
 
-  // сумма по выбранным — если есть salePrice, берём её, иначе price
   const sum = useMemo(
     () =>
       selected.reduce<number>((acc, id) => {
@@ -134,40 +128,29 @@ export default function LevelPurchaseModal({
 
   const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
 
-  // Тоггл уровня:
-  // – всегда держим цепочку от anchorIndex до какого-то endIndex
-  // – anchorIndex выключить нельзя
-  // – клик по правее → удлиняем цепочку
-  // – клик по последнему → укорачиваем (если больше anchorIndex)
-  // – клик по середине → обрезаем хвост начиная с этой ступени
   const toggle = (id: string | number, disabled: boolean) => {
     if (disabled || anchorIndex < 0) return;
 
     const idx = lockedLevels.findIndex((l) => l.id === id);
     if (idx < anchorIndex) return;
 
-    // если ещё ничего не выбрано — просто строим цепочку до этой ступени
     if (selected.length === 0) {
       setSelected(buildRangeIds(idx));
       return;
     }
 
-    // текущий "хвост" — последний выбранный id
     const lastId = selected[selected.length - 1];
     const currentEndIdx = lockedLevels.findIndex((l) => l.id === lastId);
 
-    // якорную ступень выключать нельзя
     if (idx === anchorIndex) {
       return;
     }
 
-    // клик правее текущего хвоста → расширяем
     if (idx > currentEndIdx) {
       setSelected(buildRangeIds(idx));
       return;
     }
 
-    // клик по текущему хвосту → укорачиваем на 1 (но не дальше якоря)
     if (idx === currentEndIdx) {
       if (currentEndIdx > anchorIndex) {
         setSelected(buildRangeIds(currentEndIdx - 1));
@@ -175,8 +158,6 @@ export default function LevelPurchaseModal({
       return;
     }
 
-    // клик по ступени внутри цепочки (между anchor и хвостом):
-    // обрезаем всё, начиная с неё → новый хвост = idx - 1 (но не левее anchor)
     const newEndIdx = Math.max(anchorIndex, idx - 1);
     setSelected(buildRangeIds(newEndIdx));
   };
@@ -306,10 +287,8 @@ export default function LevelPurchaseModal({
                   const val = e.target.checked;
 
                   if (val && anchorIndex >= 0) {
-                    // включили "Выбрать все" → всё от anchor до конца
                     setSelected(buildRangeIds(lockedLevels.length - 1));
                   } else {
-                    // выключили "Выбрать все" → возвращаемся к базовому выбору
                     setSelected(baseSelection);
                   }
                 }}
