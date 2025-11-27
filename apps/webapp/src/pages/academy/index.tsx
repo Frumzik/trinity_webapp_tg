@@ -168,7 +168,11 @@ export default function Index() {
               }}
             >
               <FeatureTile
-                title="Ступени Духа"
+                title={
+                  <>
+                    Ступени<br />Духа
+                  </>
+                }
                 description={desc}
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
