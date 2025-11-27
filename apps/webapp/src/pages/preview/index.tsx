@@ -167,10 +167,10 @@ export default function PreviewPage() {
 
       if (isBalanceError) {
         setResultKind("no-balance");
-        setResultTitle("Недостаточно баланса\nдля совершения платежа");
+        setResultTitle("Недостаточно ОМ на балансе ");
         setResultItems(undefined);
         setResultDesc(rawMsg);
-        setResultCta("Пополнить");
+        setResultCta("Добавить ОМ");
         setResultOnCta(() => () => {
           setResultOpen(false);
         });

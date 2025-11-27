@@ -42,8 +42,8 @@ export default function ProfileViewPage() {
 
   const rows = useMemo(() => {
     return [
-      ['Имя', nameParts.firstName],
       ['Фамилия', nameParts.lastName],
+      ['Имя', nameParts.firstName],
       ['Отчество', nameParts.middleName],
       ['Электронная почта', u?.email ?? ''],
       ['Дата рождения', fmtDate(u?.birthDate)],

@@ -243,7 +243,7 @@ export default function SubscriptionManagePage({
     );
   }
   const titleText = isRenew
-    ? <span>Продлите доступ</span>
+    ? <span style={{fontSize: 18, fontWeight: 500}}>После активации доступа вы получаете возможность полного погружения в пространство ТРИНИТИ:</span>
     : <span style={{fontSize: 18, fontWeight: 500}}>После активации доступа вы получаете возможность полного погружения в пространство ТРИНИТИ:</span>;
     const buttonText = isBuying
     ? isRenew
@@ -269,10 +269,10 @@ export default function SubscriptionManagePage({
         <section className="sub__pitch">
           <h2 className="sub__h2">{titleText}</h2>
           <ul className="sub__ul">
-            <Bullet>возможность пользоваться всеми функциями и инструментами;</Bullet>
-            <Bullet>доступ ко всем разделам, материалам и обновлениям;</Bullet>
-            <Bullet>открытие ступеней и прохождение личного пути развития;</Bullet>
-            <Bullet>участие в программе вознаграждений и получение бонусов за активность.</Bullet>
+            <Bullet>право пользования всеми функциями и продуктами</Bullet>
+            <Bullet>доступ ко всем разделам, материалам и обновлениям</Bullet>
+            <Bullet>открытие ступеней и прохождение личного пути развития</Bullet>
+            <Bullet>участие в программе вознаграждений и получение бонусов за активность</Bullet>
           </ul>
         </section>
       </main>

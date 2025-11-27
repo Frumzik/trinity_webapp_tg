@@ -31,7 +31,7 @@ export default function BalanceCard({ amount, onDeposit, onWithdraw }: Props) {
         </NavLink>
           <NavLink to="/wallet">
         <button className="balance__btn" onClick={onDeposit}>
-          Добавить
+          Добавить ОМ
         </button>
       </NavLink>
       </div>
