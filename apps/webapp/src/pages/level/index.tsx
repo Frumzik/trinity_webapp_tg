@@ -8,6 +8,7 @@ import PracticeSlider from '../../widgets/practise-card-slider';
 import SectionHeader from './ui/Sectionheader';
 import { useGetUserTrainingByIdQuery } from '../../shared/api/learning.api';
 import { useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
+
 import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type LocalProgress = {

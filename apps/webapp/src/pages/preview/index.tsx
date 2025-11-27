@@ -58,21 +58,62 @@ export default function PreviewPage() {
     isLoading: boolean;
     isError: boolean;
   };
+
+  // ---------- избранное ----------
   const { data: favoritesData } = useGetFavoritesQuery();
+
   const favoriteEntries = useMemo(
-    () =>
-      (favoritesData ?? []).flatMap((cat) => cat.favorites),
+    () => (favoritesData ?? []).flatMap((cat) => cat.favorites),
     [favoritesData]
   );
-  const isFav = useMemo(
+
+  // запись избранного именно для этого тренинга
+  const currentFavEntry = useMemo(
     () =>
-      favoriteEntries.some(
+      favoriteEntries.find(
         (f) =>
           f.type === "Training" &&
           (f.trainingId === trainingId || f.favoriteId === trainingId)
       ),
     [favoriteEntries, trainingId]
   );
+
+  const isFav = !!currentFavEntry;
+
+  const [addFavorite] = useAddFavoriteMutation();
+  const [deleteFavorite] = useDeleteFavoriteMutation();
+
+  const [isFavLocal, setIsFavLocal] = useState(isFav);
+  const [favPending, setFavPending] = useState(false);
+
+  // синк с серверным состоянием, когда оно реально меняется
+  useEffect(() => {
+    setIsFavLocal(isFav);
+  }, [isFav]);
+
+  const handleToggleFav = async () => {
+    if (!trainingId || favPending) return;
+
+    setFavPending(true);
+
+    try {
+      if (currentFavEntry) {
+        // Удаляем по favoriteId
+        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
+      } else {
+        // Добавляем
+        await addFavorite({ type: "Training", trainingId }).unwrap();
+      }
+      // isFav подтянется из useGetFavoritesQuery после invalidatesTags
+      // и через useEffect обновит isFavLocal
+    } catch (e) {
+      console.error("favorite toggle error", e);
+    } finally {
+      setFavPending(false);
+    }
+  };
+
+  // ---------- подписка / покупка ----------
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
@@ -85,25 +126,9 @@ export default function PreviewPage() {
   const price = node?.salePrice ?? node?.price ?? 0;
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
-  const [addFavorite] = useAddFavoriteMutation();
-  const [deleteFavorite] = useDeleteFavoriteMutation();
+
   const isTraining = node?.type === "training";
   const isPractise = node?.type === "practise" || node?.tag === "practise";
-
-
-  const handleToggleFav = async () => {
-    try {
-      if (isFav) {
-        await deleteFavorite({ type: "Training", trainingId }).unwrap();
-      } else {
-        await addFavorite({ type: "Training", trainingId }).unwrap();
-      }
-    } catch (e) {
-      console.error("favorite toggle error", e);
-    }
-  };
-
-
 
   const handlePurchase = async () => {
     if (!hasPaidSubscription) {
@@ -120,13 +145,11 @@ export default function PreviewPage() {
       return;
     }
 
-    const purchaseType: "Training" | "Practise" = isPractise ? "Practise" : "Training";
+    const purchaseType: "Training" | "Practise" =
+      isPractise ? "Practise" : "Training";
 
     try {
-      await addPurchase({
-        type: purchaseType,
-        content: [trainingId],
-      }).unwrap();
+      await addPurchase({ type: purchaseType, content: [trainingId] }).unwrap();
 
       if (isTraining) {
         if (typeof window !== "undefined") {
@@ -188,11 +211,13 @@ export default function PreviewPage() {
       setResultOpen(true);
     }
   };
+
   return (
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={isFav}
+          isFav={isFavLocal}
+          pending={favPending}
           onBack={() => navigate(-1)}
           onToggleFav={handleToggleFav}
           onMenu={() => {}}
@@ -200,9 +225,7 @@ export default function PreviewPage() {
       </Hero>
 
       <Sheet head="Описание">
-        {isLoading && (
-          <div style={{ padding: 16 }}>Загрузка описания…</div>
-        )}
+        {isLoading && <div style={{ padding: 16 }}>Загрузка описания…</div>}
 
         {isError && !isLoading && (
           <div style={{ padding: 16 }}>
