@@ -196,6 +196,7 @@ export default function PreviewPage() {
         setResultCta("Добавить ОМ");
         setResultOnCta(() => () => {
           setResultOpen(false);
+          navigate("/wallet");
         });
       } else {
         setResultKind("error");
