@@ -180,6 +180,10 @@ export class PurchaseService {
             break;
           }
           case ContentAccessType.TRAINING_PURCHASED: {
+            if (dto.content?.includes(rule.value)) {
+              break;
+            }
+
             const purchase = await this.find({
               type: PurchaseType.TRAINING,
               userId: user.userId,
