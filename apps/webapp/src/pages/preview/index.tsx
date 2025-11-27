@@ -58,21 +58,39 @@ export default function PreviewPage() {
     isLoading: boolean;
     isError: boolean;
   };
+
+  // --- избранное ---
   const { data: favoritesData } = useGetFavoritesQuery();
+
   const favoriteEntries = useMemo(
-    () =>
-      (favoritesData ?? []).flatMap((cat) => cat.favorites),
+    () => (favoritesData ?? []).flatMap((cat) => cat.favorites),
     [favoritesData]
   );
-  const isFav = useMemo(
+
+  // текущая запись избранного для этого тренинга
+  const currentFavEntry = useMemo(
     () =>
-      favoriteEntries.some(
+      favoriteEntries.find(
         (f) =>
           f.type === "Training" &&
           (f.trainingId === trainingId || f.favoriteId === trainingId)
       ),
     [favoriteEntries, trainingId]
   );
+
+  const isFav = !!currentFavEntry;
+
+  const [addFavorite] = useAddFavoriteMutation();
+  const [deleteFavorite] = useDeleteFavoriteMutation();
+
+  const [isFavLocal, setIsFavLocal] = useState(isFav);
+  const [favPending, setFavPending] = useState(false);
+
+  useEffect(() => {
+    setIsFavLocal(isFav);
+  }, [isFav]);
+
+  // --- пользователь / подписка ---
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
@@ -85,25 +103,30 @@ export default function PreviewPage() {
   const price = node?.salePrice ?? node?.price ?? 0;
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
-  const [addFavorite] = useAddFavoriteMutation();
-  const [deleteFavorite] = useDeleteFavoriteMutation();
+
   const isTraining = node?.type === "training";
   const isPractise = node?.type === "practise" || node?.tag === "practise";
 
-
+  // переключение избранного
   const handleToggleFav = async () => {
+    if (!trainingId || favPending) return;
+
+    setFavPending(true);
     try {
-      if (isFav) {
-        await deleteFavorite({ type: "Training", trainingId }).unwrap();
+      if (currentFavEntry) {
+        // УДАЛЕНИЕ: отправляем favoriteId
+        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
       } else {
+        // ДОБАВЛЕНИЕ
         await addFavorite({ type: "Training", trainingId }).unwrap();
       }
+      // фактическое состояние подтянется из useGetFavoritesQuery → isFav → isFavLocal
     } catch (e) {
       console.error("favorite toggle error", e);
+    } finally {
+      setFavPending(false);
     }
   };
-
-
 
   const handlePurchase = async () => {
     if (!hasPaidSubscription) {
@@ -188,11 +211,13 @@ export default function PreviewPage() {
       setResultOpen(true);
     }
   };
+
   return (
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={isFav}
+          isFav={isFavLocal}
+          pending={favPending}
           onBack={() => navigate(-1)}
           onToggleFav={handleToggleFav}
           onMenu={() => {}}
