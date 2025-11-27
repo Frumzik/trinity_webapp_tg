@@ -44,6 +44,7 @@ export class AcquiringService {
     this.BASE_URL = this.configService.get('ACQUIRING_URL') || '';
     this.TOKEN = this.configService.get('ACQUIRING_TOKEN') || '';
   }
+  
 
   // -------------------------
   // ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ЗАГОЛОВКОВ

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Favorite } from '../models';
 import { FavoriteEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class FavoritesRepository {
@@ -24,11 +25,31 @@ export class FavoritesRepository {
     return favorite ? new FavoriteEntity(favorite.toObject()) : null;
   }
 
-  // Получение всех избранных
-  async findAll(filter: FilterQuery<Favorite> = {}): Promise<FavoriteEntity[]> {
-    const favorite = await this.favoriteModel.find(filter).lean().exec();
+  // Поиск избранного
+  async findAll(options?: GetListOptions<Favorite>): Promise<FavoriteEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
 
-    return favorite.map((favorite) => new FavoriteEntity(favorite.toObject()));
+    const favorites = await this.favoriteModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return favorites.map((u) => new FavoriteEntity(u));
+  }
+
+  // Подсчет избранного по условию
+  async count(filter: FilterQuery<Favorite> = {}): Promise<number> {
+    return await this.favoriteModel.countDocuments(filter).exec();
   }
 
   // Обновление

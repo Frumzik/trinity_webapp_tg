@@ -6,7 +6,7 @@ import {
 import { BannersRepository } from './repositories';
 import { CountersService } from '../service';
 import { BannerEntity } from './entities';
-import { BannerCreateRequestDto, CounterType } from '@trinity/shared';
+import { BannerCreateRequestDto, CounterType, GetListOptions } from '@trinity/shared';
 import { FilterQuery } from 'mongoose';
 import { Banner } from './models';
 
@@ -46,11 +46,23 @@ export class BannersService {
     }
   }
 
-  async findAll(): Promise<BannerEntity[]> {
+  async findAll(options?: GetListOptions<Banner>): Promise<BannerEntity[]> {
     try {
-      const banners = await this.bannersRepository.findAll();
+      const banners = await this.bannersRepository.findAll(options);
 
       return banners;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске баннера';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Banner>): Promise<number> {
+    try {
+      const count = await this.bannersRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске баннера';

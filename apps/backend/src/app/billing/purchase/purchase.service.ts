@@ -17,6 +17,7 @@ import { PurchasesRepository } from './repositories';
 import {
   ContentAccessType,
   CounterType,
+  GetListOptions,
   PurchaseCreatedEvent,
   PurchaseCreateRequestDto,
   PurchaseEvents,
@@ -491,6 +492,30 @@ export class PurchaseService {
       const purchase = await this.purchasesRepository.find(condition);
 
       return purchase;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске покупки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async findAll(options?: GetListOptions<Purchase>): Promise<PurchaseEntity[]> {
+    try {
+      const purchases = await this.purchasesRepository.findAll(options);
+
+      return purchases;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске покупки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Purchase>): Promise<number> {
+    try {
+      const count = await this.purchasesRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске покупки';

@@ -79,10 +79,12 @@ export class PurchaseListener {
           );
 
           const reserveItems = await this.fundsService.findReserveItemAll({
-            type: ReserveFundItemType.STAGE,
-            userId: purchase.userId,
-            stage: training.stage,
-            stageLevel: training.stageLevel,
+            filter: {
+              type: ReserveFundItemType.STAGE,
+              userId: purchase.userId,
+              stage: training.stage,
+              stageLevel: training.stageLevel,
+            },
           });
 
           for (const reserveItem of reserveItems) {
@@ -151,8 +153,10 @@ export class PurchaseListener {
       }
       case PurchaseType.SUBSCRIPTION: {
         const reserveItems = await this.fundsService.findReserveItemAll({
-          type: ReserveFundItemType.SUBSCRIPTION,
-          userId: purchase.userId,
+          filter: {
+            type: ReserveFundItemType.SUBSCRIPTION,
+            userId: purchase.userId,
+          },
         });
 
         for (const reserveItem of reserveItems) {
