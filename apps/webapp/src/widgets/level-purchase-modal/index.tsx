@@ -23,8 +23,8 @@ type Props = {
   onClose: () => void;
   onPurchase: (payload: {
     levelIds: (string | number)[];
-    totalOM: number;       // считаем по цене покупки
-    discountedOM?: number; // можно не использовать
+    totalOM: number;
+    discountedOM?: number;
   }) => void;
   InfoIcon?: React.ComponentType<{ className?: string }>;
   isFirstLevel?: boolean;
@@ -43,12 +43,17 @@ export default function LevelPurchaseModal({
                                              isFirstLevel = false,
                                            }: Props) {
   const [selected, setSelected] = useState<(string | number)[]>([]);
-  const [checkAll, setCheckAll] = useState(false);
+  // базовый выбор при открытии модалки (нужен для "Выбрать все" → снять)
+  const [baseSelection, setBaseSelection] = useState<(string | number)[]>([]);
 
+  // первый ещё не купленный уровень
   const firstSelectableIndex = useMemo(
     () => lockedLevels.findIndex((l) => !l.purchased),
     [lockedLevels]
   );
+
+  // якорный индекс — минимальная ступень, которую нельзя выключить
+  const anchorIndex = firstSelectableIndex;
 
   const selectable = useMemo(
     () => lockedLevels.filter((l) => !l.purchased),
@@ -58,11 +63,11 @@ export default function LevelPurchaseModal({
   const allSelected =
     selected.length === selectable.length && selectable.length > 0;
 
-  // ids ступеней из диапазона [firstSelectableIndex..toIndex], только не купленные
+  // ids ступеней из диапазона [anchorIndex..toIndex], только не купленные
   const buildRangeIds = useCallback(
     (toIndex: number): (string | number)[] => {
-      if (firstSelectableIndex < 0) return [];
-      const from = firstSelectableIndex;
+      if (anchorIndex < 0) return [];
+      const from = anchorIndex;
       const to = Math.max(from, toIndex);
 
       return lockedLevels
@@ -70,27 +75,27 @@ export default function LevelPurchaseModal({
         .filter((l) => !l.purchased)
         .map((l) => l.id);
     },
-    [lockedLevels, firstSelectableIndex]
+    [lockedLevels, anchorIndex]
   );
 
   // сбрасываем выбор при открытии модалки
   useEffect(() => {
     if (!open) return;
 
-    setCheckAll(false);
+    let initial: (string | number)[] = [];
 
-    if (defaultSelectedId !== undefined && firstSelectableIndex >= 0) {
+    if (defaultSelectedId !== undefined && anchorIndex >= 0) {
       const idx = lockedLevels.findIndex((l) => l.id === defaultSelectedId);
-      if (idx >= firstSelectableIndex) {
-        setSelected(buildRangeIds(idx));
-        return;
+      if (idx >= anchorIndex) {
+        initial = buildRangeIds(idx);
       }
     }
 
-    setSelected([]);
-  }, [open, defaultSelectedId, lockedLevels, firstSelectableIndex, buildRangeIds]);
+    setSelected(initial);
+    setBaseSelection(initial);
+  }, [open, defaultSelectedId, lockedLevels, anchorIndex, buildRangeIds]);
 
-  // 🔥 сумма по выбранным — если есть salePrice, берём её, иначе price
+  // сумма по выбранным — если есть salePrice, берём её, иначе price
   const sum = useMemo(
     () =>
       selected.reduce<number>((acc, id) => {
@@ -103,17 +108,11 @@ export default function LevelPurchaseModal({
     [selected, lockedLevels]
   );
 
-  // общая "старая" сумма (по полной цене: salePrice, если есть, иначе price)
   const fullOldSum = useMemo(
-    () =>
-      selectable.reduce(
-        (acc, l) => acc + (l.salePrice ?? l.price),
-        0
-      ),
+    () => selectable.reduce((acc, l) => acc + (l.salePrice ?? l.price), 0),
     [selectable]
   );
 
-  // общая "новая" сумма (по актуальной цене price)
   const fullNewSum = useMemo(
     () => selectable.reduce((acc, l) => acc + l.price, 0),
     [selectable]
@@ -135,32 +134,57 @@ export default function LevelPurchaseModal({
 
   const showBulkBlock = selectable.length > 1 && fullOldSum > fullNewSum;
 
-  useEffect(() => {
-    if (!open) return;
-    if (checkAll && firstSelectableIndex >= 0) {
-      setSelected(buildRangeIds(lockedLevels.length - 1));
-    }
-  }, [checkAll, open, buildRangeIds, lockedLevels.length, firstSelectableIndex]);
-
-  // клик по ячейке: покупаем всё от первой доступной до выбранной
+  // Тоггл уровня:
+  // – всегда держим цепочку от anchorIndex до какого-то endIndex
+  // – anchorIndex выключить нельзя
+  // – клик по правее → удлиняем цепочку
+  // – клик по последнему → укорачиваем (если больше anchorIndex)
+  // – клик по середине → обрезаем хвост начиная с этой ступени
   const toggle = (id: string | number, disabled: boolean) => {
-    if (disabled || firstSelectableIndex < 0) return;
+    if (disabled || anchorIndex < 0) return;
 
     const idx = lockedLevels.findIndex((l) => l.id === id);
-    if (idx < firstSelectableIndex) return;
+    if (idx < anchorIndex) return;
 
-    setCheckAll(false);
-    setSelected(buildRangeIds(idx));
+    // если ещё ничего не выбрано — просто строим цепочку до этой ступени
+    if (selected.length === 0) {
+      setSelected(buildRangeIds(idx));
+      return;
+    }
+
+    // текущий "хвост" — последний выбранный id
+    const lastId = selected[selected.length - 1];
+    const currentEndIdx = lockedLevels.findIndex((l) => l.id === lastId);
+
+    // якорную ступень выключать нельзя
+    if (idx === anchorIndex) {
+      return;
+    }
+
+    // клик правее текущего хвоста → расширяем
+    if (idx > currentEndIdx) {
+      setSelected(buildRangeIds(idx));
+      return;
+    }
+
+    // клик по текущему хвосту → укорачиваем на 1 (но не дальше якоря)
+    if (idx === currentEndIdx) {
+      if (currentEndIdx > anchorIndex) {
+        setSelected(buildRangeIds(currentEndIdx - 1));
+      }
+      return;
+    }
+
+    // клик по ступени внутри цепочки (между anchor и хвостом):
+    // обрезаем всё, начиная с неё → новый хвост = idx - 1 (но не левее anchor)
+    const newEndIdx = Math.max(anchorIndex, idx - 1);
+    setSelected(buildRangeIds(newEndIdx));
   };
 
   const onBuy = () => {
-    const isBulkSelected =
-      selectable.length > 1 && selected.length === selectable.length;
-
     onPurchase({
       levelIds: selected,
       totalOM: sum,
-      // 🔥 ВСЕГДА передаём discountedOM, чтобы наверху sale = true
       discountedOM: sum,
     });
   };
@@ -204,7 +228,7 @@ export default function LevelPurchaseModal({
               const hasDiscount =
                 !isBought &&
                 typeof l.salePrice === "number" &&
-                l.salePrice > l.price; // старая цена больше новой
+                l.salePrice > l.price;
 
               return (
                 <button
@@ -223,7 +247,6 @@ export default function LevelPurchaseModal({
                   </div>
 
                   <div className="lp-cell-bottom">
-                    {/* есть скидка: слева старая salePrice зачёркнута, справа актуальная price */}
                     {!isBought && hasDiscount && (
                       <>
                         <span className="lp-old-mini">{l.salePrice} OM</span>
@@ -231,7 +254,6 @@ export default function LevelPurchaseModal({
                       </>
                     )}
 
-                    {/* нет скидки: только актуальная price */}
                     {!isBought && !hasDiscount && (
                       <span className="lp-price">{l.price} OM</span>
                     )}
@@ -279,27 +301,16 @@ export default function LevelPurchaseModal({
             <label className="lp-check">
               <input
                 type="checkbox"
-                checked={allSelected || checkAll}
+                checked={allSelected}
                 onChange={(e) => {
                   const val = e.target.checked;
-                  setCheckAll(val);
 
-                  if (!val) {
-                    if (
-                      defaultSelectedId !== undefined &&
-                      firstSelectableIndex >= 0
-                    ) {
-                      const idx = lockedLevels.findIndex(
-                        (l) => l.id === defaultSelectedId
-                      );
-                      if (idx >= firstSelectableIndex) {
-                        setSelected(buildRangeIds(idx));
-                        return;
-                      }
-                    }
-                    setSelected([]);
-                  } else if (firstSelectableIndex >= 0) {
+                  if (val && anchorIndex >= 0) {
+                    // включили "Выбрать все" → всё от anchor до конца
                     setSelected(buildRangeIds(lockedLevels.length - 1));
+                  } else {
+                    // выключили "Выбрать все" → возвращаемся к базовому выбору
+                    setSelected(baseSelection);
                   }
                 }}
               />
