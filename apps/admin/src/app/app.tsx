@@ -6,6 +6,13 @@ import { httpClient } from './httpClient';
 import { UserList, UserEdit } from './user';
 import { MyMenu } from './menu';
 import { Dashboard } from './dashboard';
+import {
+  TrainingCreate,
+  TrainingEdit,
+  TrainingList,
+  TrainingShow,
+} from './training';
+import { LessonCreate, LessonEdit, LessonList, LessonShow } from './lesson';
 
 // URL должен вести на твой backend /admin
 const dataProvider = simpleRestProvider(
@@ -27,6 +34,22 @@ export default function App() {
         list={UserList}
         edit={UserEdit}
         options={{ label: 'Пользователи' }}
+      />
+      <Resource
+        name="training"
+        list={TrainingList}
+        show={TrainingShow}
+        edit={TrainingEdit}
+        create={TrainingCreate}
+        options={{ label: 'Тренинги' }}
+      />
+      <Resource
+        name="lesson"
+        list={LessonList}
+        show={LessonShow}
+        edit={LessonEdit}
+        create={LessonCreate}
+        options={{ label: 'Уроки' }}
       />
     </Admin>
   );

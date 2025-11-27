@@ -1,22 +1,37 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Menu, useSidebarState } from 'react-admin';
-import {
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Collapse,
-  Typography,
-} from '@mui/material';
+import { MenuItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BookIcon from '@mui/icons-material/Book';
 import PersonIcon from '@mui/icons-material/Person';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
   const [sidebarOpen] = useSidebarState();
+  const [trainings, setTrainings] = useState([]);
+
+  // Получаем список тренингов с бэка
+  useEffect(() => {
+    axios
+      .post(
+        `${import.meta.env.VITE_API_URL}/content/trainings`,
+        {
+          filter: { parentId: null },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      ) // путь к вашему API
+      .then((res) => setTrainings(res.data.data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <Menu>
@@ -28,31 +43,26 @@ export const MyMenu = () => {
         <ListItemText primary="Дашборд" />
       </MenuItem>
 
-      {/* Тренинги */}
+      {/* Тренинги / Материалы */}
       <MenuItem onClick={() => setOpenTrainings(!openTrainings)}>
         <ListItemIcon>
           <BookIcon />
         </ListItemIcon>
-        <ListItemText primary="Тренинги" />
+        <ListItemText primary="Материалы" />
         {openTrainings ? <ExpandLess /> : <ExpandMore />}
       </MenuItem>
       <Collapse in={openTrainings && sidebarOpen} timeout="auto" unmountOnExit>
-        <MenuItem
-          component={Link}
-          to="/trainings/steps-of-spirit"
-          sx={{ pl: 4 }}
-        >
-          <ListItemIcon>
-            <Typography variant="body2">•</Typography>
-          </ListItemIcon>
-          <ListItemText primary="Ступени духа" />
-        </MenuItem>
-        <MenuItem component={Link} to="/trainings/practices" sx={{ pl: 4 }}>
-          <ListItemIcon>
-            <Typography variant="body2">•</Typography>
-          </ListItemIcon>
-          <ListItemText primary="Практики" />
-        </MenuItem>
+        {trainings.map((t) => (
+          <MenuItem
+            key={(t as any).trainingId}
+            component={Link}
+            to={`/training/${(t as any).trainingId}/show`}
+            sx={{ pl: 4 }}
+          >
+            <ListItemText primary={`• ${(t as any).title}`} />{' '}
+            {/* Черточка/точка */}
+          </MenuItem>
+        ))}
       </Collapse>
 
       {/* Пользователи */}

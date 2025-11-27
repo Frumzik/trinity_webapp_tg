@@ -109,7 +109,7 @@ export class ContentService {
     }
   }
 
-  async countTrainings(condition: FilterQuery<Training>): Promise<number> {
+  async countTrainings(condition?: FilterQuery<Training>): Promise<number> {
     try {
       const count = await this.trainingsRepository.count(condition);
 
@@ -260,7 +260,7 @@ export class ContentService {
     }
   }
 
-  async countLessons(condition: FilterQuery<Lesson>): Promise<number> {
+  async countLessons(condition: FilterQuery<Lesson> = {}): Promise<number> {
     try {
       const count = await this.lessonsRepository.count(condition);
 
