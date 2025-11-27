@@ -19,6 +19,8 @@ import {
   ReferralReserveStageBySubscriptionEvent,
   PurchasePractiseAbortEvent,
   PurchasePractiseDoneEvent,
+  ReferralReserveByStageEvent,
+  ReferralReserveBySubscriptionEvent,
 } from '@trinity/shared';
 import {
   PurchaseEntity,
@@ -39,12 +41,12 @@ export class ReferralsListener {
     1: 0.36,
     2: 0.18,
     3: 0.12,
-    4: 0.9,
-    5: 0.9,
-    6: 0.6,
-    7: 0.4,
-    8: 0.3,
-    9: 0.3,
+    4: 0.09,
+    5: 0.09,
+    6: 0.06,
+    7: 0.04,
+    8: 0.03,
+    9: 0.03,
   };
 
   private fundPercent = 0.1;
@@ -100,6 +102,12 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.PRACTISE: {
+        await this.fundsService.createReserveItem({
+          type: ReserveFundItemType.PRACTISE,
+          userId: purchase.userId,
+          sum: Math.abs(transaction.sum),
+          trainingId: purchase.contentId,
+        });
         break;
       }
       case PurchaseType.LESSON: {
@@ -238,7 +246,9 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     {
-      for (const [level, percent] of Object.entries(this.levelPercents)) {
+      for (const [_level, percent] of Object.entries(this.levelPercents)) {
+        const level = +_level;
+
         const sum = Math.abs(transaction.sum) * percent;
 
         const partner = await this.referralsService.find({
@@ -252,39 +262,113 @@ export class ReferralsListener {
           continue;
         }
 
-        // Обновляем балансы
-        await this.referralsService.incEarn(partner, { inc: sum });
-        await this.usersService.incBalance(
-          {
-            userId: partner.partnerId,
-          },
-          {
-            inc: sum,
-          }
-        );
-
-        await this.transactionsService.create({
-          userId: partner.partnerId,
-          type: TransactionType.REFERRAL,
-          sum: sum,
-          description: `Реферальное вознаграждение за ${level} ступень`,
+        const training = await this.contentService.findTraining({
+          trainingId: purchase.contentId,
         });
 
-        // Пополняем банк
-        await this.fundsService.incMain(
-          Math.abs(transaction.sum) * this.fundPercent
-        );
+        if (!training) {
+          throw new NotFoundException('Тренинг не найден');
+        }
 
-        await this.eventEmitter.emit(
-          ReferralEvents.BUY,
-          new ReferralBuyEvent(
-            partner.partnerId,
-            partner.referralId,
-            partner.level,
+        const stageTraining = await this.contentService.findTraining({
+          stageLevel: 1,
+          stage: level,
+        });
+
+        if (!stageTraining) {
+          throw new NotFoundException('Тренинг не найден');
+        }
+
+        const partnerPurchase = await this.purchaseService.find({
+          userId: partner.partnerId,
+          contentId: stageTraining.trainingId,
+        });
+
+        const partnerSubscription = await this.subscriptionsService.find({
+          userId: partner.partnerId,
+        });
+
+        if (!partnerSubscription) {
+          throw new NotFoundException('Подписка партнера не найдена');
+        }
+
+        if (partnerSubscription.isActive()) {
+          if (partnerPurchase) {
+            // Обновляем балансы
+            await this.referralsService.incEarn(partner, { inc: sum });
+            await this.usersService.incBalance(
+              {
+                userId: partner.partnerId,
+              },
+              {
+                inc: sum,
+              }
+            );
+
+            await this.transactionsService.create({
+              userId: partner.partnerId,
+              type: TransactionType.REFERRAL,
+              sum: sum,
+              description: `Реферальное вознаграждение за ${level} ступень`,
+            });
+
+            // Пополняем банк
+            await this.fundsService.incMain(
+              Math.abs(transaction.sum) * this.fundPercent
+            );
+
+            await this.eventEmitter.emit(
+              ReferralEvents.BUY,
+              new ReferralBuyEvent(
+                partner.partnerId,
+                partner.referralId,
+                partner.level,
+                sum,
+                training.title ?? ''
+              )
+            );
+          } else {
+            await this.fundsService.createReserveItem({
+              type: ReserveFundItemType.STAGE,
+              userId: partner.partnerId,
+              sum,
+              stage: stageTraining.stage,
+              stageLevel: stageTraining.stageLevel,
+              endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+            });
+
+            await this.eventEmitter.emit(
+              ReferralEvents.RESERVE_BY_STAGE,
+              new ReferralReserveByStageEvent(
+                partner.partnerId,
+                partner.referralId,
+                sum,
+                stageTraining.stageLevel ?? 1,
+                stageTraining.stage ?? level,
+                training.title ?? ''
+              )
+            );
+          }
+        } else {
+          await this.fundsService.createReserveItem({
+            type: ReserveFundItemType.SUBSCRIPTION,
+            userId: partner.partnerId,
             sum,
-            ''
-          )
-        );
+            stage: stageTraining.stage,
+            stageLevel: stageTraining.stageLevel,
+            endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          });
+
+          await this.eventEmitter.emit(
+            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+            new ReferralReserveBySubscriptionEvent(
+              partner.partnerId,
+              partner.referralId,
+              sum,
+              training.title ?? ''
+            )
+          );
+        }
       }
     }
   }
@@ -304,6 +388,10 @@ export class ReferralsListener {
       if (!partner) {
         continue;
       }
+
+      const lesson = await this.contentService.findLesson({
+        lessonId: purchase.contentId,
+      });
 
       // Обновляем балансы
       await this.referralsService.incEarn(partner, { inc: sum });
@@ -335,7 +423,7 @@ export class ReferralsListener {
           partner.referralId,
           partner.level,
           sum,
-          ''
+          lesson?.title ?? ''
         )
       );
     }
@@ -367,7 +455,15 @@ export class ReferralsListener {
       throw new NotFoundException('Транзакция не найдена');
     }
 
-    for (const [level, percent] of Object.entries(this.levelPercents)) {
+    const practise = await this.contentService.findTraining({ trainingId });
+
+    if (!practise) {
+      throw new NotFoundException('Практика не найдена');
+    }
+
+    for (const [_level, percent] of Object.entries(this.levelPercents)) {
+      const level = +_level;
+
       const sum =
         Math.abs(transaction.sum) *
         (1 - this.merchantPercent - this.fundPercent) *
@@ -382,28 +478,94 @@ export class ReferralsListener {
         continue;
       }
 
-      // Обновляем балансы
-      await this.referralsService.incEarn(partner, { inc: sum });
-      await this.usersService.incBalance(
-        {
-          userId: partner.partnerId,
-        },
-        {
-          inc: sum,
-        }
-      );
-
-      await this.transactionsService.create({
-        userId: partner.partnerId,
-        type: TransactionType.REFERRAL,
-        sum: sum,
-        description: `Реферальное вознаграждение за ${level} ступень`,
+      const stageTraining = await this.contentService.findTraining({
+        stageLevel: 1,
+        stage: level,
       });
 
-      // Пополняем банк
-      await this.fundsService.incMain(
-        Math.abs(transaction.sum) * this.fundPercent
-      );
+      if (!stageTraining) {
+        throw new NotFoundException('Тренинг не найден');
+      }
+
+      const partnerPurchase = await this.purchaseService.find({
+        userId: partner.partnerId,
+        contentId: stageTraining.trainingId,
+      });
+
+      const partnerSubscription = await this.subscriptionsService.find({
+        userId: partner.partnerId,
+      });
+
+      if (!partnerSubscription) {
+        throw new NotFoundException('Подписка партнера не найдена');
+      }
+
+      if (partnerSubscription.isActive()) {
+        if (partnerPurchase) {
+          // Обновляем балансы
+          await this.referralsService.incEarn(partner, { inc: sum });
+          await this.usersService.incBalance(
+            {
+              userId: partner.partnerId,
+            },
+            {
+              inc: sum,
+            }
+          );
+
+          await this.transactionsService.create({
+            userId: partner.partnerId,
+            type: TransactionType.REFERRAL,
+            sum: sum,
+            description: `Реферальное вознаграждение за ${level} ступень`,
+          });
+
+          // Пополняем банк
+          await this.fundsService.incMain(
+            Math.abs(transaction.sum) * this.fundPercent
+          );
+        } else {
+          await this.fundsService.createReserveItem({
+            type: ReserveFundItemType.STAGE,
+            userId: partner.partnerId,
+            sum,
+            stage: stageTraining.stage,
+            stageLevel: stageTraining.stageLevel,
+            endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          });
+
+          await this.eventEmitter.emit(
+            ReferralEvents.RESERVE_BY_STAGE,
+            new ReferralReserveByStageEvent(
+              partner.partnerId,
+              partner.referralId,
+              sum,
+              stageTraining.stageLevel ?? 1,
+              stageTraining.stage ?? level,
+              practise.title ?? ''
+            )
+          );
+        }
+      } else {
+        await this.fundsService.createReserveItem({
+          type: ReserveFundItemType.SUBSCRIPTION,
+          userId: partner.partnerId,
+          sum,
+          stage: stageTraining.stage,
+          stageLevel: stageTraining.stageLevel,
+          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+        });
+
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+          new ReferralReserveBySubscriptionEvent(
+            partner.partnerId,
+            partner.referralId,
+            sum,
+            practise.title ?? ''
+          )
+        );
+      }
     }
 
     const training = await this.contentService.findTraining({
@@ -433,6 +595,14 @@ export class ReferralsListener {
         description: `Награда за проведение практики ${training.title}`,
       });
     }
+
+    const reserveItem = await this.fundsService.findReserveItem({
+      type: ReserveFundItemType.PRACTISE,
+      userId: purchase.userId,
+      trainingId: purchase.contentId,
+    });
+
+    reserveItem && (await this.fundsService.deleteReserveItem(reserveItem));
   }
 
   @OnEvent(PurchaseEvents.PRACTISE_ABORT)
@@ -470,6 +640,17 @@ export class ReferralsListener {
       description: `Возврат практики`,
     });
 
-    await this.usersService.incBalance({ userId }, { inc: Math.abs(transaction.sum) });
+    await this.usersService.incBalance(
+      { userId },
+      { inc: Math.abs(transaction.sum) }
+    );
+
+    const reserveItem = await this.fundsService.findReserveItem({
+      type: ReserveFundItemType.PRACTISE,
+      userId: purchase.userId,
+      trainingId: purchase.contentId,
+    });
+
+    reserveItem && (await this.fundsService.deleteReserveItem(reserveItem));
   }
 }

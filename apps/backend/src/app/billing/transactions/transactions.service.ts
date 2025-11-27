@@ -8,7 +8,11 @@ import {
 import { FilterQuery } from 'mongoose';
 import { Transaction, TransactionEntity } from '../../billing';
 import { TransactionsRepository } from './repositories';
-import { CounterType, TransactionCreateRequestDto } from '@trinity/shared';
+import {
+  CounterType,
+  GetListOptions,
+  TransactionCreateRequestDto,
+} from '@trinity/shared';
 import { CountersService } from '../../service';
 import { UsersService } from '../../account';
 
@@ -67,12 +71,24 @@ export class TransactionsService {
   }
 
   async findAll(
-    condition: FilterQuery<Transaction>
+    options?: GetListOptions<Transaction>
   ): Promise<TransactionEntity[]> {
     try {
-      const transactions = await this.transactionsRepository.findAll(condition);
+      const transactions = await this.transactionsRepository.findAll(options);
 
       return transactions;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске транзакции';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Transaction>): Promise<number> {
+    try {
+      const count = await this.transactionsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске транзакции';
@@ -100,7 +116,9 @@ export class TransactionsService {
     condition: FilterQuery<Transaction>
   ): Promise<TransactionEntity[]> {
     try {
-      const transactions = await this.transactionsRepository.populate(condition);
+      const transactions = await this.transactionsRepository.populate(
+        condition
+      );
 
       return transactions;
     } catch (error: unknown) {

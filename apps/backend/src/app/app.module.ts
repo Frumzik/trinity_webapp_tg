@@ -22,6 +22,7 @@ import { FundsModule, ReferralsModule } from './referrals';
 import { AcquiringModule } from './billing/acquiring/acquiring.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     FundsModule,
     AcquiringModule,
     NotificationsModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

@@ -9,6 +9,7 @@ import { SubscriptionsRepository } from './repositories';
 import { UserEntity } from '../../account';
 import {
   CounterType,
+  GetListOptions,
   SubscriptionDaysLeftEvent,
   SubscriptionEvents,
   SubscriptionExpiredEvent,
@@ -50,6 +51,32 @@ export class SubscriptionsService {
       return subscription
         ? await this.subscriptionsRepository.update(subscription.validate())
         : null;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async findAll(
+    options?: GetListOptions<Subscription>
+  ): Promise<SubscriptionEntity[]> {
+    try {
+      const subscriptions = await this.subscriptionsRepository.findAll(options);
+
+      return subscriptions;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Subscription>): Promise<number> {
+    try {
+      const count = await this.subscriptionsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
@@ -138,7 +165,7 @@ export class SubscriptionsService {
   }
 
   async checkAndUpdateAll() {
-    const subscriptions = await this.subscriptionsRepository.findAll();
+    const subscriptions = await this.findAll();
 
     const now = new Date();
 

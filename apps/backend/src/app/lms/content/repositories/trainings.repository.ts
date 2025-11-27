@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Lesson, Training } from '../models';
 import { TrainingEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class TrainingsRepository {
@@ -29,11 +30,31 @@ export class TrainingsRepository {
     return training ? new TrainingEntity(training.toObject()) : null;
   }
 
-  // Получение всех тренингов
-  async findAll(filter: FilterQuery<Training> = {}): Promise<TrainingEntity[]> {
-    const trainings = await this.trainingModel.find(filter).lean().exec();
+  // Поиск уроков
+  async findAll(options?: GetListOptions<Training>): Promise<TrainingEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
 
-    return trainings.map((training) => new TrainingEntity(training));
+    const trainings = await this.trainingModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return trainings.map((u) => new TrainingEntity(u));
+  }
+
+  // Подсчет уроков по условию
+  async count(filter: FilterQuery<Training> = {}): Promise<number> {
+    return await this.lessonModel.countDocuments(filter).exec();
   }
 
   // Обонлвение тренинга

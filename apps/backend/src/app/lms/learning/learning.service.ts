@@ -12,6 +12,7 @@ import { LearningEntity } from './entities';
 import { FilterQuery, Types } from 'mongoose';
 import {
   ContentAccessType,
+  GetListOptions,
   ILearningLesson,
   LearningAccessStatus,
   LearningEvents,
@@ -51,17 +52,29 @@ export class LearningService {
     }
   }
 
-  async findAll(condition: FilterQuery<Learning>): Promise<LearningEntity[]> {
-    try {
-      const learning = await this.learningRepository.findAll(condition);
-
-      return learning;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
-      throw new InternalServerErrorException(message);
+    async findAll(options?: GetListOptions<Learning>): Promise<LearningEntity[]> {
+      try {
+        const learnings = await this.learningRepository.findAll(options);
+  
+        return learnings;
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
+        throw new InternalServerErrorException(message);
+      }
     }
-  }
+  
+    async count(condition: FilterQuery<Learning>): Promise<number> {
+      try {
+        const count = await this.learningRepository.count(condition);
+  
+        return count;
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
+        throw new InternalServerErrorException(message);
+      }
+    }
 
   async calculateAccess(
     user: UserEntity,

@@ -19,6 +19,7 @@ import {
   PurchaseEvents,
   PurchasePractiseDoneEvent,
   PurchasePractiseAbortEvent,
+  GetListOptions,
 } from '@trinity/shared';
 import { FundEntity, ReserveFundItemEntity } from './entities';
 import { Fund, ReserveFundItem } from './models';
@@ -65,6 +66,28 @@ export class FundsService {
       const fund = await this.fundsRepository.find(condition);
 
       return fund;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async findAll(options?: GetListOptions<Fund>): Promise<FundEntity[]> {
+    try {
+      const funds = await this.fundsRepository.findAll(options);
+
+      return funds;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Fund>): Promise<number> {
+    try {
+      const count = await this.fundsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Ошибка';
       throw new InternalServerErrorException(message);
@@ -150,7 +173,7 @@ export class FundsService {
 
       await this.incReserve(dto.sum);
 
-      console.log(newFundItem)
+      console.log(newFundItem);
 
       return await this.reserveFundItemsRepository.create(newFundItem);
     } catch (error: unknown) {
@@ -173,14 +196,25 @@ export class FundsService {
   }
 
   async findReserveItemAll(
-    condition: FilterQuery<ReserveFundItem>
+    options?: GetListOptions<ReserveFundItem>
   ): Promise<ReserveFundItemEntity[]> {
     try {
-      const fundItems = await this.reserveFundItemsRepository.findAll(
-        condition
-      );
+      const funds = await this.reserveFundItemsRepository.findAll(options);
 
-      return fundItems;
+      return funds;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async countReserveItemAll(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<number> {
+    try {
+      const count = await this.reserveFundItemsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Ошибка';
       throw new InternalServerErrorException(message);

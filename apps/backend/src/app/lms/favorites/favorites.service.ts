@@ -13,6 +13,7 @@ import {
   FavoritesTag,
   FavoritesTagTitle,
   FavoriteType,
+  GetListOptions,
   IFavorite,
   IFavoritesByTag,
 } from '@trinity/shared';
@@ -97,7 +98,7 @@ export class FavoritesService {
         ...dto,
         userId,
         lesson: lesson_id,
-        training: training_id
+        training: training_id,
       });
 
       return await this.favoritesRepository.create(newFavorite);
@@ -122,11 +123,23 @@ export class FavoritesService {
     }
   }
 
-  async findAll(condition: FilterQuery<Favorite>): Promise<FavoriteEntity[]> {
+  async findAll(options?: GetListOptions<Favorite>): Promise<FavoriteEntity[]> {
     try {
-      const favorites = await this.favoritesRepository.findAll(condition);
+      const favorites = await this.favoritesRepository.findAll(options);
 
       return favorites;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске избранного';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Favorite>): Promise<number> {
+    try {
+      const count = await this.favoritesRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске избранного';

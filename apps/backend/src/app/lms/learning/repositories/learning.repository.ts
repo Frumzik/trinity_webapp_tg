@@ -7,6 +7,7 @@ import { LearningEntity } from '../entities';
 import { Training } from '../../content/models';
 import { TrainingEntity } from '../../content/entities';
 import {
+  GetListOptions,
   ILearning,
   ILesson,
   ITraining,
@@ -38,10 +39,30 @@ export class LearningsRepository {
   }
 
   // Получение всех тренингов
-  async findAll(filter: FilterQuery<Learning> = {}): Promise<LearningEntity[]> {
-    const learning = await this.learningModel.find(filter).lean().exec();
+  async findAll(options?: GetListOptions<Learning>): Promise<LearningEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
 
-    return learning.map((learning) => new LearningEntity(learning));
+    const learnings = await this.learningModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return learnings.map((u) => new LearningEntity(u));
+  }
+
+  // Подсчет баннера по условию
+  async count(filter: FilterQuery<Learning> = {}): Promise<number> {
+    return await this.learningModel.countDocuments(filter).exec();
   }
 
   // Обновление

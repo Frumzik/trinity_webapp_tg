@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { User } from '../models';
 import { UserEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class UsersRepository {
@@ -26,9 +27,30 @@ export class UsersRepository {
   }
 
   // Получение всех пользователей
-  async findAll(filter: FilterQuery<User> = {}): Promise<UserEntity[]> {
-    const users = await this.userModel.find(filter).lean().exec();
-    return users.map((user) => new UserEntity(user));
+  async findAll(options?: GetListOptions<User>): Promise<UserEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
+    const users = await this.userModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return users.map((u) => new UserEntity(u));
+  }
+
+  // Подсчет пользователей по условию
+  async count(filter: FilterQuery<User> = {}): Promise<number> {
+    return await this.userModel.countDocuments(filter).exec();
   }
 
   // Обновление пользователя

@@ -11,6 +11,7 @@ import {
   AuthRegisterEmailDto,
   AuthRegisterTgDto,
   CounterType,
+  GetListOptions,
   IUser,
   UserEvents,
   UserRole,
@@ -84,11 +85,25 @@ export class UsersService {
     }
   }
 
-  async findAll(condition: FilterQuery<User> = {}): Promise<UserEntity[]> {
+  async findAll(options?: GetListOptions<User>): Promise<UserEntity[]> {
     try {
-      const users = await this.usersRepository.findAll(condition);
+      const users = await this.usersRepository.findAll(options);
 
       return users;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<User> = {}): Promise<number> {
+    try {
+      const count = await this.usersRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error
@@ -128,7 +143,18 @@ export class UsersService {
 
   async updateProfile(
     condition: FilterQuery<User>,
-    updateData: Partial<Pick<IUser, 'name' | 'username'>>
+    updateData: Partial<
+      Pick<
+        IUser,
+        | 'name'
+        | 'username'
+        | 'email'
+        | 'height'
+        | 'weight'
+        | 'birthDate'
+        | 'gender'
+      >
+    >
   ): Promise<UserEntity> {
     try {
       const user = await this.usersRepository.find(condition);
