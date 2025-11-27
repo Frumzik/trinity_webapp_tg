@@ -34,6 +34,8 @@ export class TransactionsController {
     @UserId() userId: number,
     @Query('populate') populate?: boolean
   ): Promise<ITransaction[]> {
-    return populate ? await this.transactionsService.populate({ userId }) : await this.transactionsService.findAll({ userId });
+    return populate
+      ? await this.transactionsService.populate({ userId })
+      : await this.transactionsService.findAll({ filter: { userId } });
   }
 }

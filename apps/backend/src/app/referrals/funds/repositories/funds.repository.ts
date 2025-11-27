@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Fund } from '../models';
 import { FundEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class FundsRepository {
@@ -22,6 +23,33 @@ export class FundsRepository {
     const fund = await this.fundModel.findOne(condition).exec();
 
     return fund ? new FundEntity(fund.toObject()) : null;
+  }
+
+  // Получение всех тренингов
+  async findAll(options?: GetListOptions<Fund>): Promise<FundEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
+    const funds = await this.fundModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return funds.map((u) => new FundEntity(u));
+  }
+
+  // Подсчет баннера по условию
+  async count(filter: FilterQuery<Fund> = {}): Promise<number> {
+    return await this.fundModel.countDocuments(filter).exec();
   }
 
   // Обновление реферала

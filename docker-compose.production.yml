@@ -5,9 +5,12 @@ services:
       - "3101:3000"
     networks:
       - proxy
-
+    environment:
+    - TZ=${SYSTEM_TIMEZONE:-Europe/Moscow}
+  
     volumes:
     - grafana_data:/var/lib/grafana
+    - ./loki.yaml:/etc/grafana/provisioning/datasources/loki.yaml
 
   prometheus:
     image: prom/prometheus:latest
@@ -17,11 +20,13 @@ services:
       - proxy
 
   loki:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.9.0
     command: -config.file=/etc/loki/local-config.yaml
+    environment:
+      TZ: ${SYSTEM_TIMEZONE:-Europe/Moscow}
     volumes:
       - loki_data:/loki
-      - ./loki.yaml:/etc/loki/local-config.yaml
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
     networks:
@@ -53,13 +58,13 @@ services:
       - ./apps/bot/envs/.env.production
     ports:
       - "3001:3001"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`bot.3nity.space`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.services.backend.loadbalancer.server.port=3001"
-      - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
-      - "traefik.http.routers.backend.tls=true"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.bot.rule=Host(`bot.3nity.space`)"
+    #   - "traefik.http.routers.bot.entrypoints=websecure"
+    #   - "traefik.http.services.bot.loadbalancer.server.port=3001"
+    #   - "traefik.http.routers.bot.tls.certresolver=letsEncrypt"
+    #   - "traefik.http.routers.bot.tls=true"
     networks:
       - proxy
 

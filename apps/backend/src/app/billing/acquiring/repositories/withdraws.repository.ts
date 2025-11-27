@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Withdraw } from '../models';
 import { WithdrawEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class WithdrawsRepository {
@@ -22,6 +23,33 @@ export class WithdrawsRepository {
     const withdraw = await this.withdrawModel.findOne(condition).exec();
 
     return withdraw ? new WithdrawEntity(withdraw.toObject()) : null;
+  }
+
+  // Поиск выводов
+  async findAll(options?: GetListOptions<Withdraw>): Promise<WithdrawEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
+    const withdraws = await this.withdrawModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return withdraws.map((u) => new WithdrawEntity(u));
+  }
+
+  // Подсчет выводов по условию
+  async count(filter: FilterQuery<Withdraw> = {}): Promise<number> {
+    return await this.withdrawModel.countDocuments(filter).exec();
   }
 
   // Обновление баннера

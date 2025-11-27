@@ -85,6 +85,13 @@ export class BannersController {
     description: 'Баннер',
   })
   async findAll(): Promise<BannerEntity[]> {
-    return await this.bannersService.findAll();
+    return await this.bannersService.findAll({
+      filter: {
+        $or: [
+          { endDate: { $gt: new Date() } }, // дата окончания в будущем
+          { endDate: null }, // или дата не указана (бессрочный баннер)
+        ],
+      },
+    });
   }
 }

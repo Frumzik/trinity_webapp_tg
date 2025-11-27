@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Purchase } from '../models';
 import { PurchaseEntity } from '../entities';
+import { GetListOptions } from '@trinity/shared';
 
 @Injectable()
 export class PurchasesRepository {
@@ -22,6 +23,33 @@ export class PurchasesRepository {
     const purchase = await this.purchaseModel.findOne(condition).exec();
 
     return purchase ? new PurchaseEntity(purchase.toObject()) : null;
+  }
+
+  // Поиск покупки
+  async findAll(options?: GetListOptions<Purchase>): Promise<PurchaseEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
+
+    const banners = await this.purchaseModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return banners.map((u) => new PurchaseEntity(u));
+  }
+
+  // Подсчет подписки по условию
+  async count(filter: FilterQuery<Purchase> = {}): Promise<number> {
+    return await this.purchaseModel.countDocuments(filter).exec();
   }
 
   // Обновление подписки

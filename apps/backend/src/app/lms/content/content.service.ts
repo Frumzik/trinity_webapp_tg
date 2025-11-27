@@ -14,6 +14,7 @@ import {
   ContentLessonInfoResponseDto,
   ContentTrainingInfoResponseDto,
   CounterType,
+  GetListOptions,
   ILesson,
   ITraining,
   LessonCreatedEvent,
@@ -95,12 +96,24 @@ export class ContentService {
   }
 
   async findAllTrainings(
-    condition: FilterQuery<Training> = {}
+    options?: GetListOptions<Training>
   ): Promise<TrainingEntity[]> {
     try {
-      const trainings = await this.trainingsRepository.findAll(condition);
+      const trainings = await this.trainingsRepository.findAll(options);
 
       return trainings;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async countTrainings(condition?: FilterQuery<Training>): Promise<number> {
+    try {
+      const count = await this.trainingsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
@@ -229,6 +242,32 @@ export class ContentService {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске урока';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async findAllLessons(
+    options?: GetListOptions<Lesson>
+  ): Promise<LessonEntity[]> {
+    try {
+      const lessons = await this.lessonsRepository.findAll(options);
+
+      return lessons;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async countLessons(condition: FilterQuery<Lesson> = {}): Promise<number> {
+    try {
+      const count = await this.lessonsRepository.count(condition);
+
+      return count;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
       throw new InternalServerErrorException(message);
     }
   }

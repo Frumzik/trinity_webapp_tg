@@ -75,6 +75,17 @@ export class ContentController {
     return training;
   }
 
+  // 📘 Информация о тренинге
+  @Post('trainings')
+  @ApiOperation({ summary: 'Получить информацию о тренингах' })
+  async infoTrainings(
+    @Body() { filter }: { filter: object }
+  ): Promise<ContentTrainingInfoResponseDto[]> {
+    const trainings = await this.contentService.findAllTrainings({ filter });
+
+    return trainings;
+  }
+
   // 🎥 Добавление урока
   @Post('lesson/add')
   @Roles(UserRole.Admin, UserRole.Moderator)
