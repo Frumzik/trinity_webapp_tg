@@ -3,8 +3,8 @@ type Props = {
   onBack: () => void;
   onToggleFav: () => void;
   onMenu: () => void;
-  showFav?: boolean;     // <- опционально скрыть звезду (для плеера тоже подойдёт)
-  pending?: boolean;     // <- блокирует повторные клики, серый вид
+  showFav?: boolean;
+  pending?: boolean;
 };
 
 function BackIcon() {
