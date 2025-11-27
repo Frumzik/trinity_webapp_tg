@@ -160,7 +160,8 @@ export default function LevelPurchaseModal({
     onPurchase({
       levelIds: selected,
       totalOM: sum,
-      discountedOM: isBulkSelected ? sum : undefined,
+      // 🔥 ВСЕГДА передаём discountedOM, чтобы наверху sale = true
+      discountedOM: sum,
     });
   };
 
