@@ -1,7 +1,6 @@
 export const aboutContent = {
   sections: [
     {
-      title: "О проекте ТРИНИТИ",
       paragraphs: [
         `ТРИНИТИ — живое пространство роста, осознанности и свободы.
 

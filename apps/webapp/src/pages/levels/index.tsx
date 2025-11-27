@@ -302,7 +302,7 @@ export default function Index() {
 
   const openSuccessModal = (titles: string[]) => {
     setResultTitle("Новый уровень открыт");
-    setResultCta("Открыть");
+    setResultCta("Перейти");
     const first = purchaseLevels.find((pl) => titles.includes(pl.title));
     setResultOnCta(
       () => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false))
@@ -399,7 +399,7 @@ export default function Index() {
       const raw = e?.data?.message ?? e?.error ?? "Ошибка покупки";
       const msg = Array.isArray(raw) ? raw[0] : raw;
 
-      const isInsufficient = msg === "Недостаточно баланса";
+      const isInsufficient = msg === "Недостаточно ОМ на балансе";
 
       openErrorModal(msg, isInsufficient);
     }
@@ -476,7 +476,7 @@ export default function Index() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="USDT = OM"
+            rateText="1 USDT = 1 OM"
             title={`${group} уровень`}
             // InfoIcon={(props) => <img src={Info} {...props} />}
             onClose={() => setModalOpen(false)}

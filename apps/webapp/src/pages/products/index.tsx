@@ -234,7 +234,11 @@ export default function Index() {
               {/*))}*/}
 
               <FeatureTile
-                title="Ступени ㅤㅤㅤㅤДуха"
+                title={
+                <>
+                Ступени<br />Духа
+                </>
+              }
                 // description={descStages}
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
