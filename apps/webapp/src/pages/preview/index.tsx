@@ -59,7 +59,7 @@ export default function PreviewPage() {
     isError: boolean;
   };
 
-  // --- избранное ---
+  // ---------- избранное ----------
   const { data: favoritesData } = useGetFavoritesQuery();
 
   const favoriteEntries = useMemo(
@@ -67,7 +67,7 @@ export default function PreviewPage() {
     [favoritesData]
   );
 
-  // текущая запись избранного для этого тренинга
+  // запись избранного именно для этого тренинга
   const currentFavEntry = useMemo(
     () =>
       favoriteEntries.find(
@@ -86,11 +86,34 @@ export default function PreviewPage() {
   const [isFavLocal, setIsFavLocal] = useState(isFav);
   const [favPending, setFavPending] = useState(false);
 
+  // синк с серверным состоянием, когда оно реально меняется
   useEffect(() => {
     setIsFavLocal(isFav);
   }, [isFav]);
 
-  // --- пользователь / подписка ---
+  const handleToggleFav = async () => {
+    if (!trainingId || favPending) return;
+
+    setFavPending(true);
+
+    try {
+      if (currentFavEntry) {
+        // Удаляем по favoriteId
+        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
+      } else {
+        // Добавляем
+        await addFavorite({ type: "Training", trainingId }).unwrap();
+      }
+      // isFav подтянется из useGetFavoritesQuery после invalidatesTags
+      // и через useEffect обновит isFavLocal
+    } catch (e) {
+      console.error("favorite toggle error", e);
+    } finally {
+      setFavPending(false);
+    }
+  };
+
+  // ---------- подписка / покупка ----------
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
@@ -107,27 +130,6 @@ export default function PreviewPage() {
   const isTraining = node?.type === "training";
   const isPractise = node?.type === "practise" || node?.tag === "practise";
 
-  // переключение избранного
-  const handleToggleFav = async () => {
-    if (!trainingId || favPending) return;
-
-    setFavPending(true);
-    try {
-      if (currentFavEntry) {
-        // УДАЛЕНИЕ: отправляем favoriteId
-        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
-      } else {
-        // ДОБАВЛЕНИЕ
-        await addFavorite({ type: "Training", trainingId }).unwrap();
-      }
-      // фактическое состояние подтянется из useGetFavoritesQuery → isFav → isFavLocal
-    } catch (e) {
-      console.error("favorite toggle error", e);
-    } finally {
-      setFavPending(false);
-    }
-  };
-
   const handlePurchase = async () => {
     if (!hasPaidSubscription) {
       setResultKind("error");
@@ -143,13 +145,11 @@ export default function PreviewPage() {
       return;
     }
 
-    const purchaseType: "Training" | "Practise" = isPractise ? "Practise" : "Training";
+    const purchaseType: "Training" | "Practise" =
+      isPractise ? "Practise" : "Training";
 
     try {
-      await addPurchase({
-        type: purchaseType,
-        content: [trainingId],
-      }).unwrap();
+      await addPurchase({ type: purchaseType, content: [trainingId] }).unwrap();
 
       if (isTraining) {
         if (typeof window !== "undefined") {
@@ -225,9 +225,7 @@ export default function PreviewPage() {
       </Hero>
 
       <Sheet head="Описание">
-        {isLoading && (
-          <div style={{ padding: 16 }}>Загрузка описания…</div>
-        )}
+        {isLoading && <div style={{ padding: 16 }}>Загрузка описания…</div>}
 
         {isError && !isLoading && (
           <div style={{ padding: 16 }}>

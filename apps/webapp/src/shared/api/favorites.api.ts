@@ -45,30 +45,44 @@ export const favoritesApi = createApi({
   endpoints: (b) => ({
     getFavorites: b.query<FavoriteCategory[], { populate?: boolean } | void>({
       async queryFn(arg, _api, _extra, baseQuery) {
+        const params: any = { _ts: Date.now() }; // 👈 анти-кешовый параметр
+        if (arg?.populate) params.populate = true;
+
         const res: any = await baseQuery({
           url: "/favorites",
-          params: arg?.populate ? { populate: true } : undefined,
+          params,
+          cache: "no-store" as RequestCache,
         });
+
         if (res.error) {
-          if (res.error.status === 404) return { data: [] as FavoriteCategory[] };
+          if (res.error.status === 404) {
+            return { data: [] as FavoriteCategory[] };
+          }
           return { error: res.error };
         }
+
         return { data: (res.data?.data ?? []) as FavoriteCategory[] };
       },
       providesTags: ["Favorites"],
     }),
-    addFavorite: b.mutation<{ success: true; data: true }, { type: FavoriteType; trainingId?: number; lessonId?: number }>({
+
+    addFavorite: b.mutation<
+      { success: true; data: true },
+      { type: FavoriteType; trainingId?: number; lessonId?: number }
+    >({
       query: (body) => ({ url: "/favorites", method: "POST", body }),
       invalidatesTags: ["Favorites"],
     }),
-    deleteFavorite: b.mutation<
-      { success: true; data: true },
-      { favoriteId: number }
-    >({
-      query: (body) => ({ url: "/favorites", method: "DELETE", body }),
+
+    deleteFavorite: b.mutation<{ success: true; data: true }, { favoriteId: number }>({
+      query: ({ favoriteId }) => ({
+        url: "/favorites",
+        method: "DELETE",
+        params: { favoriteId },
+        body: {},
+      }),
       invalidatesTags: ["Favorites"],
     }),
   }),
 });
-
 export const { useGetFavoritesQuery, useAddFavoriteMutation, useDeleteFavoriteMutation } = favoritesApi;
