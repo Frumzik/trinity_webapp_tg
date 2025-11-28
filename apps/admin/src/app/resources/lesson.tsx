@@ -347,7 +347,10 @@ export const LessonCreate = () => {
   const defaultParentId = parentIdFromUrl ? Number(parentIdFromUrl) : undefined;
 
   return (
-    <Create title="Создать урок">
+    <Create
+      title="Создать урок"
+      redirect={(basePath, id) => (id ? `/lesson/${id}/show` : 'lesson')}
+    >
       <SimpleForm
         defaultValues={{
           parentId: defaultParentId,

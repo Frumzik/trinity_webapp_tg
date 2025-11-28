@@ -40,38 +40,63 @@ const FileFilter: React.FC = (props) => (
   </Filter>
 );
 
-interface ImageGridProps {
+interface FileGridProps {
   onSelect?: (url: string) => void;
 }
 
 // Сетка карточек
-const ImageGrid: React.FC<ImageGridProps> = ({ onSelect }) => {
+const FileGrid: React.FC<FileGridProps> = ({ onSelect }) => {
   const { data, isLoading } = useListContext<ImageItem>();
 
   if (isLoading || !data) return <p>Загрузка...</p>;
 
   return (
-    <Grid container spacing={2}>
+    <Grid
+      container
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '16px', // расстояние между карточками
+      }}
+    >
       {data.map((item) => (
-        <Grid key={item.id}>
+        <Box
+          key={item.id}
+          sx={{
+            flex: '0 0 calc(20% - 16px)', // вычитаем gap → всегда помещается 5
+            maxWidth: 'calc(20% - 16px)',
+          }}
+        >
           <Card
-            onClick={() => (onSelect ? onSelect(item.url) : null)} // вызываем callback
+            onClick={() => (onSelect ? onSelect(item.url) : null)}
             sx={{ cursor: 'pointer', height: '100%' }}
           >
             {isImageFile(item.url || '') ? (
-              <CardMedia
-                component="img"
-                height="140"
-                image={item.url}
-                alt={item.Key || 'file'}
-              />
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 160,
+                  overflow: 'hidden',
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={item.url}
+                  alt={item.Key || 'file'}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              </Box>
             ) : (
               <CardContent
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  height: 140,
+                  height: 160,
                   backgroundColor: '#f0f0f0',
                 }}
               >
@@ -91,7 +116,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ onSelect }) => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
       ))}
     </Grid>
   );
@@ -113,7 +138,7 @@ export const FileList: React.FC<FileListPageProps> = (props) => (
       filters={<FileFilter />}
       sort={{ field: 'LastModified', order: 'DESC' }} // по умолчанию сортировка по дате
     >
-      <ImageGrid onSelect={props.onSelect} />
+      <FileGrid onSelect={props.onSelect} />
     </List>
   </Box>
 );

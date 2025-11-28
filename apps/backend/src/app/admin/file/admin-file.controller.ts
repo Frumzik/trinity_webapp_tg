@@ -18,24 +18,30 @@ import { AdminFileService } from './admin-file.service';
 import { UserRole } from '@trinity/shared';
 import { type Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Roles(UserRole.Admin, UserRole.Moderator)
 @UseGuards(JWTAuthGuard)
+@ApiBearerAuth('access_token')
 @Controller('admin/file')
 export class AdminFileController {
   constructor(private readonly adminFileService: AdminFileService) {}
 
   @Get()
   async getList(
-    @Query('range') rangeRaw: string,
-    @Query('sort') sortRaw: string,
-    @Query('filter') filterRaw: string,
-    @Res() res: Response
+    @Res() res: Response,
+    @Query('range') rangeRaw?: string,
+    @Query('sort') sortRaw?: string,
+    @Query('filter') filterRaw?: string
   ) {
     console.log(sortRaw);
     // Парсим параметры
-    const range = JSON.parse(rangeRaw) as [number, number];
-    const sort = JSON.parse(sortRaw) as [keyof FileItem, 'ASC' | 'DESC'];
+    const range = rangeRaw
+      ? (JSON.parse(rangeRaw) as [number, number])
+      : ([0, 100000000000] as [number, number]);
+    const sort = sortRaw
+      ? (JSON.parse(sortRaw) as [keyof FileItem, 'ASC' | 'DESC'])
+      : (['Key', 'ASC'] as [keyof FileItem, 'ASC' | 'DESC']);
     const filter = filterRaw ? JSON.parse(filterRaw) : {};
 
     const options = { range, sort, filter };
