@@ -14,7 +14,7 @@ export default function WithdrawPage() {
     <div className="withdraw">
       <TopBar title="Кошелек" />
       <WithdrawForm
-        title="Получить Вознаграждения"
+        title="Вывести ОМ"
         subtitle=""
         balance={balance}
         loading={isLoading}

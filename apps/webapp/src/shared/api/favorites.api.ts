@@ -74,12 +74,14 @@ export const favoritesApi = createApi({
       invalidatesTags: ["Favorites"],
     }),
 
-    deleteFavorite: b.mutation<{ success: true; data: true }, { favoriteId: number }>({
-      query: ({ favoriteId }) => ({
+    deleteFavorite: b.mutation<
+      { success: true; data: true },
+      { favoriteId: number }
+    >({
+      query: (body) => ({
         url: "/favorites",
         method: "DELETE",
-        params: { favoriteId },
-        body: {},
+        body,
       }),
       invalidatesTags: ["Favorites"],
     }),

@@ -155,7 +155,7 @@ export default function WithdrawForm({
       </div>
 
       <div className="wform__agree">
-        Нажимая кнопку «получить»,<br />
+        Нажимая кнопку «ПОЛУЧИТЬ USDT»,<br />
         я подтверждаю, что ознакомился
         <br />
         с <Link to="/policy">Правилами сервиса</Link>
