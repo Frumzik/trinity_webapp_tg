@@ -29,6 +29,30 @@ export class AdminUserService {
         populate: ['subscription'], // если нужно populate
       };
 
+      // Если есть filter.id, заменяем на filter.userId
+      if (options.filter?.id !== undefined) {
+        options.filter.userId = options.filter.id;
+        delete options.filter.id;
+      }
+
+      // Если есть q → создаём поиск по userId, username или name
+      if (options.filter?.q !== undefined) {
+        const q = options.filter.q;
+        const userId = Number(q);
+
+        // Создаём $or фильтр для mongoose
+        const or: any[] = [];
+
+        if (!isNaN(userId)) {
+          or.push({ userId }); // ищем по числовому ID
+        }
+
+        or.push({ username: { $regex: q, $options: 'i' } });
+        or.push({ name: { $regex: q, $options: 'i' } });
+
+        options.filter = { $or: or };
+      }
+
       const items = await this.usersService.findAll(options);
       const total = await this.usersService.count();
 

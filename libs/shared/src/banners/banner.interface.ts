@@ -5,8 +5,8 @@ export interface IBanner {
 
   bannerId: number;
 
-  miniatureUrl: string;
-  imageUrl: string;
+  miniatureUrl: string | null;
+  imageUrl: string | null;
   linkUrl: string | null;
   description: string | null;
 

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class AcquiringWithdrawRequestDto {
   @IsString()
@@ -58,6 +59,14 @@ export class AcquiringErrorWebhookDto {
 }
 
 export class WithdrawCreateRequestDto {
+  @IsNumber()
+  @ApiProperty()
+  withdrawId!: number;
+  
+  @IsString()
+  @ApiProperty()
+  user!: Types.ObjectId;
+
   @IsNumber()
   @ApiProperty()
   userId!: number;

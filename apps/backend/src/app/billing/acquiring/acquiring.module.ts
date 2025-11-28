@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Withdraw, WithdrawSchema } from './models';
 import { WithdrawsService } from './withdraws.service';
 import { WithdrawsRepository } from './repositories';
+import { CountersModule } from '../../service';
 
 @Module({
   imports: [
@@ -17,9 +18,10 @@ import { WithdrawsRepository } from './repositories';
     HttpModule,
     forwardRef(() => UsersModule),
     forwardRef(() => TransactionsModule),
+    CountersModule,
   ],
   providers: [AcquiringService, WithdrawsService, WithdrawsRepository],
   controllers: [AcquiringController],
-  exports: [AcquiringService],
+  exports: [AcquiringService, WithdrawsService],
 })
 export class AcquiringModule {}

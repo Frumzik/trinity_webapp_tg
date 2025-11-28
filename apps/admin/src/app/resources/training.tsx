@@ -94,6 +94,7 @@ export const FavoritesTagTitles = {
 const TrainingDatagrid = () => (
   <Datagrid rowClick="show">
     <TextField source="trainingId" label="ID" />
+    <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
     <TextField source="description" label="Описание" />
     <TextField source="shortDescrtiption" label="Краткое описание" />
