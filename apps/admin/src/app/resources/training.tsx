@@ -87,7 +87,7 @@ export const FavoritesTagTitles = {
   [FavoritesTag.FILM]: 'Фильмы',
   [FavoritesTag.MUSIC]: 'Музыка',
   [FavoritesTag.MEDITATION]: 'Медитации',
-  [FavoritesTag.BOOK]: 'Книгиы',
+  [FavoritesTag.BOOK]: 'Книги',
   [FavoritesTag.PRODUCT]: 'Продукты',
 };
 
@@ -288,7 +288,23 @@ export const TrainingEdit = () => (
       <FileSelector source="bgUrl" label="Фон" />
 
       {/* Наставник */}
-      <NumberInput source="merchantId" label="ID наставника" />
+      <ReferenceInput
+        source="merchantId"
+        reference="user"
+        allowEmpty
+        sort={{ field: 'userId', order: 'ASC' }}
+      >
+        <AutocompleteInput
+          optionText={(record: any) =>
+            record
+              ? `${record.userId} — ${record.name} (${record.username})`
+              : ''
+          }
+          optionValue="userId"
+          filterToQuery={(searchText: string) => ({ name: searchText })}
+          label="Наставник"
+        />
+      </ReferenceInput>
 
       {/* Цены */}
       <NumberInput source="price" label="Цена" />
@@ -365,7 +381,10 @@ export const TrainingCreate = () => {
   const parentIdParam = searchParams.get('parentId');
 
   return (
-    <Create title="Создать тренинг">
+    <Create
+      title="Создать тренинг"
+      redirect={(basePath, id) => (id ? `/training/${id}/show` : 'training')}
+    >
       <SimpleForm
         defaultValues={{
           parentId: parentIdParam ? Number(parentIdParam) : null,

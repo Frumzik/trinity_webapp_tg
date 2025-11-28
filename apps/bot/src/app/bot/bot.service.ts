@@ -22,7 +22,7 @@ export class BotService implements OnModuleInit {
   async sendPresentation(tgId: number) {
     try {
       return await this.bot.telegram.sendDocument(tgId, {
-        url: 'https://s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/prod/1763442729467-%C3%90%C2%A2%C3%90%C2%A0%C3%90%C2%98%C3%90%C2%9D%C3%90%C2%98%C3%90%C2%A2%C3%90%C2%98.pdf',
+        url: 'https://s3.twcstorage.ru/13217ac8-a7451518-6949-46ca-ba80-d0cde001160c/prod/%D0%A2%D0%A0%D0%98%D0%9D%D0%98%D0%A2%D0%98.pdf',
         filename: 'ТРИНИТИ.pdf',
       });
     } catch (error) {
