@@ -3,7 +3,6 @@ import {
   List,
   Datagrid,
   TextField,
-  EditButton,
   Edit,
   SimpleForm,
   TextInput,
@@ -139,7 +138,6 @@ export const UserList = () => (
       />
 
       <TextField source="address" label="Адрес" />
-      <EditButton />
     </Datagrid>
   </List>
 );

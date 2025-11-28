@@ -5,7 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { GetListOptions } from '@trinity/shared';
+import { ContentAddLessonRequestDto, GetListOptions } from '@trinity/shared';
 import { ContentService } from '../../lms';
 import { Lesson } from '../../lms/content/models';
 import { LessonEntity } from '../../lms/content/entities';
@@ -64,8 +64,19 @@ export class AdminLessonService {
   /**
    * CREATE
    */
-  async create(data: Partial<LessonEntity>) {
-    return false;
+  async create(data: ContentAddLessonRequestDto) {
+    const created = await this.contentService.createLesson(data);
+
+    if (!created) {
+      throw new Error('Ошибка создания урока');
+    }
+
+    return {
+      data: {
+        ...created,
+        id: created.lessonId,
+      },
+    };
   }
 
   /**
@@ -106,6 +117,14 @@ export class AdminLessonService {
    * DELETE
    */
   async delete(id: string | number) {
-    return false;
+    const lessonId = typeof id === 'string' ? parseInt(id) : id;
+
+    const deleted = await this.contentService.deleteLesson(lessonId);
+
+    if (!deleted) {
+      throw new Error('Ошибка удаления');
+    }
+
+    return { id: lessonId, data: { id: lessonId } };
   }
 }

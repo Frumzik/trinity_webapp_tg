@@ -19,9 +19,23 @@ import {
   ImageField,
   SelectInput,
   NumberInput,
+  ReferenceInput,
+  FormDataConsumer,
+  AutocompleteInput,
+  TopToolbar,
+  Button,
+  useRecordContext,
+  required,
+  FunctionField,
 } from 'react-admin';
 import { LessonDatagrid } from './lesson';
 import { FileSelector } from '../components';
+import { useEffect } from 'react';
+import { useFormContext } from 'react-hook-form';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { UniversalDeleteButton } from '../components/buttons';
 
 enum TrainingType {
   TRAINING = 'training',
@@ -59,7 +73,7 @@ const TrainingTagTitles = {
   [TrainingTag.COURSE]: 'Курс',
 };
 
-enum FavoritesTag {
+export enum FavoritesTag {
   STANDART = 'standart',
   FILM = 'film',
   MUSIC = 'music',
@@ -68,7 +82,7 @@ enum FavoritesTag {
   PRODUCT = 'product',
 }
 
-const FavoritesTagTitles = {
+export const FavoritesTagTitles = {
   [FavoritesTag.STANDART]: 'Избранное',
   [FavoritesTag.FILM]: 'Фильмы',
   [FavoritesTag.MUSIC]: 'Музыка',
@@ -79,7 +93,7 @@ const FavoritesTagTitles = {
 
 const TrainingDatagrid = () => (
   <Datagrid rowClick="show">
-    <TextField source="id" />
+    <TextField source="trainingId" label="ID" />
     <TextField source="title" label="Название" />
     <TextField source="description" label="Описание" />
     <TextField source="shortDescrtiption" label="Краткое описание" />
@@ -109,15 +123,79 @@ const TrainingDatagrid = () => (
 );
 
 export const TrainingList = () => (
-  <List>
+  <List actions={false}>
     <TrainingDatagrid />
   </List>
 );
 
+const TrainingShowActions = () => {
+  const record = useRecordContext();
+  const navigate = useNavigate();
+
+  if (!record) return null;
+
+  const handleAddTraining = () => {
+    navigate(`/training/create?parentId=${record.trainingId}`);
+  };
+
+  const handleAddLesson = () => {
+    navigate(`/lesson/create?parentId=${record.trainingId}`);
+  };
+
+  const handleEditTraining = () => {
+    navigate(`/training/${record.trainingId}`);
+  };
+
+  return (
+    <TopToolbar>
+      {record.tag !== TrainingType.PRACTISE && (
+        <>
+          <Button
+            label="Добавить тренинг"
+            onClick={handleAddTraining}
+            startIcon={<AddIcon />}
+          />
+          <Button
+            label="Добавить урок"
+            onClick={handleAddLesson}
+            startIcon={<AddIcon />}
+          />
+        </>
+      )}
+      <Button
+        label="Редактировать"
+        onClick={handleEditTraining}
+        startIcon={<EditIcon />}
+      />
+
+      {record.parentId && !record.stageLevel && (
+        <UniversalDeleteButton
+          parentResource="training"
+          resource="training"
+          record={record}
+        />
+      )}
+    </TopToolbar>
+  );
+};
+
 export const TrainingShow = () => (
-  <Show>
+  <Show actions={<TrainingShowActions />}>
     <SimpleShowLayout>
-      <TextField source="id" />
+      <TextField source="trainingId" label="ID тренинга" />
+      {/* Родительский тренинг */}
+      <FunctionField
+        label="Родительский тренинг"
+        render={(record: any) =>
+          record?.parent ? (
+            <Link to={`/training/${record.parent.trainingId}/show`}>
+              {record.parent.trainingId} — {record.parent.title}
+            </Link>
+          ) : (
+            '—'
+          )
+        }
+      />
       {/* Метаинформация */}
       <TextField source="title" label="Название" />
       <TextField source="description" label="Описание" />
@@ -131,10 +209,9 @@ export const TrainingShow = () => (
       <ImageField source="bgUrl" label="Фон" />
 
       {/* Наставник */}
-
       <TextField source="merchantId" label="ID наставника" />
 
-      {/* ЦЕНЫ */}
+      {/* Цены */}
       <NumberField source="price" label="Цена" />
       <NumberField source="salePrice" label="Цена со скидкой" />
 
@@ -168,15 +245,6 @@ export const TrainingShow = () => (
         }))}
       />
 
-      {/* Доступ */}
-      {/* <ArrayInput source="accessRules" label="Условия доступа">
-        <SimpleFormIterator>
-          <TextField source="type" label="Тип доступа" />
-          <TextField source="description" label="Описание (для ошибки)" />
-          <TextField source="value" label="Значение" />
-        </SimpleFormIterator>
-      </ArrayInput> */}
-
       {/* Подтренинги */}
       <ReferenceManyField
         label="Подтренинги"
@@ -201,7 +269,7 @@ export const TrainingEdit = () => (
   >
     <SimpleForm>
       {/* ID */}
-      <TextInput disabled source="id" />
+      <TextInput disabled source="trainingId" label="ID" />
 
       {/* Мета */}
       <TextInput source="title" label="Название" fullWidth />
@@ -261,18 +329,139 @@ export const TrainingEdit = () => (
   </Edit>
 );
 
-export const TrainingCreate = () => (
-  <Create>
-    <SimpleForm>
-      <TextInput source="title" label="Название" fullWidth />
-      <TextInput source="slug" label="URL" fullWidth />
-      <TextInput
-        source="description"
-        label="Описание"
-        fullWidth
-        multiline
-        minRows={4}
-      />
-    </SimpleForm>
-  </Create>
-);
+const StageFields = () => {
+  const { watch, setValue } = useFormContext<any>();
+  const tag = watch('tag');
+
+  // Сбрасываем значения при смене tag
+  useEffect(() => {
+    if (tag !== TrainingTag.STAGE) {
+      setValue('stage', undefined);
+    }
+    if (tag !== TrainingTag.STAGE && tag !== TrainingTag.STAGE_LEVEL) {
+      setValue('stageLevel', undefined);
+    }
+  }, [tag, setValue]);
+
+  return (
+    <FormDataConsumer>
+      {() => (
+        <>
+          {(tag === TrainingTag.STAGE || tag === TrainingTag.STAGE_LEVEL) && (
+            <NumberInput source="stageLevel" label="Уровень ступени" />
+          )}
+          {tag === TrainingTag.STAGE && (
+            <NumberInput source="stage" label="Ступень" />
+          )}
+        </>
+      )}
+    </FormDataConsumer>
+  );
+};
+
+export const TrainingCreate = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const parentIdParam = searchParams.get('parentId');
+
+  return (
+    <Create title="Создать тренинг">
+      <SimpleForm
+        defaultValues={{
+          parentId: parentIdParam ? Number(parentIdParam) : null,
+          type: TrainingType.TRAINING,
+          tag: TrainingTag.STANDART,
+          favoritesTag: FavoritesTag.STANDART,
+        }}
+      >
+        {/* Основные поля */}
+        <TextInput source="title" label="Название" validate={required()} />
+        <TextInput source="description" label="Описание" multiline />
+        <TextInput
+          source="shortDescription"
+          label="Краткое описание"
+          multiline
+        />
+
+        {/* Типы и тэги */}
+        <SelectInput
+          source="type"
+          label="Тип тренинга"
+          choices={Object.values(TrainingType).map((t) => ({
+            id: t,
+            name: t,
+          }))}
+          validate={required()}
+        />
+        <SelectInput
+          source="tag"
+          label="Тэг тренинга"
+          choices={Object.values(TrainingTag).map((t) => ({
+            id: t,
+            name: t,
+          }))}
+          validate={required()}
+        />
+        {/* Динамические поля ступени */}
+        <StageFields />
+
+        <SelectInput
+          source="favoritesTag"
+          label="Тэг избранного"
+          choices={Object.values(FavoritesTag).map((t) => ({
+            id: t,
+            name: t,
+          }))}
+          validate={required()}
+        />
+
+        {/* Наставник */}
+        <ReferenceInput
+          source="merchantId"
+          reference="user"
+          allowEmpty
+          sort={{ field: 'userId', order: 'ASC' }}
+        >
+          <AutocompleteInput
+            optionText={(record: any) =>
+              record
+                ? `${record.userId} — ${record.name} (${record.username})`
+                : ''
+            }
+            optionValue="userId"
+            filterToQuery={(searchText: string) => ({ name: searchText })}
+            label="Наставник"
+          />
+        </ReferenceInput>
+
+        <TextInput source="duration" label="Длительность" />
+        <TextInput source="link" label="Ссылка" />
+
+        <ReferenceInput
+          source="parentId"
+          reference="training"
+          label="Родительский тренинг"
+          sort={{ field: 'trainingId', order: 'ASC' }}
+          allowEmpty
+        >
+          <AutocompleteInput
+            optionText={(record) => `${record.trainingId} — ${record.title}`}
+            optionValue="trainingId"
+            filterToQuery={(searchText) => ({ title: searchText })}
+            label="Родительский тренинг"
+            disabled={Boolean(parentIdParam)}
+          />
+        </ReferenceInput>
+
+        {/* Файлы */}
+        <FileSelector source="coverUrl" label="Обложка" />
+        <FileSelector source="iconUrl" label="Иконка" />
+        <FileSelector source="bgUrl" label="Фон" />
+
+        {/* Цены */}
+        <NumberInput source="price" label="Цена" />
+        <NumberInput source="salePrice" label="Скидка" />
+      </SimpleForm>
+    </Create>
+  );
+};

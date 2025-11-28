@@ -434,7 +434,7 @@ export class ContentAddLessonRequestDto {
         return LessonTextContentDto;
     }
   })
-  content!:
+  content?:
     | LessonVideoContentDto
     | LessonAudioContentDto
     | LessonTextContentDto

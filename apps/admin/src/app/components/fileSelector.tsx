@@ -78,7 +78,7 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
         )
       )}
 
-      <TextInput source={source} fullWidth />
+      <TextInput source={source} label={label} fullWidth />
 
       <Button
         variant="contained"
