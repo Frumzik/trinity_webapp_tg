@@ -100,12 +100,15 @@ export class AdminUserService {
       data.birthDate ||
       data.gender
     ) {
-      user = await this.usersService.updateProfile(user, data);
+      user = await this.usersService.updateProfile({ userId }, data);
     }
 
     // Обновление роли
     if (data.role) {
-      user = await this.usersService.updateRole(user, { role: data.role });
+      user = await this.usersService.updateRole(
+        { userId },
+        { role: data.role }
+      );
     }
 
     // Обновление баланса
@@ -113,9 +116,12 @@ export class AdminUserService {
       const diff = data.balance - user.balance;
 
       if (diff !== 0) {
-        user = await this.usersService.updateBalance(user, {
-          balance: data.balance,
-        });
+        user = await this.usersService.updateBalance(
+          { userId },
+          {
+            balance: data.balance,
+          }
+        );
 
         await this.transactionsService.create({
           type: TransactionType.STANDART,
@@ -128,23 +134,32 @@ export class AdminUserService {
 
     // Обновление пароля
     if (data.password) {
-      user = await this.usersService.updatePassword(user, {
-        password: data.password,
-      });
+      user = await this.usersService.updatePassword(
+        { userId },
+        {
+          password: data.password,
+        }
+      );
     }
 
     // Обновление пина
     if (data.pin) {
-      user = await this.usersService.updatePin(user, {
-        pin: data.pin,
-      });
+      user = await this.usersService.updatePin(
+        { userId },
+        {
+          pin: data.pin,
+        }
+      );
     }
 
     // Обновление фин. пароля
     if (data.finPassword) {
-      user = await this.usersService.updateFinPassword(user, {
-        finPassword: data.finPassword,
-      });
+      user = await this.usersService.updateFinPassword(
+        { userId },
+        {
+          finPassword: data.finPassword,
+        }
+      );
     }
 
     return { id: userId, data: { ...user, id: userId } };
@@ -154,6 +169,15 @@ export class AdminUserService {
    * DELETE
    */
   async delete(id: string | number) {
-    return false
+    const userId = typeof id === 'string' ? parseInt(id) : id;
+
+    let user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException(`Пользователь с id=${userId} не найден`);
+    }
+    user = await this.usersService.delete({ userId: +id });
+
+    return { id: userId, data: { ...user, id: userId } };
   }
 }

@@ -17,11 +17,9 @@ export enum TrainingTag {
   STAGES_SPIRIT = 'stages_spirit',
   STAGE_LEVEL = 'stage_level',
   STAGE = 'stage',
-  SPIRITUAL_START = 'spiritual_start',
-  ACADEMY_SPIRIT = 'acedemy_spirit',
-  PRACTICE = 'practice',
   USEFUL_MATERIALS = 'userful_materials',
   KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
+  GIFTS = 'gifts',
   HEALTH_LAB = 'health_lab',
   PRACTISE = 'practise',
   COURSE = 'course',
@@ -59,6 +57,7 @@ export interface ITraining {
   coverUrl: string | null;
   iconUrl: string | null;
   bgUrl: string | null;
+  link: string | null;
 
   // Условия доступности
   accessRules: TypeContentAccess[];
@@ -69,6 +68,8 @@ export interface ITraining {
   progressPercent?: number;
   progressTotal?: number;
   progressCompleted?: number;
+
+  deleted: boolean;
 }
 
 // Уроки
@@ -107,6 +108,8 @@ export interface ILesson {
   salePrice: number | null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
+
+  deleted: boolean;
 }
 
 export interface ILessonVideoContent {
@@ -133,7 +136,8 @@ export type ILessonContent =
   | ILessonVideoContent
   | ILessonAudioContent
   | ILessonTextContent
-  | ILessonFilmContent;
+  | ILessonFilmContent
+  | ILessonPractiseContent;
 
 export interface ILessonVideo extends ILesson {
   type: LessonType.VIDEO;
