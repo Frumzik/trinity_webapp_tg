@@ -43,11 +43,10 @@ export function Index() {
 
         const item: SliderItem = {
           id: f.lessonId ?? f._id ?? `${ci}-${fi}`,
-          title: f.lesson?.title || "Урок",
+          title: f.lesson?.title || "Практика",
           imageUrl: img,
           onClick: () => {
             if (f.type === "Training") {
-              // Открываем страницу превью
               navigate("/preview", {
                 state: {
                   trainingId: f.trainingId,
@@ -64,7 +63,7 @@ export function Index() {
               const q = [
                 {
                   id: f.lessonId as number,
-                  title: f.lesson?.title || "Урок",
+                  title: f.lesson?.title || "Практика",
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
                   mediaUrl: undefined,
@@ -80,7 +79,7 @@ export function Index() {
               const q = [
                 {
                   id: f.lessonId as number,
-                  title: f.lesson?.title || "Урок",
+                  title: f.lesson?.title || "Практика",
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
                   videoUrl: undefined,

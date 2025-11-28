@@ -221,7 +221,9 @@ export default function PlayerPage({
     setScrub(false);
     if (isVideo && playing) scheduleHide();
   };
-
+  useEffect(() => {
+    setFav(!!track.isFavorite);
+  }, [track.isFavorite]);
   const toggleFav = () => {
     const next = !isFav;
     setFav(next);

@@ -254,7 +254,7 @@ export default function SupportPage() {
               title={
                 <>
                   Академия<br />
-                  духа
+                  Духа
                 </>
               }
               description=""
