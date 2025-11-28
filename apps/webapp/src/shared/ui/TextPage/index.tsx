@@ -1,3 +1,4 @@
+// src/shared/ui/TextPage/index.tsx
 import clsx from "clsx";
 import styles from "./text-page.module.scss";
 
@@ -6,6 +7,7 @@ type Section = {
   paragraphs?: string[];
   list?: string[];
   ordered?: boolean;
+  html?: string;         // сырое HTML из админки
 };
 
 type TextPageProps = {
@@ -20,8 +22,11 @@ export default function TextPage({ sections, className }: TextPageProps) {
         {sections.map((s, i) => (
           <section key={i} className={styles.section}>
 
-            {s.title && (
-              <h1 className={styles.h1}>{s.title}</h1>
+            {s.html && (
+              <div
+                className={styles.html}
+                dangerouslySetInnerHTML={{ __html: s.html }}
+              />
             )}
 
             {s.paragraphs?.map((p, j) => (

@@ -54,13 +54,13 @@ export default function Index() {
             title={"Музыка"}
             bgSrc={Bgmini}
             imageUrl={CardImage2}
-            href="https://t.me/spacetrinity"
+            href="https://t.me/trinity_music"
           />
           <PromoTile
             title={"Книги"}
             bgSrc={Bgmini}
             imageUrl={CardImage3}
-            href="https://t.me/duhliteratyra"
+            href="https://t.me/trinity_books"
           />
         </div>
       </main>
