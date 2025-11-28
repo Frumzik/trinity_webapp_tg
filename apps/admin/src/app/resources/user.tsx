@@ -15,6 +15,8 @@ import {
   DateField,
   NumberField,
   SelectField,
+  SimpleShowLayout,
+  Show,
 } from 'react-admin';
 
 enum UserGender {
@@ -59,35 +61,33 @@ const UserFilter = (props: any) => (
     <SelectInput
       label="Роль"
       source="role"
-      choices={[
-        { id: UserRole.User, name: UserRoleTitles[UserRole.User] },
-        { id: UserRole.Moderator, name: UserRoleTitles[UserRole.Moderator] },
-        { id: UserRole.Admin, name: UserRoleTitles[UserRole.Admin] },
-      ]}
+      choices={Object.entries(UserRole).map(([key, value]) => ({
+        id: value,
+        name: UserRoleTitles[value],
+      }))}
     />
     <SelectInput
       label="Пол"
       source="gender"
-      choices={[
-        { id: UserGender.MALE, name: UserGenderTitles[UserGender.MALE] },
-        { id: UserGender.FEMALE, name: UserGenderTitles[UserGender.FEMALE] },
-      ]}
+      choices={Object.entries(UserGender).map(([key, value]) => ({
+        id: value,
+        name: UserGenderTitles[value],
+      }))}
     />
 
     {/* Фильтры по подписке */}
     <SelectInput
       label="Подписка"
       source="subscription.type"
-      choices={[
-        { id: SubscriptionType.FREE, name: SubscriptionTypeTitles[SubscriptionType.FREE] },
-        { id: SubscriptionType.TRIAL, name: SubscriptionTypeTitles[SubscriptionType.TRIAL] },
-        { id: SubscriptionType.PREMIUM, name: SubscriptionTypeTitles[SubscriptionType.PREMIUM] },
-      ]}
+      choices={Object.entries(SubscriptionType).map(([key, value]) => ({
+        id: value,
+        name: SubscriptionTypeTitles[value],
+      }))}
     />
 
     {/* Прочие фильтры */}
     <TextInput label="Имя" source="name" />
-    <TextInput label="Username" source="username" alwaysOn/>
+    <TextInput label="Username" source="username" alwaysOn />
     <TextInput label="Адрес" source="address" />
     <NumberInput label="Telegram ID" source="tgId" />
     <NumberInput label="Баланс от" source="balance_gte" />
@@ -103,25 +103,15 @@ export const UserList = () => (
     perPage={25}
     sort={{ field: 'userId', order: 'ASC' }}
   >
-    <Datagrid rowClick="edit">
+    <Datagrid rowClick="show">
       <NumberField source="userId" label="ID" />
       <SelectField
         source="subscription.type"
         label="Подписка"
-        choices={[
-          {
-            id: SubscriptionType.FREE,
-            name: SubscriptionTypeTitles[SubscriptionType.FREE],
-          },
-          {
-            id: SubscriptionType.TRIAL,
-            name: SubscriptionTypeTitles[SubscriptionType.TRIAL],
-          },
-          {
-            id: SubscriptionType.PREMIUM,
-            name: SubscriptionTypeTitles[SubscriptionType.PREMIUM],
-          },
-        ]}
+        choices={Object.entries(SubscriptionType).map(([key, value]) => ({
+          id: value,
+          name: SubscriptionTypeTitles[value],
+        }))}
       />
       <NumberField source="tgId" label="Telegram ID" />
       <TextField source="name" label="Имя" />
@@ -134,19 +124,18 @@ export const UserList = () => (
       <SelectField
         source="gender"
         label="Пол"
-        choices={[
-          { id: UserGender.MALE, name: UserGenderTitles[UserGender.MALE] },
-          { id: UserGender.FEMALE, name: UserGenderTitles[UserGender.FEMALE] },
-        ]}
+        choices={Object.entries(UserGender).map(([key, value]) => ({
+          id: value,
+          name: UserGenderTitles[value],
+        }))}
       />
       <SelectField
         source="role"
         label="Роль"
-        choices={[
-          { id: UserRole.User, name: UserRoleTitles[UserRole.User] },
-          { id: UserRole.Moderator, name: UserRoleTitles[UserRole.Moderator] },
-          { id: UserRole.Admin, name: UserRoleTitles[UserRole.Admin] },
-        ]}
+        choices={Object.entries(UserRole).map(([key, value]) => ({
+          id: value,
+          name: UserRoleTitles[value],
+        }))}
       />
 
       <TextField source="address" label="Адрес" />
@@ -155,19 +144,59 @@ export const UserList = () => (
   </List>
 );
 
+export const UserShow = () => (
+  <Show>
+    <SimpleShowLayout>
+      <NumberField source="userId" label="ID" />
+      <NumberField source="tgId" label="Telegram ID" />
+      <TextField source="name" label="Имя" />
+      <TextField source="username" label="Username" />
+      <SelectField
+        source="subscription.type"
+        label="Подписка"
+        choices={Object.entries(SubscriptionType).map(([key, value]) => ({
+          id: value,
+          name: SubscriptionTypeTitles[value],
+        }))}
+      />
+      <NumberField source="balance" label="Баланс" />
+      <EmailField source="email" label="Email" />
+      <DateField source="birthDate" label="Дата рождения" />
+      <NumberField source="height" label="Рост" />
+      <NumberField source="weight" label="Вес" />
+      <SelectField
+        source="gender"
+        label="Пол"
+        choices={Object.entries(UserGender).map(([key, value]) => ({
+          id: value,
+          name: UserGenderTitles[value],
+        }))}
+      />
+      <SelectField
+        source="role"
+        label="Роль"
+        choices={Object.entries(UserRole).map(([key, value]) => ({
+          id: value,
+          name: UserRoleTitles[value],
+        }))}
+      />
+      <TextField source="address" label="Адрес" />
+    </SimpleShowLayout>
+  </Show>
+);
+
 export const UserEdit = () => (
-  <Edit>
+  <Edit
+    redirect={(basePath, id) => (id ? `/user/${id}/show` : 'training')}
+    mutationMode="pessimistic"
+  >
     <SimpleForm>
       {/* Только для чтения */}
       <NumberInput source="userId" disabled label="ID" />
       <NumberInput source="tgId" disabled label="Telegram ID" />
       <TextInput source="name" disabled label="Имя" />
       <TextInput source="username" disabled label="Username" />
-      <TextInput
-        source="subscription.type"
-        label="Подписка"
-        disabled
-      />
+      <TextInput source="subscription.type" label="Подписка" disabled />
       <TextInput source="address" disabled label="Адрес" />
 
       {/* Можно редактировать */}
@@ -178,20 +207,19 @@ export const UserEdit = () => (
       <NumberInput source="weight" label="Вес" />
       <SelectInput
         source="gender"
-        choices={[
-          { id: UserGender.MALE, name: UserGenderTitles[UserGender.MALE] },
-          { id: UserGender.FEMALE, name: UserGenderTitles[UserGender.FEMALE] },
-        ]}
+        choices={Object.entries(UserGender).map(([key, value]) => ({
+          id: value,
+          name: UserGenderTitles[value],
+        }))}
         label="Пол"
       />
       <SelectInput
         source="role"
         label="Роль"
-        choices={[
-          { id: UserRole.User, name: UserRoleTitles[UserRole.User] },
-          { id: UserRole.Moderator, name: UserRoleTitles[UserRole.Moderator] },
-          { id: UserRole.Admin, name: UserRoleTitles[UserRole.Admin] },
-        ]}
+        choices={Object.entries(UserRole).map(([key, value]) => ({
+          id: value,
+          name: UserRoleTitles[value],
+        }))}
       />
 
       {/* Поля для изменения пароля и пина */}

@@ -80,7 +80,24 @@ export class AdminLessonService {
       throw new NotFoundException(`Урок с id=${lessonId} не найден`);
     }
 
-    lesson = await this.contentService.updateLesson(lesson, data);
+    if (
+      data.title ||
+      data.description ||
+      data.shortDescription ||
+      data.duration ||
+      data.coverUrl ||
+      data.iconUrl ||
+      data.bgUrl ||
+      data.price ||
+      data.salePrice ||
+      data.type ||
+      data.content ||
+      data.favoritesTag
+    ) {
+      lesson = await this.contentService.updateLesson({ lessonId }, data);
+    }
+
+    lesson = await this.contentService.updateLesson({ lessonId }, data);
 
     return { id: lessonId, data: { ...lesson, id: lessonId } };
   }

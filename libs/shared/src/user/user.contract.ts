@@ -80,7 +80,7 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: 250, description: 'Баланс пользователя' })
   balance!: number;
 
-  @ApiProperty({ example: "5:10", description: 'Уведомления' })
+  @ApiProperty({ example: '5:10', description: 'Уведомления' })
   meditationNotifications!: string;
 
   @ApiProperty({ example: true, description: 'Уведомления' })
@@ -88,6 +88,9 @@ export class UserInfoResponseDto implements IUser {
 
   @ApiProperty({ example: false, description: 'Уведомления' })
   promoNotifications!: boolean;
+
+  @ApiProperty({ description: 'Удалён', example: false })
+  deleted!: boolean;
 }
 
 /* ============================================================
@@ -113,7 +116,7 @@ export class UserUpdateProfileRequestDto {
   @ApiProperty({ example: 75, required: false })
   @IsOptional()
   @IsInt({ message: 'height должен быть числом' })
-  height?: string;
+  height?: number;
 
   @ApiProperty({ example: new Date(), required: false })
   @IsOptional()

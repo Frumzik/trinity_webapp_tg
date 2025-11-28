@@ -71,6 +71,9 @@ export class Lesson extends Document<Types.ObjectId> implements ILesson {
 
   @Prop({ type: Number, default: null })
   salePrice!: number | null;
+
+  @Prop({ type: Boolean, default: false })
+  deleted!: boolean;
 }
 
 export const LessonSchema = SchemaFactory.createForClass(Lesson);

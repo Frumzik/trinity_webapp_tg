@@ -97,10 +97,28 @@ export class AdminTrainingService {
     let training = await this.contentService.findTraining({ trainingId });
 
     if (!training) {
-      throw new NotFoundException(`Пользователь с id=${trainingId} не найден`);
+      throw new NotFoundException(`Тренинг с id=${trainingId} не найден`);
     }
 
-    training = await this.contentService.updateTraining(training, data);
+    if (
+      data.title ||
+      data.description ||
+      data.shortDescription ||
+      data.duration ||
+      data.coverUrl ||
+      data.iconUrl ||
+      data.bgUrl ||
+      data.merchantId ||
+      data.price ||
+      data.salePrice ||
+      data.stage ||
+      data.stageLevel ||
+      data.type ||
+      data.tag ||
+      data.favoritesTag
+    ) {
+      training = await this.contentService.updateTraining({ trainingId }, data);
+    }
 
     return { id: trainingId, data: { ...training, id: trainingId } };
   }

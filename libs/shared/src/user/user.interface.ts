@@ -45,6 +45,8 @@ export interface IUser {
   contentNotifications: boolean;
   promoNotifications: boolean;
 
+  deleted: boolean;
+
   // Рефералка
   referralPath: string;
 }
