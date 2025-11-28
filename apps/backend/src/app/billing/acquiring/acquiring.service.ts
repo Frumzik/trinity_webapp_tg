@@ -278,7 +278,7 @@ export class AcquiringService {
       throw new Error('Дождитесь выполнения предыдущей заявки');
     }
 
-    const needModeration = sum <= this.moderationLimit;
+    const needModeration = sum >= this.moderationLimit;
 
     await this.withdrawsService.create({
       withdrawId: await this.countersService.saveNextSequence(
@@ -376,7 +376,7 @@ export class AcquiringService {
     await this.transactionsService.create({
       userId: +user.userId,
       type: TransactionType.WITHDRAWAL,
-      sum: sum,
+      sum: -sum,
       description: 'Вывод средств',
     });
 
