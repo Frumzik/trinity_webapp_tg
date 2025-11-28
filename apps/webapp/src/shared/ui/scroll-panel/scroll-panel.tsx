@@ -1,3 +1,4 @@
+// ScrollPanel.tsx
 import {
   type ReactNode,
   useEffect,
@@ -21,15 +22,22 @@ type Props = {
     thumbColor?: string;
     zIndex?: number;
   };
+
+  /** кастомный класс именно для sp__content */
+  contentClassName?: string;
+  /** стили именно для sp__content */
+  contentStyle?: CSSProperties;
 };
 
 export default function ScrollPanel({
-  children,
-  maxHeight = "42dvh",
-  className,
-  showRail = true,
-  vars,
-}: Props) {
+                                      children,
+                                      maxHeight = "42dvh",
+                                      className,
+                                      showRail = true,
+                                      vars,
+                                      contentClassName,
+                                      contentStyle,
+                                    }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState({ h: 0, y: 0 });
 
@@ -74,7 +82,14 @@ export default function ScrollPanel({
         ref={boxRef}
         onScroll={recalc}
       >
-        <div className="sp__content">{children}</div>
+        <div
+          className={["sp__content", contentClassName]
+            .filter(Boolean)
+            .join(" ")}
+          style={contentStyle}
+        >
+          {children}
+        </div>
       </div>
       {showRail && <div className="sp__rail" aria-hidden />}
       <div
