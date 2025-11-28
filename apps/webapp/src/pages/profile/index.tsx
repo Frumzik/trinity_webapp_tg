@@ -99,7 +99,7 @@ const Index = () => {
       setIsLoading(true);
       console.log("Отправляю запрос в бота с tgId =", tgId);
 
-      const res = await fetch("https://bot.3nity.space/bot/presentation", {
+      const res = await fetch("https://api.3nity.space/notifications/presentation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
