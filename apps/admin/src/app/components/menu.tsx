@@ -9,6 +9,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import ImageIcon from '@mui/icons-material/Image';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
@@ -68,8 +69,19 @@ export const MyMenu = () => {
         <ListItemText primary="Пользователи" />
       </MenuItem>
 
+      {/* Баннеры */}
+      <MenuItem component={Link} to="/banner">
+        <ListItemIcon>
+          <ImageIcon />
+        </ListItemIcon>
+        <ListItemText primary="Баннеры" />
+      </MenuItem>
+
       {/* Файлы */}
-      <MenuItem component={Link} to="/file?filter=%7B%7D&order=DESC&page=1&perPage=10&sort=LastModified">
+      <MenuItem
+        component={Link}
+        to="/file?filter=%7B%7D&order=DESC&page=1&perPage=10&sort=LastModified"
+      >
         <ListItemIcon>
           <InsertDriveFileIcon />
         </ListItemIcon>

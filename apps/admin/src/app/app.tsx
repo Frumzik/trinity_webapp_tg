@@ -3,7 +3,16 @@ import simpleRestProvider from 'ra-data-simple-rest';
 import { authProvider } from './authProvider';
 import { httpClient } from './httpClient';
 // Импорт кастомных компонентов (можно оставить ListGuesser на первых порах)
-import { UserList, UserEdit, FileListWithCopy, UserShow } from './resources';
+import {
+  UserList,
+  UserEdit,
+  FileListWithCopy,
+  UserShow,
+  BannerList,
+  BannerShow,
+  BannerEdit,
+  BannerCreate,
+} from './resources';
 import { MyMenu } from './components';
 import { Dashboard } from './components';
 import {
@@ -56,6 +65,14 @@ export default function App() {
         name="file"
         list={FileListWithCopy}
         options={{ label: 'Файлы' }}
+      />
+      <Resource
+        name="banner"
+        list={BannerList}
+        show={BannerShow}
+        edit={BannerEdit}
+        create={BannerCreate}
+        options={{ label: 'Баннеры' }}
       />
     </Admin>
   );

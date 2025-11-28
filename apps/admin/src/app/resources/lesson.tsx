@@ -51,6 +51,7 @@ const LessonTypeTitles: Record<LessonType, string> = {
 export const LessonDatagrid = () => (
   <Datagrid rowClick="show">
     <NumberField source="lessonId" label="ID" />
+    <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
     <SelectField
       source="type"

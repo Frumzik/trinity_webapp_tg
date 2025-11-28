@@ -13,5 +13,6 @@ import { BannersRepository } from './repositories';
   ],
   providers: [BannersService, BannersRepository],
   controllers: [BannersController],
+  exports: [BannersService],
 })
 export class BannersModule {}

@@ -8,6 +8,8 @@ import { AdminLessonController, AdminLessonService } from './lesson';
 import { AdminFileController } from './file/admin-file.controller';
 import { AdminFileService } from './file/admin-file.service';
 import { FileModule } from '../service';
+import { AdminBannerController, AdminBannerService } from './banner';
+import { BannersModule } from '../banners';
 
 @Module({
   imports: [
@@ -15,18 +17,21 @@ import { FileModule } from '../service';
     forwardRef(() => TransactionsModule),
     ContentModule,
     FileModule,
+    BannersModule,
   ],
   providers: [
     AdminUserService,
     AdminTrainingService,
     AdminLessonService,
     AdminFileService,
+    AdminBannerService,
   ],
   controllers: [
     AdminUserController,
     AdminTrainingController,
     AdminLessonController,
     AdminFileController,
+    AdminBannerController,
   ],
 })
 export class AdminModule {}
