@@ -12,7 +12,7 @@ import FlexibleModal from "../../widgets/flexible-modal";
 import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
-import { useGetUserQuery } from "../../shared/api/user.api";
+import { useGetUserQuery, useLazyGetUserQuery } from "../../shared/api/user.api";
 import { useLocation } from "react-router-dom";
 
 export type LevelItem = {
@@ -169,10 +169,7 @@ export default function Index() {
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
-
-  const subscriptionType = userRes?.data.subscription?.type;
-  const hasPaidSubscription =
-    subscriptionType === "pro" || subscriptionType === "premium";
+  const [fetchUser] = useLazyGetUserQuery();
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
@@ -374,6 +371,20 @@ export default function Index() {
   }) => {
     setModalOpen(false);
 
+    let hasPaidSubscription = false;
+
+    try {
+      const freshUser = await fetchUser().unwrap();
+      const subscriptionType = freshUser?.data?.subscription?.type;
+      hasPaidSubscription =
+        subscriptionType === "pro" || subscriptionType === "premium";
+    } catch (err) {
+      console.error("Не удалось обновить данные пользователя перед покупкой", err);
+      const fallbackType = userRes?.data.subscription?.type;
+      hasPaidSubscription =
+        fallbackType === "pro" || fallbackType === "premium";
+    }
+
     if (!hasPaidSubscription) {
       setResultTitle("Недоступно");
       setResultItems(undefined);
@@ -400,7 +411,6 @@ export default function Index() {
       }).unwrap();
 
       await refetch();
-
       openSuccessModal(ids);
     } catch (e: any) {
       const raw = e?.data?.message ?? e?.error ?? "Ошибка покупки";
