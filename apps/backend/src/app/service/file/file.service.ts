@@ -7,6 +7,7 @@ import {
   type S3,
 } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
+import { slugify } from 'transliteration';
 
 export interface FileItem {
   Key: string;
@@ -48,9 +49,18 @@ export class FileService {
   async uploadFile(file: Express.Multer.File, key?: string): Promise<string> {
     try {
       if (!key) {
+        const original = Buffer.from(file.originalname, 'latin1').toString(
+          'utf8'
+        );
+
+        const translitName = slugify(original, {
+          lowercase: false, // если хочешь сохранить регистр
+          separator: '-', // заменяет пробелы
+        });
+
         key = `${
           this.configService.get('S3_FOLDER') ?? 'uploads'
-        }/${Date.now()}-${file.originalname}`;
+        }/${Date.now()}-${translitName}`;
       }
 
       await this.s3.send(
@@ -181,6 +191,7 @@ export class FileService {
       );
 
       const item = result.Contents?.[0];
+
       if (!item) {
         throw new InternalServerErrorException(
           `Файл с ключом ${key} не найден`

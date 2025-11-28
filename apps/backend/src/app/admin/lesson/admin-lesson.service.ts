@@ -76,6 +76,7 @@ export class AdminLessonService {
         ...created,
         id: created.lessonId,
       },
+      id: created.lessonId
     };
   }
 

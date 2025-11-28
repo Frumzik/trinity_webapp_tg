@@ -15,9 +15,11 @@ import { JWTAuthGuard, parseGetListQuery, Roles } from '../../service';
 import { AdminUserService } from './admin-user.service';
 import { UserRole } from '@trinity/shared';
 import { type Response } from 'express';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Roles(UserRole.Admin, UserRole.Moderator)
 @UseGuards(JWTAuthGuard)
+@ApiBearerAuth('access_token')
 @Controller('admin/user')
 export class AdminUserController {
   constructor(private readonly adminUserService: AdminUserService) {}

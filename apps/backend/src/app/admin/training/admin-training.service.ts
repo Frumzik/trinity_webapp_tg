@@ -95,6 +95,7 @@ export class AdminTrainingService {
         ...created,
         id: created.trainingId,
       },
+      id: created.trainingId,
     };
   }
 

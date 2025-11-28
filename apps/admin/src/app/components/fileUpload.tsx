@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Button, Box, Typography, CircularProgress } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { useRefresh } from 'react-admin';
 
 interface FileUploadProps {
   onUploadSuccess?: () => void;
@@ -11,6 +12,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const refresh = useRefresh(); // <--- добавили
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] ?? null;
@@ -38,7 +41,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
         formData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
         }
@@ -53,6 +56,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       setPreview(null);
 
       if (onUploadSuccess) onUploadSuccess();
+
+      refresh();
     } catch (error) {
       console.error(error);
       alert('Не удалось загрузить файл'); // Можно заменить на notify
