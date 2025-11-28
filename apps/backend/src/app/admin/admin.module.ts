@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AdminUserController, AdminUserService } from './user';
 import { UsersModule } from '../account';
-import { TransactionsModule } from '../billing';
+import { AcquiringModule, TransactionsModule } from '../billing';
 import { ContentModule } from '../lms';
 import { AdminTrainingController, AdminTrainingService } from './training';
 import { AdminLessonController, AdminLessonService } from './lesson';
@@ -10,6 +10,7 @@ import { AdminFileService } from './file/admin-file.service';
 import { FileModule } from '../service';
 import { AdminBannerController, AdminBannerService } from './banner';
 import { BannersModule } from '../banners';
+import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BannersModule } from '../banners';
     ContentModule,
     FileModule,
     BannersModule,
+    AcquiringModule,
   ],
   providers: [
     AdminUserService,
@@ -25,6 +27,7 @@ import { BannersModule } from '../banners';
     AdminLessonService,
     AdminFileService,
     AdminBannerService,
+    AdminWithdrawService,
   ],
   controllers: [
     AdminUserController,
@@ -32,6 +35,7 @@ import { BannersModule } from '../banners';
     AdminLessonController,
     AdminFileController,
     AdminBannerController,
+    AdminWithdrawController,
   ],
 })
 export class AdminModule {}

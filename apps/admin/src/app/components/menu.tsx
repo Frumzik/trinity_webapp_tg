@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ImageIcon from '@mui/icons-material/Image';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
@@ -86,6 +87,17 @@ export const MyMenu = () => {
           <InsertDriveFileIcon />
         </ListItemIcon>
         <ListItemText primary="Файлы" />
+      </MenuItem>
+
+      {/* Выводы средств */}
+      <MenuItem
+        component={Link}
+        to="/withdraw?filter=%7B%7D&order=ASC&page=1&perPage=20&sort=date"
+      >
+        <ListItemIcon>
+          <MonetizationOnIcon />
+        </ListItemIcon>
+        <ListItemText primary="Выводы" />
       </MenuItem>
     </Menu>
   );

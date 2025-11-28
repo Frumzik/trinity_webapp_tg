@@ -12,6 +12,7 @@ import {
   BannerShow,
   BannerEdit,
   BannerCreate,
+  WithdrawList,
 } from './resources';
 import { MyMenu } from './components';
 import { Dashboard } from './components';
@@ -73,6 +74,12 @@ export default function App() {
         edit={BannerEdit}
         create={BannerCreate}
         options={{ label: 'Баннеры' }}
+      />
+
+      <Resource
+        name="withdraw"
+        list={WithdrawList}
+        options={{ label: 'Вывод' }}
       />
     </Admin>
   );
