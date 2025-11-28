@@ -176,7 +176,25 @@ export class ContentService {
   async updateTraining(
     condition: FilterQuery<Training>,
     updateData: Partial<
-      Pick<ITraining, 'title' | 'description' | 'coverUrl' | 'price'>
+      Pick<
+        ITraining,
+        | 'title'
+        | 'description'
+        | 'shortDescription'
+        | 'duration'
+        | 'link'
+        | 'coverUrl'
+        | 'iconUrl'
+        | 'bgUrl'
+        | 'merchantId'
+        | 'price'
+        | 'salePrice'
+        | 'stage'
+        | 'stageLevel'
+        | 'type'
+        | 'tag'
+        | 'favoritesTag'
+      >
     >
   ) {
     try {
@@ -335,7 +353,20 @@ export class ContentService {
   async updateLesson(
     condition: FilterQuery<Lesson>,
     updateData: Partial<
-      Pick<ILesson, 'title' | 'description' | 'coverUrl' | 'price' | 'content'>
+      Pick<
+        ILesson,
+        | 'title'
+        | 'description'
+        | 'shortDescription'
+        | 'duration'
+        | 'favoritesTag'
+        | 'coverUrl'
+        | 'iconUrl'
+        | 'bgUrl'
+        | 'content'
+        | 'price'
+        | 'salePrice'
+      >
     >
   ) {
     try {

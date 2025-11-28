@@ -50,12 +50,12 @@ export class AdminTrainingController {
   }
 
   @Post()
-  async create(@Body() dto: never) {
+  async create(@Body() dto: any) {
     return await this.adminTrainingService.create(dto);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: never) {
+  async update(@Param('id') id: string, @Body() dto: any) {
     return await this.adminTrainingService.update(id, dto);
   }
 

@@ -35,6 +35,8 @@ export class UserEntity implements IUser {
   contentNotifications = true;
   promoNotifications = false;
 
+  deleted = false;
+
   // Рефералка
   referralPath = '';
 
@@ -87,7 +89,13 @@ export class UserEntity implements IUser {
     data: Partial<
       Pick<
         IUser,
-        'name' | 'username' | 'email' | 'height' | 'weight' | 'birthDate' | 'gender'
+        | 'name'
+        | 'username'
+        | 'email'
+        | 'height'
+        | 'weight'
+        | 'birthDate'
+        | 'gender'
       >
     >
   ) {
@@ -152,6 +160,18 @@ export class UserEntity implements IUser {
     this.meditationNotifications = body.meditationNotifications;
     this.contentNotifications = body.contentNotifications;
     this.promoNotifications = body.promoNotifications;
+
+    return this;
+  }
+
+  public delete() {
+    this.deleted = true;
+
+    return this;
+  }
+
+  public undo() {
+    this.deleted = false;
 
     return this;
   }

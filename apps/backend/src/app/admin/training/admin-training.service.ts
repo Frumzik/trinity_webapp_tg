@@ -5,7 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { GetListOptions } from '@trinity/shared';
+import { ContentAddTrainingRequestDto, GetListOptions } from '@trinity/shared';
 import { ContentService } from '../../lms';
 import { Training } from '../../lms/content/models';
 import { LessonEntity, TrainingEntity } from '../../lms/content/entities';
@@ -23,7 +23,6 @@ export class AdminTrainingService {
         ...params,
         filter: {
           ...params.filter,
-          parentId: params.filter?.parentId ?? null,
         },
         populate: ['childrens', 'lessons'], // если нужно populate
       };
@@ -84,8 +83,19 @@ export class AdminTrainingService {
   /**
    * CREATE
    */
-  async create(data: Partial<TrainingEntity>) {
-    return false;
+  async create(data: ContentAddTrainingRequestDto) {
+    const created = await this.contentService.createTraining(data);
+
+    if (!created) {
+      throw new Error('Ошибка создания тренинга');
+    }
+
+    return {
+      data: {
+        ...created,
+        id: created.trainingId,
+      },
+    };
   }
 
   /**
@@ -97,10 +107,28 @@ export class AdminTrainingService {
     let training = await this.contentService.findTraining({ trainingId });
 
     if (!training) {
-      throw new NotFoundException(`Пользователь с id=${trainingId} не найден`);
+      throw new NotFoundException(`Тренинг с id=${trainingId} не найден`);
     }
 
-    training = await this.contentService.updateTraining(training, data);
+    if (
+      data.title ||
+      data.description ||
+      data.shortDescription ||
+      data.duration ||
+      data.coverUrl ||
+      data.iconUrl ||
+      data.bgUrl ||
+      data.merchantId ||
+      data.price ||
+      data.salePrice ||
+      data.stage ||
+      data.stageLevel ||
+      data.type ||
+      data.tag ||
+      data.favoritesTag
+    ) {
+      training = await this.contentService.updateTraining({ trainingId }, data);
+    }
 
     return { id: trainingId, data: { ...training, id: trainingId } };
   }
@@ -109,6 +137,14 @@ export class AdminTrainingService {
    * DELETE
    */
   async delete(id: string | number) {
-    return false;
+    const trainingId = typeof id === 'string' ? parseInt(id) : id;
+
+    const deleted = await this.contentService.deleteTraining(trainingId);
+
+    if (!deleted) {
+      throw new Error('Ошибка удаления');
+    }
+
+    return { id: trainingId, data: { id: trainingId } };
   }
 }

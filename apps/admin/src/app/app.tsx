@@ -3,16 +3,16 @@ import simpleRestProvider from 'ra-data-simple-rest';
 import { authProvider } from './authProvider';
 import { httpClient } from './httpClient';
 // Импорт кастомных компонентов (можно оставить ListGuesser на первых порах)
-import { UserList, UserEdit } from './user';
-import { MyMenu } from './menu';
-import { Dashboard } from './dashboard';
+import { UserList, UserEdit, FileListWithCopy, UserShow } from './resources';
+import { MyMenu } from './components';
+import { Dashboard } from './components';
 import {
   TrainingCreate,
   TrainingEdit,
   TrainingList,
   TrainingShow,
-} from './training';
-import { LessonCreate, LessonEdit, LessonList, LessonShow } from './lesson';
+} from './resources';
+import { LessonCreate, LessonEdit, LessonList, LessonShow } from './resources';
 
 // URL должен вести на твой backend /admin
 const dataProvider = simpleRestProvider(
@@ -33,6 +33,7 @@ export default function App() {
         name="user"
         list={UserList}
         edit={UserEdit}
+        show={UserShow}
         options={{ label: 'Пользователи' }}
       />
       <Resource
@@ -50,6 +51,11 @@ export default function App() {
         edit={LessonEdit}
         create={LessonCreate}
         options={{ label: 'Уроки' }}
+      />
+      <Resource
+        name="file"
+        list={FileListWithCopy}
+        options={{ label: 'Файлы' }}
       />
     </Admin>
   );

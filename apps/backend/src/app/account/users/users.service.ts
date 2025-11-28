@@ -127,9 +127,15 @@ export class UsersService {
     }
   }
 
-  async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
+  async delete(condition: FilterQuery<User>): Promise<UserEntity> {
     try {
-      const result = await this.usersRepository.delete(condition);
+      const user = await this.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const result = await this.usersRepository.update(user.delete());
 
       return result;
     } catch (error: unknown) {
@@ -137,6 +143,26 @@ export class UsersService {
         error instanceof Error
           ? error.message
           : 'Ошибка при удалении пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async undo(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
+    try {
+      const user = await this.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const result = await this.usersRepository.update(user.undo());
+
+      return result;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при восстановлении пользователя';
       throw new InternalServerErrorException(message);
     }
   }

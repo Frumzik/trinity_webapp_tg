@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Menu, useSidebarState } from 'react-admin';
+import { Menu, useDataProvider, useSidebarState } from 'react-admin';
 import { MenuItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BookIcon from '@mui/icons-material/Book';
@@ -8,30 +8,25 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
   const [sidebarOpen] = useSidebarState();
-  const [trainings, setTrainings] = useState([]);
+  const [trainings, setTrainings] = useState<any>([]);
+
+  const dataProvider = useDataProvider();
 
   // Получаем список тренингов с бэка
   useEffect(() => {
-    axios
-      .post(
-        `${import.meta.env.VITE_API_URL}/content/trainings`,
-        {
-          filter: { parentId: null },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      ) // путь к вашему API
-      .then((res) => setTrainings(res.data.data))
-      .catch((err) => console.error(err));
-  }, []);
+    dataProvider
+      .getList('training', {
+        sort: { field: 'id', order: 'ASC' },
+        filter: { parentId: null },
+      })
+      .then(({ data }) => setTrainings(data))
+      .catch((error) => console.error(error));
+  }, [dataProvider]);
 
   return (
     <Menu>
@@ -52,7 +47,7 @@ export const MyMenu = () => {
         {openTrainings ? <ExpandLess /> : <ExpandMore />}
       </MenuItem>
       <Collapse in={openTrainings && sidebarOpen} timeout="auto" unmountOnExit>
-        {trainings.map((t) => (
+        {trainings.map((t: any) => (
           <MenuItem
             key={(t as any).trainingId}
             component={Link}
@@ -71,6 +66,14 @@ export const MyMenu = () => {
           <PersonIcon />
         </ListItemIcon>
         <ListItemText primary="Пользователи" />
+      </MenuItem>
+
+      {/* Файлы */}
+      <MenuItem component={Link} to="/file?filter=%7B%7D&order=DESC&page=1&perPage=10&sort=LastModified">
+        <ListItemIcon>
+          <InsertDriveFileIcon />
+        </ListItemIcon>
+        <ListItemText primary="Файлы" />
       </MenuItem>
     </Menu>
   );

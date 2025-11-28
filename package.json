@@ -35,6 +35,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "ra-data-simple-rest": "^5.13.2",
+    "ra-input-rich-text": "^5.13.2",
     "react": "^19.1.1",
     "react-admin": "^5.13.2",
     "react-dom": "^19.1.1",
