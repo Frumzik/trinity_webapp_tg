@@ -6,7 +6,13 @@ import { Document, Types } from 'mongoose';
 @Schema({ versionKey: false, timestamps: true })
 export class Withdraw extends Document<Types.ObjectId> implements IWithdraw {
   @Prop({ type: Number, required: true })
+  withdrawId!: number;
+
+  @Prop({ type: Number, required: true })
   userId!: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  user!: Types.ObjectId;
 
   @Prop({ type: String, required: true })
   toAddress!: string;

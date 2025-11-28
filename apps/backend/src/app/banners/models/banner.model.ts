@@ -8,11 +8,11 @@ export class Banner extends Document<Types.ObjectId> implements IBanner {
   @Prop({ required: true, unique: true })
   bannerId!: number;
 
-  @Prop({ required: true })
-  miniatureUrl!: string;
+  @Prop({ type: String, default: null })
+  miniatureUrl!: string | null;
 
-  @Prop({ required: true })
-  imageUrl!: string;
+  @Prop({ type: String, default: null })
+  imageUrl!: string | null;
 
   @Prop({ type: String, default: null })
   linkUrl!: string | null;

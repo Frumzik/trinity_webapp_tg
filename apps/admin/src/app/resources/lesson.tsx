@@ -51,6 +51,7 @@ const LessonTypeTitles: Record<LessonType, string> = {
 export const LessonDatagrid = () => (
   <Datagrid rowClick="show">
     <NumberField source="lessonId" label="ID" />
+    <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
     <SelectField
       source="type"
@@ -145,7 +146,7 @@ export const LessonShow = () => (
 
       {/* Картинки */}
       <ImageField source="coverUrl" label="Обложка" />
-      <ImageField source="iconUrl" label="Иконка" />
+      {/* <ImageField source="iconUrl" label="Иконка" /> */}
       <ImageField source="bgUrl" label="Фон" />
 
       {/* --- Условный контент УСТОЙЧИВО ЧЕРЕЗ FunctionField --- */}
@@ -235,7 +236,7 @@ export const LessonEdit = () => (
 
       {/* Картинки */}
       <FileSelector source="coverUrl" label="Обложка" />
-      <FileSelector source="iconUrl" label="Иконка" />
+      {/* <FileSelector source="iconUrl" label="Иконка" /> */}
       <FileSelector source="bgUrl" label="Фон" />
 
       {/* Динамическое поле контента */}
@@ -416,7 +417,7 @@ export const LessonCreate = () => {
 
         {/* Картинки */}
         <FileSelector source="coverUrl" label="Обложка" />
-        <FileSelector source="iconUrl" label="Иконка" />
+        {/* <FileSelector source="iconUrl" label="Иконка" /> */}
         <FileSelector source="bgUrl" label="Фон" />
       </SimpleForm>
     </Create>

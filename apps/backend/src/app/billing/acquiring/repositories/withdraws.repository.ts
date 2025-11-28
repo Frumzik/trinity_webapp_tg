@@ -83,4 +83,21 @@ export class WithdrawsRepository {
 
     return { deleted: result.deletedCount !== 0 };
   }
+
+  // Получение с юзером
+  async populate(
+    condition: FilterQuery<Withdraw>
+  ): Promise<WithdrawEntity | null> {
+    const result = await this.withdrawModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'user',
+        },
+      ])
+      .lean()
+      .exec();
+
+    return result ? new WithdrawEntity(result) : null;
+  }
 }
