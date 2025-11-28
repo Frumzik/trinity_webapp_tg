@@ -42,7 +42,7 @@ export class BotService implements OnModuleInit {
   async sendNewPractiseMessage(user: any, practise: any) {
     return this.bot.telegram.sendMessage(
       this.configService.get('BOT_ADMIN_CHAT') || 0,
-      `Новая покупка практики:\n\nПрактика: ${practise.title}\nПользователь: ${user.name} - ${user.username}`
+      `Новая покупка практики:\n\nПрактика: ${practise.title}\nПользователь: ${user.name} - @${user.username}`
     );
   }
 
