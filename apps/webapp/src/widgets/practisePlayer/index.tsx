@@ -221,7 +221,9 @@ export default function PlayerPage({
     setScrub(false);
     if (isVideo && playing) scheduleHide();
   };
-
+  useEffect(() => {
+    setFav(!!track.isFavorite);
+  }, [track.isFavorite]);
   const toggleFav = () => {
     const next = !isFav;
     setFav(next);
@@ -251,7 +253,6 @@ export default function PlayerPage({
     else onBack();
   };
 
-  // события для показа HUD при взаимодействии мышью/тачем (только видео)
   const onUserInteract = () => bumpHud();
 
   return (
@@ -265,7 +266,6 @@ export default function PlayerPage({
       onPointerMove={isVideo ? onUserInteract : undefined}
       onPointerDown={isVideo ? onUserInteract : undefined}
     >
-      {/* фон и шейд — только для аудио */}
       {!isVideo && track.artworkUrl && (
         <>
           <img className="player__bg" src={track.artworkUrl} alt="" />
@@ -273,7 +273,6 @@ export default function PlayerPage({
         </>
       )}
 
-      {/* HUD: верхняя панель */}
       <div className="player__top hud">
         <TopActions
           onBack={backWithPayload}
@@ -284,7 +283,6 @@ export default function PlayerPage({
         />
       </div>
 
-      {/* HUD: стрелки навигации */}
       {onPrev && (
         <button className="player__nav player__nav--prev hud" onClick={onPrev} aria-label="Prev">
           <img src={leftArrow} alt="" />
@@ -296,7 +294,6 @@ export default function PlayerPage({
         </button>
       )}
 
-      {/* HUD: кнопка Play/Pause (оверлеем по центру) */}
       <button className="player__play hud" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}>
         <span className={clsx("player__knob", playing && "is-playing")}>
           <span className="player__play-icon">
@@ -307,7 +304,6 @@ export default function PlayerPage({
         </span>
       </button>
 
-      {/* HUD: таймлайн/тайминги */}
       <div className="player__panel hud">
         <div className="player__title">{track.title}</div>
         {track.subtitle && <div className="player__subtitle">{track.subtitle}</div>}
@@ -332,7 +328,6 @@ export default function PlayerPage({
         </div>
       </div>
 
-      {/* media */}
       {track.videoUrl ? (
         <video
           ref={mediaRef as React.RefObject<HTMLVideoElement>}
@@ -340,14 +335,13 @@ export default function PlayerPage({
           preload="metadata"
           playsInline
           controls={false}
-          onClick={onUserInteract}      // << оставить
-          onPointerDown={onUserInteract} // << добавить
+          onClick={onUserInteract}
+          onPointerDown={onUserInteract}
         />
       ) : (
         <audio ref={mediaRef as React.RefObject<HTMLAudioElement>} preload="metadata" />
       )}
 
-      {/* HUD: нижний блок (описание/прогресс) */}
       {extraBottom && (
         <div className="player__bottom hud">
           {extraBottom}

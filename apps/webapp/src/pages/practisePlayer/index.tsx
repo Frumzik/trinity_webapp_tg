@@ -1,3 +1,4 @@
+// src/pages/practisePlayer/PlayerScreen.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PlayerPage, {
@@ -125,9 +126,10 @@ export default function PlayerScreen() {
     currentTrainingId
   );
 
-  // первичная подгрузка одиночного урока
+  // первичная подгрузка одиночного урока (когда зашли по /player/:trackId без очереди)
   useEffect(() => {
     if (queue.length || !lessonRes?.data) return;
+
     const l: any = lessonRes.data;
     const media = l?.content?.audioUrl || l?.mediaUrl;
     const vurl = l?.content?.videoUrl || l?.videoUrl;
@@ -137,25 +139,42 @@ export default function PlayerScreen() {
     if (!returnToRef.current && trainingIdRef.current != null) {
       returnToRef.current = `/level/${trainingIdRef.current}`;
     }
-    setDesc(l?.description ?? null);
+
+    const descText =
+      l?.description ??
+      l?.shortDescription ??
+      l?.parent?.description ??
+      null;
+    setDesc(descText);
+
+    // фоновая картинка ДЛЯ АУДИО: сначала bgUrl, потом parent.bgUrl, потом cover'ы
+    const bgImage =
+      !vurl
+        ? (l?.bgUrl ??
+          l?.parent?.bgUrl ??
+          l?.coverUrl ??
+          l?.parent?.coverUrl ??
+          undefined)
+        : undefined;
 
     setQueue([
       {
         id: l.lessonId,
         title: l.title,
-        subtitle: l.duration ?? undefined,
+        subtitle: descText || undefined,
         mediaUrl: media,
         videoUrl: vurl,
-        artworkUrl: l.coverUrl ?? undefined,
+        artworkUrl: bgImage,
       },
     ]);
     setIndex(0);
   }, [lessonRes, queue.length]);
 
-  // догружаем медиа/описание для элемента очереди
+  // догружаем медиа/описание/фон для элемента очереди
   useEffect(() => {
     (async () => {
-      if (!track || track.mediaUrl || track.videoUrl) return;
+      if (!track) return;
+
       try {
         const res = await fetchLesson({
           id: Number(track.id),
@@ -164,26 +183,52 @@ export default function PlayerScreen() {
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         const vurl = l?.content?.videoUrl || l?.videoUrl;
-        setDesc(l?.description ?? null);
 
-        if (media || vurl) {
-          setQueue((q) =>
-            q.map((t, i) =>
-              i === index ? { ...t, mediaUrl: media, videoUrl: vurl } : t
-            )
-          );
-        }
-      } catch {}
+        const descText =
+          l?.description ??
+          l?.shortDescription ??
+          l?.parent?.description ??
+          null;
+        setDesc(descText);
+
+        const bgImage =
+          !vurl
+            ? (l?.bgUrl ??
+              l?.parent?.bgUrl ??
+              l?.coverUrl ??
+              l?.parent?.coverUrl ??
+              undefined)
+            : undefined;
+
+        setQueue((q) =>
+          q.map((t, i) =>
+            i === index
+              ? {
+                ...t,
+                ...(media ? { mediaUrl: media } : {}),
+                ...(vurl ? { videoUrl: vurl } : {}),
+                subtitle: descText || t.subtitle,
+                // фон для аудио
+                ...(bgImage ? { artworkUrl: bgImage } : {}),
+              }
+              : t
+          )
+        );
+      } catch {
+        // молча
+      }
     })();
-  }, [track?.id, track?.mediaUrl, track?.videoUrl, index, fetchLesson]);
+  }, [track?.id, index, fetchLesson]);
 
   // таймер «прослушано/просмотрено»
   useEffect(() => {
     if (!track) return;
+
     if (tickerRef.current) {
       clearInterval(tickerRef.current);
       tickerRef.current = null;
     }
+
     startedAtRef.current = Date.now();
     tickerRef.current = window.setInterval(() => {
       if (startedAtRef.current != null) {
@@ -192,6 +237,7 @@ export default function PlayerScreen() {
         startedAtRef.current = now;
       }
     }, 250);
+
     return () => {
       if (tickerRef.current) {
         clearInterval(tickerRef.current);
@@ -275,10 +321,11 @@ export default function PlayerScreen() {
     if (currentLessonId != null) lpMarkInProgress(currentLessonId);
   }, [currentLessonId]);
 
-
+  // обработка результата из /player/exit
   useEffect(() => {
     const st = (location.state as NavState) || null;
     if (!st?.decision || !st?.meta?.action) return;
+
     if (Array.isArray(st.queue)) setQueue(st.queue);
     if (typeof st.index === 'number') setIndex(st.index);
     if (st.trainingId != null) trainingIdRef.current = st.trainingId;
@@ -287,19 +334,18 @@ export default function PlayerScreen() {
     const p: PlayerPayload =
       st.track && typeof st.duration === 'number'
         ? {
-            track: st.track,
-            current: st.current ?? 0,
-            duration: st.duration ?? 0,
-            progressPct: st.progressPct ?? 0,
-            completed: false,
-          }
+          track: st.track,
+          current: st.current ?? 0,
+          duration: st.duration ?? 0,
+          progressPct: st.progressPct ?? 0,
+          completed: false,
+        }
         : buildPayload(false);
 
     if (st.decision === 'save') {
       const completed = ratio(p) >= 0.5;
       saveLessonProgress(p.track.id, p.current, p.duration, completed);
     }
-
 
     const a = st.meta.action;
     if (a === 'back') {
@@ -328,9 +374,9 @@ export default function PlayerScreen() {
       currentLessonId != null ? lp[String(currentLessonId)] : undefined;
     const donePct = rec?.duration
       ? Math.min(
-          100,
-          Math.round((rec.seconds / Math.max(1, rec.duration)) * 100)
-        )
+        100,
+        Math.round((rec.seconds / Math.max(1, rec.duration)) * 100)
+      )
       : 0;
 
     return (
@@ -357,8 +403,6 @@ export default function PlayerScreen() {
         if (el && 'requestFullscreen' in el) {
           await (el as any).requestFullscreen();
         }
-        // попытка залочить ориентацию — только в фуллскрине и где доступно
-        // некоторые вебвью (в т.ч. TG) могут игнорить — это ок
         // @ts-ignore
         if (screen.orientation && screen.orientation.lock) {
           try {
@@ -377,11 +421,9 @@ export default function PlayerScreen() {
         setIsFs(false);
       }
     } catch {
-      // graceful fallback
       setIsFs(!!document.fullscreenElement);
     }
   };
-
 
   if (!track || (!track.mediaUrl && !track.videoUrl)) {
     return (
@@ -402,12 +444,9 @@ export default function PlayerScreen() {
       onCompleted={handleCompleted}
       onDurationReady={onDurationReady}
       showFav
-      isFav={isFav}
       onToggleFav={() => !pending && toggle()}
       extraBottom={progressNode}
-      onToggleFullscreen={
-        track.videoUrl ? toggleFullscreenLandscape : undefined
-      }
+      onToggleFullscreen={track.videoUrl ? toggleFullscreenLandscape : undefined}
       isFullscreen={isFs}
     />
   );

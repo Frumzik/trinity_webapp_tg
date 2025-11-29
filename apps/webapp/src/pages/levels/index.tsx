@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
@@ -10,11 +9,11 @@ import "./levels.scss";
 import Footer from "../../widgets/footer/footer";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
 import FlexibleModal from "../../widgets/flexible-modal";
-import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
-import { useGetUserQuery } from "../../shared/api/user.api";
-import { useLocation } from 'react-router-dom';
+import { useGetUserQuery, useLazyGetUserQuery } from "../../shared/api/user.api";
+import { useLocation } from "react-router-dom";
 
 export type LevelItem = {
   id: string;
@@ -114,23 +113,6 @@ const isLessonCompletedLocal = (
   );
 };
 
-const isTrainingCompletedLocal = (node: BNode) => {
-  const lp = lpLoad();
-  const lessons = node.lessons ?? [];
-  if (!lessons.length) return false;
-  return lessons.every(
-    (l: any) =>
-      l.progressStatus === "completed" ||
-      isLessonCompletedLocal(l.lessonId, lp)
-  );
-};
-
-const minutesFromDuration = (d?: string | null) => {
-  if (!d) return undefined;
-  const m = d.match(/\d+/);
-  return m ? Number(m[0]) : undefined;
-};
-
 type BNode = {
   _id: string;
   trainingId: number;
@@ -152,9 +134,25 @@ type BNode = {
   lessons?: any[];
 };
 
+const isTrainingCompletedLocal = (node: BNode) => {
+  const lp = lpLoad();
+  const lessons = node.lessons ?? [];
+  if (!lessons.length) return false;
+  return lessons.every(
+    (l: any) =>
+      l.progressStatus === "completed" ||
+      isLessonCompletedLocal(l.lessonId, lp)
+  );
+};
+
+const minutesFromDuration = (d?: string | null) => {
+  if (!d) return undefined;
+  const m = d.match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+
 export default function Index() {
   const navigate = useAppNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
 
   const [group, setGroup] = useState(1);
@@ -171,10 +169,7 @@ export default function Index() {
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
-
-  const subscriptionType = userRes?.data.subscription?.type;
-  const hasPaidSubscription =
-    subscriptionType === "pro" || subscriptionType === "premium";
+  const [fetchUser] = useLazyGetUserQuery();
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
@@ -193,16 +188,13 @@ export default function Index() {
     });
   }, [root]);
 
-  const [backTo, setBackTo] = useState<string>("/home"); // значение по умолчанию
+  const [backTo, setBackTo] = useState<string>("/home");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const fromQuery = searchParams.get("from");
-
     const fromState = (location.state as any)?.from;
-
     const stored = sessionStorage.getItem("levelsBackTo");
-
     const next = fromQuery || fromState || stored || "/home";
 
     setBackTo(next);
@@ -300,13 +292,51 @@ export default function Index() {
     }
   };
 
-  const openSuccessModal = (titles: string[]) => {
-    setResultTitle("Новый уровень открыт");
-    setResultCta("Открыть");
-    const first = purchaseLevels.find((pl) => titles.includes(pl.title));
-    setResultOnCta(
-      () => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false))
+  const buildStepTitle = (count: number) => {
+    const lastTwo = count % 100;
+    const last = count % 10;
+
+    if (lastTwo >= 11 && lastTwo <= 14) {
+      return `${count} ступеней Духа открыто`;
+    }
+
+    if (last === 1) {
+      return `${count} ступень Духа открыта`;
+    }
+
+    if (last >= 2 && last <= 4) {
+      return `${count} ступени Духа открыты`;
+    }
+
+    return `${count} ступеней Духа открыто`;
+  };
+
+  const openSuccessModal = (openedIds: number[]) => {
+    if (!openedIds.length) return;
+
+    const openedLevels = purchaseLevels.filter((pl) =>
+      openedIds.includes(Number(pl.id))
     );
+
+    const titleText = buildStepTitle(openedIds.length);
+
+    setResultTitle(titleText);
+    setResultItems(undefined);
+    setResultDesc(undefined);
+    setResultCta("Перейти");
+
+    const first = openedLevels[0];
+
+    setResultOnCta(
+      () =>
+        first
+          ? () =>
+            navigate(`/level/${first.id}`, {
+              state: { returnTo: "/levels" },
+            })
+          : () => setResultOpen(false)
+    );
+
     setResultOpen(true);
   };
 
@@ -314,11 +344,11 @@ export default function Index() {
     const msg = Array.isArray(message) ? message.join("\n") : message;
 
     setResultTitle(
-      msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка")
+      msg || (isInsufficient ? "Недостаточно OM на балансе" : "Произошла ошибка")
     );
     setResultItems(undefined);
 
-    setResultCta(isInsufficient ? "Пополнить баланс" : "Продолжить");
+    setResultCta(isInsufficient ? "Добавить OM" : "Продолжить");
 
     setResultOnCta(
       () => () => {
@@ -341,10 +371,24 @@ export default function Index() {
   }) => {
     setModalOpen(false);
 
+    let hasPaidSubscription = false;
+
+    try {
+      const freshUser = await fetchUser().unwrap();
+      const subscriptionType = freshUser?.data?.subscription?.type;
+      hasPaidSubscription =
+        subscriptionType === "pro" || subscriptionType === "premium";
+    } catch (err) {
+      console.error("Не удалось обновить данные пользователя перед покупкой", err);
+      const fallbackType = userRes?.data.subscription?.type;
+      hasPaidSubscription =
+        fallbackType === "pro" || fallbackType === "premium";
+    }
+
     if (!hasPaidSubscription) {
       setResultTitle("Недоступно");
       setResultItems(undefined);
-      setResultDesc("У вас не активен доступ к приложению");
+      setResultDesc("У вас неактивен доступ к приложению");
       setResultCta("Активировать");
       setResultOnCta(() => () => {
         setResultOpen(false);
@@ -366,40 +410,13 @@ export default function Index() {
         sale: Boolean(_p.discountedOM),
       }).unwrap();
 
-      dispatch(
-        learningApi.util.updateQueryData(
-          "getTrainingTree",
-          undefined,
-          (draft: any) => {
-            const nodes: any[] = draft?.data ?? [];
-            for (const root of nodes) {
-              const walk = (n: any) => {
-                if (
-                  typeof n?.trainingId === "number" &&
-                  ids.includes(n.trainingId)
-                ) {
-                  n.accessStatus = "available";
-                  if (n.progressStatus !== "completed")
-                    n.progressStatus = "not_started";
-                }
-                (n.childrens ?? []).forEach(walk);
-              };
-              walk(root);
-            }
-          }
-        )
-      );
-      const titles = purchaseLevels
-        .filter((pl) => ids.includes(Number(pl.id)))
-        .map((pl) => pl.title);
-      openSuccessModal(titles);
-
       await refetch();
+      openSuccessModal(ids);
     } catch (e: any) {
       const raw = e?.data?.message ?? e?.error ?? "Ошибка покупки";
       const msg = Array.isArray(raw) ? raw[0] : raw;
 
-      const isInsufficient = msg === "Недостаточно баланса";
+      const isInsufficient = msg === "Недостаточно ОМ на балансе";
 
       openErrorModal(msg, isInsufficient);
     }
@@ -414,7 +431,7 @@ export default function Index() {
         rightIconUrl={helpIcon}
         onRightClick={() =>
           window.open(
-            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
+            "https://docs.google.com/document/d/16k0o50V_jEfftCG-pIvr3RJAtZu9mFbiOr0MiVlpvhQ/edit?usp=sharing",
             "_blank",
             "noopener,noreferrer"
           )
@@ -476,10 +493,11 @@ export default function Index() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="USDT = OM"
-            // InfoIcon={(props) => <img src={Info} {...props} />}
+            rateText="1 USDT = 1 OM"
+            title={`${group} уровень`}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
+            isFirstLevel={group === 1}
           />
         </div>
       </main>

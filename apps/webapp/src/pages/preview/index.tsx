@@ -1,5 +1,4 @@
-// pages/preview/index.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
@@ -12,6 +11,11 @@ import "./preview.scss";
 
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
 import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
+import {
+  useGetFavoritesQuery,
+  useAddFavoriteMutation,
+  useDeleteFavoriteMutation,
+} from "../../shared/api/favorites.api";
 import type { LearningNode } from "../../shared/api/learning.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
 
@@ -55,6 +59,61 @@ export default function PreviewPage() {
     isError: boolean;
   };
 
+  // ---------- избранное ----------
+  const { data: favoritesData } = useGetFavoritesQuery();
+
+  const favoriteEntries = useMemo(
+    () => (favoritesData ?? []).flatMap((cat) => cat.favorites),
+    [favoritesData]
+  );
+
+  // запись избранного именно для этого тренинга
+  const currentFavEntry = useMemo(
+    () =>
+      favoriteEntries.find(
+        (f) =>
+          f.type === "Training" &&
+          (f.trainingId === trainingId || f.favoriteId === trainingId)
+      ),
+    [favoriteEntries, trainingId]
+  );
+
+  const isFav = !!currentFavEntry;
+
+  const [addFavorite] = useAddFavoriteMutation();
+  const [deleteFavorite] = useDeleteFavoriteMutation();
+
+  const [isFavLocal, setIsFavLocal] = useState(isFav);
+  const [favPending, setFavPending] = useState(false);
+
+  // синк с серверным состоянием, когда оно реально меняется
+  useEffect(() => {
+    setIsFavLocal(isFav);
+  }, [isFav]);
+
+  const handleToggleFav = async () => {
+    if (!trainingId || favPending) return;
+
+    setFavPending(true);
+
+    try {
+      if (currentFavEntry) {
+        // Удаляем по favoriteId
+        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
+      } else {
+        // Добавляем
+        await addFavorite({ type: "Training", trainingId }).unwrap();
+      }
+      // isFav подтянется из useGetFavoritesQuery после invalidatesTags
+      // и через useEffect обновит isFavLocal
+    } catch (e) {
+      console.error("favorite toggle error", e);
+    } finally {
+      setFavPending(false);
+    }
+  };
+
+  // ---------- подписка / покупка ----------
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
@@ -76,7 +135,7 @@ export default function PreviewPage() {
       setResultKind("error");
       setResultTitle("Недоступно");
       setResultItems(undefined);
-      setResultDesc("У вас не активен доступ к приложению");
+      setResultDesc("У вас неактивен доступ к приложению");
       setResultCta("Активировать");
       setResultOnCta(() => () => {
         setResultOpen(false);
@@ -86,11 +145,11 @@ export default function PreviewPage() {
       return;
     }
 
+    const purchaseType: "Training" | "Practise" =
+      isPractise ? "Practise" : "Training";
+
     try {
-      await addPurchase({
-        type: "Training",
-        content: [trainingId],
-      }).unwrap();
+      await addPurchase({ type: purchaseType, content: [trainingId] }).unwrap();
 
       if (isTraining) {
         if (typeof window !== "undefined") {
@@ -110,7 +169,7 @@ export default function PreviewPage() {
         setResultTitle("Успешно");
         setResultItems(undefined);
         setResultDesc(
-          "Специалист свяжется с Вами в ближайшее время для согласования времени практики"
+          "В ближайшее время мастер свяжется с вами для согласования времени проведения практики."
         );
         setResultOnCta(() => () => setResultOpen(false));
         setResultOpen(true);
@@ -131,12 +190,13 @@ export default function PreviewPage() {
 
       if (isBalanceError) {
         setResultKind("no-balance");
-        setResultTitle("Недостаточно баланса\nдля совершения платежа");
+        setResultTitle("Недостаточно ОМ на балансе ");
         setResultItems(undefined);
         setResultDesc(rawMsg);
-        setResultCta("Пополнить");
+        setResultCta("Добавить ОМ");
         setResultOnCta(() => () => {
           setResultOpen(false);
+          navigate("/wallet");
         });
       } else {
         setResultKind("error");
@@ -152,21 +212,21 @@ export default function PreviewPage() {
       setResultOpen(true);
     }
   };
+
   return (
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={false}
+          isFav={isFavLocal}
+          pending={favPending}
           onBack={() => navigate(-1)}
-          onToggleFav={() => {}}
+          onToggleFav={handleToggleFav}
           onMenu={() => {}}
         />
       </Hero>
 
       <Sheet head="Описание">
-        {isLoading && (
-          <div style={{ padding: 16 }}>Загрузка описания…</div>
-        )}
+        {isLoading && <div style={{ padding: 16 }}>Загрузка описания…</div>}
 
         {isError && !isLoading && (
           <div style={{ padding: 16 }}>

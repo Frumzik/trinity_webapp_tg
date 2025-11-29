@@ -47,7 +47,6 @@ export default function BurgerMenu({ open, onClose }: Props) {
         return;
       }
 
-      // если всё ок — открываем попап
       setOpenModal(true);
     } catch (err) {
       console.error('Сетевая ошибка при запросе в бота:', err);

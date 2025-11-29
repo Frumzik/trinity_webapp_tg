@@ -8,6 +8,7 @@ import PracticeSlider from '../../widgets/practise-card-slider';
 import SectionHeader from './ui/Sectionheader';
 import { useGetUserTrainingByIdQuery } from '../../shared/api/learning.api';
 import { useLazyGetLessonAdminQuery } from '../../shared/api/contentAdmin.api';
+
 import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
 
 type LocalProgress = {
@@ -15,20 +16,41 @@ type LocalProgress = {
   duration: number;
   status: 'in_progress' | 'completed';
 };
+
 const LP_KEY = 'lessonProgress';
 
 const lpLoad = (): Record<string, LocalProgress> => {
-  try { return JSON.parse(localStorage.getItem(LP_KEY) || '{}'); } catch { return {}; }
-};
-const lpSave = (obj: Record<string, LocalProgress>) => {
-  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+  try {
+    return JSON.parse(localStorage.getItem(LP_KEY) || '{}');
+  } catch {
+    return {};
+  }
 };
 
-export const lpMarkInProgress = (lessonId: number | string, duration = 0, seconds = 0) => {
+const lpSave = (obj: Record<string, LocalProgress>) => {
+  try {
+    localStorage.setItem(LP_KEY, JSON.stringify(obj));
+  } catch {}
+};
+
+export const lpMarkInProgress = (
+  lessonId: number | string,
+  duration = 0,
+  seconds = 0
+) => {
   const k = String(lessonId);
   const lp = lpLoad();
-  const prev = lp[k] || { seconds: 0, duration: 0, status: 'in_progress' as const };
-  lp[k] = { ...prev, seconds, duration: Math.max(prev.duration, duration), status: 'in_progress' };
+  const prev = lp[k] || {
+    seconds: 0,
+    duration: 0,
+    status: 'in_progress' as const,
+  };
+  lp[k] = {
+    ...prev,
+    seconds,
+    duration: Math.max(prev.duration, duration),
+    status: 'in_progress',
+  };
   lpSave(lp);
 };
 
@@ -38,16 +60,18 @@ export const lpMarkCompleted = (lessonId: number | string) => {
   lp[k] = {
     seconds: Math.max(lp[k]?.seconds ?? 0, lp[k]?.duration ?? 0),
     duration: lp[k]?.duration ?? 0,
-    status: 'completed'
+    status: 'completed',
   };
   lpSave(lp);
 };
+
 const setCompleted = (lessonId: number | string) => {
   const key = String(lessonId);
   const lp = lpLoad();
   lp[key] = { seconds: 0, duration: 0, status: 'completed' };
   lpSave(lp);
 };
+
 const mergeStatus = (lesson: any, lp: Record<string, LocalProgress>) => {
   const server = (lesson?.progressStatus as string) || 'not_started';
   const local = lp[String(lesson?.lessonId)];
@@ -55,6 +79,16 @@ const mergeStatus = (lesson: any, lp: Record<string, LocalProgress>) => {
   if (server === 'completed') return 'completed';
   if (local?.status === 'in_progress') return 'in_progress';
   return server;
+};
+
+type Tile = {
+  id: number | string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  accessStatus: any;
+  typeHint: string;
+  shortDescription?: string | null;
 };
 
 export default function Index() {
@@ -70,18 +104,17 @@ export default function Index() {
   const training = data?.data;
   const lessons = training?.lessons ?? [];
 
-  /** принятый payload из плеера (выход/complete) — применяем локально */
   useEffect(() => {
     const st = location.state as
       | {
-          sessionDecision?: 'save' | 'discard';
-          session?: {
-            lessonId: number | string;
-            current: number;
-            duration: number;
-            completed: boolean;
-          };
-        }
+      sessionDecision?: 'save' | 'discard';
+      session?: {
+        lessonId: number | string;
+        current: number;
+        duration: number;
+        completed: boolean;
+      };
+    }
       | undefined;
 
     if (st?.sessionDecision === 'save' && st.session) {
@@ -98,7 +131,8 @@ export default function Index() {
     if (st?.sessionDecision) window.history.replaceState({}, '');
   }, [location.state]);
 
-  const tiles = useMemo(
+  // подготавливаем плитки с shortDescription
+  const tiles: Tile[] = useMemo(
     () =>
       lessons.map((l: any) => ({
         id: l.lessonId,
@@ -107,9 +141,26 @@ export default function Index() {
         imageUrl: l.coverUrl ?? training?.coverUrl ?? '',
         accessStatus: l.accessStatus,
         typeHint: l.type,
+        shortDescription: l.shortDescription ?? null,
       })),
     [lessons, training]
   );
+
+  // Группируем по shortDescription
+  const groupedTiles = useMemo(() => {
+    const map = new Map<string, Tile[]>();
+
+    tiles.forEach((t) => {
+      // если shortDescription нет — кладём в группу "Уроки"
+      const key = (t.shortDescription || 'Уроки').trim();
+      const arr = map.get(key) ?? [];
+      arr.push(t);
+      map.set(key, arr);
+    });
+
+    // превращаем в массив [title, items[]]
+    return Array.from(map.entries());
+  }, [tiles]);
 
   const audioItems = useMemo(() => {
     return (training?.lessons ?? [])
@@ -134,18 +185,26 @@ export default function Index() {
         videoUrl: undefined as string | undefined,
       }));
   }, [training]);
+
   const handleOpen = async (lessonId: number | string) => {
     const backTarget = `/level/${training.trainingId}`;
 
-    const audioIdx = audioItems.findIndex((i) => String(i.id) === String(lessonId));
+    const audioIdx = audioItems.findIndex(
+      (i) => String(i.id) === String(lessonId)
+    );
     if (audioIdx !== -1) {
       try {
-        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+        const res = await fetchLesson({
+          id: Number(lessonId),
+          populate: true,
+        }).unwrap();
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         const queuePrefilled = media
           ? audioItems.map((it) =>
-            String(it.id) === String(lessonId) ? { ...it, mediaUrl: media } : it
+            String(it.id) === String(lessonId)
+              ? { ...it, mediaUrl: media }
+              : it
           )
           : audioItems;
         lpMarkCompleted(lessonId);
@@ -172,16 +231,22 @@ export default function Index() {
       }
     }
 
-    // 2) видео-плейлист — НОВОЕ
-    const videoIdx = videoItems.findIndex((i) => String(i.id) === String(lessonId));
+    const videoIdx = videoItems.findIndex(
+      (i) => String(i.id) === String(lessonId)
+    );
     if (videoIdx !== -1) {
       try {
-        const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+        const res = await fetchLesson({
+          id: Number(lessonId),
+          populate: true,
+        }).unwrap();
         const l: any = res.data;
         const vurl = l?.content?.videoUrl || l?.videoUrl;
         const queuePrefilled = vurl
           ? videoItems.map((it) =>
-            String(it.id) === String(lessonId) ? { ...it, videoUrl: vurl } : it
+            String(it.id) === String(lessonId)
+              ? { ...it, videoUrl: vurl }
+              : it
           )
           : videoItems;
         lpMarkCompleted(lessonId);
@@ -210,7 +275,10 @@ export default function Index() {
 
     // 3) текст — как было
     try {
-      const res = await fetchLesson({ id: Number(lessonId), populate: true }).unwrap();
+      const res = await fetchLesson({
+        id: Number(lessonId),
+        populate: true,
+      }).unwrap();
       const l: any = res.data;
       const isText = l?.type === 'text' || !!l?.content?.html;
       if (isText && training) {
@@ -222,8 +290,6 @@ export default function Index() {
 
     alert('Контент этого урока ещё не загружен');
   };
-
-
 
   const headerProgress = useMemo(() => {
     const lp = lpLoad();
@@ -238,7 +304,6 @@ export default function Index() {
 
   const returnTo = (location.state as any)?.returnTo as string | undefined;
 
-
   if (isLoading) {
     return (
       <div className="preview">
@@ -246,11 +311,12 @@ export default function Index() {
       </div>
     );
   }
+
   if (isError || !training) {
     return (
       <div className="preview">
         <div style={{ padding: 16 }}>
-          Не удалось загрузить ступень.{' '}
+          Не удалось загрузить ступень.{` `}
           <button onClick={() => refetch()}>Повторить</button>
         </div>
       </div>
@@ -281,16 +347,20 @@ export default function Index() {
       />
 
       <Sheet>
-        <SectionHeader title="Уроки" count={tiles.length} />
-        <PracticeSlider
-          items={tiles.map((t) => ({
-            id: t.id,
-            title: t.title,
-            subtitle: t.subtitle,
-            imageUrl: t.imageUrl,
-            onClick: () => handleOpen(t.id),
-          }))}
-        />
+        {groupedTiles.map(([groupTitle, groupTiles]) => (
+          <div key={groupTitle}>
+            <SectionHeader title={groupTitle} count={groupTiles.length} />
+            <PracticeSlider
+              items={groupTiles.map((t) => ({
+                id: t.id,
+                title: t.title,
+                subtitle: t.subtitle,
+                imageUrl: t.imageUrl,
+                onClick: () => handleOpen(t.id),
+              }))}
+            />
+          </div>
+        ))}
       </Sheet>
     </div>
   );

@@ -8,7 +8,8 @@ import "./detailing.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
-import helpIcon from '../../assets/icons/helpIcon.svg';
+import helpIcon from "../../assets/icons/helpIcon.svg";
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
 
 const formatName = (r: any) => {
   const u =
@@ -37,12 +38,23 @@ const pickAppUserId = (u?: any) => {
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [subModalOpen, setSubModalOpen] = useState(false); // модалка подписки
   const location = useLocation();
+  const nav = useNavigate();
+
   const levelFromState = (location.state as any)?.level as number | undefined;
   const level = levelFromState ?? 1;
 
   const { data: userData } = useGetUserQuery({ populate: true });
   const u = userData?.data;
+
+  const premium = useMemo(() => {
+    const type =
+      typeof u?.subscription === "object" && u?.subscription
+        ? u.subscription.type
+        : "free";
+    return type && type !== "free";
+  }, [u]);
 
   const {
     data: levelsData,
@@ -75,20 +87,23 @@ const Index = () => {
     return share.toString();
   }, [u]);
 
+  const handleInviteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+
+    if (premium) {
+      // подписка есть — сразу открываем реферальную ссылку
+      window.open(inviteHref, "_blank");
+    } else {
+      // подписки нет — показываем модалку
+      setSubModalOpen(true);
+    }
+  };
+
   return (
     <div className="app">
       <TopBar
-        // title="Ступени духа"
-        rightIconUrl={helpIcon}
-        onRightClick={() =>
-          window.open(
-            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
-            "_blank",
-            "noopener,noreferrer"
-          )
-        }
       />
-      <main className="screen" style={{marginTop: 36}}>
+      <main className="screen" style={{ marginTop: 36 }}>
         <Title
           right={
             <button
@@ -138,11 +153,20 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">
+          <GradientButton onClick={handleInviteClick}>
             Пригласить
           </GradientButton>
         </div>
       </div>
+
+      <SubscriptionRequiredModal
+        open={subModalOpen}
+        onClose={() => setSubModalOpen(false)}
+        onGoToSubscription={() => {
+          setSubModalOpen(false);
+          nav("/subscription");
+        }}
+      />
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
