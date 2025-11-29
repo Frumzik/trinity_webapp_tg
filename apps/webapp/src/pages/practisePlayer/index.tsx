@@ -1,3 +1,4 @@
+// src/pages/practisePlayer/PlayerScreen.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PlayerPage, {
@@ -146,21 +147,30 @@ export default function PlayerScreen() {
       null;
     setDesc(descText);
 
+    // фоновая картинка ДЛЯ АУДИО: сначала bgUrl, потом parent.bgUrl, потом cover'ы
+    const bgImage =
+      !vurl
+        ? (l?.bgUrl ??
+          l?.parent?.bgUrl ??
+          l?.coverUrl ??
+          l?.parent?.coverUrl ??
+          undefined)
+        : undefined;
+
     setQueue([
       {
         id: l.lessonId,
         title: l.title,
-        // В subtitle кладём описание, а не длительность
         subtitle: descText || undefined,
         mediaUrl: media,
         videoUrl: vurl,
-        artworkUrl: l.coverUrl ?? undefined,
+        artworkUrl: bgImage,
       },
     ]);
     setIndex(0);
   }, [lessonRes, queue.length]);
 
-  // догружаем медиа/описание для элемента очереди (включая случаи, когда очередь уже есть)
+  // догружаем медиа/описание/фон для элемента очереди
   useEffect(() => {
     (async () => {
       if (!track) return;
@@ -181,6 +191,15 @@ export default function PlayerScreen() {
           null;
         setDesc(descText);
 
+        const bgImage =
+          !vurl
+            ? (l?.bgUrl ??
+              l?.parent?.bgUrl ??
+              l?.coverUrl ??
+              l?.parent?.coverUrl ??
+              undefined)
+            : undefined;
+
         setQueue((q) =>
           q.map((t, i) =>
             i === index
@@ -188,14 +207,15 @@ export default function PlayerScreen() {
                 ...t,
                 ...(media ? { mediaUrl: media } : {}),
                 ...(vurl ? { videoUrl: vurl } : {}),
-                // всегда перетираем subtitle на описание
                 subtitle: descText || t.subtitle,
+                // фон для аудио
+                ...(bgImage ? { artworkUrl: bgImage } : {}),
               }
               : t
           )
         );
       } catch {
-        // молча, чтобы не ломать плеер
+        // молча
       }
     })();
   }, [track?.id, index, fetchLesson]);
