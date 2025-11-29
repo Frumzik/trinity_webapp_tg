@@ -20,12 +20,13 @@ import { FileList, isImageFile } from '../resources';
 interface FileSelectorProps {
   source: string;
   label?: string;
+  validate?: any;
 }
-
 
 export const FileSelector: React.FC<FileSelectorProps> = ({
   source,
   label,
+  validate,
 }) => {
   const recordContext = useRecordContext<Record<string, any>>();
   const record = useMemo(() => recordContext || {}, [recordContext]);
@@ -56,8 +57,8 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
     <Box display="flex" flexDirection="column" gap={1} mb={2} width="100%">
       {label && <Typography variant="subtitle2">{label}</Typography>}
 
-      {selectedUrl && (
-        isImageFile(selectedUrl) ? (
+      {selectedUrl &&
+        (isImageFile(selectedUrl) ? (
           <img
             src={selectedUrl}
             alt="selected"
@@ -75,10 +76,9 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
           >
             {selectedUrl.split('/').pop()}
           </Typography>
-        )
-      )}
+        ))}
 
-      <TextInput source={source} label={label} fullWidth />
+      <TextInput source={source} label={label} fullWidth validate={validate} />
 
       <Button
         variant="contained"

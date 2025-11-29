@@ -1,7 +1,11 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { WithdrawsRepository } from './repositories';
 import { WithdrawEntity } from './entities';
-import { GetListOptions, WithdrawCreateRequestDto } from '@trinity/shared';
+import {
+  GetListOptions,
+  IWithdraw,
+  WithdrawCreateRequestDto,
+} from '@trinity/shared';
 import { FilterQuery } from 'mongoose';
 import { Withdraw } from './models';
 
@@ -34,6 +38,20 @@ export class WithdrawsService {
     }
   }
 
+  async populate(
+    condition: FilterQuery<Withdraw>
+  ): Promise<WithdrawEntity | null> {
+    try {
+      const withdraw = await this.withdrawsRepository.populate(condition);
+
+      return withdraw;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске заявки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async findAll(options?: GetListOptions<Withdraw>): Promise<WithdrawEntity[]> {
     try {
       const withdraws = await this.withdrawsRepository.findAll(options);
@@ -46,7 +64,26 @@ export class WithdrawsService {
     }
   }
 
-  async count(condition: FilterQuery<Withdraw>): Promise<number> {
+  async update(
+    condition: FilterQuery<Withdraw>,
+    updateData: Partial<Pick<IWithdraw, 'needModeration'>>
+  ): Promise<WithdrawEntity> {
+    try {
+      const withdraw = await this.withdrawsRepository.find(condition);
+
+      if (!withdraw) {
+        throw new NotFoundException('Заявка не найдена');
+      } 
+      
+      return await this.withdrawsRepository.update(withdraw.update(updateData))
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске заявки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Withdraw> = {}): Promise<number> {
     try {
       const count = await this.withdrawsRepository.count(condition);
 

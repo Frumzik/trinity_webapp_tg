@@ -17,12 +17,15 @@ import {
   AcquiringEvents,
   AcquiringWithdrawEvent,
   AcquiringWithdrawWebhookDto,
+  CounterType,
   TransactionType,
 } from '@trinity/shared';
 import { UserEntity, UsersService } from '../../account';
 import { TransactionsService } from '../transactions';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { WithdrawsService } from './withdraws.service';
+import { Types } from 'mongoose';
+import { CountersService } from '../../service';
 
 @Injectable()
 export class AcquiringService {
@@ -39,12 +42,12 @@ export class AcquiringService {
     @Inject(forwardRef(() => TransactionsService))
     private readonly transactionsService: TransactionsService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly withdrawsService: WithdrawsService
+    private readonly withdrawsService: WithdrawsService,
+    private readonly countersService: CountersService
   ) {
     this.BASE_URL = this.configService.get('ACQUIRING_URL') || '';
     this.TOKEN = this.configService.get('ACQUIRING_TOKEN') || '';
   }
-  
 
   // -------------------------
   // ВСПОМОГАТЕЛЬНЫЙ МЕТОД ДЛЯ ЗАГОЛОВКОВ
@@ -275,12 +278,16 @@ export class AcquiringService {
       throw new Error('Дождитесь выполнения предыдущей заявки');
     }
 
-    const needModeration = sum <= this.moderationLimit;
+    const needModeration = sum >= this.moderationLimit;
 
     await this.withdrawsService.create({
+      withdrawId: await this.countersService.saveNextSequence(
+                CounterType.WITHDRAW_ID
+              ),
       userId: user.userId,
       amount: sum,
       toAddress: address,
+      user: user._id as Types.ObjectId,
       needModeration,
     });
 
@@ -362,17 +369,14 @@ export class AcquiringService {
     if (!user) {
       return { ok: false };
     }
-    
+
     const sum = body.amount + this.withdrawComission;
 
-    await this.usersService.decBalance(
-      { userId: user.userId },
-      { dec: sum }
-    );
+    await this.usersService.decBalance({ userId: user.userId }, { dec: sum });
     await this.transactionsService.create({
       userId: +user.userId,
       type: TransactionType.WITHDRAWAL,
-      sum: sum,
+      sum: -sum,
       description: 'Вывод средств',
     });
 
