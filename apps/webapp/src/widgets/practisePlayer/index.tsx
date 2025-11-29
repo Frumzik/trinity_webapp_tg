@@ -29,6 +29,7 @@ type Props = {
   onPrev?: () => void;
   onNext?: () => void;
   onMenu?: () => void;
+  onProgress?: (p: PlayerPayload) => void;
   onToggleFav?: (next: boolean) => void;
   onExit?: (p: PlayerPayload) => void;
   onCompleted?: (p: PlayerPayload) => void;
@@ -37,7 +38,6 @@ type Props = {
   showFav?: boolean;
   className?: string;
 
-  /** НИЖНИЙ БЛОК: описание/прогресс/что угодно */
   extraBottom?: React.ReactNode;
 };
 
@@ -58,6 +58,7 @@ export default function PlayerPage({
                                      onMenu,
                                      onToggleFav,
                                      onExit,
+                                     onProgress,
                                      onCompleted,
                                      onDurationReady,
                                      resumeAtSec = 0,
@@ -103,14 +104,13 @@ export default function PlayerPage({
     scheduleHide();
   }, [isVideo, scheduleHide]);
 
-  // при смене трека — сброс и загрузка источника
   useEffect(() => {
     const m = mediaRef.current;
     setReady(false);
     setPlaying(false);
     setCurrent(0);
     setDuration(0);
-    setHudVisible(true); // при загрузке показать HUD
+    setHudVisible(true);
     clearHideTimer();
 
     if (m) {
@@ -136,17 +136,31 @@ export default function PlayerPage({
       onDurationReady?.(d);
     };
 
-    const onTime = () => { if (!scrub) setCurrent(m.currentTime); };
+    const onTime = () => {
+      if (!scrub) {
+        setCurrent(m.currentTime);
+
+        onProgress?.({
+          track,
+          current: m.currentTime,
+          duration: m.duration || 0,
+          progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
+          completed: false,
+        });
+      }
+    };
+
     const onPlay = () => {
       setPlaying(true);
-      // сразу спрятать HUD через небольшой таймаут
       scheduleHide();
     };
+
     const onPause = () => {
       setPlaying(false);
-      setHudVisible(true); // на паузе показываем HUD
+      setHudVisible(true);
       clearHideTimer();
     };
+
     const onEnded = () => {
       setPlaying(false);
       setHudVisible(true);
@@ -172,8 +186,7 @@ export default function PlayerPage({
       m.removeEventListener("pause", onPause);
       m.removeEventListener("ended", onEnded);
     };
-  }, [onCompleted, onDurationReady, scrub, track, resumeAtSec, scheduleHide]);
-
+  }, [onCompleted, onDurationReady, onProgress, scrub, track, resumeAtSec, scheduleHide]);
   // хоткеи
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

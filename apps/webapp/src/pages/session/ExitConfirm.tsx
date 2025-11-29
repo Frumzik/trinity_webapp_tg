@@ -12,16 +12,45 @@ type ExitState = {
   meta?: { action: "back" | "prev" | "next" | "autoNext" };
   trainingId?: number | string;
 } | null;
+function formatTimeMmSs(totalSec: number) {
+  const sec = Math.max(0, Math.round(totalSec || 0));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
+function getMinutesWord(minutes: number) {
+  const n = minutes % 100;
+  if (n >= 11 && n <= 14) return "минут";
+  const last = n % 10;
+  if (last === 1) return "минута";
+  if (last >= 2 && last <= 4) return "минуты";
+  return "минут";
+}
 export default function ExitConfirm() {
   const nav = useNavigate();
   const { state } = useLocation() as { state: ExitState };
 
   const t = state?.track;
-  const minutes = Math.max(1, Math.round(((state?.current ?? 0) as number) / 60));
-
+  const totalSec = Math.max(0, Math.round((state?.current ?? 0) as number));
+  const minutes = Math.floor(totalSec / 60) || 0;
+  const timeLabel = formatTimeMmSs(totalSec);
+  const minutesWord = getMinutesWord(minutes || 1);
   const decide = (decision: "save" | "discard") => {
-    // ВОЗВРАЩАЕМСЯ на /player С СОХРАНЕНИЕМ ВСЕГО СТЕЙТА + РЕШЕНИЕ
+    if (decision === "discard" && state?.track?.id != null) {
+      const lessonId = state.track.id;
+
+      // Полностью удаляем оба вида прогресса
+      localStorage.removeItem(`lessonProgress:${lessonId}`);
+
+      const raw = localStorage.getItem("lessonProgress");
+      if (raw) {
+        const all = JSON.parse(raw) || {};
+        delete all[String(lessonId)];
+        localStorage.setItem("lessonProgress", JSON.stringify(all));
+      }
+    }
+
     nav("/player", {
       replace: true,
       state: {
@@ -30,7 +59,6 @@ export default function ExitConfirm() {
       },
     });
   };
-
   return (
     <div className="session__wrapper">
     <div className="session session--blur" style={{ backgroundImage: `url(${t?.artworkUrl})` }}>
@@ -50,7 +78,7 @@ export default function ExitConfirm() {
             color: "#FFF",
           }}
         >
-          <span style={{ fontWeight: 700 }}>{minutes}</span> минут прослушано
+          <span style={{ fontWeight: 700 }}>{timeLabel}</span> {minutesWord} прослушано
         </div>
       </div>
 
