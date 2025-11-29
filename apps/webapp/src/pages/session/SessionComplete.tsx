@@ -24,15 +24,23 @@ type CompleteState = {
   trainingId?: number | string;
 } | null;
 
+// только формат времени оставляем
+function formatTimeMmSs(totalSec: number) {
+  const sec = Math.max(0, Math.round(totalSec || 0));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 export default function SessionComplete() {
   const nav = useNavigate();
   const { state } = useLocation() as { state: CompleteState };
 
   const t = state?.track;
-  const minutes = Math.max(
-    1,
-    Math.round(((state?.duration ?? 0) as number) / 60)
-  );
+
+  // БЕРЁМ ПОЛНУЮ ДЛИТЕЛЬНОСТЬ УРОКА, А НЕ current
+  const totalSec = Math.max(0, Math.round((state?.duration ?? 0) as number));
+  const timeLabel = formatTimeMmSs(totalSec);
 
   const hasQueue =
     Array.isArray(state?.queue) && (state!.queue as any[]).length > 0;
@@ -41,8 +49,8 @@ export default function SessionComplete() {
     typeof state?.nextIndex === 'number'
       ? state!.nextIndex!
       : typeof idx === 'number' && hasQueue
-      ? idx + 1
-      : undefined;
+        ? idx + 1
+        : undefined;
   const hasNext =
     hasQueue &&
     typeof nx === 'number' &&
@@ -51,7 +59,6 @@ export default function SessionComplete() {
 
   const continueAction = () => {
     if (hasNext) {
-      // перейти к следующему (ленивая подгрузка url — в плеере)
       nav('/player', {
         replace: true,
         state: {
@@ -60,7 +67,6 @@ export default function SessionComplete() {
           trainingId: state?.trainingId,
           decision: 'save',
           meta: { action: 'autoNext' as const },
-          // передадим и payload на всякий, чтобы можно было посчитать ratio при холодном возврате
           track: state!.track,
           current: state!.current,
           duration: state!.duration,
@@ -82,8 +88,7 @@ export default function SessionComplete() {
 
   return (
     <div className="session session--complete">
-      <TopBar title="Сессия завершилась"   backTo={state?.returnTo ?? '/level'}
-      />
+      <TopBar title="Сессия завершилась" backTo={state?.returnTo ?? '/level'} />
       <main className="session__main">
         {t?.artworkUrl && (
           <img className="session__thumb" src={t.artworkUrl} alt="" />
@@ -92,7 +97,7 @@ export default function SessionComplete() {
           <div className="session__title">{t?.title}</div>
           {t?.subtitle && <div className="session__subtitle">{t.subtitle}</div>}
           <div className="session__chip">
-            <span style={{ fontWeight: 700 }}>{minutes}</span> минут прошло
+            <span style={{ fontWeight: 700 }}>{timeLabel}</span> минут прошло
           </div>
         </div>
       </main>

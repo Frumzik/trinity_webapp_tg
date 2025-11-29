@@ -35,7 +35,6 @@ export default function LevelCard({ item, onClick, subtitle }: Props) {
         </div>
 
       <div className="lvl__body">
-        {/*<div className="lvl__subtitle">Духовный старт</div>*/}
         <div className="lvl__title">{item.title}</div>
         {item.subtitle && <div className="lvl__subtitle">{item.subtitle}</div>}
 

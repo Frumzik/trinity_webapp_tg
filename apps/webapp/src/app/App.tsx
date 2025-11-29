@@ -80,10 +80,16 @@ export default function App() {
       ? location.pathname
       : `/${location.pathname}`;
 
+    if (
+      normalizedPathname.startsWith('/player') &&
+      normalizedPathname !== '/player/complete'
+    ) {
+      return false;
+    }
+
     const withoutRect = [
       /^\/level(\/|$)/,
       /^\/lesson(\/|$)/,
-      /^\/player(\/|$)/,
       /^\/preview(\/|$)/,
     ];
 
