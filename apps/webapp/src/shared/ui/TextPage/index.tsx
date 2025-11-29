@@ -22,11 +22,17 @@ export default function TextPage({ sections, className }: TextPageProps) {
         {sections.map((s, i) => (
           <section key={i} className={styles.section}>
 
-            {s.html && (
-              <div
-                className={styles.html}
-                dangerouslySetInnerHTML={{ __html: s.html }}
-              />
+            { s.html && (
+              s.html.includes("<") ? (
+                <div
+                  className={styles.html}
+                  dangerouslySetInnerHTML={{ __html: s.html }}
+                />
+              ) : (
+                <p className={styles.p}>
+                  {s.html}
+                </p>
+              )
             )}
 
             {s.paragraphs?.map((p, j) => (

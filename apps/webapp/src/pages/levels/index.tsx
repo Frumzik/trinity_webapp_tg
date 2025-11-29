@@ -431,7 +431,7 @@ export default function Index() {
         rightIconUrl={helpIcon}
         onRightClick={() =>
           window.open(
-            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
+            "https://docs.google.com/document/d/16k0o50V_jEfftCG-pIvr3RJAtZu9mFbiOr0MiVlpvhQ/edit?usp=sharing",
             "_blank",
             "noopener,noreferrer"
           )
