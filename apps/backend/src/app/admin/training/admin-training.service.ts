@@ -112,21 +112,21 @@ export class AdminTrainingService {
     }
 
     if (
-      data.title ||
-      data.description ||
-      data.shortDescription ||
-      data.duration ||
-      data.coverUrl ||
-      data.iconUrl ||
-      data.bgUrl ||
-      data.merchantId ||
-      data.price ||
-      data.salePrice ||
-      data.stage ||
-      data.stageLevel ||
-      data.type ||
-      data.tag ||
-      data.favoritesTag
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.shortDescription !== undefined ||
+      data.duration !== undefined ||
+      data.coverUrl !== undefined ||
+      data.iconUrl !== undefined ||
+      data.bgUrl !== undefined ||
+      data.merchantId !== undefined ||
+      data.price !== undefined ||
+      data.salePrice !== undefined ||
+      data.stage !== undefined ||
+      data.stageLevel !== undefined ||
+      data.type !== undefined ||
+      data.tag !== undefined ||
+      data.favoritesTag !== undefined
     ) {
       training = await this.contentService.updateTraining({ trainingId }, data);
     }

@@ -35,7 +35,7 @@ import { useFormContext } from 'react-hook-form';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { UniversalDeleteButton } from '../components/buttons';
+import { CustomDeleteButton } from '../components/buttons';
 
 enum TrainingType {
   TRAINING = 'training',
@@ -92,7 +92,7 @@ export const FavoritesTagTitles = {
 };
 
 const TrainingDatagrid = () => (
-  <Datagrid rowClick="show">
+  <Datagrid rowClick="show" bulkActionButtons={false}>
     <TextField source="trainingId" label="ID" />
     <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
@@ -170,10 +170,13 @@ const TrainingShowActions = () => {
       />
 
       {record.parentId && !record.stageLevel && (
-        <UniversalDeleteButton
+        <CustomDeleteButton
           parentResource="training"
           resource="training"
           record={record}
+          confirm={() =>
+            'Вы уверены что хотите удалить тренинг?\nВсе уроки тоже будут удалены.\nЭто действие нельзя отменить'
+          }
         />
       )}
     </TopToolbar>

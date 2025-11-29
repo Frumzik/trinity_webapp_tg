@@ -28,7 +28,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FavoritesTag, FavoritesTagTitles } from './training';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
-import { UniversalDeleteButton } from '../components/buttons';
+import { CustomDeleteButton } from '../components/buttons';
 import EditIcon from '@mui/icons-material/Edit';
 
 enum LessonType {
@@ -49,7 +49,7 @@ const LessonTypeTitles: Record<LessonType, string> = {
 };
 
 export const LessonDatagrid = () => (
-  <Datagrid rowClick="show">
+  <Datagrid rowClick="show" bulkActionButtons={false}>
     <NumberField source="lessonId" label="ID" />
     <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
@@ -90,10 +90,11 @@ const LessonShowActions = () => {
         onClick={handleEditLesson}
         startIcon={<EditIcon />}
       />
-      <UniversalDeleteButton
+      <CustomDeleteButton
         parentResource="training"
         resource="lesson"
         record={record}
+        confirm={() => 'Вы уверены что хотите удалить урок?\nЭто действие нельзя отменить'}
       />
     </TopToolbar>
   );

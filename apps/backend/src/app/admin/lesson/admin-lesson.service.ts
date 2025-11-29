@@ -76,7 +76,7 @@ export class AdminLessonService {
         ...created,
         id: created.lessonId,
       },
-      id: created.lessonId
+      id: created.lessonId,
     };
   }
 
@@ -93,18 +93,18 @@ export class AdminLessonService {
     }
 
     if (
-      data.title ||
-      data.description ||
-      data.shortDescription ||
-      data.duration ||
-      data.coverUrl ||
-      data.iconUrl ||
-      data.bgUrl ||
-      data.price ||
-      data.salePrice ||
-      data.type ||
-      data.content ||
-      data.favoritesTag
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.shortDescription !== undefined ||
+      data.duration !== undefined ||
+      data.coverUrl !== undefined ||
+      data.iconUrl !== undefined ||
+      data.bgUrl !== undefined ||
+      data.price !== undefined ||
+      data.salePrice !== undefined ||
+      data.type !== undefined ||
+      data.content !== undefined ||
+      data.favoritesTag !== undefined
     ) {
       lesson = await this.contentService.updateLesson({ lessonId }, data);
     }

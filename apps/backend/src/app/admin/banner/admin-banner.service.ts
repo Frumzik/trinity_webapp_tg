@@ -87,11 +87,11 @@ export class AdminBannerService {
 
     // Обновления
     if (
-      data.description ||
-      data.linkUrl ||
-      data.miniatureUrl ||
-      data.imageUrl ||
-      data.endDate
+      data.description !== undefined ||
+      data.linkUrl !== undefined ||
+      data.miniatureUrl !== undefined ||
+      data.imageUrl !== undefined ||
+      data.endDate !== undefined
     ) {
       banner = await this.bannersService.update(
         { bannerId },

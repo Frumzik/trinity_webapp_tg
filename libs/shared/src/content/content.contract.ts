@@ -312,9 +312,6 @@ export class ContentTrainingInfoResponseDto implements ITraining {
 
   @ApiPropertyOptional({ enum: LearningProgressStatus })
   progressStatus?: LearningProgressStatus;
-
-  @ApiProperty({ description: 'Удалён', example: false })
-  deleted!: boolean;
 }
 
 // ─────────────────────────────────────────────
@@ -570,9 +567,6 @@ export class ContentLessonInfoResponseDto implements ILesson {
 
   @ApiPropertyOptional({ enum: LearningProgressStatus })
   progressStatus?: LearningProgressStatus;
-
-  @ApiProperty({ description: 'Удалён', example: false })
-  deleted!: boolean;
 }
 
 // ─────────────────────────────────────────────

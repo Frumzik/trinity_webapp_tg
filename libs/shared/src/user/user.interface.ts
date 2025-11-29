@@ -45,8 +45,9 @@ export interface IUser {
   contentNotifications: boolean;
   promoNotifications: boolean;
 
-  deleted: boolean;
+  banned: boolean;
 
   // Рефералка
   referralPath: string;
+  partnerId: number | null;
 }

@@ -127,15 +127,9 @@ export class UsersService {
     }
   }
 
-  async delete(condition: FilterQuery<User>): Promise<UserEntity> {
+  async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     try {
-      const user = await this.find(condition);
-
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
-
-      const result = await this.usersRepository.update(user.delete());
+      const result = await this.usersRepository.delete(condition);
 
       return result;
     } catch (error: unknown) {
@@ -143,26 +137,6 @@ export class UsersService {
         error instanceof Error
           ? error.message
           : 'Ошибка при удалении пользователя';
-      throw new InternalServerErrorException(message);
-    }
-  }
-
-  async undo(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
-    try {
-      const user = await this.find(condition);
-
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
-
-      const result = await this.usersRepository.update(user.undo());
-
-      return result;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Ошибка при восстановлении пользователя';
       throw new InternalServerErrorException(message);
     }
   }
@@ -487,6 +461,57 @@ export class UsersService {
         error instanceof Error
           ? error.message
           : 'Ошибка при обновлении уведомлений пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async setBanned(
+    condition: FilterQuery<User>,
+    updateData: { banned: boolean }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.setBanned(updateData.banned)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async changePartner(
+    condition: FilterQuery<User>,
+    updateData: { partnerId: number | null }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.changePartner(
+        user.userId,
+        updateData.partnerId
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
       throw new InternalServerErrorException(message);
     }
   }

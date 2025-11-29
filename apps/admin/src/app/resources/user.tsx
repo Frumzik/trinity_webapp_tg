@@ -16,7 +16,19 @@ import {
   SelectField,
   SimpleShowLayout,
   Show,
+  TopToolbar,
+  Button,
+  useRecordContext,
+  BooleanField,
+  ReferenceField,
+  ReferenceInput,
+  AutocompleteInput,
+  BooleanInput,
+  ReferenceManyField,
 } from 'react-admin';
+import { CustomDeleteButton } from '../components/buttons';
+import { useNavigate } from 'react-router-dom';
+import EditIcon from '@mui/icons-material/Edit';
 
 enum UserGender {
   MALE = 'Male',
@@ -65,14 +77,6 @@ const UserFilter = (props: any) => (
         name: UserRoleTitles[value],
       }))}
     />
-    <SelectInput
-      label="Пол"
-      source="gender"
-      choices={Object.entries(UserGender).map(([key, value]) => ({
-        id: value,
-        name: UserGenderTitles[value],
-      }))}
-    />
 
     {/* Фильтры по подписке */}
     <SelectInput
@@ -85,15 +89,50 @@ const UserFilter = (props: any) => (
     />
 
     {/* Прочие фильтры */}
-    <TextInput label="Имя" source="name" />
     <TextInput label="Username" source="username" alwaysOn />
-    <TextInput label="Адрес" source="address" />
-    <NumberInput label="Telegram ID" source="tgId" />
-    <NumberInput label="Баланс от" source="balance_gte" />
-    <NumberInput label="Баланс до" source="balance_lte" />
-    <DateInput label="Дата рождения с" source="birthDate_gte" />
-    <DateInput label="Дата рождения по" source="birthDate_lte" />
+    <NumberInput source="tgId" label="Telegram ID" />
+    <BooleanInput source="banned" label="Заблокирован" />
   </Filter>
+);
+
+export const UserDatagrid = () => (
+  <Datagrid rowClick="show" bulkActionButtons={false}>
+    <NumberField source="userId" label="ID" />
+    <SelectField
+      source="subscription.type"
+      label="Подписка"
+      choices={Object.entries(SubscriptionType).map(([key, value]) => ({
+        id: value,
+        name: SubscriptionTypeTitles[value],
+      }))}
+    />
+    <NumberField source="tgId" label="Telegram ID" />
+    <TextField source="name" label="Имя" />
+    <TextField source="username" label="Username" />
+    <NumberField source="balance" label="Баланс" />
+    <EmailField source="email" label="Email" />
+    <DateField source="birthDate" label="Дата рождения" />
+    <NumberField source="height" label="Рост" />
+    <NumberField source="weight" label="Вес" />
+    <SelectField
+      source="gender"
+      label="Пол"
+      choices={Object.entries(UserGender).map(([key, value]) => ({
+        id: value,
+        name: UserGenderTitles[value],
+      }))}
+    />
+    <SelectField
+      source="role"
+      label="Роль"
+      choices={Object.entries(UserRole).map(([key, value]) => ({
+        id: value,
+        name: UserRoleTitles[value],
+      }))}
+    />
+
+    <BooleanField source="banned" label="Заблокирован" />
+  </Datagrid>
 );
 
 export const UserList = () => (
@@ -102,86 +141,105 @@ export const UserList = () => (
     perPage={25}
     sort={{ field: 'userId', order: 'ASC' }}
   >
-    <Datagrid rowClick="show">
-      <NumberField source="userId" label="ID" />
-      <SelectField
-        source="subscription.type"
-        label="Подписка"
-        choices={Object.entries(SubscriptionType).map(([key, value]) => ({
-          id: value,
-          name: SubscriptionTypeTitles[value],
-        }))}
-      />
-      <NumberField source="tgId" label="Telegram ID" />
-      <TextField source="name" label="Имя" />
-      <TextField source="username" label="Username" />
-      <NumberField source="balance" label="Баланс" />
-      <EmailField source="email" label="Email" />
-      <DateField source="birthDate" label="Дата рождения" />
-      <NumberField source="height" label="Рост" />
-      <NumberField source="weight" label="Вес" />
-      <SelectField
-        source="gender"
-        label="Пол"
-        choices={Object.entries(UserGender).map(([key, value]) => ({
-          id: value,
-          name: UserGenderTitles[value],
-        }))}
-      />
-      <SelectField
-        source="role"
-        label="Роль"
-        choices={Object.entries(UserRole).map(([key, value]) => ({
-          id: value,
-          name: UserRoleTitles[value],
-        }))}
-      />
-
-      <TextField source="address" label="Адрес" />
-    </Datagrid>
+    <UserDatagrid />
   </List>
 );
 
-export const UserShow = () => (
-  <Show>
-    <SimpleShowLayout>
-      <NumberField source="userId" label="ID" />
-      <NumberField source="tgId" label="Telegram ID" />
-      <TextField source="name" label="Имя" />
-      <TextField source="username" label="Username" />
-      <SelectField
-        source="subscription.type"
-        label="Подписка"
-        choices={Object.entries(SubscriptionType).map(([key, value]) => ({
-          id: value,
-          name: SubscriptionTypeTitles[value],
-        }))}
+const TrainingShowActions = () => {
+  const record = useRecordContext();
+  const navigate = useNavigate();
+
+  if (!record) return null;
+
+  const handleEditTraining = () => {
+    navigate(`/user/${record.userId}`);
+  };
+
+  return (
+    <TopToolbar>
+      <Button
+        label="Редактировать"
+        onClick={handleEditTraining}
+        startIcon={<EditIcon />}
       />
-      <NumberField source="balance" label="Баланс" />
-      <EmailField source="email" label="Email" />
-      <DateField source="birthDate" label="Дата рождения" />
-      <NumberField source="height" label="Рост" />
-      <NumberField source="weight" label="Вес" />
-      <SelectField
-        source="gender"
-        label="Пол"
-        choices={Object.entries(UserGender).map(([key, value]) => ({
-          id: value,
-          name: UserGenderTitles[value],
-        }))}
+      <CustomDeleteButton
+        parentResource="user"
+        resource="user"
+        record={record}
+        confirm={(record) =>
+          `Вы уверены, что хотите удалить пользователя?\nЭто действие необратимо.\nВсе рефералы этого пользователя перейдут в рефералы пригласителя этого пользователя.\nПродолжить?`
+        }
       />
-      <SelectField
-        source="role"
-        label="Роль"
-        choices={Object.entries(UserRole).map(([key, value]) => ({
-          id: value,
-          name: UserRoleTitles[value],
-        }))}
-      />
-      <TextField source="address" label="Адрес" />
-    </SimpleShowLayout>
-  </Show>
-);
+    </TopToolbar>
+  );
+};
+
+export const UserShow = () => {
+  const record = useRecordContext(); // текущий пользователь
+
+  return (
+    <Show actions={<TrainingShowActions />}>
+      <SimpleShowLayout>
+        <NumberField source="userId" label="ID" />
+        <NumberField source="tgId" label="Telegram ID" />
+        <TextField source="name" label="Имя" />
+        <TextField source="username" label="Username" />
+        <SelectField
+          source="subscription.type"
+          label="Подписка"
+          choices={Object.entries(SubscriptionType).map(([key, value]) => ({
+            id: value,
+            name: SubscriptionTypeTitles[value],
+          }))}
+        />
+        <NumberField source="balance" label="Баланс" />
+        <EmailField source="email" label="Email" />
+        <DateField source="birthDate" label="Дата рождения" />
+        <NumberField source="height" label="Рост" />
+        <NumberField source="weight" label="Вес" />
+        <SelectField
+          source="gender"
+          label="Пол"
+          choices={Object.entries(UserGender).map(([key, value]) => ({
+            id: value,
+            name: UserGenderTitles[value],
+          }))}
+        />
+        <SelectField
+          source="role"
+          label="Роль"
+          choices={Object.entries(UserRole).map(([key, value]) => ({
+            id: value,
+            name: UserRoleTitles[value],
+          }))}
+        />
+        {/* Пользователь */}
+        <ReferenceField
+          label="Пригласитель"
+          reference="user"
+          link="show"
+          source="partnerId"
+        >
+          <TextField source="userId" />: @<TextField source="username" /> -{' '}
+          <TextField source="name" />
+        </ReferenceField>
+
+        {/* Список рефералов */}
+        <ReferenceManyField
+          label="Рефералы"
+          reference="user"
+          target="partnerId"
+        >
+          <UserDatagrid />
+        </ReferenceManyField>
+
+        <TextField source="address" label="Адрес" />
+
+        <BooleanField source="banned" label="Заблокирован" />
+      </SimpleShowLayout>
+    </Show>
+  );
+};
 
 export const UserEdit = () => (
   <Edit
@@ -220,10 +278,30 @@ export const UserEdit = () => (
         }))}
       />
 
+      {/* ReferenceInput для партнера */}
+      <ReferenceInput
+        label="Пригласитель"
+        source="partnerId"
+        reference="user"
+        sort={{ field: 'userId', order: 'ASC' }}
+        allowEmpty
+      >
+        <AutocompleteInput
+          optionText={(r) =>
+            r?.userId ? `${r.userId}: @${r.username} — ${r.name}` : 'Нет'
+          }
+          optionValue="userId"
+          fullWidth
+          emptyText="Нет"
+        />
+      </ReferenceInput>
+
       {/* Поля для изменения пароля и пина */}
       <TextInput source="password" label="Пароль" />
       <TextInput source="finPassword" label="Фин. Пароль" />
       <TextInput source="pin" label="PIN" />
+
+      <BooleanInput source="banned" label="Заблокирован" />
     </SimpleForm>
   </Edit>
 );
