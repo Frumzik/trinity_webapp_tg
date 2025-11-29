@@ -282,8 +282,8 @@ export class AcquiringService {
 
     await this.withdrawsService.create({
       withdrawId: await this.countersService.saveNextSequence(
-                CounterType.WITHDRAW_ID
-              ),
+        CounterType.WITHDRAW_ID
+      ),
       userId: user.userId,
       amount: sum,
       toAddress: address,
