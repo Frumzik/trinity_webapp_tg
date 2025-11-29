@@ -1,6 +1,5 @@
-// src/pages/lesson-text/index.tsx
 import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom"; // ← ДОБАВИЛ useLocation
 import ScrollPanel from "../../../shared/ui/scroll-panel/scroll-panel";
 import Hero from "../../preview/ui/Hero";
 import TopActions from "../../preview/ui/TopActions";
@@ -22,6 +21,13 @@ type Section = {
 
 export default function LessonTextPage() {
   const navigate = useNavigate();
+  const location = useLocation() as {
+    state?: {
+      trainingType?: string;
+      filmDuration?: string;
+    };
+  };
+
   const { trainingId: trainingIdStr, lessonId: lessonIdStr } =
     useParams<{ trainingId: string; lessonId: string }>();
 
@@ -37,8 +43,20 @@ export default function LessonTextPage() {
 
   const lesson = data?.data;
   const title = lesson?.title || "Урок";
+
+  // ---- тут логика подстановки длительности фильма из ступени ----
+  const isFilmTraining = location.state?.trainingType === "film";
+  const filmDurationFromStep = location.state?.filmDuration; // "1 час 36 минут"
+
+  // если это тренинг-фильм и в state есть длительность — показываем её,
+  // иначе старое поведение
   const subtitle =
-    lesson?.duration || (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
+    isFilmTraining && filmDurationFromStep
+      ? filmDurationFromStep
+      : lesson?.duration ||
+      (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
+  // ---------------------------------------------------------------
+
   const description = lesson?.description || "Описание";
   const imageSrc = lesson?.coverUrl || Card1;
 
