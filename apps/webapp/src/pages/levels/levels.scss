@@ -209,6 +209,9 @@
 
     &--done {
       background: rgba(88, 160, 112, 0.9);
+      position: absolute;
+      right: 9px;
+      bottom: 7px;
     }
 
     &--lock {

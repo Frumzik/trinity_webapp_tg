@@ -28,6 +28,7 @@ export default function SupportPage() {
               imageUrl={ChannelImg}
               buttonText={"Перейти"}
               href="https://t.me/trinity_channel"
+              style={{ height: "115px" }}
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
@@ -35,6 +36,7 @@ export default function SupportPage() {
               imageUrl={ChatImg}
               buttonText={"Перейти"}
               href="https://t.me/trinity_space"
+              style={{ height: "115px" }}
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
@@ -46,7 +48,7 @@ export default function SupportPage() {
               buttonText={"Перейти"}
               imageUrl={SupportImg}
               href="https://t.me/trinity_light"
-              style={{ height: "80px" }}
+              style={{ height: "115px" }}
               buttonStyle={{ width: "78px", position: "absolute", bottom:"8px", left: "16px" }}
             />
           </div>

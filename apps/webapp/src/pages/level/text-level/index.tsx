@@ -1,4 +1,3 @@
-// src/pages/lesson-text/index.tsx
 import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ScrollPanel from "../../../shared/ui/scroll-panel/scroll-panel";
