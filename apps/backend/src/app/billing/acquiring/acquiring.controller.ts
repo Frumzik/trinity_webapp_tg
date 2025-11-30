@@ -10,7 +10,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JWTAuthGuard, UserId } from '../../service';
+import { JWTAuthGuard, ProdcutionGuard, UserId } from '../../service';
 import { AcquiringService } from './acquiring.service';
 import {
   ApiOperation,
@@ -80,7 +80,7 @@ export class AcquiringController {
   // Вывод средств
   // -------------------------
   @ApiBearerAuth('access_token')
-  @UseGuards(JWTAuthGuard)
+  @UseGuards(JWTAuthGuard, ProdcutionGuard)
   @Post('withdraw')
   @ApiOperation({ summary: 'Вывести средства на указанный адрес' })
   @ApiBody({ type: AcquiringWithdrawRequestDto })

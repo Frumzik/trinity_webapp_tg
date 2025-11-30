@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { ClientSession, FilterQuery, Model } from 'mongoose';
 import { User } from '../models';
 import { UserEntity } from '../entities';
-import { FundType, GetListOptions, IUser } from '@trinity/shared';
+import { FundType, GetListOptions } from '@trinity/shared';
 import {
   Purchase,
   Subscription,
@@ -114,6 +118,21 @@ export class UsersRepository {
     return new UserEntity(updated.toObject());
   }
 
+  // Получение с подпиской
+  async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
+    const user = await this.userModel
+      .findOne(condition)
+      .populate([
+        {
+          path: 'subscription',
+        },
+      ])
+      .lean()
+      .exec();
+
+    return user ? new UserEntity(user) : null;
+  }
+
   // Удаление пользователя
   async delete(condition: FilterQuery<User>): Promise<{ deleted: boolean }> {
     const user = await this.find(condition);
@@ -155,6 +174,14 @@ export class UsersRepository {
           { $inc: { balance: -totalReserveSum } }
         )
         .exec();
+
+      // Пополняем баланс MAIN-фонда на эту сумму
+      await this.fundModel
+        .updateOne(
+          { type: FundType.MAIN },
+          { $inc: { balance: totalReserveSum } }
+        )
+        .exec();
     }
 
     // Удаляем заявки на вывод пользователя
@@ -175,7 +202,6 @@ export class UsersRepository {
     await this.learningModel.deleteMany({ userId }).exec();
 
     // Меняем реферальное дерево
-
     const children = await this.userModel.find({
       partnerId: userId, // прямые рефералы
     });
@@ -184,170 +210,329 @@ export class UsersRepository {
       await this.changePartner(child.userId, partnerId);
     }
 
+    await this.referralModel.deleteMany({
+      $or: [{ partnerId: userId }, { referralId: userId }],
+    });
+
     // Удаляем пользователя
     const result = await this.userModel.deleteOne(condition).exec();
 
     return { deleted: result.deletedCount !== 0 };
   }
 
-  async changePartner(userId: number, newPartnerId: number | null) {
-    let user = await this.userModel.findOne({ userId });
-    if (!user) throw new Error('User not found');
+  async changePartner(
+    userId: number,
+    newPartnerId: number | null
+  ): Promise<UserEntity> {
+    const session = await this.userModel.db.startSession();
+    session.startTransaction();
 
-    if (userId === newPartnerId)
-      throw new Error('Пользователь не может быть партнёром сам себе');
+    try {
+      // Проверка валидности пользователей
+      const user = await this.userModel.findOne({ userId }).session(session);
+      if (!user) {
+        throw new BadRequestException(`User with userId ${userId} not found`);
+      }
 
-    const oldPartnerId = user.partnerId;
+      if (newPartnerId !== null) {
+        const newPartner = await this.userModel
+          .findOne({ userId: newPartnerId })
+          .session(session);
+        if (!newPartner) {
+          throw new BadRequestException(
+            `New partner with userId ${newPartnerId} not found`
+          );
+        }
+      }
 
-    let newPartner: IUser | null = null;
-    if (newPartnerId !== null) {
-      newPartner = await this.userModel.findOne({ userId: newPartnerId });
-      if (!newPartner) throw new Error('Partner not found');
+      // Проверка невозможных переносов
+      await this.validateTransfer(userId, newPartnerId, session);
 
-      const partnerPath = newPartner.referralPath
-        .split('/')
-        .filter(Boolean)
-        .map(Number);
-      if (partnerPath.includes(user.userId)) {
-        throw new Error('Invalid partner: cycle detected');
+      // Получение всей ветки пользователя
+      const userBranch = await this.getUserBranch(userId, session);
+
+      // Вычисление новых путей для всех пользователей в ветке
+      const newPaths = await this.calculateNewPaths(
+        userId,
+        newPartnerId,
+        userBranch,
+        session
+      );
+
+      // Обновление пользователей и реферальных связей
+      await this.updateUsersAndReferrals(userBranch, newPaths, session);
+
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+
+    const user = await this.find({ userId });
+
+    if (!user) {
+      throw new Error('Пользователь не найден');
+    }
+
+    return user;
+  }
+
+  private async validateTransfer(
+    userId: number,
+    newPartnerId: number | null,
+    session: ClientSession
+  ): Promise<void> {
+    // Запрет переноса к самому себе
+    if (userId === newPartnerId) {
+      throw new BadRequestException('Cannot transfer user to itself');
+    }
+
+    if (newPartnerId === null) return;
+
+    // Запрет кольцевого переноса: новый партнер не должен находиться в ветке пользователя
+    const userBranch = await this.getUserBranch(userId, session);
+    const userBranchUserIds = userBranch.map((u) => u.userId);
+
+    if (userBranchUserIds.includes(newPartnerId)) {
+      throw new BadRequestException(
+        'Circular transfer detected: new partner is in the branch of user being transferred'
+      );
+    }
+  }
+
+  private async getUserBranch(
+    userId: number,
+    session: ClientSession
+  ): Promise<User[]> {
+    const branch: User[] = [];
+    const queue = [userId];
+
+    while (queue.length > 0) {
+      const currentUserId = queue.shift();
+      if (!currentUserId) continue;
+
+      const user = await this.userModel
+        .findOne({ userId: currentUserId })
+        .session(session);
+
+      if (user) {
+        branch.push(user);
+
+        // Находим всех пользователей, у которых текущий пользователь является партнером
+        const referrals = await this.userModel
+          .find({ partnerId: currentUserId })
+          .session(session);
+
+        for (const referral of referrals) {
+          queue.push(referral.userId);
+        }
       }
     }
 
-    // --- Формируем новый referralPath
-    const newReferralPathArr = newPartner
-      ? [
-          ...newPartner.referralPath.split('/').filter(Boolean).map(Number),
-          newPartner.userId,
-        ].slice(-9)
-      : [];
+    return branch;
+  }
 
-    // --- Обновляем самого пользователя
-    user.partnerId = newPartnerId;
-    user.referralPath = newReferralPathArr.join('/');
-    await user.save();
+  private async calculateNewPaths(
+    rootUserId: number,
+    newPartnerId: number | null,
+    userBranch: User[],
+    session: ClientSession
+  ): Promise<Map<number, { path: string; partnerId: number | null }>> {
+    const newPaths = new Map<
+      number,
+      { path: string; partnerId: number | null }
+    >();
 
-    // --- Удаляем старые пары referrals у старого партнёра
-    if (oldPartnerId !== null) {
-      const oldBranch = await this.userModel.find({
-        referralPath: { $regex: `(^|/)${user.userId}(/|$)` },
+    // Сначала вычисляем путь для корневого пользователя
+    let rootNewPath: string;
+    let rootNewPartnerId: number | null;
+
+    if (newPartnerId === null) {
+      rootNewPath = '';
+      rootNewPartnerId = null;
+    } else {
+      const newPartner = await this.userModel
+        .findOne({ userId: newPartnerId })
+        .session(session);
+      if (!newPartner) {
+        throw new BadRequestException('New partner not found');
+      }
+
+      const newPartnerPath = newPartner.referralPath || '';
+      // Добавляем нового партнера в путь
+      rootNewPath = newPartnerPath
+        ? `${newPartnerPath}/${newPartnerId}`
+        : newPartnerId.toString();
+      rootNewPartnerId = newPartnerId;
+
+      // Обрезаем путь до 9 уровней, если нужно
+      const pathParts = rootNewPath.split('/');
+      if (pathParts.length > 9) {
+        rootNewPath = pathParts.slice(-9).join('/');
+      }
+    }
+
+    newPaths.set(rootUserId, {
+      path: rootNewPath,
+      partnerId: rootNewPartnerId,
+    });
+
+    // Затем вычисляем пути для всех остальных пользователей в ветке
+    for (const user of userBranch) {
+      if (user.userId === rootUserId) continue;
+
+      const oldPath = user.referralPath || '';
+
+      // Для прямых рефералов корневого пользователя
+      if (user.partnerId === rootUserId) {
+        // Новый путь = путь корневого пользователя + ID корневого пользователя
+        let newUserPath = rootNewPath
+          ? `${rootNewPath}/${rootUserId}`
+          : rootUserId.toString();
+
+        // Обрезаем путь до 9 уровней, если нужно
+        const newPathParts = newUserPath.split('/');
+        if (newPathParts.length > 9) {
+          newUserPath = newPathParts.slice(-9).join('/');
+        }
+
+        newPaths.set(user.userId, { path: newUserPath, partnerId: rootUserId });
+      } else {
+        // Для непрямых рефералов - сохраняем существующую структуру
+        // Находим путь от корневого пользователя до текущего пользователя
+        const oldPathParts = oldPath.split('/');
+        const rootIndex = oldPathParts.indexOf(rootUserId.toString());
+
+        if (rootIndex === -1) {
+          throw new Error(
+            `User ${user.userId} is not in the branch of root user ${rootUserId}`
+          );
+        }
+
+        // Берем часть пути после корневого пользователя
+        const pathAfterRoot = oldPathParts.slice(rootIndex + 1).join('/');
+
+        // Собираем новый путь
+        let newUserPath: string;
+        if (pathAfterRoot) {
+          newUserPath = rootNewPath
+            ? `${rootNewPath}/${rootUserId}/${pathAfterRoot}`
+            : `${rootUserId}/${pathAfterRoot}`;
+        } else {
+          // Это не должно происходить для непрямых рефералов
+          newUserPath = rootNewPath
+            ? `${rootNewPath}/${rootUserId}`
+            : rootUserId.toString();
+        }
+
+        // Обрезаем путь до 9 уровней, если нужно
+        const newPathParts = newUserPath.split('/');
+        if (newPathParts.length > 9) {
+          newUserPath = newPathParts.slice(-9).join('/');
+        }
+
+        // Для непрямых рефералов partnerId остается тем же
+        newPaths.set(user.userId, {
+          path: newUserPath,
+          partnerId: user.partnerId,
+        });
+      }
+    }
+
+    return newPaths;
+  }
+
+  private async updateUsersAndReferrals(
+    userBranch: User[],
+    newPaths: Map<number, { path: string; partnerId: number | null }>,
+    session: ClientSession
+  ): Promise<void> {
+    // Получаем ObjectId всех пользователей в ветке
+    const userBranchObjectIds = userBranch.map((u) => u._id);
+
+    // Удаляем старые реферальные связи для всей ветки
+    await this.referralModel
+      .deleteMany({
+        referral: { $in: userBranchObjectIds },
+      })
+      .session(session);
+
+    // Обновляем пользователей
+    for (const user of userBranch) {
+      const newPathData = newPaths.get(user.userId);
+      if (!newPathData) {
+        throw new Error(`No new path data for user ${user.userId}`);
+      }
+
+      await this.userModel
+        .updateOne(
+          { userId: user.userId },
+          {
+            partnerId: newPathData.partnerId,
+            referralPath: newPathData.path,
+          }
+        )
+        .session(session);
+
+      // Создаем новые реферальные связи
+      await this.createReferralLinks(user, newPathData.path, session);
+    }
+  }
+
+  private async createReferralLinks(
+    user: User,
+    referralPath: string,
+    session: ClientSession
+  ): Promise<void> {
+    const referralLinks = [];
+
+    // Если путь пустой, значит пользователь в корне - нет реферальных связей
+    if (!referralPath) return;
+
+    const pathParts = referralPath.split('/');
+
+    // Проходим по всем партнерам в пути
+    for (let i = 0; i < pathParts.length; i++) {
+      const partnerUserId = parseInt(pathParts[i], 10);
+
+      // Уровень = разница в позициях между партнером и рефералом
+      // Позиция партнера = i, позиция реферала = pathParts.length
+      // Уровень = (pathParts.length) - i
+      const level = pathParts.length - i;
+
+      // Сохраняем только уровни <= 9
+      if (level > 9) continue;
+
+      // Находим партнера по userId
+      const partner = await this.userModel
+        .findOne({ userId: partnerUserId })
+        .session(session);
+      if (!partner) {
+        throw new Error(`Partner with userId ${partnerUserId} not found`);
+      }
+
+      // Ищем существующую запись для сохранения заработка
+      const existingReferral = await this.referralModel
+        .findOne({
+          partner: partner._id,
+          referral: user._id,
+        })
+        .session(session);
+
+      referralLinks.push({
+        partner: partner._id,
+        referral: user._id,
+        partnerId: partner.userId,
+        referralId: user.userId,
+        level,
+        earn: existingReferral ? existingReferral.earn : 0,
       });
-      const oldUserIds = oldBranch.map((u) => u.userId).concat([user.userId]);
-      const protectedUserIds = newReferralPathArr;
-
-      const toDeleteIds = oldUserIds.filter(
-        (id) => !protectedUserIds.includes(id)
-      );
-      if (toDeleteIds.length > 0) {
-        await this.referralModel.deleteMany({
-          partnerId: oldPartnerId,
-          referralId: { $in: toDeleteIds },
-        });
-      }
     }
 
-    // --- Создаём/обновляем запись для нового партнёра
-    if (newPartner) {
-      await this.referralModel.updateOne(
-        { partnerId: newPartner.userId, referralId: user.userId },
-        {
-          $set: {
-            level: 1,
-            earn: 0,
-            partner: newPartner._id,
-            referral: user._id,
-          },
-        },
-        { upsert: true }
-      );
+    if (referralLinks.length > 0) {
+      await this.referralModel.insertMany(referralLinks, { session });
     }
-
-    // --- Рекурсивное обновление всех потомков
-    await this._updateChildren(user.userId);
-
-    user = await this.userModel.findOne({ userId });
-
-    return new UserEntity(user?.toObject());
-  }
-
-  private async _updateChildren(parentUserId: number) {
-    const parent = await this.userModel.findOne({ userId: parentUserId });
-    if (!parent) throw new Error('Parent not found');
-
-    const children = await this.userModel.find({ partnerId: parentUserId });
-    if (!children.length) return;
-
-    const parentPathArr = parent.referralPath
-      .split('/')
-      .filter(Boolean)
-      .map(Number);
-
-    for (const child of children) {
-      const oldPartnerId = child.partnerId;
-
-      // --- 1. Обновляем partnerId и referralPath
-      const newPathArr = [...parentPathArr, parent.userId].slice(-9);
-      child.partnerId = parent.userId;
-      child.referralPath = newPathArr.join('/');
-      await child.save();
-
-      // --- 2. Удаляем старые связи
-      if (oldPartnerId !== null) {
-        await this.referralModel.deleteMany({
-          partnerId: oldPartnerId,
-          referralId: child.userId,
-        });
-      }
-
-      // --- 3. Создаём/обновляем запись для текущего партнёра
-      const level = newPathArr.length - parentPathArr.length;
-      await this.referralModel.updateOne(
-        { partnerId: parent.userId, referralId: child.userId },
-        { $set: { level, earn: 0, partner: parent._id, referral: child._id } },
-        { upsert: true }
-      );
-
-      // --- 4. Пересчёт всех partners вверх по пути
-      await this._updateReferralsUpwards(child.userId);
-
-      // --- 5. Рекурсивно обновляем всех потомков
-      await this._updateChildren(child.userId);
-    }
-  }
-
-  private async _updateReferralsUpwards(userId: number) {
-    const user = await this.userModel.findOne({ userId });
-    if (!user) return;
-
-    const referralPathArr = user.referralPath
-      .split('/')
-      .filter(Boolean)
-      .map(Number);
-
-    for (let i = 0; i < referralPathArr.length; i++) {
-      const partnerId = referralPathArr[i];
-      const level = referralPathArr.length - i;
-
-      const partner = await this.userModel.findOne({ userId: partnerId });
-      await this.referralModel.updateOne(
-        { partnerId, referralId: user.userId },
-        { $set: { level, earn: 0, partner: partner?._id, referral: user._id } },
-        { upsert: true }
-      );
-    }
-  }
-
-  // Получение с подпиской
-  async populate(condition: FilterQuery<User>): Promise<UserEntity | null> {
-    const user = await this.userModel
-      .findOne(condition)
-      .populate([
-        {
-          path: 'subscription',
-        },
-      ])
-      .lean()
-      .exec();
-
-    return user ? new UserEntity(user) : null;
   }
 }

@@ -175,8 +175,6 @@ const TrainingShowActions = () => {
 };
 
 export const UserShow = () => {
-  const record = useRecordContext(); // текущий пользователь
-
   return (
     <Show actions={<TrainingShowActions />}>
       <SimpleShowLayout>
@@ -217,7 +215,6 @@ export const UserShow = () => {
         <ReferenceField
           label="Пригласитель"
           reference="user"
-          link="show"
           source="partnerId"
         >
           <TextField source="userId" />: @<TextField source="username" /> -{' '}
