@@ -92,9 +92,9 @@ export default function TopActions({
         </button>
       )}
 
-      <button className="icon-btn" onClick={onMenu} aria-label="Меню">
-        <KebabIcon />
-      </button>
+      {/*<button className="icon-btn" onClick={onMenu} aria-label="Меню">*/}
+      {/*  <KebabIcon />*/}
+      {/*</button>*/}
     </div>
   );
 }

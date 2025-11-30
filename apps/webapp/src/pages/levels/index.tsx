@@ -292,7 +292,11 @@ export default function Index() {
     }
   };
 
-  const buildStepTitle = (count: number) => {
+  const buildStepTitle = (stepNumber: number, count: number) => {
+    if (count === 1) {
+      return `${stepNumber} ступень Духа открыта`;
+    }
+
     const lastTwo = count % 100;
     const last = count % 10;
 
@@ -318,14 +322,18 @@ export default function Index() {
       openedIds.includes(Number(pl.id))
     );
 
-    const titleText = buildStepTitle(openedIds.length);
+    const first = openedLevels[0];
 
+    const mainStepNumber =
+      first && typeof first.stepIndex === "number"
+        ? first.stepIndex
+        : numFromTitle(first?.title) ?? 1;
+
+    const titleText = buildStepTitle(mainStepNumber, openedLevels.length);
     setResultTitle(titleText);
     setResultItems(undefined);
     setResultDesc(undefined);
     setResultCta("Перейти");
-
-    const first = openedLevels[0];
 
     setResultOnCta(
       () =>
