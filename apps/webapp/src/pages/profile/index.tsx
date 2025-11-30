@@ -82,7 +82,6 @@ const Index = () => {
   const levelsCount = useMemo(() => (stats ?? []).length || 0, [stats]);
 
   const onDownload = async (e?: React.MouseEvent) => {
-    // если e есть (например, вызовем из <a onClick={onDownload}>), предотвратим дефолт
     e?.preventDefault();
 
     const tgId =
@@ -136,7 +135,7 @@ const Index = () => {
 
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
-    const BOT_USERNAME = "TrinityFrontTestBot";
+    const BOT_USERNAME = "TrinitySpaceBot";
     const WEBAPP_SHORT_NAME = "TrinityFront";
 
     const botDeepLink =
