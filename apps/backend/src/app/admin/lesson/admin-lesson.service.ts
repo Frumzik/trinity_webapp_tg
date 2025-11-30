@@ -24,6 +24,29 @@ export class AdminLessonService {
         populate: [], // если нужно populate
       };
 
+      // Если есть filter.id, заменяем на filter.lessonId
+      if (options.filter?.id !== undefined) {
+        options.filter.lessonId = options.filter.id;
+        delete options.filter.id;
+      }
+
+      // Если есть q → создаём поиск по lessonId, username или name
+      if (options.filter?.q !== undefined) {
+        const q = options.filter.q;
+        const lessonId = Number(q);
+
+        // Создаём $or фильтр для mongoose
+        const or: any[] = [];
+
+        if (!isNaN(lessonId)) {
+          or.push({ lessonId }); // ищем по числовому ID
+        }
+
+        or.push({ title: { $regex: q, $options: 'i' } });
+
+        options.filter = { $or: or };
+      }
+
       const items = await this.contentService.findAllLessons(options);
       const total = await this.contentService.countLessons();
 
@@ -76,7 +99,7 @@ export class AdminLessonService {
         ...created,
         id: created.lessonId,
       },
-      id: created.lessonId
+      id: created.lessonId,
     };
   }
 
@@ -93,20 +116,27 @@ export class AdminLessonService {
     }
 
     if (
-      data.title ||
-      data.description ||
-      data.shortDescription ||
-      data.duration ||
-      data.coverUrl ||
-      data.iconUrl ||
-      data.bgUrl ||
-      data.price ||
-      data.salePrice ||
-      data.type ||
-      data.content ||
-      data.favoritesTag
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.shortDescription !== undefined ||
+      data.duration !== undefined ||
+      data.coverUrl !== undefined ||
+      data.iconUrl !== undefined ||
+      data.bgUrl !== undefined ||
+      data.price !== undefined ||
+      data.salePrice !== undefined ||
+      data.type !== undefined ||
+      data.content !== undefined ||
+      data.favoritesTag !== undefined
     ) {
       lesson = await this.contentService.updateLesson({ lessonId }, data);
+    }
+
+    if (data.accessRules !== undefined) {
+      lesson = await this.contentService.updateLessonAccessRules(
+        { lessonId },
+        { accessRules: data.accessRules }
+      );
     }
 
     lesson = await this.contentService.updateLesson({ lessonId }, data);

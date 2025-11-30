@@ -35,10 +35,11 @@ export class UserEntity implements IUser {
   contentNotifications = true;
   promoNotifications = false;
 
-  deleted = false;
+  banned = false;
 
   // Рефералка
   referralPath = '';
+  partnerId: number | null = null;
 
   constructor(user: Partial<IUser> = {}) {
     Object.assign(this, user);
@@ -164,14 +165,8 @@ export class UserEntity implements IUser {
     return this;
   }
 
-  public delete() {
-    this.deleted = true;
-
-    return this;
-  }
-
-  public undo() {
-    this.deleted = false;
+  public setBanned(status: boolean) {
+    this.banned = status;
 
     return this;
   }

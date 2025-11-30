@@ -21,7 +21,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import { UniversalDeleteButton } from '../components/buttons';
+import { CustomDeleteButton } from '../components/buttons';
 import { FileSelector } from '../components';
 
 const BannerListActions = () => {
@@ -47,7 +47,7 @@ export const BannerList = () => (
     actions={<BannerListActions />}
     sort={{ field: 'bannerId', order: 'ASC' }}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" bulkActionButtons={false}>
       <NumberField source="bannerId" label="ID" />
       <ImageField source="miniatureUrl" label="Миниатюра" />
 
@@ -76,7 +76,7 @@ const BannerShowActions = () => {
         onClick={handleEditBanner}
         startIcon={<EditIcon />}
       />
-      <UniversalDeleteButton
+      <CustomDeleteButton
         parentResource="banner"
         resource="banner"
         record={record}

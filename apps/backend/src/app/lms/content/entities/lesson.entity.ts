@@ -122,16 +122,4 @@ export class LessonEntity implements ILesson {
 
     return this;
   }
-
-  public delete() {
-    this.deleted = true;
-
-    return this;
-  }
-
-  public undo() {
-    this.deleted = false;
-
-    return this;
-  }
 }

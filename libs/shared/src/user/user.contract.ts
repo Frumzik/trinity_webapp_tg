@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsDate,
@@ -89,8 +89,11 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: false, description: 'Уведомления' })
   promoNotifications!: boolean;
 
-  @ApiProperty({ description: 'Удалён', example: false })
-  deleted!: boolean;
+  @ApiProperty({ description: 'Забанен', example: false })
+  banned!: boolean;
+
+  @ApiProperty({ description: 'id партнера', example: null })
+  partnerId!: number | null;
 }
 
 /* ============================================================
@@ -124,11 +127,12 @@ export class UserUpdateProfileRequestDto {
   @IsDate({ message: 'birthDate должен быть датой' })
   birthDate?: Date;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: UserGender,
     example: UserGender.MALE,
     description: 'Новый пользователя',
   })
+  @IsOptional()
   @IsEnum(UserGender, {
     message: 'Пол должен быть UserGender',
   })
