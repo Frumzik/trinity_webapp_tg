@@ -21,11 +21,31 @@ export class AdminTrainingService {
       // Параметры для findAll
       const options = {
         ...params,
-        filter: {
-          ...params.filter,
-        },
         populate: ['childrens', 'lessons'], // если нужно populate
       };
+
+      // Если есть filter.id, заменяем на filter.trainingId
+      if (options.filter?.id !== undefined) {
+        options.filter.trainingId = options.filter.id;
+        delete options.filter.id;
+      }
+
+      // Если есть q → создаём поиск по trainingId, username или name
+      if (options.filter?.q !== undefined) {
+        const q = options.filter.q;
+        const trainingId = Number(q);
+
+        // Создаём $or фильтр для mongoose
+        const or: any[] = [];
+
+        if (!isNaN(trainingId)) {
+          or.push({ trainingId }); // ищем по числовому ID
+        }
+
+        or.push({ title: { $regex: q, $options: 'i' } });
+
+        options.filter = { $or: or };
+      }
 
       const items = await this.contentService.findAllTrainings(options);
       const total = await this.contentService.countTrainings();
@@ -84,6 +104,8 @@ export class AdminTrainingService {
    * CREATE
    */
   async create(data: ContentAddTrainingRequestDto) {
+    console.log(data);
+
     const created = await this.contentService.createTraining(data);
 
     if (!created) {
@@ -129,6 +151,13 @@ export class AdminTrainingService {
       data.favoritesTag !== undefined
     ) {
       training = await this.contentService.updateTraining({ trainingId }, data);
+    }
+
+    if (data.accessRules !== undefined) {
+      training = await this.contentService.updateTrainingAccessRules(
+        { trainingId },
+        { accessRules: data.accessRules }
+      );
     }
 
     return { id: trainingId, data: { ...training, id: trainingId } };

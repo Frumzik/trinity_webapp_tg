@@ -27,9 +27,16 @@ import {
   useRecordContext,
   required,
   FunctionField,
+  ReferenceField,
+  ArrayField,
+  ArrayInput,
 } from 'react-admin';
 import { LessonDatagrid } from './lesson';
-import { FileSelector } from '../components';
+import {
+  AccessRulesDatagrid,
+  AccessRulesInput,
+  FileSelector,
+} from '../components';
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import AddIcon from '@mui/icons-material/Add';
@@ -92,7 +99,11 @@ export const FavoritesTagTitles = {
 };
 
 const TrainingDatagrid = () => (
-  <Datagrid rowClick="show" bulkActionButtons={false}>
+  <Datagrid
+    rowClick="show"
+    bulkActionButtons={false}
+    empty={<span>Нет тренингов</span>}
+  >
     <TextField source="trainingId" label="ID" />
     <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
@@ -169,16 +180,19 @@ const TrainingShowActions = () => {
         startIcon={<EditIcon />}
       />
 
-      {record.parentId && !record.stageLevel && (
-        <CustomDeleteButton
-          parentResource="training"
-          resource="training"
-          record={record}
-          confirm={() =>
-            'Вы уверены что хотите удалить тренинг?\nВсе уроки тоже будут удалены.\nЭто действие нельзя отменить'
-          }
-        />
-      )}
+      {!record.stageLevel &&
+        record.tag !== TrainingTag.STAGES_SPIRIT &&
+        record.tag !== TrainingTag.STAGE_LEVEL &&
+        record.tag !== TrainingTag.STAGE_LEVEL && (
+          <CustomDeleteButton
+            parentResource="training"
+            resource="training"
+            record={record}
+            confirm={() =>
+              'Вы уверены что хотите удалить тренинг?\nВсе уроки тоже будут удалены.\nЭто действие нельзя отменить'
+            }
+          />
+        )}
     </TopToolbar>
   );
 };
@@ -206,23 +220,21 @@ export const TrainingShow = () => (
       <TextField source="shortDescription" label="Короткое описание" />
       <TextField source="duration" label="Длительность" />
       <TextField source="link" label="Ссылка" />
-
       {/* Изображения */}
       <ImageField source="coverUrl" label="Обложка" />
       <ImageField source="iconUrl" label="Иконка" />
       <ImageField source="bgUrl" label="Фон" />
-
       {/* Наставник */}
-      <TextField source="merchantId" label="ID наставника" />
-
+      <ReferenceField label="Пригласитель" reference="user" source="merchantId">
+        <TextField source="userId" />: @<TextField source="username" /> -{' '}
+        <TextField source="name" />
+      </ReferenceField>
       {/* Цены */}
       <NumberField source="price" label="Цена" />
       <NumberField source="salePrice" label="Цена со скидкой" />
-
       {/* Вывод ступени */}
       <NumberField source="stageLevel" label="Уровень ступени" />
       <NumberField source="stage" label="Ступень" />
-
       {/* Тип, тэг, тэг избранного */}
       <SelectField
         source="type"
@@ -248,6 +260,14 @@ export const TrainingShow = () => (
           name: FavoritesTagTitles[value],
         }))}
       />
+      {/* Условия доступа */}
+      <ArrayField
+        source="accessRules"
+        label="Правила доступа"
+        emptyText="Пусто"
+      >
+        <AccessRulesDatagrid />
+      </ArrayField>
 
       {/* Подтренинги */}
       <ReferenceManyField
@@ -257,7 +277,6 @@ export const TrainingShow = () => (
       >
         <TrainingDatagrid />
       </ReferenceManyField>
-
       {/* Уроки */}
       <ReferenceManyField label="Уроки" reference="lesson" target="parentId">
         <LessonDatagrid />
@@ -302,7 +321,7 @@ export const TrainingEdit = () => (
           optionText={(record: any) =>
             record
               ? `${record.userId} — ${record.name} (${record.username})`
-              : ''
+              : 'Нет'
           }
           optionValue="userId"
           filterToQuery={(searchText: string) => ({ name: searchText })}
@@ -345,6 +364,11 @@ export const TrainingEdit = () => (
           name: FavoritesTagTitles[value],
         }))}
       />
+
+      {/* Правила доступа */}
+      <ArrayInput source="accessRules" label="Правила доступа">
+        <AccessRulesInput />
+      </ArrayInput>
     </SimpleForm>
   </Edit>
 );
@@ -407,36 +431,35 @@ export const TrainingCreate = () => {
         />
 
         {/* Типы и тэги */}
+        {/* SELECT поля */}
         <SelectInput
           source="type"
-          label="Тип тренинга"
-          choices={Object.values(TrainingType).map((t) => ({
-            id: t,
-            name: t,
+          label="Тип"
+          choices={Object.entries(TrainingType).map(([key, value]) => ({
+            id: value,
+            name: TrainingTypeTitles[value],
           }))}
-          validate={required()}
         />
+
         <SelectInput
           source="tag"
-          label="Тэг тренинга"
-          choices={Object.values(TrainingTag).map((t) => ({
-            id: t,
-            name: t,
+          label="Тэг"
+          choices={Object.entries(TrainingTag).map(([key, value]) => ({
+            id: value,
+            name: TrainingTagTitles[value],
           }))}
-          validate={required()}
         />
-        {/* Динамические поля ступени */}
-        <StageFields />
 
         <SelectInput
           source="favoritesTag"
           label="Тэг избранного"
-          choices={Object.values(FavoritesTag).map((t) => ({
-            id: t,
-            name: t,
+          choices={Object.entries(FavoritesTag).map(([key, value]) => ({
+            id: value,
+            name: FavoritesTagTitles[value],
           }))}
-          validate={required()}
         />
+        {/* Динамические поля ступени */}
+        <StageFields />
 
         {/* Наставник */}
         <ReferenceInput
@@ -472,7 +495,7 @@ export const TrainingCreate = () => {
             optionValue="trainingId"
             filterToQuery={(searchText) => ({ title: searchText })}
             label="Родительский тренинг"
-            disabled={Boolean(parentIdParam)}
+            readOnly={Boolean(parentIdParam)}
           />
         </ReferenceInput>
 
@@ -484,6 +507,11 @@ export const TrainingCreate = () => {
         {/* Цены */}
         <NumberInput source="price" label="Цена" />
         <NumberInput source="salePrice" label="Скидка" />
+
+        {/* Правила доступа */}
+        <ArrayInput source="accessRules" label="Правила доступа">
+          <AccessRulesInput />
+        </ArrayInput>
       </SimpleForm>
     </Create>
   );
