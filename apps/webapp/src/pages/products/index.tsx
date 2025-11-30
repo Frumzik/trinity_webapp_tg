@@ -250,11 +250,11 @@ export default function Index() {
               <FeatureTile
                 title="Практики"
                 description=""
-                bgImageUrl={Tile1}
+                bgImageUrl={Tile3}
                 rightImageUrl={Card4}
                 enabled
                 to="/practice"
-                className={"left-block-color"}
+                className={"left-block-color-blue"}
               />
 
               <FeatureTile
