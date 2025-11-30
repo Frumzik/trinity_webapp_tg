@@ -1,20 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { Button, useDelete, useNotify, useRedirect } from 'react-admin';
+import {
+  Button,
+  RaRecord,
+  useDelete,
+  useNotify,
+  useRedirect,
+} from 'react-admin';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-interface UniversalDeleteButtonProps {
+interface CustomDeleteButtonProps {
   parentResource: string;
   resource: string;
   record?: any;
   label?: string;
+  confirm?: (record: RaRecord) => string;
 }
 
-export const UniversalDeleteButton: React.FC<UniversalDeleteButtonProps> = ({
+export const CustomDeleteButton: React.FC<CustomDeleteButtonProps> = ({
   parentResource,
   resource,
   record,
   label = 'Удалить',
+  confirm,
 }) => {
   const notify = useNotify();
   const redirect = useRedirect();
@@ -22,6 +30,13 @@ export const UniversalDeleteButton: React.FC<UniversalDeleteButtonProps> = ({
 
   const handleClick = () => {
     if (!record?.id) return;
+
+    // подтверждение удаления
+    if (confirm) {
+      const confirmed = window.confirm(confirm(record));
+      if (!confirmed) return;
+    }
+
     deleteOne(
       resource,
       { id: record.id },

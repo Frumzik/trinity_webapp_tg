@@ -102,9 +102,6 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
 
   @Prop({ type: Number, default: null })
   salePrice!: number | null;
-
-  @Prop({ type: Boolean, default: false })
-  deleted!: boolean;
 }
 
 export const TrainingSchema = SchemaFactory.createForClass(Training);

@@ -115,20 +115,20 @@ export class AdminUserService {
 
     // Обновления профиля
     if (
-      data.name ||
-      data.email ||
-      data.username ||
-      data.email ||
-      data.height ||
-      data.height ||
-      data.birthDate ||
-      data.gender
+      data.name !== undefined ||
+      data.email !== undefined ||
+      data.username !== undefined ||
+      data.email !== undefined ||
+      data.height !== undefined ||
+      data.height !== undefined ||
+      data.birthDate !== undefined ||
+      data.gender !== undefined
     ) {
       user = await this.usersService.updateProfile({ userId }, data);
     }
 
     // Обновление роли
-    if (data.role) {
+    if (data.role !== undefined) {
       user = await this.usersService.updateRole(
         { userId },
         { role: data.role }
@@ -136,7 +136,7 @@ export class AdminUserService {
     }
 
     // Обновление баланса
-    if (data.balance) {
+    if (data.balance !== undefined) {
       const diff = data.balance - user.balance;
 
       if (diff !== 0) {
@@ -157,7 +157,7 @@ export class AdminUserService {
     }
 
     // Обновление пароля
-    if (data.password) {
+    if (data.password !== undefined) {
       user = await this.usersService.updatePassword(
         { userId },
         {
@@ -167,7 +167,7 @@ export class AdminUserService {
     }
 
     // Обновление пина
-    if (data.pin) {
+    if (data.pin !== undefined) {
       user = await this.usersService.updatePin(
         { userId },
         {
@@ -177,11 +177,31 @@ export class AdminUserService {
     }
 
     // Обновление фин. пароля
-    if (data.finPassword) {
+    if (data.finPassword !== undefined) {
       user = await this.usersService.updateFinPassword(
         { userId },
         {
           finPassword: data.finPassword,
+        }
+      );
+    }
+
+    // Обновление фин. пароля
+    if (data.banned !== undefined) {
+      user = await this.usersService.setBanned(
+        { userId },
+        {
+          banned: data.banned,
+        }
+      );
+    }
+
+    // Обновление фин. пароля
+    if (data.partnerId !== undefined) {
+      user = await this.usersService.changePartner(
+        { userId },
+        {
+          partnerId: data.partnerId,
         }
       );
     }
@@ -195,13 +215,8 @@ export class AdminUserService {
   async delete(id: string | number) {
     const userId = typeof id === 'string' ? parseInt(id) : id;
 
-    let user = await this.usersService.find({ userId });
+    await this.usersService.delete({ userId });
 
-    if (!user) {
-      throw new NotFoundException(`Пользователь с id=${userId} не найден`);
-    }
-    user = await this.usersService.delete({ userId: +id });
-
-    return { id: userId, data: { ...user, id: userId } };
+    return { id: userId, data: { id: userId } };
   }
 }

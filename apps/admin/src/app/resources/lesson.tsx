@@ -21,14 +21,21 @@ import {
   useRecordContext,
   TopToolbar,
   Button,
+  ArrayField,
+  ArrayInput,
+  AutocompleteInput,
 } from 'react-admin';
 import { RichTextInput } from 'ra-input-rich-text';
-import { FileSelector } from '../components';
+import {
+  AccessRulesDatagrid,
+  AccessRulesInput,
+  FileSelector,
+} from '../components';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FavoritesTag, FavoritesTagTitles } from './training';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useEffect } from 'react';
-import { UniversalDeleteButton } from '../components/buttons';
+import { CustomDeleteButton } from '../components/buttons';
 import EditIcon from '@mui/icons-material/Edit';
 
 enum LessonType {
@@ -49,7 +56,11 @@ const LessonTypeTitles: Record<LessonType, string> = {
 };
 
 export const LessonDatagrid = () => (
-  <Datagrid rowClick="show">
+  <Datagrid
+    rowClick="show"
+    bulkActionButtons={false}
+    empty={<span>Нет уроков</span>}
+  >
     <NumberField source="lessonId" label="ID" />
     <ImageField source="coverUrl" label="Обложка" />
     <TextField source="title" label="Название" />
@@ -90,10 +101,13 @@ const LessonShowActions = () => {
         onClick={handleEditLesson}
         startIcon={<EditIcon />}
       />
-      <UniversalDeleteButton
+      <CustomDeleteButton
         parentResource="training"
         resource="lesson"
         record={record}
+        confirm={() =>
+          'Вы уверены что хотите удалить урок?\nЭто действие нельзя отменить'
+        }
       />
     </TopToolbar>
   );
@@ -135,7 +149,6 @@ export const LessonShow = () => (
           )
         }
       />
-
       <TextField source="title" label="Название" />
       <TextField source="description" label="Описание" />
       <TextField source="shortDescription" label="Краткое описание" />
@@ -148,6 +161,15 @@ export const LessonShow = () => (
       <ImageField source="coverUrl" label="Обложка" />
       {/* <ImageField source="iconUrl" label="Иконка" /> */}
       <ImageField source="bgUrl" label="Фон" />
+
+      {/* Условия доступа */}
+      <ArrayField
+        source="accessRules"
+        label="Правила доступа"
+        emptyText="Нет правил доступа"
+      >
+        <AccessRulesDatagrid />
+      </ArrayField>
 
       {/* --- Условный контент УСТОЙЧИВО ЧЕРЕЗ FunctionField --- */}
       <FunctionField
@@ -238,6 +260,11 @@ export const LessonEdit = () => (
       <FileSelector source="coverUrl" label="Обложка" />
       {/* <FileSelector source="iconUrl" label="Иконка" /> */}
       <FileSelector source="bgUrl" label="Фон" />
+
+      {/* Правила доступа */}
+      <ArrayInput source="accessRules" label="Правила доступа">
+        <AccessRulesInput />
+      </ArrayInput>
 
       {/* Динамическое поле контента */}
       <FormDataConsumer>
@@ -393,10 +420,14 @@ export const LessonCreate = () => {
           reference="training"
           label="Родительский тренинг"
           sort={{ field: 'trainingId', order: 'ASC' }}
+          allowEmpty
         >
-          <SelectInput
+          <AutocompleteInput
             optionText={(record) => `${record.trainingId} — ${record.title}`}
-            validate={required()}
+            optionValue="trainingId"
+            filterToQuery={(searchText) => ({ title: searchText })}
+            label="Родительский тренинг"
+            readOnly={Boolean(defaultParentId)}
           />
         </ReferenceInput>
 
@@ -419,6 +450,11 @@ export const LessonCreate = () => {
         <FileSelector source="coverUrl" label="Обложка" />
         {/* <FileSelector source="iconUrl" label="Иконка" /> */}
         <FileSelector source="bgUrl" label="Фон" />
+
+        {/* Правила доступа */}
+        <ArrayInput source="accessRules" label="Правила доступа">
+          <AccessRulesInput />
+        </ArrayInput>
       </SimpleForm>
     </Create>
   );

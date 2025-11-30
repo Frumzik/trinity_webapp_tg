@@ -68,7 +68,10 @@ export class User extends Document<Types.ObjectId> implements IUser {
   promoNotifications!: boolean;
 
   @Prop({ type: Boolean, default: false })
-  deleted!: boolean;
+  banned!: boolean;
+
+  @Prop({ type: Number, default: null })
+  partnerId!: number | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

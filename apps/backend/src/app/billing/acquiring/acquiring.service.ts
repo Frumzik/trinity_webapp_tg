@@ -5,6 +5,7 @@ import {
   Inject,
   forwardRef,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -25,8 +26,9 @@ import { TransactionsService } from '../transactions';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { WithdrawsService } from './withdraws.service';
 import { Types } from 'mongoose';
-import { CountersService } from '../../service';
+import { CountersService, JWTAuthGuard, ProdcutionGuard } from '../../service';
 
+@UseGuards(JWTAuthGuard, ProdcutionGuard)
 @Injectable()
 export class AcquiringService {
   private BASE_URL = '';
