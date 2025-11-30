@@ -17,23 +17,6 @@ export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const staticMaterials = [
-    {
-      key: "movies",
-      title: "Фильмы",
-      description: "Подборка фильмов для вдохновения и развития.",
-    },
-    {
-      key: "music",
-      title: "Музыка",
-      description: "Музыкальные треки и плейлисты для практик и отдыха.",
-    },
-    {
-      key: "books",
-      title: "Книги",
-      description: "Рекомендованные книги для осознанности и роста.",
-    },
-  ];
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>

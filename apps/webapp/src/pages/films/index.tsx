@@ -116,7 +116,12 @@ export default function Index() {
     const roots = (data?.data ?? []) as unknown as BNode[];
     if (!roots.length) return [];
 
-    const films = collectFilmLessons(roots);
+    const materialsRoot = roots.find(
+      (r) => r.tag === "userful_materials" || r.trainingId === 21
+    );
+    if (!materialsRoot) return [];
+
+    const films = collectFilmLessons([materialsRoot]);
 
     return films.map(({ lesson, parentTrainingId, parentCover, parentIcon }) => {
       const status: LevelItem["status"] =
@@ -139,7 +144,6 @@ export default function Index() {
       };
     });
   }, [data]);
-
   const handleCardClick = (l: LevelItem) => {
     if (l.status === "locked") {
       navigate("/preview", {
@@ -204,6 +208,7 @@ export default function Index() {
                     key={`${l.parentTrainingId}-${l.id}`}
                     item={l}
                     onClick={() => handleCardClick(l)}
+                    hideStatus
                   />
                 ))}
 
