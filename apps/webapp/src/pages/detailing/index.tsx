@@ -76,7 +76,7 @@ const Index = () => {
 
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
-    const BOT_USERNAME = "TrinityFrontTestBot";
+    const BOT_USERNAME = "TrinitySpaceBot";
     const WEBAPP_SHORT_NAME = "TrinityFront";
 
     const botDeepLink =
@@ -91,10 +91,8 @@ const Index = () => {
     e?.preventDefault();
 
     if (premium) {
-      // подписка есть — сразу открываем реферальную ссылку
       window.open(inviteHref, "_blank");
     } else {
-      // подписки нет — показываем модалку
       setSubModalOpen(true);
     }
   };
