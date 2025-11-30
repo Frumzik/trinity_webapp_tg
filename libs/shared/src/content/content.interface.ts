@@ -68,8 +68,6 @@ export interface ITraining {
   progressPercent?: number;
   progressTotal?: number;
   progressCompleted?: number;
-
-  deleted: boolean;
 }
 
 // Уроки
@@ -108,8 +106,6 @@ export interface ILesson {
   salePrice: number | null;
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
-
-  deleted: boolean;
 }
 
 export interface ILessonVideoContent {

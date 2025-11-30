@@ -45,7 +45,9 @@ export class AuthService {
           .split('/')
           .filter((p) => p); // убираем пустые
         referralPathArr.push(partner.userId.toString());
-        referralPath = referralPathArr.join('/');
+        referralPath = referralPathArr.slice(-9).join('/');
+      } else {
+        dto.partnerId = undefined;
       }
     }
 
@@ -128,6 +130,10 @@ export class AuthService {
     dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
   ): Promise<AuthLoginResponseDto> {
     const user = await this.validate(dto);
+
+    if (user.banned) {
+      throw new Error('Пользователь заблокирован');
+    }
 
     this.eventEmitter.emit(
       UserEvents.LOGGED_IN,

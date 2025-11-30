@@ -153,13 +153,12 @@ export const WithdrawList = () => {
   const isProduction = nodeEnv === 'production';
   // const isProduction = true;
 
-
   return isProduction ? (
     <List
       sort={{ field: 'withdrawId', order: 'DESC' }}
       filters={<WithdrawFilter />}
     >
-      <Datagrid>
+      <Datagrid bulkActionButtons={false}>
         <NumberField source="withdrawId" label="ID" />
 
         {/* Пользователь */}

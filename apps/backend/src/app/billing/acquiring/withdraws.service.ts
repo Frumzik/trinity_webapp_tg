@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { WithdrawsRepository } from './repositories';
 import { WithdrawEntity } from './entities';
 import {
@@ -8,7 +13,9 @@ import {
 } from '@trinity/shared';
 import { FilterQuery } from 'mongoose';
 import { Withdraw } from './models';
+import { JWTAuthGuard, ProdcutionGuard } from '../../service';
 
+@UseGuards(JWTAuthGuard, ProdcutionGuard)
 @Injectable()
 export class WithdrawsService {
   constructor(private readonly withdrawsRepository: WithdrawsRepository) {}
@@ -73,9 +80,9 @@ export class WithdrawsService {
 
       if (!withdraw) {
         throw new NotFoundException('Заявка не найдена');
-      } 
-      
-      return await this.withdrawsRepository.update(withdraw.update(updateData))
+      }
+
+      return await this.withdrawsRepository.update(withdraw.update(updateData));
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске заявки';
