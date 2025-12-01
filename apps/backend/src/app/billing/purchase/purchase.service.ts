@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   forwardRef,
   Inject,
   Injectable,
@@ -68,7 +69,7 @@ export class PurchaseService {
 
       // Проверка баланса
       if (user.balance < totalPrice) {
-        throw new Error('Недостаточно баланса');
+        throw new ConflictException('Недостаточно ОМ на балансе');
       }
 
       // Проверка условий покупки

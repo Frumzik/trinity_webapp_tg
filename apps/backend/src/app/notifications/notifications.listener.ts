@@ -32,6 +32,7 @@ import {
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
+import { formatDays } from '../service';
 
 @Injectable()
 export class NotificationsListener {
@@ -42,16 +43,22 @@ export class NotificationsListener {
   ) {}
 
   @OnEvent(ReferralEvents.REGISTERED)
-  async onReferralRegistered({ partnerId, level }: ReferralRegisteredEvent) {
+  async onReferralRegistered({
+    partnerId,
+    referralId,
+    level,
+  }: ReferralRegisteredEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
-    if (!partner) {
+    const referral = await this.usersService.find({ userId: referralId });
+
+    if (!partner || !referral) {
       throw new NotFoundException('Пользователь не найден');
     }
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `В вашей структуре появился новый единомышленник.\nПоколение: ${level}.\nСтруктура продолжает расти.`
+      `В вашей структуре появился новый единомышленник.\n@${referral.username}\nПоколение: ${level}.\nСтруктура продолжает расти.`
     );
   }
 
@@ -106,9 +113,8 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
-Причина: не открыта ${stageLevel}-${stage} Ступень Духа
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
-Откройте Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
+Откройте ${stage} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
 
@@ -129,9 +135,8 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
-Причина: доступ к приложению не активирован
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
-Активируйте доступ, чтобы вернуть упущенное вознаграждение обратно.`
+Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
 
@@ -140,7 +145,6 @@ export class NotificationsListener {
     partnerId,
     sum,
     title,
-    stageLevel,
     stage,
   }: ReferralReserveByStageEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
@@ -152,9 +156,8 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM за приобретение "${title}"
-Причина: не открыта ${stage} Ступень духа ${stageLevel} Уровня
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
-Откройте Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
+Откройте ${stage} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
 
@@ -175,7 +178,7 @@ export class NotificationsListener {
       `Вы упустили вознаграждение ${sum} OM за приобретение "${title}"
 Причина: доступ к приложению не активирован
 Вознаградение отправлено в Резервный Фонд (срок хранения: 33 дня).
-Откройте Активируйте доступ, чтобы вернуть упущенное вознаграждение обратно.`
+Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
 
@@ -273,9 +276,11 @@ ${sum} OM отправлены в Фонд Света`
       throw new NotFoundException('Пользователь не найден');
     }
 
+    const daysFormatted = formatDays(days);
+
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
-      `Ваш доступ к приложению заканчивается через ${days} дня`
+      `Ваш доступ к приложению заканчивается через ${days} ${daysFormatted}`
     );
   }
 

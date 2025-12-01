@@ -11,6 +11,7 @@ import { FileModule } from '../service';
 import { AdminBannerController, AdminBannerService } from './banner';
 import { BannersModule } from '../banners';
 import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
+import { ReferralsModule } from '../referrals';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
     FileModule,
     BannersModule,
     AcquiringModule,
+    forwardRef(() => ReferralsModule),
   ],
   providers: [
     AdminUserService,
