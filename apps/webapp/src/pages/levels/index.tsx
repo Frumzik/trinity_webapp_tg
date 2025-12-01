@@ -294,25 +294,25 @@ export default function Index() {
 
   const buildStepTitle = (stepNumber: number, count: number) => {
     if (count === 1) {
-      return `${stepNumber} ступень Духа открыта`;
+      return `${stepNumber} Ступень Духа открыта`;
     }
 
     const lastTwo = count % 100;
     const last = count % 10;
 
     if (lastTwo >= 11 && lastTwo <= 14) {
-      return `${count} ступеней Духа открыто`;
+      return `${count} Ступеней Духа открыто`;
     }
 
     if (last === 1) {
-      return `${count} ступень Духа открыта`;
+      return `${count} Ступень Духа открыта`;
     }
 
     if (last >= 2 && last <= 4) {
-      return `${count} ступени Духа открыты`;
+      return `${count} Ступени Духа открыты`;
     }
 
-    return `${count} ступеней Духа открыто`;
+    return `${count} Ступеней Духа открыто`;
   };
 
   const openSuccessModal = (openedIds: number[]) => {
