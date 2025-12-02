@@ -5,4 +5,5 @@ export class TransactionCreateRequestDto {
   type!: TransactionType;
   sum!: number;
   description!: string;
+  toAddress?: string;
 }

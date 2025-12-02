@@ -147,44 +147,43 @@ export const WithdrawFilter = (props: any) => (
 /* -------------------------------------- */
 /*               LIST                     */
 /* -------------------------------------- */
-
 export const WithdrawList = () => {
   const nodeEnv = import.meta.env.VITE_NODE_ENV;
   const isProduction = nodeEnv === 'production';
   // const isProduction = true;
 
   return isProduction ? (
-    <List
-      sort={{ field: 'withdrawId', order: 'DESC' }}
-      filters={<WithdrawFilter />}
-    >
-      <Datagrid bulkActionButtons={false}>
-        <NumberField source="withdrawId" label="ID" />
+      <List
+        sort={{ field: 'withdrawId', order: 'DESC' }}
+        filters={<WithdrawFilter />}
+      >
+        <Datagrid bulkActionButtons={false}>
+          <NumberField source="withdrawId" label="ID" />
 
-        {/* Пользователь */}
-        <ReferenceField
-          source="userId" // поле в Withdraw
-          reference="user" // ресурс для запроса
-          link="show" // ссылка на просмотр пользователя
-          label="Пользователь"
-        >
-          <TextField source="userId" />: @<TextField source="username" /> -{' '}
-          <TextField source="name" />
-        </ReferenceField>
+          {/* Пользователь */}
+          <ReferenceField
+            source="userId" // поле в Withdraw
+            reference="user" // ресурс для запроса
+            link="show" // ссылка на просмотр пользователя
+            label="Пользователь"
+          >
+            <TextField source="userId" />: @<TextField source="username" /> -{' '}
+            <TextField source="name" />
+          </ReferenceField>
 
-        <TextField source="toAddress" label="Адрес" />
-        <NumberField source="amount" label="Сумма" />
-        <DateField source="date" label="Дата" />
+          <TextField source="toAddress" label="Адрес" />
+          <NumberField source="amount" label="Сумма" />
+          <DateField source="date" label="Дата" />
 
-        <BooleanField source="needModeration" label="На модерации" />
+          <BooleanField source="needModeration" label="На модерации" />
 
-        {/* Кнопки в отдельной колонке */}
-        <FunctionField
-          label="Действия"
-          render={(record) => <WithdrawButtons record={record} />}
-        />
-      </Datagrid>
-    </List>
+          {/* Кнопки в отдельной колонке */}
+          <FunctionField
+            label="Действия"
+            render={(record) => <WithdrawButtons record={record} />}
+          />
+        </Datagrid>
+      </List>
   ) : (
     <Card>
       <Title title="Ошибка" />

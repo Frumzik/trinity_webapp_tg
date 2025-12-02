@@ -332,7 +332,6 @@ export class FundsService {
       const result = await this.reserveFundItemsRepository.delete(fundItem);
 
       await this.decReserve(fundItem.sum);
-      await this.incMain(fundItem.sum);
 
       // Событие
       if (fundItem.type == ReserveFundItemType.PRACTISE) {
@@ -346,6 +345,8 @@ export class FundsService {
           );
         }
       } else {
+        await this.incMain(fundItem.sum);
+
         await this.eventEmitter.emit(
           ReferralEvents.RESERVE_EXPIRED,
           new ReferralReserveExpiredEvent(fundItem.userId, fundItem.sum)
