@@ -262,7 +262,7 @@ export default function SupportPage() {
               rightImageUrl={Card1}
               className="featureTile--altFont"
               enabled
-              onClick={() => requirePaid(() => nav("/academy"))}
+              onClick={() => nav("/academy")}
             />
 
             <FeatureTile
@@ -272,7 +272,7 @@ export default function SupportPage() {
               enabled
               rightImageUrl={Card2}
               className="featureTile--altFont"
-              onClick={() => requirePaid(() => nav("/products"))}
+              onClick={() => nav("/products")}
             />
 
             <div
@@ -280,7 +280,7 @@ export default function SupportPage() {
               style={{ display: "flex", gap: "11px" }}
             >
               <div
-                onClick={() => requirePaid(() => nav("/practice"))}
+                onClick={() => nav("/practice")}
                 style={{ flex: 1 }}
               >
                 <ReferralsCard
@@ -295,9 +295,7 @@ export default function SupportPage() {
               </div>
 
               <div
-                onClick={() =>
-                  requirePaid(() => nav("/levels?from=/home"))
-                }
+                onClick={() => nav("/levels?from=/home")}
                 style={{ flex: 1 }}
               >
                 <ReferralsCard

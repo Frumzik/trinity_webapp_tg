@@ -199,7 +199,7 @@ export default function PreviewPage() {
         setResultKind("no-balance");
         setResultTitle("Недостаточно ОМ на балансе");
         setResultItems(undefined);
-        setResultDesc(msg);
+        setResultDesc("");
         setResultCta("Добавить ОМ");
         setResultOnCta(() => () => {
           setResultOpen(false);
