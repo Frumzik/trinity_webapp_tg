@@ -1,3 +1,4 @@
+// src/shared/api/base.ts
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
   BaseQueryFn,
@@ -25,7 +26,7 @@ const rawBaseQuery = fetchBaseQuery({
 
 function getTgIdSafe() {
   try {
-    const ls = window.localStorage.getItem(TG_ID_KEY);
+    const ls = localStorage.getItem(TG_ID_KEY);
     const wa = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
     return ls || (wa ? String(wa) : null);
   } catch {
@@ -36,11 +37,13 @@ function getTgIdSafe() {
 function forceLogoutAndGoToPin(api: any) {
   api.dispatch(sessionActions.logout());
   try {
-    window.localStorage.removeItem('access_token');
-    window.localStorage.removeItem(TG_ID_KEY);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem(TG_ID_KEY);
   } catch {}
 
-  window.location.replace('/pin/create');
+  if (!window.location.pathname.startsWith('/pin')) {
+    window.location.replace('/pin/create');
+  }
 }
 
 export const baseQueryWithAuth: BaseQueryFn<
@@ -48,72 +51,68 @@ export const baseQueryWithAuth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extra) => {
-  // 1. Проверка, что tgId не поменялся (твоя логика)
-  if (typeof window !== 'undefined') {
-    try {
-      const storedTgId = window.localStorage.getItem(TG_ID_KEY);
-      const webAppTgId = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-      if (storedTgId && webAppTgId && storedTgId !== String(webAppTgId)) {
+  const token = (api.getState() as any)?.session?.token ?? null;
+  const tgId = typeof window !== 'undefined' ? getTgIdSafe() : null;
+
+  const url =
+    typeof args === 'string'
+      ? args
+      : typeof args === 'object'
+        ? String(args.url || '')
+        : '';
+
+  const isAuthRoute =
+    url.startsWith('/auth/') ||
+    url.startsWith('/pin/') ||
+    url.startsWith('/tg/') ||
+    url.startsWith('/user/update/pin');
+
+  const isUserRoute = url.startsWith('/user');
+
+  if (typeof window !== 'undefined' && tgId && token && !isAuthRoute) {
+    const checkRes = await rawBaseQuery(
+      {
+        url: '/auth/check-tg',
+        method: 'GET',
+        params: { id: tgId, _ts: Date.now() },
+        cache: 'no-store',
+      } as any,
+      api,
+      extra
+    );
+
+    if ('error' in checkRes && checkRes.error) {
+      const st = checkRes.error.status;
+      if (st === 404 || st === 401) {
+        // пользователя нет → выкидываем
         forceLogoutAndGoToPin(api);
-        return {
-          error: {
-            status: 'CUSTOM_TG_MISMATCH',
-            data: { message: 'tgId mismatch, logged out' },
-          },
-        } as any;
+        return checkRes as any;
       }
-    } catch {}
-  }
+    }
 
-  if (typeof window !== 'undefined') {
-    const url =
-      typeof args === 'string'
-        ? args
-        : typeof args === 'object'
-          ? String(args.url || '')
-          : '';
-    const isAuthRoute = url.startsWith('/auth/');
-    const token = (api.getState() as any)?.session?.token ?? null;
-    const tgId = getTgIdSafe();
+    if ('data' in checkRes && checkRes.data) {
+      const d: any = checkRes.data;
+      const exists = d?.exists ?? d?.data?.exists ?? d?.data?.userExists;
 
-    if (!isAuthRoute && tgId && token) {
-      const checkRes = await rawBaseQuery(
-        {
-          url: '/auth/check-tg',
-          method: 'GET',
-          params: { id: tgId },
-        },
-        api,
-        extra
-      );
-
-
-      if ('error' in checkRes && checkRes.error) {
-        const st = checkRes.error.status;
-        if (st === 404 || st === 401) {
-          forceLogoutAndGoToPin(api);
-          return checkRes as any;
-        }
-      }
-
-      if ('data' in checkRes && checkRes.data) {
-        const d: any = checkRes.data;
-        const exists =
-          d?.exists ?? d?.data?.exists ?? d?.data?.userExists ?? null;
-        const success = d?.success;
-
-        if (success === false || exists === false) {
-          forceLogoutAndGoToPin(api);
-          return checkRes as any;
-        }
+      if (exists === false) {
+        forceLogoutAndGoToPin(api);
+        return checkRes as any;
       }
     }
   }
 
   const result = await rawBaseQuery(args, api, extra);
 
-  if (result.error && result.error.status === 401) {
-    forceLogoutAndGoToPin(api);
+  if (result.error) {
+    const st = result.error.status;
+
+    if (st === 401) {
+      forceLogoutAndGoToPin(api);
+    }
+
+    if (st === 404 && isUserRoute) {
+      forceLogoutAndGoToPin(api);
+    }
   }
 
   return result;
