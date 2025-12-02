@@ -23,18 +23,38 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: 'omit',
 });
 
+function getTgIdSafe() {
+  try {
+    const ls = window.localStorage.getItem(TG_ID_KEY);
+    const wa = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+    return ls || (wa ? String(wa) : null);
+  } catch {
+    return null;
+  }
+}
+
+function forceLogoutAndGoToPin(api: any) {
+  api.dispatch(sessionActions.logout());
+  try {
+    window.localStorage.removeItem('access_token');
+    window.localStorage.removeItem(TG_ID_KEY);
+  } catch {}
+
+  window.location.replace('/pin/create');
+}
+
 export const baseQueryWithAuth: BaseQueryFn<
   FetchArgs | string,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extra) => {
+  // 1. Проверка, что tgId не поменялся (твоя логика)
   if (typeof window !== 'undefined') {
     try {
       const storedTgId = window.localStorage.getItem(TG_ID_KEY);
       const webAppTgId = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-
       if (storedTgId && webAppTgId && storedTgId !== String(webAppTgId)) {
-        api.dispatch(sessionActions.logout());
+        forceLogoutAndGoToPin(api);
         return {
           error: {
             status: 'CUSTOM_TG_MISMATCH',
@@ -42,67 +62,58 @@ export const baseQueryWithAuth: BaseQueryFn<
           },
         } as any;
       }
-    } catch (e) {}
+    } catch {}
   }
 
   if (typeof window !== 'undefined') {
-    try {
-      const tgId = window.localStorage.getItem(TG_ID_KEY);
-      const token = (api.getState() as any)?.session?.token;
+    const url =
+      typeof args === 'string'
+        ? args
+        : typeof args === 'object'
+          ? String(args.url || '')
+          : '';
+    const isAuthRoute = url.startsWith('/auth/');
+    const token = (api.getState() as any)?.session?.token ?? null;
+    const tgId = getTgIdSafe();
 
-      const url =
-        typeof args === 'string'
-          ? args
-          : typeof args === 'object'
-            ? String(args.url || '')
-            : '';
+    if (!isAuthRoute && tgId && token) {
+      const checkRes = await rawBaseQuery(
+        {
+          url: '/auth/check-tg',
+          method: 'GET',
+          params: { id: tgId },
+        },
+        api,
+        extra
+      );
 
-      const isAuthRoute = url.startsWith('/auth/');
 
-      if (tgId && token && !isAuthRoute) {
-        const checkRes = await rawBaseQuery(
-          {
-            url: '/auth/check-tg',
-            method: 'GET',
-            params: { id: tgId },
-          },
-          api,
-          extra,
-        );
-
-        if ('error' in checkRes && checkRes.error) {
-          const status = checkRes.error.status;
-          if (status === 404 || status === 401) {
-            api.dispatch(sessionActions.logout());
-            try {
-              window.localStorage.removeItem('access_token');
-              window.localStorage.removeItem(TG_ID_KEY);
-            } catch {}
-
-            window.location.replace('/pin/create');
-            return checkRes as any;
-          }
-        } else if (
-          'data' in checkRes &&
-          (checkRes as any).data &&
-          (checkRes as any).data.success === false
-        ) {
-          api.dispatch(sessionActions.logout());
-          try {
-            window.localStorage.removeItem('access_token');
-            window.localStorage.removeItem(TG_ID_KEY);
-          } catch {}
-          window.location.replace('/pin/create');
+      if ('error' in checkRes && checkRes.error) {
+        const st = checkRes.error.status;
+        if (st === 404 || st === 401) {
+          forceLogoutAndGoToPin(api);
           return checkRes as any;
         }
       }
-    } catch {}
+
+      if ('data' in checkRes && checkRes.data) {
+        const d: any = checkRes.data;
+        const exists =
+          d?.exists ?? d?.data?.exists ?? d?.data?.userExists ?? null;
+        const success = d?.success;
+
+        if (success === false || exists === false) {
+          forceLogoutAndGoToPin(api);
+          return checkRes as any;
+        }
+      }
+    }
   }
 
   const result = await rawBaseQuery(args, api, extra);
 
   if (result.error && result.error.status === 401) {
-    api.dispatch(sessionActions.logout());
+    forceLogoutAndGoToPin(api);
   }
 
   return result;
