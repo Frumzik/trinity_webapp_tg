@@ -3,6 +3,7 @@ export const ReferralEvents = {
   REGISTERED: 'referral.registered',
   BUY_STAGE: 'refferral.buy-stage',
   BUY: 'refferral.buy',
+  BUY_PRACTISE: 'refferral.buy-practise',
   RESERVE_STAGE_BY_STAGE: 'refferral.reserve-stage-by-stage',
   RESERVE_STAGE_BY_SUBSCRIPTION: 'refferral.reserve-subscription-by-stage',
   RESERVE_BY_STAGE: 'refferral.reserve-by-stage',
@@ -33,6 +34,16 @@ export class ReferralBuyStageEvent {
 }
 
 export class ReferralBuyEvent {
+  constructor(
+    public readonly partnerId: number,
+    public readonly referralId: number,
+    public readonly level: number,
+    public readonly sum: number,
+    public readonly title: string
+  ) {}
+}
+
+export class ReferralBuyPractiseEvent {
   constructor(
     public readonly partnerId: number,
     public readonly referralId: number,

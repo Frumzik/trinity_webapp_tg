@@ -33,6 +33,7 @@ import {
   PurchaseBuyPractiseEvent,
   PurchasePractiseAcceptEvent,
   PurchasePractiseDoneEvent,
+  ReferralBuyPractiseEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -79,6 +80,25 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Ваш единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM`
+    );
+  }
+
+  @OnEvent(ReferralEvents.BUY_PRACTISE)
+  async onReferralBuyPractise({
+    partnerId,
+    level,
+    sum,
+    title,
+  }: ReferralBuyPractiseEvent) {
+    const partner = await this.usersService.find({ userId: partnerId });
+
+    if (!partner) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      partner.tgId as number,
+      `Ваш единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM`
     );
   }
 
