@@ -3,13 +3,13 @@ import { Types } from 'mongoose';
 export enum FundType {
   RESERVE = 'RESERVE',
   MAIN = 'MAIN',
-  INVESTMENT = 'INVESTMENT',
+  ADMIN = 'ADMIN',
 }
 
 export enum FundTitle {
   RESERVE = 'Резервный фонд',
-  INVESTMENT = 'Фонд света',
-  MAIN = 'Админский доход',
+  ADMIN = 'Админский доход',
+  MAIN = 'Фонд света',
 }
 
 export interface IFund {
@@ -19,6 +19,7 @@ export interface IFund {
   type: FundType;
 
   balance: number;
+  earn: number;
 }
 
 export enum ReserveFundItemType {

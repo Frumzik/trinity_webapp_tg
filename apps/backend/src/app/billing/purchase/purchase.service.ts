@@ -368,7 +368,7 @@ export class PurchaseService {
         type: TransactionType.PURCHASE,
         userId: user.userId,
         sum: -price,
-        description: `Покупка курса "${training.title}"`,
+        description: `Покупка ${training.stage ? 'ступени' : 'тренинга'} "${training.title}"`,
       });
 
       if (!transaction) throw new Error('Ошибка создания транзакции');

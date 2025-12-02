@@ -27,6 +27,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { WithdrawsService } from './withdraws.service';
 import { Types } from 'mongoose';
 import { CountersService, JWTAuthGuard, ProdcutionGuard } from '../../service';
+import { FundsService } from '../../referrals';
 
 @UseGuards(JWTAuthGuard, ProdcutionGuard)
 @Injectable()
@@ -45,7 +46,8 @@ export class AcquiringService {
     private readonly transactionsService: TransactionsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly withdrawsService: WithdrawsService,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    private readonly fundsService: FundsService
   ) {
     this.BASE_URL = this.configService.get('ACQUIRING_URL') || '';
     this.TOKEN = this.configService.get('ACQUIRING_TOKEN') || '';
@@ -381,6 +383,7 @@ export class AcquiringService {
       sum: -sum,
       description: 'Вывод средств',
     });
+    await this.fundsService.incAdmin(this.withdrawComission);
 
     await this.eventEmitter.emit(
       AcquiringEvents.WITHDRAW,

@@ -8,6 +8,7 @@ export class FundEntity implements IFund {
   type!: FundType;
 
   balance = 0;
+  earn = 0;
 
   constructor(fund: Partial<IFund>) {
     Object.assign(this, fund);
@@ -15,6 +16,8 @@ export class FundEntity implements IFund {
 
   incBalance(sum: number) {
     this.balance += sum;
+
+    if (this.type !== FundType.RESERVE) this.earn += sum;
 
     return this;
   }

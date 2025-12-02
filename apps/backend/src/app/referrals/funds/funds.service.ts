@@ -111,16 +111,76 @@ export class FundsService {
 
   async incMain(sum: number) {
     try {
-      let fund = await this.fundsRepository.find({ type: FundType.INVESTMENT });
+      let fund = await this.fundsRepository.find({ type: FundType.MAIN });
 
       if (!fund) {
         fund = await this.create({
-          type: FundType.INVESTMENT,
+          type: FundType.MAIN,
           title: FundTitle.MAIN,
         });
       }
 
       const updated = await this.fundsRepository.update(fund.incBalance(sum));
+
+      return updated;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async decMain(sum: number) {
+    try {
+      let fund = await this.fundsRepository.find({ type: FundType.MAIN });
+
+      if (!fund) {
+        fund = await this.create({
+          type: FundType.MAIN,
+          title: FundTitle.MAIN,
+        });
+      }
+
+      const updated = await this.fundsRepository.update(fund.decBalance(sum));
+
+      return updated;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async incAdmin(sum: number) {
+    try {
+      let fund = await this.fundsRepository.find({ type: FundType.ADMIN });
+
+      if (!fund) {
+        fund = await this.create({
+          type: FundType.ADMIN,
+          title: FundTitle.ADMIN,
+        });
+      }
+
+      const updated = await this.fundsRepository.update(fund.incBalance(sum));
+
+      return updated;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async decAdmin(sum: number) {
+    try {
+      let fund = await this.fundsRepository.find({ type: FundType.ADMIN });
+
+      if (!fund) {
+        fund = await this.create({
+          type: FundType.MAIN,
+          title: FundTitle.MAIN,
+        });
+      }
+
+      const updated = await this.fundsRepository.update(fund.decBalance(sum));
 
       return updated;
     } catch (error: unknown) {

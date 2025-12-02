@@ -102,7 +102,6 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.PRACTISE: {
-
         break;
       }
       case PurchaseType.LESSON: {
@@ -136,7 +135,7 @@ export class ReferralsListener {
     });
 
     if (!partner) {
-      await this.fundsService.incMain(sum);
+      await this.fundsService.incAdmin(sum);
 
       return;
     }
@@ -252,7 +251,7 @@ export class ReferralsListener {
         });
 
         if (!partner) {
-          await this.fundsService.incMain(sum);
+          await this.fundsService.incAdmin(sum);
 
           continue;
         }
@@ -381,6 +380,8 @@ export class ReferralsListener {
       });
 
       if (!partner) {
+        await this.fundsService.incAdmin(sum);
+
         continue;
       }
 
@@ -470,6 +471,8 @@ export class ReferralsListener {
       });
 
       if (!partner) {
+        await this.fundsService.incAdmin(sum);
+
         continue;
       }
 
