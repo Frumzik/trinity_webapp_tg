@@ -34,7 +34,6 @@ import {
   PurchasePractiseAcceptEvent,
   PurchasePractiseDoneEvent,
   ReferralBuyPractiseEvent,
-  ISubscription,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -279,25 +278,17 @@ ${sum} OM отправлены в Фонд Света`
   }
 
   @OnEvent(SubscriptionEvents.PAYED)
-  async onRSubscriptionPayed({ subscriptionId }: SubscriptionPayedEvent) {
+  async onRSubscriptionPayed({ days, subscriptionId }: SubscriptionPayedEvent) {
     const user = await this.usersService.populate({ subscriptionId });
 
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
     }
-    const now = new Date();
-
-    const diffMs =
-      ((user.subscription as ISubscription).endDate as Date).getTime() -
-      now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Доступ к приложению активирован на ${
-        diffDays >= 360
-          ? '1 год'
-          : formatDays(diffDays as number)
+        days >= 360 ? '1 год' : formatDays(days as number)
       }`
     );
   }
