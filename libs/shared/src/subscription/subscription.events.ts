@@ -11,7 +11,7 @@ export class SubscriptionUpdatedEvent {
 }
 
 export class SubscriptionPayedEvent {
-  constructor(public readonly subscriptionId: number) {}
+  constructor(public readonly days: number, public readonly subscriptionId: number) {}
 }
 
 export class SubscriptionDaysLeftEvent {

@@ -9,7 +9,9 @@ export enum TransactionType {
   SUBSCRIPTION = 'Subscription',
   REPLENISHMENT = 'Replenishment',
   WITHDRAWAL = 'Withdrawal',
+  FUND = 'Fund',
 }
+
 export interface ITransaction {
   _id?: Types.ObjectId;
   transactionId: number;
@@ -19,4 +21,5 @@ export interface ITransaction {
   sum: number;
   date: Date;
   description: string;
+  toAddress?: string;
 }

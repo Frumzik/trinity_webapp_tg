@@ -310,7 +310,12 @@ export class AcquiringService {
     }
   }
 
-  async fundWithdraw(fundType: FundType, address: string, amount: number) {
+  async fundWithdraw(
+    userId: number,
+    fundType: FundType,
+    address: string,
+    amount: number
+  ) {
     const fund = await this.fundsService.find({ type: fundType });
 
     if (!fund) {
@@ -323,12 +328,20 @@ export class AcquiringService {
       throw new Error('Недостаточный баланс');
     }
 
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
     const withdrawId = await this.countersService.saveNextSequence(
       CounterType.WITHDRAW_ID
     );
     await this.withdrawsService.create({
       withdrawId,
       type: WithdrawType.FUND,
+      user: user._id,
+      userId,
       fundType,
       amount,
       toAddress: address,
@@ -431,6 +444,7 @@ export class AcquiringService {
         type: TransactionType.WITHDRAWAL,
         sum: -sum,
         description: `${sum} ОМ выведено`,
+        toAddress: body.toAddress
       });
       await this.fundsService.incAdmin(this.withdrawComission);
 
@@ -444,6 +458,16 @@ export class AcquiringService {
       } else if (withdraw.fundType == FundType.ADMIN) {
         await this.fundsService.decAdmin(withdraw.amount);
       }
+
+      const fund = await this.fundsService.find({ type: FundType.ADMIN });
+
+      await this.transactionsService.create({
+        userId: withdraw.userId as number,
+        type: TransactionType.FUND,
+        sum: -withdraw.amount,
+        description: `Вывод из "${fund?.title}"`,
+        toAddress: body.toAddress
+      });
     }
 
     await this.withdrawsService.delete({ _id: withdraw._id });

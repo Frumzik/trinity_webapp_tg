@@ -33,6 +33,7 @@ import {
   PurchaseBuyPractiseEvent,
   PurchasePractiseAcceptEvent,
   PurchasePractiseDoneEvent,
+  ReferralBuyPractiseEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -79,6 +80,25 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Ваш единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM`
+    );
+  }
+
+  @OnEvent(ReferralEvents.BUY_PRACTISE)
+  async onReferralBuyPractise({
+    partnerId,
+    level,
+    sum,
+    title,
+  }: ReferralBuyPractiseEvent) {
+    const partner = await this.usersService.find({ userId: partnerId });
+
+    if (!partner) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      partner.tgId as number,
+      `Ваш единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM`
     );
   }
 
@@ -258,8 +278,8 @@ ${sum} OM отправлены в Фонд Света`
   }
 
   @OnEvent(SubscriptionEvents.PAYED)
-  async onRSubscriptionPayed({ subscriptionId }: SubscriptionPayedEvent) {
-    const user = await this.usersService.find({ subscriptionId });
+  async onRSubscriptionPayed({ days, subscriptionId }: SubscriptionPayedEvent) {
+    const user = await this.usersService.populate({ subscriptionId });
 
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
@@ -267,7 +287,9 @@ ${sum} OM отправлены в Фонд Света`
 
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
-      `Доступ к приложению активирован.`
+      `Доступ к приложению активирован на ${
+        days >= 360 ? '1 год' : formatDays(days as number)
+      }`
     );
   }
 
