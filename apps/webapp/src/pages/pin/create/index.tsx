@@ -1,7 +1,6 @@
 // src/pages/pin/create/index.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TopBar from '../../../widgets/topbarTextpage';
 import GradientButton from '../../../shared/ui/gradient-button';
 import '../../pin/pin.scss';
 import { useRegisterTgMutation, useLoginTgMutation } from '../../../shared/api/auth.api';
@@ -10,7 +9,6 @@ import { sessionActions } from '../../../entities/session/model/session.slice';
 
 const toDigits = (v: string) => v.replace(/\D/g, '').slice(0, 4);
 
-// один и тот же pickToken, как в PinLoginPage
 const pickToken = (x: any): string | null =>
   x?.access_token ||
   x?.accessToken ||
@@ -20,7 +18,6 @@ const pickToken = (x: any): string | null =>
   x?.data?.token ||
   null;
 
-// --- decodeB64Url / parsePartnerId как у тебя было ---
 function decodeB64Url(s: string) {
   try {
     const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
