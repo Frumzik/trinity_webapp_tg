@@ -24,7 +24,6 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: 'omit',
 });
 
-// tgId берём из localStorage или из Telegram WebApp
 function getTgIdSafe() {
   try {
     const ls = localStorage.getItem(TG_ID_KEY);
@@ -42,7 +41,6 @@ function forceLogoutAndGoToPin(api: any) {
     localStorage.removeItem(TG_ID_KEY);
   } catch {}
 
-  // чтобы не зациклиться, если уже на /pin
   if (!window.location.pathname.startsWith('/pin')) {
     window.location.replace('/pin/create');
   }
@@ -56,7 +54,6 @@ export const baseQueryWithAuth: BaseQueryFn<
   const token = (api.getState() as any)?.session?.token ?? null;
   const tgId = typeof window !== 'undefined' ? getTgIdSafe() : null;
 
-  // текущий путь запроса
   const url =
     typeof args === 'string'
       ? args
@@ -72,17 +69,12 @@ export const baseQueryWithAuth: BaseQueryFn<
 
   const isUserRoute = url.startsWith('/user');
 
-  // -----------------------------
-  // 1. check-tg (без кэша)
-  // -----------------------------
   if (typeof window !== 'undefined' && tgId && token && !isAuthRoute) {
     const checkRes = await rawBaseQuery(
       {
         url: '/auth/check-tg',
         method: 'GET',
-        // cache-buster, чтобы НЕ было 304 из кэша
         params: { id: tgId, _ts: Date.now() },
-        // и на всякий случай отключаем кэш на уровне fetch
         cache: 'no-store',
       } as any,
       api,
@@ -109,21 +101,15 @@ export const baseQueryWithAuth: BaseQueryFn<
     }
   }
 
-  // -----------------------------
-  // 2. основной запрос
-  // -----------------------------
   const result = await rawBaseQuery(args, api, extra);
 
-  // 3. если токен умер → логаут
   if (result.error) {
     const st = result.error.status;
 
-    // 401 — классика, истёк / битый токен
     if (st === 401) {
       forceLogoutAndGoToPin(api);
     }
 
-    // 404 specifically для /user → пользователя нет в БД
     if (st === 404 && isUserRoute) {
       forceLogoutAndGoToPin(api);
     }
