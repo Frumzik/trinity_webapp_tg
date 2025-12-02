@@ -7,6 +7,9 @@ export class ReserveFundItem
   extends Document<Types.ObjectId>
   implements IReserveFundItem
 {
+  @Prop({ required: true })
+  reserveId!: number;
+
   @Prop({ enum: ReserveFundItemType, type: String })
   type!: ReserveFundItemType;
 
@@ -24,6 +27,9 @@ export class ReserveFundItem
 
   @Prop({ required: false })
   trainingId?: number;
+
+  @Prop({ required: false })
+  accepted?: boolean;
 
   @Prop({ type: Date, required: false, default: null })
   endDate!: Date | null;

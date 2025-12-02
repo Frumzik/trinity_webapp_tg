@@ -11,6 +11,10 @@ import { FileModule } from '../service';
 import { AdminBannerController, AdminBannerService } from './banner';
 import { BannersModule } from '../banners';
 import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
+import { FundsModule, ReferralsModule } from '../referrals';
+import { AdminPractiseController, AdminPractiseService } from './practise';
+import { AdminFundService } from './fund/admin-fund.service';
+import { AdminFundController } from './fund/admin-fund.controller';
 
 @Module({
   imports: [
@@ -20,6 +24,8 @@ import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
     FileModule,
     BannersModule,
     AcquiringModule,
+    forwardRef(() => ReferralsModule),
+    FundsModule
   ],
   providers: [
     AdminUserService,
@@ -28,6 +34,8 @@ import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
     AdminFileService,
     AdminBannerService,
     AdminWithdrawService,
+    AdminPractiseService,
+    AdminFundService
   ],
   controllers: [
     AdminUserController,
@@ -36,6 +44,8 @@ import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
     AdminFileController,
     AdminBannerController,
     AdminWithdrawController,
+    AdminPractiseController,
+    AdminFundController
   ],
 })
 export class AdminModule {}

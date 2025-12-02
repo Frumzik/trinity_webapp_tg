@@ -1,6 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
 import { Types } from 'mongoose';
+import { WithdrawType } from './acquiring.interface.js';
+import { FundType } from '../funds/funds.interface.js';
 
 export class AcquiringWithdrawRequestDto {
   @IsString()
@@ -63,13 +65,20 @@ export class WithdrawCreateRequestDto {
   @ApiProperty()
   withdrawId!: number;
   
-  @IsString()
+  @IsEnum(WithdrawType)
   @ApiProperty()
-  user!: Types.ObjectId;
+  type!: WithdrawType;
+  
+  @ApiPropertyOptional()
+  user?: Types.ObjectId;
 
   @IsNumber()
+  @ApiPropertyOptional()
+  userId?: number;
+
+  @IsEnum(FundType)
   @ApiProperty()
-  userId!: number;
+  fundType?: FundType;
 
   @IsString()
   @ApiProperty()
@@ -80,6 +89,6 @@ export class WithdrawCreateRequestDto {
   amount!: number;
 
   @IsBoolean()
-  @ApiProperty()
-  needModeration!: boolean;
+  @ApiPropertyOptional()
+  needModeration?: boolean;
 }

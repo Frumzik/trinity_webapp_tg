@@ -9,6 +9,7 @@ import { Withdraw, WithdrawSchema } from './models';
 import { WithdrawsService } from './withdraws.service';
 import { WithdrawsRepository } from './repositories';
 import { CountersModule } from '../../service';
+import { FundsModule } from '../../referrals';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CountersModule } from '../../service';
     forwardRef(() => UsersModule),
     forwardRef(() => TransactionsModule),
     CountersModule,
+    FundsModule
   ],
   providers: [AcquiringService, WithdrawsService, WithdrawsRepository],
   controllers: [AcquiringController],

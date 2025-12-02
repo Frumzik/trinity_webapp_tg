@@ -38,6 +38,10 @@ export class ReserveFundItemCreateRequestDto {
 
   @IsNumber()
   @IsOptional()
+  accepted?: boolean;
+
+  @IsNumber()
+  @IsOptional()
   trainingId?: number;
 
   @IsOptional()

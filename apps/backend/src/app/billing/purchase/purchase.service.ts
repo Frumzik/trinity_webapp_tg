@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   forwardRef,
   Inject,
   Injectable,
@@ -26,7 +27,7 @@ import {
   TransactionType,
   TypeContentAccess,
 } from '@trinity/shared';
-import { CountersService } from '../../service';
+import { CountersService, formatDays } from '../../service';
 import { UserEntity, UsersService } from '../../account';
 import { ContentService } from '../../lms';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -68,7 +69,7 @@ export class PurchaseService {
 
       // Проверка баланса
       if (user.balance < totalPrice) {
-        throw new Error('Недостаточно баланса');
+        throw new ConflictException('Недостаточно ОМ на балансе');
       }
 
       // Проверка условий покупки
@@ -171,9 +172,6 @@ export class PurchaseService {
               throw new NotFoundException('Подписка не найдена');
             }
 
-            console.log(subscription);
-            console.log(subscription.isActive());
-
             if (!subscription.isActive()) {
               throw new Error(rule.description ?? 'Сначала оформите подписку');
             }
@@ -189,6 +187,8 @@ export class PurchaseService {
               userId: user.userId,
               contentId: rule.value,
             });
+
+            console.log(rule);
 
             if (!purchase) {
               throw new Error(
@@ -285,6 +285,16 @@ export class PurchaseService {
       });
       if (!training) throw new NotFoundException('Тренинг не найден');
 
+      const reserveItem = await this.fundsService.findReserveItem({
+        type: ReserveFundItemType.PRACTISE,
+        userId: user.userId,
+        trainingId: training.trainingId,
+      });
+
+      if (reserveItem) {
+        throw new Error('Заявка на практику уже создана');
+      }
+
       const price =
         dto.sale && training.salePrice
           ? training.salePrice ?? 0
@@ -294,7 +304,7 @@ export class PurchaseService {
         type: TransactionType.PURCHASE,
         userId: user.userId,
         sum: -price,
-        description: `Покупка практики "${training.title}"`,
+        description: `Вы приобрели практику "${training.title}" за ${price} OM.\nВ ближайшее время мастер свяжется с вами для согласования времени проведения практики.\nБлагодарим за доверие.`,
       });
 
       if (!transaction) throw new Error('Ошибка создания транзакции');
@@ -318,8 +328,9 @@ export class PurchaseService {
       await this.fundsService.createReserveItem({
         type: ReserveFundItemType.PRACTISE,
         trainingId: training.trainingId,
-        sum: -price,
+        sum: price,
         userId: user.userId,
+        accepted: false,
       });
 
       await this.notificationsService.sendBotNewPractise(user, training);
@@ -356,7 +367,9 @@ export class PurchaseService {
         type: TransactionType.PURCHASE,
         userId: user.userId,
         sum: -price,
-        description: `Покупка курса "${training.title}"`,
+        description: training.stage
+          ? `Поздравляем! Вы открыли ${training.stage} Ступень Духа ${training.stageLevel} уровня`
+          : `Поздравляем! Вы приобрели ${training.title}.\nБлагодарим за доверие.`,
       });
 
       if (!transaction) throw new Error('Ошибка создания транзакции');
@@ -451,7 +464,11 @@ export class PurchaseService {
       type: TransactionType.SUBSCRIPTION,
       userId: user.userId,
       sum: -totalPrice,
-      description: `Продление подписки на ${dto.subscriptionDays} дней`,
+      description: `Доступ к приложению активирован на ${
+        dto.subscriptionDays == 365
+          ? '1 год'
+          : formatDays(dto.subscriptionDays as number)
+      }`,
     });
 
     if (!transaction) throw new Error('Ошибка создания транзакции');

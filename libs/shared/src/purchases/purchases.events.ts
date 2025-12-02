@@ -5,6 +5,7 @@ export const PurchaseEvents = {
   BUY_STAGE: 'purchase.buy_stage',
   BUY_PRACTISE: 'purchase.buy_practise',
   PRACTISE_DONE: 'purchase.practise_done',
+  PRACTISE_ACCEPT: 'purchase.practise_accept',
   PRACTISE_ABORT: 'purchase.practise_abort',
 };
 
@@ -45,5 +46,12 @@ export class PurchasePractiseAbortEvent {
   constructor(
     public readonly userId: number,
     public readonly trainingId: number
+  ) {}
+}
+
+export class PurchasePractiseAcceptEvent {
+  constructor(
+    public readonly userId: number,
+    public readonly trainingId: number,
   ) {}
 }

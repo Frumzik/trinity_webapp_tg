@@ -8,6 +8,7 @@ export enum CounterType {
   PURCHASE_ID = 'PURCHASE_ID',
   WITHDRAW_ID = 'WITHDRAW_ID',
   BANNER_ID = 'BANNER_ID',
+  RESERVE_ID = 'RESERVE_ID',
 }
 
 export interface ICounter {

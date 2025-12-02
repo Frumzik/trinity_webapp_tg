@@ -10,7 +10,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ImageIcon from '@mui/icons-material/Image';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import MoneyIcon from '@mui/icons-material/Money';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
@@ -40,6 +42,14 @@ export const MyMenu = () => {
         <ListItemText primary="Дашборд" />
       </MenuItem>
 
+      {/* Пользователи */}
+      <MenuItem component={Link} to="/user">
+        <ListItemIcon>
+          <PersonIcon />
+        </ListItemIcon>
+        <ListItemText primary="Пользователи" />
+      </MenuItem>
+
       {/* Тренинги / Материалы */}
       <MenuItem onClick={() => setOpenTrainings(!openTrainings)}>
         <ListItemIcon>
@@ -63,11 +73,11 @@ export const MyMenu = () => {
       </Collapse>
 
       {/* Пользователи */}
-      <MenuItem component={Link} to="/user">
+      <MenuItem component={Link} to="/practise">
         <ListItemIcon>
-          <PersonIcon />
+          <AssignmentIcon />
         </ListItemIcon>
-        <ListItemText primary="Пользователи" />
+        <ListItemText primary="Заявки практик" />
       </MenuItem>
 
       {/* Баннеры */}
@@ -98,6 +108,17 @@ export const MyMenu = () => {
           <MonetizationOnIcon />
         </ListItemIcon>
         <ListItemText primary="Выводы" />
+      </MenuItem>
+
+      {/* Выводы средств */}
+      <MenuItem
+        component={Link}
+        to="/fund"
+      >
+        <ListItemIcon>
+          <MoneyIcon />
+        </ListItemIcon>
+        <ListItemText primary="Фонды" />
       </MenuItem>
     </Menu>
   );

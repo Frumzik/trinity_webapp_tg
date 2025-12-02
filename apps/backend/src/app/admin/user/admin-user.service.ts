@@ -10,13 +10,16 @@ import {
 import { GetListOptions, TransactionType } from '@trinity/shared';
 import { User, UserEntity, UsersService } from '../../account';
 import { TransactionsService } from '../../billing';
+import { ReferralsService } from '../../referrals';
 
 @Injectable()
 export class AdminUserService {
   constructor(
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => TransactionsService))
-    private readonly transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService,
+    @Inject(forwardRef(() => ReferralsService))
+    private readonly referralsService: ReferralsService
   ) {}
   /**
    * LIST: фильтры + сортировка + пагинация
@@ -80,10 +83,20 @@ export class AdminUserService {
       throw new NotFoundException(`Пользователь с id=${userId} не найден`);
     }
 
+    const levels = await this.referralsService.getReferralList(userId);
+
     // Возвращаем в формате React-Admin
     return {
       ...user,
-      id: user.userId, // React-Admin требует поле id
+      id: user.userId, // React-Admin требует поле id,
+      levels: levels.map((level) => ({
+        ...level,
+        id: level.level,
+        referrals: level.referrals.map((referral) => ({
+          ...referral,
+          id: referral.referralId,
+        })),
+      })),
     };
   }
 
