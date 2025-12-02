@@ -236,11 +236,13 @@ export default function Index() {
       const doneLocal = isTrainingCompletedLocal(s);
 
       const status: LevelItem["status"] =
-        s.progressStatus === "completed" || doneLocal
-          ? "done"
-          : s.accessStatus === "available"
-            ? "available"
-            : "locked";
+        group === 1 && stages[0]?.trainingId === s.trainingId
+          ? "available"
+          : s.progressStatus === "completed" || doneLocal
+            ? "done"
+            : s.accessStatus === "available"
+              ? "available"
+              : "locked";
 
       return {
         id: String(s.trainingId),
@@ -260,11 +262,13 @@ export default function Index() {
     () =>
       stages.map((s, idx) => {
         const status: LevelItem["status"] =
-          s.progressStatus === "completed" || isTrainingCompletedLocal(s)
-            ? "done"
-            : s.accessStatus === "available"
-              ? "available"
-              : "locked";
+          group === 1 && stages[0]?.trainingId === s.trainingId
+            ? "available"
+            : s.progressStatus === "completed" || isTrainingCompletedLocal(s)
+              ? "done"
+              : s.accessStatus === "available"
+                ? "available"
+                : "locked";
 
         const stepIndex =
           typeof s.stage === "number"
@@ -280,7 +284,7 @@ export default function Index() {
           stepIndex,
         };
       }),
-    [stages]
+    [stages, group]
   );
 
   const handleCardClick = (l: LevelItem) => {
