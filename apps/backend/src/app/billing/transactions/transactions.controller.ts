@@ -8,7 +8,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
-import { ITransaction } from '@trinity/shared';
+import { ITransaction, TransactionType } from '@trinity/shared';
 
 @Controller('transactions')
 @ApiTags('transactions')
@@ -34,8 +34,9 @@ export class TransactionsController {
     @UserId() userId: number,
     @Query('populate') populate?: boolean
   ): Promise<ITransaction[]> {
-    return populate
-      ? await this.transactionsService.populate({ userId })
-      : await this.transactionsService.findAll({ filter: { userId } });
+    return await this.transactionsService.findAll({
+      filter: { userId, type: { $ne: TransactionType.FUND } },
+      populate: populate ? ['user'] : [],
+    });
   }
 }

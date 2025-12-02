@@ -84,7 +84,7 @@ export class TransactionsService {
     }
   }
 
-  async count(condition: FilterQuery<Transaction>): Promise<number> {
+  async count(condition: FilterQuery<Transaction> = {}): Promise<number> {
     try {
       const count = await this.transactionsRepository.count(condition);
 

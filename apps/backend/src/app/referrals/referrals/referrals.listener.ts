@@ -305,7 +305,7 @@ export class ReferralsListener {
             userId: partner.partnerId,
             type: TransactionType.REFERRAL,
             sum: sum,
-            description: `Ваш Единомышленник в ${level} поколении приобрел ${training.title}.\nВы получили +${sum} OM (${percent}%).,`,
+            description: `Ваш Единомышленник в ${level} поколении приобрел ${training.title}.\nВы получили +${sum} OM (${percent * 100}%).`,
           });
 
           await this.eventEmitter.emit(
@@ -403,7 +403,7 @@ export class ReferralsListener {
         userId: partner.partnerId,
         type: TransactionType.REFERRAL,
         sum: sum,
-        description: `Ваш Единомышленник в ${level} поколении приобрел ${lesson?.title}.\nВы получили +${sum} OM (${percent}%).,`,
+        description: `Ваш Единомышленник в ${level} поколении приобрел ${lesson?.title}.\nВы получили +${sum} OM (${percent * 100}%).`,
       });
 
       await this.eventEmitter.emit(
@@ -509,7 +509,7 @@ export class ReferralsListener {
             userId: partner.partnerId,
             type: TransactionType.REFERRAL,
             sum: sum,
-            description: `Ваш Единомышленник в ${level} поколении прошёл практику ${practise.title}.\nВы получили +${sum} OM (${percent}%).,`,
+            description: `Ваш Единомышленник в ${level} поколении прошёл практику ${practise.title}.\nВы получили +${sum} OM (${percent * 100}%).`,
           });
 
           // Пополняем банк

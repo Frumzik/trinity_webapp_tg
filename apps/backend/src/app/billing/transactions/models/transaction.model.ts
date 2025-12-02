@@ -31,6 +31,9 @@ export class Transaction
 
   @Prop({ type: String, required: true })
   description!: string;
+
+  @Prop({ type: String, required: false })
+  toAddress?: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

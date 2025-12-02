@@ -90,11 +90,11 @@ export default function App() {
         options={{ label: 'Практики' }}
       />
 
-       <Resource
-        name="fund"
-        list={FundList}
-        options={{ label: 'Фонды' }}
-      />
+      <Resource name="fund" list={FundList} options={{ label: 'Фонды' }} />
+
+      <Resource
+        name="transaction"
+        options={{ label: 'Транзакции' }}/>
     </Admin>
   );
 }

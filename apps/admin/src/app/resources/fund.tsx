@@ -15,6 +15,8 @@ import {
   TextInput,
   NumberInput,
   FormDataConsumer,
+  DateField,
+  ReferenceField,
 } from 'react-admin';
 
 import {
@@ -23,6 +25,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Card,
+  CardContent,
 } from '@mui/material';
 
 import MoneyIcon from '@mui/icons-material/Money';
@@ -125,15 +129,53 @@ export const WithdrawButton = () => {
 /*               LIST                     */
 /* -------------------------------------- */
 
-export const FundList = () => (
-  <List>
-    <Datagrid bulkActionButtons={false}>
-      <TextField source="title" label="Фонд" />
-      <NumberField source="balance" label="Баланс" />
-      <NumberField source="earn" label="Заработок" />
+export const TransactionList = () => {
+  return (
+    <Card sx={{ mt: 2 }}>
+      <CardContent>
+        <h3>Транзакции</h3>
+        <List
+          resource="transaction"
+          filter={{ type: 'Fund' }} // type !== FUND
+          actions={false}
+        >
+          <Datagrid rowClick={false} bulkActionButtons={false}>
+            <TextField source="transactionId" label="ID" />
+            {/* Пользователь */}
+            <ReferenceField
+              source="userId" // поле в Practise
+              reference="user" // ресурс для запроса
+              link="show" // ссылка на просмотр пользователя
+              label="Пользователь"
+            >
+              <TextField source="userId" />: @<TextField source="username" /> -{' '}
+              <TextField source="name" />
+            </ReferenceField>
+            <NumberField source="sum" label="Сумма" />
+            <TextField source="toAddress" label="Адрес" />
+            <DateField source="createdAt" showTime label="Дата"/>
+          </Datagrid>
+        </List>
+      </CardContent>
+    </Card>
+  );
+};
 
-      {/* Кнопки в отдельной колонке */}
-      <FunctionField label="Действия" render={(record) => <WithdrawButton />} />
-    </Datagrid>
-  </List>
+export const FundList = () => (
+  <>
+    <List>
+      <Datagrid bulkActionButtons={false}>
+        <TextField source="title" label="Фонд" />
+        <NumberField source="balance" label="Баланс" />
+        <NumberField source="earn" label="Заработок" />
+
+        {/* Кнопки в отдельной колонке */}
+        <FunctionField
+          label="Действия"
+          render={(record) => <WithdrawButton />}
+        />
+      </Datagrid>
+    </List>
+    <TransactionList />
+  </>
 );
