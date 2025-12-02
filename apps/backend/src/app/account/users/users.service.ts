@@ -289,7 +289,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateBalance(user.balance + updateData.inc)
+        await user.updateBalance(user.balance + Math.abs(updateData.inc))
       );
 
       return updated;
@@ -314,7 +314,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateBalance(user.balance - updateData.dec)
+        await user.updateBalance(user.balance - Math.abs(updateData.dec))
       );
 
       return updated;

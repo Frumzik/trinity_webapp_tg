@@ -24,11 +24,20 @@ import {
   ReferenceInput,
   AutocompleteInput,
   BooleanInput,
-  ReferenceManyField,
+  ArrayField,
+  RaRecord,
+  FunctionField,
 } from 'react-admin';
 import { CustomDeleteButton } from '../components/buttons';
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 enum UserGender {
   MALE = 'Male',
@@ -174,6 +183,55 @@ const TrainingShowActions = () => {
   );
 };
 
+const LevelsList = ({ source, label }: { source: string; label?: string }) => {
+  const record: RaRecord | undefined = useRecordContext();
+  if (!record || !record[source] || record[source].length === 0) return null;
+
+  const levels = record[source];
+
+  return (
+    <>
+      {levels.map((level: any) => {
+        if (!level.referrals.length) return null;
+
+        return (
+          <Accordion key={level.level}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>
+                {level.level}: Рефералы - {level.referrals.length}. Заработок -{' '}
+                {level.totalEarn} ОМ
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {level.referrals && level.referrals.length > 0 && (
+                <ArrayField record={level} source="referrals">
+                  <Datagrid bulkActionButtons={false}>
+                    <ReferenceField
+                      source="referralId"
+                      reference="user"
+                      label="Пользователь"
+                    >
+                      <FunctionField
+                        render={(referral: RaRecord) =>
+                          referral
+                            ? `${referral.userId}: ${referral.name} - ${referral.username}`
+                            : '—'
+                        }
+                      />
+                    </ReferenceField>
+
+                    <NumberField source="earn" label="Заработок" />
+                  </Datagrid>
+                </ArrayField>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </>
+  );
+};
+
 export const UserShow = () => {
   return (
     <Show actions={<TrainingShowActions />}>
@@ -221,14 +279,8 @@ export const UserShow = () => {
           <TextField source="name" />
         </ReferenceField>
 
-        {/* Список рефералов */}
-        <ReferenceManyField
-          label="Рефералы"
-          reference="user"
-          target="partnerId"
-        >
-          <UserDatagrid />
-        </ReferenceManyField>
+        {/* Список уровней */}
+        <LevelsList source="levels" label="Рефералы" />
 
         <TextField source="address" label="Адрес" />
 

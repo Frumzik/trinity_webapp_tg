@@ -1,4 +1,4 @@
-import { IUser, IWithdraw } from '@trinity/shared';
+import { IUser, IWithdraw, WithdrawType } from '@trinity/shared';
 import { Types } from 'mongoose';
 
 export class WithdrawEntity implements IWithdraw {
@@ -6,15 +6,19 @@ export class WithdrawEntity implements IWithdraw {
 
   withdrawId!: number;
 
-  user!: Types.ObjectId | IUser;
-  userId!: number;
+  type!: WithdrawType;
+
+  user?: Types.ObjectId | IUser;
+  userId?: number;
+
+  fundType?: string;
 
   toAddress!: string;
   amount!: number;
 
   date: Date = new Date();
 
-  needModeration = true;
+  needModeration = false;
 
   constructor(withdraw: Partial<IWithdraw>) {
     Object.assign(this, withdraw);

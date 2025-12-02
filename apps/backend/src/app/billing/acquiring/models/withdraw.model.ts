@@ -1,6 +1,6 @@
 // banner.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IWithdraw } from '@trinity/shared';
+import { IWithdraw, WithdrawType } from '@trinity/shared';
 import { Document, Types } from 'mongoose';
 
 @Schema({ versionKey: false, timestamps: true })
@@ -8,11 +8,18 @@ export class Withdraw extends Document<Types.ObjectId> implements IWithdraw {
   @Prop({ type: Number, required: true })
   withdrawId!: number;
 
-  @Prop({ type: Number, required: true })
-  userId!: number;
+  @Prop({type: String, enum: WithdrawType, required: true})
+  type!: WithdrawType;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  user!: Types.ObjectId;
+  @Prop({ type: Number, required: false })
+  userId?: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
+
+  @Prop({ type: String, required: false })
+  fundType?: string;
+
 
   @Prop({ type: String, required: true })
   toAddress!: string;

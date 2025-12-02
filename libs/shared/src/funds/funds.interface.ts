@@ -3,11 +3,13 @@ import { Types } from 'mongoose';
 export enum FundType {
   RESERVE = 'RESERVE',
   MAIN = 'MAIN',
+  ADMIN = 'ADMIN',
 }
 
 export enum FundTitle {
   RESERVE = 'Резервный фонд',
-  MAIN = 'Фонд Света'
+  ADMIN = 'Админский доход',
+  MAIN = 'Фонд света',
 }
 
 export interface IFund {
@@ -17,21 +19,24 @@ export interface IFund {
   type: FundType;
 
   balance: number;
+  earn: number;
 }
 
 export enum ReserveFundItemType {
-  STAGE = "Stage",
-  SUBSCRIPTION = "Subscription",
-  PRACTISE = "Practise"
+  STAGE = 'Stage',
+  SUBSCRIPTION = 'Subscription',
+  PRACTISE = 'Practise',
 }
 
 export interface IReserveFundItem {
   _id?: Types.ObjectId;
-  type: ReserveFundItemType,
+  reserveId: number;
+  type: ReserveFundItemType;
   userId: number;
   sum: number;
   stage?: number;
   stageLevel?: number;
   trainingId?: number;
+  accepted?: boolean;
   endDate: Date | null;
 }

@@ -178,7 +178,7 @@ export class UsersRepository {
       // Пополняем баланс MAIN-фонда на эту сумму
       await this.fundModel
         .updateOne(
-          { type: FundType.MAIN },
+          { type: FundType.INVESTMENT },
           { $inc: { balance: totalReserveSum } }
         )
         .exec();

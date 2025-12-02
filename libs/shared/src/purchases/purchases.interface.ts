@@ -23,3 +23,5 @@ export interface IPurchase {
   days?: number;
   contentId?: number;
 }
+
+
