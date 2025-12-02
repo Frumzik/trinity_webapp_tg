@@ -152,6 +152,7 @@ export const TransactionList = () => {
               <TextField source="name" />
             </ReferenceField>
             <NumberField source="sum" label="Сумма" />
+            <TextField source="description" label="Комментарий" />
             <TextField source="toAddress" label="Адрес" />
             <DateField source="createdAt" showTime label="Дата"/>
           </Datagrid>

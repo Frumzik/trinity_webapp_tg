@@ -8,7 +8,6 @@ import {
   UseGuards,
   Query,
   Param,
-  Body,
   Res,
 } from '@nestjs/common';
 import { JWTAuthGuard, parseGetListQuery, Roles } from '../../service';
@@ -52,17 +51,17 @@ export class AdminTransactionController {
   }
 
   @Post()
-  async create(@Body() dto: never) {
+  async create() {
     return await this.adminTransactionService.create();
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: never) {
+  async update() {
     return await this.adminTransactionService.update();
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
+  async delete() {
     return await this.adminTransactionService.delete();
   }
 }
