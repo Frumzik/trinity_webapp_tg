@@ -58,8 +58,8 @@ export const WithdrawButton = () => {
   };
 
   const nodeEnv = import.meta.env.VITE_NODE_ENV;
-  // const isProduction = nodeEnv === 'production';
-  const isProduction = true;
+  const isProduction = nodeEnv === 'production';
+  // const isProduction = true;
 
   return isProduction ? (
     <>
