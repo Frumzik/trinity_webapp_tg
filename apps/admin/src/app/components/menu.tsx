@@ -12,6 +12,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ImageIcon from '@mui/icons-material/Image';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import MoneyIcon from '@mui/icons-material/Money';
 
 export const MyMenu = () => {
   const [openTrainings, setOpenTrainings] = useState(false);
@@ -107,6 +108,17 @@ export const MyMenu = () => {
           <MonetizationOnIcon />
         </ListItemIcon>
         <ListItemText primary="Выводы" />
+      </MenuItem>
+
+      {/* Выводы средств */}
+      <MenuItem
+        component={Link}
+        to="/fund"
+      >
+        <ListItemIcon>
+          <MoneyIcon />
+        </ListItemIcon>
+        <ListItemText primary="Фонды" />
       </MenuItem>
     </Menu>
   );

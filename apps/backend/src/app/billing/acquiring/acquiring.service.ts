@@ -6,6 +6,7 @@ import {
   forwardRef,
   NotFoundException,
   UseGuards,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -19,7 +20,9 @@ import {
   AcquiringWithdrawEvent,
   AcquiringWithdrawWebhookDto,
   CounterType,
+  FundType,
   TransactionType,
+  WithdrawType,
 } from '@trinity/shared';
 import { UserEntity, UsersService } from '../../account';
 import { TransactionsService } from '../transactions';
@@ -284,10 +287,13 @@ export class AcquiringService {
 
     const needModeration = sum >= this.moderationLimit;
 
+    const withdrawId = await this.countersService.saveNextSequence(
+      CounterType.WITHDRAW_ID
+    );
+    
     await this.withdrawsService.create({
-      withdrawId: await this.countersService.saveNextSequence(
-        CounterType.WITHDRAW_ID
-      ),
+      withdrawId,
+      type: WithdrawType.USER,
       userId: user.userId,
       amount: sum,
       toAddress: address,
@@ -296,18 +302,60 @@ export class AcquiringService {
     });
 
     if (!needModeration) {
-      await this.sendWithdrawRequest(address, sum);
+      try {
+        await this.sendWithdrawRequest(address, sum);
+      } catch (e) {
+        await this.withdrawsService.delete;
+      }
+    }
+  }
+
+  async fundWithdraw(fundType: FundType, address: string, amount: number) {
+    const fund = await this.fundsService.find({ type: fundType });
+
+    if (!fund) {
+      console.log('Фонд не найден');
+      throw new NotFoundException('Фонд не найден');
+    }
+
+    if (fund.balance < amount) {
+      console.log('Недостаточный баланс');
+      throw new Error('Недостаточный баланс');
+    }
+
+    const withdrawId = await this.countersService.saveNextSequence(
+      CounterType.WITHDRAW_ID
+    );
+    await this.withdrawsService.create({
+      withdrawId,
+      type: WithdrawType.FUND,
+      fundType,
+      amount,
+      toAddress: address,
+      needModeration: false,
+    });
+
+    try {
+      await this.sendWithdrawRequest(address, amount);
+    } catch (e) {
+      await this.withdrawsService.delete({ withdrawId });
     }
   }
 
   async sendWithdrawRequest(address: string, amount: number) {
-    await firstValueFrom(
-      this.http.post(
-        `${this.BASE_URL}/withdraw`,
-        { address, amount: amount.toString() },
-        { headers: this.headers }
-      )
-    );
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${this.BASE_URL}/withdraw`,
+          { address, amount: amount.toString() },
+          { headers: this.headers }
+        )
+      );
+    } catch (error: unknown) {
+      throw new InternalServerErrorException(
+        'Ошибка при создании заявки на вывод'
+      );
+    }
   }
 
   // -------------------------
@@ -368,27 +416,35 @@ export class AcquiringService {
       return { ok: false };
     }
 
-    const user = await this.usersService.find({ userId: withdraw.userId });
+    if (withdraw.type == WithdrawType.USER) {
+      const user = await this.usersService.find({ userId: withdraw.userId });
 
-    if (!user) {
-      return { ok: false };
+      if (!user) {
+        return { ok: false };
+      }
+
+      const sum = body.amount + this.withdrawComission;
+
+      await this.usersService.decBalance({ userId: user.userId }, { dec: sum });
+      await this.transactionsService.create({
+        userId: +user.userId,
+        type: TransactionType.WITHDRAWAL,
+        sum: -sum,
+        description: 'Вывод средств',
+      });
+      await this.fundsService.incAdmin(this.withdrawComission);
+
+      await this.eventEmitter.emit(
+        AcquiringEvents.WITHDRAW,
+        new AcquiringDepositEvent(+user.userId, +body.amount)
+      );
+    } else if (withdraw.type == WithdrawType.FUND) {
+      if (withdraw.fundType == FundType.MAIN) {
+        await this.fundsService.decMain(withdraw.amount);
+      } else if (withdraw.fundType == FundType.ADMIN) {
+        await this.fundsService.decAdmin(withdraw.amount);
+      }
     }
-
-    const sum = body.amount + this.withdrawComission;
-
-    await this.usersService.decBalance({ userId: user.userId }, { dec: sum });
-    await this.transactionsService.create({
-      userId: +user.userId,
-      type: TransactionType.WITHDRAWAL,
-      sum: -sum,
-      description: 'Вывод средств',
-    });
-    await this.fundsService.incAdmin(this.withdrawComission);
-
-    await this.eventEmitter.emit(
-      AcquiringEvents.WITHDRAW,
-      new AcquiringDepositEvent(+user.userId, +body.amount)
-    );
 
     await this.withdrawsService.delete({ _id: withdraw._id });
 

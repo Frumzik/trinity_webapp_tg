@@ -68,9 +68,12 @@ export class PurchaseListener {
           throw new Error('Тренинг не найден');
         }
 
-        if (training.type == TrainingType.TRAINING) {
+        if (
+          training.type == TrainingType.TRAINING &&
+          !(training.stage && training.stageLevel)
+        ) {
           this.eventEmitter.emit(
-            PurchaseEvents.BUY_PRACTISE,
+            PurchaseEvents.BUY,
             new PurchaseBuyPractiseEvent(purchase.userId, training.trainingId)
           );
         } else if (training.stage && training.stageLevel) {
@@ -106,22 +109,25 @@ export class PurchaseListener {
               }
             }
           }
-          await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_STAGE_RETURNED,
-            new ReferralReserveStageReturnedEvent(purchase.userId, reserveSum)
-          );
 
-          await this.transactionsService.create({
-            userId: purchase.userId,
-            type: TransactionType.REFERRAL,
-            sum: reserveSum,
-            description: 'Возврат реферального вознаграждения из резерва',
-          });
+          if (reserveItems.length) {
+            await this.eventEmitter.emit(
+              ReferralEvents.RESERVE_STAGE_RETURNED,
+              new ReferralReserveStageReturnedEvent(purchase.userId, reserveSum)
+            );
 
-          await this.usersService.incBalance(
-            { userId: purchase.userId },
-            { inc: reserveSum }
-          );
+            await this.transactionsService.create({
+              userId: purchase.userId,
+              type: TransactionType.REFERRAL,
+              sum: reserveSum,
+              description: 'Возврат реферального вознаграждения из резерва',
+            });
+
+            await this.usersService.incBalance(
+              { userId: purchase.userId },
+              { inc: reserveSum }
+            );
+          }
         } else {
           // Событие
           await this.eventEmitter.emit(
@@ -163,28 +169,34 @@ export class PurchaseListener {
           },
         });
 
+        let reserveSum = 0;
+
         for (const reserveItem of reserveItems) {
           // Убираем из резерва
           await this.fundsService.returnReserveItem(reserveItem);
 
+          reserveSum += reserveItem.sum;
+        }
+
+        if (reserveItems.length) {
           await this.eventEmitter.emit(
             ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
             new ReferralReserveSubscriptionReturnedEvent(
-              reserveItem.userId,
-              reserveItem.sum
+              purchase.userId,
+              reserveSum
             )
           );
 
           await this.transactionsService.create({
             userId: purchase.userId,
             type: TransactionType.REFERRAL,
-            sum: reserveItem.sum,
+            sum: reserveSum,
             description: 'Возврат реферального вознаграждения из резерва',
           });
 
           await this.usersService.incBalance(
             { userId: purchase.userId },
-            { inc: reserveItem.sum }
+            { inc: reserveSum }
           );
         }
 

@@ -13,6 +13,8 @@ import { BannersModule } from '../banners';
 import { AdminWithdrawController, AdminWithdrawService } from './withdraw';
 import { FundsModule, ReferralsModule } from '../referrals';
 import { AdminPractiseController, AdminPractiseService } from './practise';
+import { AdminFundService } from './fund/admin-fund.service';
+import { AdminFundController } from './fund/admin-fund.controller';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { AdminPractiseController, AdminPractiseService } from './practise';
     AdminBannerService,
     AdminWithdrawService,
     AdminPractiseService,
+    AdminFundService
   ],
   controllers: [
     AdminUserController,
@@ -42,6 +45,7 @@ import { AdminPractiseController, AdminPractiseService } from './practise';
     AdminBannerController,
     AdminWithdrawController,
     AdminPractiseController,
+    AdminFundController
   ],
 })
 export class AdminModule {}

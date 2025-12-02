@@ -14,6 +14,7 @@ import {
   BannerCreate,
   WithdrawList,
   PractiseList,
+  FundList,
 } from './resources';
 import { MyMenu } from './components';
 import { Dashboard } from './components';
@@ -87,6 +88,12 @@ export default function App() {
         name="practise"
         list={PractiseList}
         options={{ label: 'Практики' }}
+      />
+
+       <Resource
+        name="fund"
+        list={FundList}
+        options={{ label: 'Фонды' }}
       />
     </Admin>
   );

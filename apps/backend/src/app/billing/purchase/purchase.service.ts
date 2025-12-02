@@ -172,9 +172,6 @@ export class PurchaseService {
               throw new NotFoundException('Подписка не найдена');
             }
 
-            console.log(subscription);
-            console.log(subscription.isActive());
-
             if (!subscription.isActive()) {
               throw new Error(rule.description ?? 'Сначала оформите подписку');
             }
@@ -190,6 +187,8 @@ export class PurchaseService {
               userId: user.userId,
               contentId: rule.value,
             });
+
+            console.log(rule);
 
             if (!purchase) {
               throw new Error(
