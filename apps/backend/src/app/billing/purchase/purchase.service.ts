@@ -467,7 +467,7 @@ export class PurchaseService {
       description: `Доступ к приложению активирован на ${
         dto.subscriptionDays == 365
           ? '1 год'
-          : formatDays(dto.subscriptionDays as number)
+          : `${dto.subscriptionDays} ${formatDays(dto.subscriptionDays as number)}`
       }`,
     });
 
