@@ -33,33 +33,40 @@ export function Index() {
     const cats: any[] = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
 
     return cats.map((cat, ci) => {
-      const items: SliderItem[] = (cat.favorites ?? []).map((f: any, fi: number) => {
-        const lessonType = String(f.lesson?.type || "").toLowerCase();
+      // 1. сортировка favorites
+      const sortedFavs = [...(cat.favorites ?? [])].sort((a, b) => {
+        const aIsTraining = a.type === "Training";
+        const bIsTraining = b.type === "Training";
+
+        // сначала тренинги, потом уроки
+        if (aIsTraining !== bIsTraining) {
+          return aIsTraining ? -1 : 1;
+        }
+
+        // внутри группы — по дате добавления (новые выше)
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return bTime - aTime;
+      });
+
+      const items: SliderItem[] = sortedFavs.map((f: any, fi: number) => {
         const img =
           f.lesson?.coverUrl ||
           f.training?.coverUrl ||
           f.training?.iconUrl ||
           fallbacks[(ci + fi) % 3];
 
-        const fullTitle =
-          f.lesson?.title || f.training?.title || "Практика";
-
-        const shortTitle = fullTitle
-          .split(/\s+/)
-          .slice(0, 3)
-          .join(" ");
+        const fullTitle = f.lesson?.title || f.training?.title || "Практика";
+        const shortTitle = fullTitle.split(/\s+/).slice(0, 3).join(" ");
 
         const item: SliderItem = {
-          id: f.lessonId ?? f._id ?? `${ci}-${fi}`,
+          id: f.lessonId ?? f.trainingId ?? f._id ?? `${ci}-${fi}`,
           title: shortTitle,
           imageUrl: img,
           onClick: () => {
             if (f.type === "Training") {
               navigate("/preview", {
-                state: {
-                  trainingId: f.trainingId,
-                  returnTo: "/favorites",
-                },
+                state: { trainingId: f.trainingId, returnTo: "/favorites" },
               });
               return;
             }
@@ -77,12 +84,7 @@ export function Index() {
                 },
               ];
               navigate("/player", {
-                state: {
-                  queue: q,
-                  index: 0,
-                  trainingId: f.trainingId,
-                  returnTo: "/favorites",
-                },
+                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
               });
               return;
             }
@@ -98,12 +100,7 @@ export function Index() {
                 },
               ];
               navigate("/player", {
-                state: {
-                  queue: q,
-                  index: 0,
-                  trainingId: f.trainingId,
-                  returnTo: "/favorites",
-                },
+                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
               });
               return;
             }
@@ -124,7 +121,6 @@ export function Index() {
       };
     });
   }, [data, navigate]);
-
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
