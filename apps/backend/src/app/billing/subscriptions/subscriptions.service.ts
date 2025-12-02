@@ -156,7 +156,7 @@ export class SubscriptionsService {
       );
       await this.eventEmitter.emit(
         SubscriptionEvents.PAYED,
-        new SubscriptionPayedEvent(subscription.subscriptionId)
+        new SubscriptionPayedEvent(dto.days, subscription.subscriptionId)
       );
     } catch (error: unknown) {
       const message =
