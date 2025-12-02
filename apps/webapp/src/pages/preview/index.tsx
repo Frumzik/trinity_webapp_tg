@@ -113,8 +113,7 @@ export default function PreviewPage() {
     }
   };
 
-  // ---------- подписка / покупка ----------
-  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
     subscriptionType === "pro" || subscriptionType === "premium";
@@ -184,15 +183,22 @@ export default function PreviewPage() {
       setResultOnCta(() => () => setResultOpen(false));
       setResultOpen(true);
     } catch (e: any) {
-      const rawMsg: string | undefined = e?.data?.message?.[0] || e?.error;
-      const isBalanceError =
-        rawMsg && rawMsg.toLowerCase().includes("баланс");
+      const status = e?.status;
 
-      if (isBalanceError) {
+      const raw = Array.isArray(e?.data?.message)
+        ? e.data.message[0]
+        : e?.data?.message ?? e?.error;
+
+      const msg: string =
+        typeof raw === "string" && raw.trim()
+          ? raw
+          : "Покупка не оформлена. Попробуй ещё раз.";
+
+      if (status === 409) {
         setResultKind("no-balance");
-        setResultTitle("Недостаточно ОМ на балансе ");
+        setResultTitle("Недостаточно ОМ на балансе");
         setResultItems(undefined);
-        setResultDesc(rawMsg);
+        setResultDesc("");
         setResultCta("Добавить ОМ");
         setResultOnCta(() => () => {
           setResultOpen(false);
@@ -200,11 +206,9 @@ export default function PreviewPage() {
         });
       } else {
         setResultKind("error");
-        setResultTitle("");
+        setResultTitle(msg);
         setResultItems(undefined);
-        setResultDesc(
-          rawMsg || "Покупка не оформлена. Попробуй ещё раз."
-        );
+        setResultDesc("");
         setResultCta("Понятно");
         setResultOnCta(() => () => setResultOpen(false));
       }

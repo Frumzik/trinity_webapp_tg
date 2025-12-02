@@ -168,7 +168,7 @@ export default function Index() {
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
-  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
   const [fetchUser] = useLazyGetUserQuery();
 
   const root: BNode | undefined = useMemo(() => {

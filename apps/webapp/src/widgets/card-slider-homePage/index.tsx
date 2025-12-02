@@ -1,4 +1,5 @@
 import { useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { HScroller } from "../../shared/ui/h-scroller";
 import "./card-slider.scss";
 import giftIcon from "../../assets/home/gifts.png";
@@ -40,6 +41,7 @@ export default function MiniCardSlider({
                                          onItemClick,
                                          onViewed,
                                        }: Props) {
+  const navigate = useNavigate();
   const seenRef = useRef<Record<string, true>>(loadSeen());
 
   const staticGiftsCard: MiniCardItem = {
@@ -74,8 +76,9 @@ export default function MiniCardSlider({
     e?.preventDefault();
     e?.stopPropagation();
 
+    // «Дары» — всегда доступны, без проверки подписки
     if (isGifts(it)) {
-      onItemClick?.(it);
+      navigate("/gifts");
       return;
     }
 

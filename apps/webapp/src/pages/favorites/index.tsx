@@ -41,9 +41,17 @@ export function Index() {
           f.training?.iconUrl ||
           fallbacks[(ci + fi) % 3];
 
+        const fullTitle =
+          f.lesson?.title || f.training?.title || "Практика";
+
+        const shortTitle = fullTitle
+          .split(/\s+/)
+          .slice(0, 3)
+          .join(" ");
+
         const item: SliderItem = {
           id: f.lessonId ?? f._id ?? `${ci}-${fi}`,
-          title: f.lesson?.title || "Практика",
+          title: shortTitle,
           imageUrl: img,
           onClick: () => {
             if (f.type === "Training") {
@@ -56,21 +64,25 @@ export function Index() {
               return;
             }
 
-            // Если это урок — открываем его по типу
             const lessonType = String(f.lesson?.type || "").toLowerCase();
 
             if (lessonType === "audio") {
               const q = [
                 {
                   id: f.lessonId as number,
-                  title: f.lesson?.title || "Практика",
+                  title: fullTitle,
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
                   mediaUrl: undefined,
                 },
               ];
               navigate("/player", {
-                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
+                state: {
+                  queue: q,
+                  index: 0,
+                  trainingId: f.trainingId,
+                  returnTo: "/favorites",
+                },
               });
               return;
             }
@@ -79,23 +91,27 @@ export function Index() {
               const q = [
                 {
                   id: f.lessonId as number,
-                  title: f.lesson?.title || "Практика",
+                  title: fullTitle,
                   subtitle: f.lesson?.duration || undefined,
                   artworkUrl: img,
                   videoUrl: undefined,
                 },
               ];
               navigate("/player", {
-                state: { queue: q, index: 0, trainingId: f.trainingId, returnTo: "/favorites" },
+                state: {
+                  queue: q,
+                  index: 0,
+                  trainingId: f.trainingId,
+                  returnTo: "/favorites",
+                },
               });
               return;
             }
 
-            // Текстовые уроки
             navigate(`/lesson/${f.trainingId}/${f.lessonId}`, {
               state: { returnTo: "/favorites" },
             });
-          }
+          },
         };
 
         return item;
