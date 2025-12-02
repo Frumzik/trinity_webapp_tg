@@ -13,6 +13,7 @@ import {
   SubscriptionDaysLeftEvent,
   SubscriptionEvents,
   SubscriptionExpiredEvent,
+  SubscriptionPayedEvent,
   SubscriptionUpdatedEvent,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
@@ -155,7 +156,7 @@ export class SubscriptionsService {
       );
       await this.eventEmitter.emit(
         SubscriptionEvents.PAYED,
-        new SubscriptionExpiredEvent(subscription.subscriptionId)
+        new SubscriptionPayedEvent(subscription.subscriptionId)
       );
     } catch (error: unknown) {
       const message =
