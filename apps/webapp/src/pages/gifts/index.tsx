@@ -39,11 +39,7 @@ export function Index() {
     const root = data?.data;
     if (!root) return [];
 
-    // Категории — это children тренинга 35: Фильмы, Музыка, Медитации
     return (root.childrens ?? []).map((category, ci) => {
-      // Что рендерим внутри категории:
-      // 1) если есть lessons — берём их,
-      // 2) иначе берём childrens (если подарки завязаны на под-тренинги).
       const rawItems: any[] =
         (category.lessons && category.lessons.length > 0
           ? category.lessons
@@ -65,8 +61,6 @@ export function Index() {
           title,
           imageUrl: img,
           onClick: () => {
-            // если это урок — можем сразу вести в плеер/урок,
-            // если это под-тренинг — в страницу тренинга
             if (isLesson) {
               if (lessonType === "audio") {
                 const q = [
@@ -105,13 +99,11 @@ export function Index() {
                   },
                 });
               } else {
-                // текст / другое
                 navigate(`/lesson/${category.trainingId}/${node.lessonId}`, {
                   state: { returnTo: "/gifts" },
                 });
               }
             } else {
-              // под-тренинг внутри категории
               navigate(`/training/${node.trainingId}`, {
                 state: { returnTo: "/gifts" },
               });

@@ -78,10 +78,6 @@ export default function TopActions({
           <StarIcon filled={isFav} dimmed={pending} />
         </button>
       )}
-
-      <button className="icon-btn" onClick={onMenu} aria-label="Меню">
-        <KebabIcon />
-      </button>
     </div>
   );
 }
