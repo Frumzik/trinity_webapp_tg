@@ -55,7 +55,6 @@ export default function LessonTextPage() {
       ? filmDurationFromStep
       : lesson?.duration ||
       (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
-  // ---------------------------------------------------------------
 
   const description = lesson?.description || "Описание";
   const imageSrc = lesson?.coverUrl || Card1;

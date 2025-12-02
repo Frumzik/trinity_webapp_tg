@@ -173,7 +173,7 @@ export default function Index() {
                     Ступени<br />Духа
                   </>
                 }
-                description={desc}
+                // description={desc}
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
                 enabled
