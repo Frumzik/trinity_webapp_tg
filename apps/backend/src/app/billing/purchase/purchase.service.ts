@@ -27,7 +27,7 @@ import {
   TransactionType,
   TypeContentAccess,
 } from '@trinity/shared';
-import { CountersService } from '../../service';
+import { CountersService, formatDays } from '../../service';
 import { UserEntity, UsersService } from '../../account';
 import { ContentService } from '../../lms';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -303,8 +303,8 @@ export class PurchaseService {
       const transaction = await this.transactionsService.create({
         type: TransactionType.PURCHASE,
         userId: user.userId,
-        sum:-price,
-        description: `Покупка практики "${training.title}"`,
+        sum: -price,
+        description: `Вы приобрели практику "${training.title}" за ${price} OM.\nВ ближайшее время мастер свяжется с вами для согласования времени проведения практики.\nБлагодарим за доверие.`,
       });
 
       if (!transaction) throw new Error('Ошибка создания транзакции');
@@ -367,7 +367,9 @@ export class PurchaseService {
         type: TransactionType.PURCHASE,
         userId: user.userId,
         sum: -price,
-        description: `Покупка ${training.stage ? 'ступени' : 'тренинга'} "${training.title}"`,
+        description: training.stage
+          ? `Поздравляем! Вы открыли ${training.stage} Ступень Духа ${training.stageLevel} уровня`
+          : `Поздравляем! Вы приобрели ${training.title}.\nБлагодарим за доверие.`,
       });
 
       if (!transaction) throw new Error('Ошибка создания транзакции');
@@ -462,7 +464,11 @@ export class PurchaseService {
       type: TransactionType.SUBSCRIPTION,
       userId: user.userId,
       sum: -totalPrice,
-      description: `Продление подписки на ${dto.subscriptionDays} дней`,
+      description: `Доступ к приложению активирован на ${
+        dto.subscriptionDays == 365
+          ? '1 год'
+          : formatDays(dto.subscriptionDays as number)
+      }`,
     });
 
     if (!transaction) throw new Error('Ошибка создания транзакции');

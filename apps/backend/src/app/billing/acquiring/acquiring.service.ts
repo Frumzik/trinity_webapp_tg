@@ -242,14 +242,14 @@ export class AcquiringService {
       type: TransactionType.WITHDRAWAL,
       userId: user.userId,
       sum: -amount,
-      description: 'Перевод средств другому пользователю',
+      description: `Перевод ${amount} ОМ другому пользователю`,
     });
 
     await this.transactionsService.create({
       type: TransactionType.REPLENISHMENT,
       userId: toUser.userId,
       sum: amount,
-      description: 'Пополнение от другого пользователя',
+      description: `Пополнение ${amount} ОМ от другого пользователя`,
     });
 
     await this.usersService.decBalance(
@@ -290,7 +290,7 @@ export class AcquiringService {
     const withdrawId = await this.countersService.saveNextSequence(
       CounterType.WITHDRAW_ID
     );
-    
+
     await this.withdrawsService.create({
       withdrawId,
       type: WithdrawType.USER,
@@ -395,7 +395,7 @@ export class AcquiringService {
       userId: +body.toUserId,
       type: TransactionType.REPLENISHMENT,
       sum: +body.amount,
-      description: 'Пополнение счёта',
+      description: `${+body.amount} ОМ добавлено на баланс`,
     });
 
     await this.eventEmitter.emit(
@@ -430,7 +430,7 @@ export class AcquiringService {
         userId: +user.userId,
         type: TransactionType.WITHDRAWAL,
         sum: -sum,
-        description: 'Вывод средств',
+        description: `${sum} ОМ выведено`,
       });
       await this.fundsService.incAdmin(this.withdrawComission);
 

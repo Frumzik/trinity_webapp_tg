@@ -175,7 +175,7 @@ export class ReferralsListener {
           userId: partner.partnerId,
           type: TransactionType.REFERRAL,
           sum: sum,
-          description: `Реферальное вознаграждение за ${level} ступень`,
+          description: `Ваш Единомышленник в ${level} поколении открыл ${training.stage} Ступень Духа.\nВы получили +X ${sum} ОМ`,
         });
 
         await this.eventEmitter.emit(
@@ -305,7 +305,7 @@ export class ReferralsListener {
             userId: partner.partnerId,
             type: TransactionType.REFERRAL,
             sum: sum,
-            description: `Реферальное вознаграждение за ${level} ступень`,
+            description: `Ваш Единомышленник в ${level} поколении приобрел ${training.title}.\nВы получили +${sum} OM (${percent}%).,`,
           });
 
           await this.eventEmitter.emit(
@@ -403,7 +403,7 @@ export class ReferralsListener {
         userId: partner.partnerId,
         type: TransactionType.REFERRAL,
         sum: sum,
-        description: `Реферальное вознаграждение за ${level} ступень`,
+        description: `Ваш Единомышленник в ${level} поколении приобрел ${lesson?.title}.\nВы получили +${sum} OM (${percent}%).,`,
       });
 
       await this.eventEmitter.emit(
@@ -509,7 +509,7 @@ export class ReferralsListener {
             userId: partner.partnerId,
             type: TransactionType.REFERRAL,
             sum: sum,
-            description: `Реферальное вознаграждение за ${level} ступень`,
+            description: `Ваш Единомышленник в ${level} поколении прошёл практику ${practise.title}.\nВы получили +${sum} OM (${percent}%).,`,
           });
 
           // Пополняем банк
@@ -584,7 +584,7 @@ export class ReferralsListener {
         userId: merchant.userId,
         type: TransactionType.MERCHANT,
         sum: merchantSum,
-        description: `Награда за проведение практики ${training.title}`,
+        description: `Вознаграждение +${merchantSum} OM за ${training.title}`,
       });
     }
 
@@ -623,19 +623,20 @@ export class ReferralsListener {
       throw new NotFoundException('Транзакция не найдена');
     }
 
-    await this.fundsService.decReserve(Math.abs(transaction.sum));
+    const practise = await this.contentService.findTraining({ trainingId });
+
+    const sum = Math.abs(transaction.sum);
+
+    await this.fundsService.decReserve(sum);
 
     await this.transactionsService.create({
       userId,
       type: TransactionType.PURCHASE,
-      sum: Math.abs(transaction.sum),
-      description: `Возврат практики`,
+      sum: sum,
+      description: `${sum} OM за ${practise?.title} были возвращены`,
     });
 
-    await this.usersService.incBalance(
-      { userId },
-      { inc: Math.abs(transaction.sum) }
-    );
+    await this.usersService.incBalance({ userId }, { inc: sum });
 
     const reserveItem = await this.fundsService.findReserveItem({
       type: ReserveFundItemType.PRACTISE,

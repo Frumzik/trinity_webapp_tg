@@ -120,7 +120,7 @@ export class PurchaseListener {
               userId: purchase.userId,
               type: TransactionType.REFERRAL,
               sum: reserveSum,
-              description: 'Возврат реферального вознаграждения из резерва',
+              description: `Вознаграждение ${reserveSum} ОМ возвращено вам из Резервного Фонда.\nВы открыли необходимую ступень`,
             });
 
             await this.usersService.incBalance(
@@ -191,7 +191,7 @@ export class PurchaseListener {
             userId: purchase.userId,
             type: TransactionType.REFERRAL,
             sum: reserveSum,
-            description: 'Возврат реферального вознаграждения из резерва',
+            description: `Вознаграждение ${reserveSum} OM возвращено вам из Резервного Фонда.\nВы активировали доступ вовремя.`,
           });
 
           await this.usersService.incBalance(
