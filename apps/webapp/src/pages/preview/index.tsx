@@ -113,8 +113,7 @@ export default function PreviewPage() {
     }
   };
 
-  // ---------- подписка / покупка ----------
-  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery();
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
   const subscriptionType = userRes?.data.subscription?.type;
   const hasPaidSubscription =
     subscriptionType === "pro" || subscriptionType === "premium";

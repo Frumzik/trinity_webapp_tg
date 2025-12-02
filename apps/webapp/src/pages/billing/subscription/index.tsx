@@ -63,7 +63,7 @@ export default function SubscriptionManagePage({
   });
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
-  const [selectedPlan, setSelectedPlan] = useState<'year' | 'month'>('year');
+  const [selectedPlan, setSelectedPlan] = useState<'year' | 'month'>('month');
   const [showManage, setShowManage] = useState(false);
 
   const [resultOpen, setResultOpen] = useState(false);
