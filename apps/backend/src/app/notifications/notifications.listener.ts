@@ -29,17 +29,23 @@ import {
   AcquiringDepositEvent,
   AcquiringWithdrawEvent,
   AcquiringErrorEvent,
+  PurchasePractiseAbortEvent,
+  PurchaseBuyPractiseEvent,
+  PurchasePractiseAcceptEvent,
+  PurchasePractiseDoneEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
 import { formatDays } from '../service';
+import { ContentService } from '../lms';
 
 @Injectable()
 export class NotificationsListener {
   constructor(
     private readonly notificationsService: NotificationsService,
     @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly contentService: ContentService
   ) {}
 
   @OnEvent(ReferralEvents.REGISTERED)
@@ -363,5 +369,93 @@ ${sum} OM отправлены в Фонд Света`
   @OnEvent(AcquiringEvents.ERROR)
   async onAcquringError({ message }: AcquiringErrorEvent) {
     await this.notificationsService.sendBotError(message);
+  }
+
+  @OnEvent(PurchaseEvents.BUY_PRACTISE)
+  async onPractiseBuy({ userId, trainingId }: PurchaseBuyPractiseEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const training = await this.contentService.findTraining({ trainingId });
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Вы забронировали практику "${training.title}" за ${training.price} OM.
+Позже с вами свяжется эксперт для подтверждения практики
+Спасибо, что развиваете ТРИНИТИ.`
+    );
+  }
+
+  @OnEvent(PurchaseEvents.PRACTISE_ACCEPT)
+  async onPractiseAccept({ userId, trainingId }: PurchasePractiseAcceptEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const training = await this.contentService.findTraining({ trainingId });
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
+
+    const merchant = await this.usersService.find({
+      userId: training.merchantId,
+    });
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Заявку на вашу практику "${training.title}" подтвердил эксперт @${
+        merchant?.username ?? ''
+      }`
+    );
+  }
+
+  @OnEvent(PurchaseEvents.PRACTISE_DONE)
+  async onPractiseDone({ userId, trainingId }: PurchasePractiseDoneEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const training = await this.contentService.findTraining({ trainingId });
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Практика "${training.title}" проведена`
+    );
+  }
+
+  @OnEvent(PurchaseEvents.PRACTISE_ABORT)
+  async onPractiseAbort({ userId, trainingId }: PurchasePractiseAbortEvent) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const training = await this.contentService.findTraining({ trainingId });
+
+    if (!training) {
+      throw new NotFoundException('Тренинг не найден');
+    }
+
+    await this.notificationsService.sendBotMessage(
+      user.tgId as number,
+      `Практика "${training.title}" отменена`
+    );
   }
 }

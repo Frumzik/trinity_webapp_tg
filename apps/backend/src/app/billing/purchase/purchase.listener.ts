@@ -17,6 +17,7 @@ import {
   ReferralReserveStageReturnedEvent,
   ReferralReserveSubscriptionReturnedEvent,
   ReserveFundItemType,
+  TrainingType,
   TransactionType,
 } from '@trinity/shared';
 import { PurchaseService, TransactionsService } from '../../billing';
@@ -67,7 +68,12 @@ export class PurchaseListener {
           throw new Error('Тренинг не найден');
         }
 
-        if (training.stage && training.stageLevel) {
+        if (training.type == TrainingType.TRAINING) {
+          this.eventEmitter.emit(
+            PurchaseEvents.BUY_PRACTISE,
+            new PurchaseBuyPractiseEvent(purchase.userId, training.trainingId)
+          );
+        } else if (training.stage && training.stageLevel) {
           // Событие
           await this.eventEmitter.emit(
             PurchaseEvents.BUY_STAGE,
@@ -87,6 +93,7 @@ export class PurchaseListener {
             },
           });
 
+          let reserveSum = 0;
           for (const reserveItem of reserveItems) {
             if (reserveItem && reserveItem.endDate) {
               // Если срок ещё не истёк
@@ -95,29 +102,26 @@ export class PurchaseListener {
               ) {
                 // Убираем из резерва
                 await this.fundsService.returnReserveItem(reserveItem);
-
-                await this.eventEmitter.emit(
-                  ReferralEvents.RESERVE_STAGE_RETURNED,
-                  new ReferralReserveStageReturnedEvent(
-                    reserveItem.userId,
-                    reserveItem.sum
-                  )
-                );
-
-                await this.transactionsService.create({
-                  userId: purchase.userId,
-                  type: TransactionType.REFERRAL,
-                  sum: reserveItem.sum,
-                  description: 'Возврат реферального вознаграждения из резерва',
-                });
-
-                await this.usersService.incBalance(
-                  { userId: purchase.userId },
-                  { inc: reserveItem.sum }
-                );
+                reserveSum += reserveItem.sum;
               }
             }
           }
+          await this.eventEmitter.emit(
+            ReferralEvents.RESERVE_STAGE_RETURNED,
+            new ReferralReserveStageReturnedEvent(purchase.userId, reserveSum)
+          );
+
+          await this.transactionsService.create({
+            userId: purchase.userId,
+            type: TransactionType.REFERRAL,
+            sum: reserveSum,
+            description: 'Возврат реферального вознаграждения из резерва',
+          });
+
+          await this.usersService.incBalance(
+            { userId: purchase.userId },
+            { inc: reserveSum }
+          );
         } else {
           // Событие
           await this.eventEmitter.emit(

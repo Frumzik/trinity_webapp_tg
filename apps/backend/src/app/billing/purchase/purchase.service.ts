@@ -286,6 +286,16 @@ export class PurchaseService {
       });
       if (!training) throw new NotFoundException('Тренинг не найден');
 
+      const reserveItem = await this.fundsService.findReserveItem({
+        type: ReserveFundItemType.PRACTISE,
+        userId: user.userId,
+        trainingId: training.trainingId,
+      });
+
+      if (reserveItem) {
+        throw new Error('Заявка на практику уже создана');
+      }
+
       const price =
         dto.sale && training.salePrice
           ? training.salePrice ?? 0
@@ -294,7 +304,7 @@ export class PurchaseService {
       const transaction = await this.transactionsService.create({
         type: TransactionType.PURCHASE,
         userId: user.userId,
-        sum: -price,
+        sum:-price,
         description: `Покупка практики "${training.title}"`,
       });
 
@@ -319,8 +329,9 @@ export class PurchaseService {
       await this.fundsService.createReserveItem({
         type: ReserveFundItemType.PRACTISE,
         trainingId: training.trainingId,
-        sum: -price,
+        sum: price,
         userId: user.userId,
+        accepted: false,
       });
 
       await this.notificationsService.sendBotNewPractise(user, training);

@@ -20,17 +20,21 @@ import {
   PurchasePractiseDoneEvent,
   PurchasePractiseAbortEvent,
   GetListOptions,
+  PurchasePractiseAcceptEvent,
+  CounterType,
 } from '@trinity/shared';
 import { FundEntity, ReserveFundItemEntity } from './entities';
 import { Fund, ReserveFundItem } from './models';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CountersService } from '../../service';
 
 @Injectable()
 export class FundsService {
   constructor(
     private readonly fundsRepository: FundsRepository,
     private readonly reserveFundItemsRepository: ReserveFundItemsRepository,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly countersService: CountersService
   ) {}
 
   async onModuleInit() {
@@ -107,11 +111,11 @@ export class FundsService {
 
   async incMain(sum: number) {
     try {
-      let fund = await this.fundsRepository.find({ type: FundType.MAIN });
+      let fund = await this.fundsRepository.find({ type: FundType.INVESTMENT });
 
       if (!fund) {
         fund = await this.create({
-          type: FundType.MAIN,
+          type: FundType.INVESTMENT,
           title: FundTitle.MAIN,
         });
       }
@@ -169,7 +173,12 @@ export class FundsService {
     dto: ReserveFundItemCreateRequestDto
   ): Promise<ReserveFundItemEntity> {
     try {
-      const newFundItem = new ReserveFundItemEntity(dto);
+      const newFundItem = new ReserveFundItemEntity({
+        ...dto,
+        reserveId: await this.countersService.saveNextSequence(
+          CounterType.RESERVE_ID
+        ),
+      });
 
       await this.incReserve(dto.sum);
 
@@ -195,6 +204,34 @@ export class FundsService {
     }
   }
 
+  async acceptReserveItem(
+    condition: FilterQuery<ReserveFundItem>
+  ): Promise<ReserveFundItemEntity | null> {
+    try {
+      const fundItem = await this.findReserveItem(condition);
+
+      if (!fundItem) {
+        throw new NotFoundException('Элемент не найден');
+      }
+
+      // Событие
+      if (fundItem.type == ReserveFundItemType.PRACTISE) {
+        await this.eventEmitter.emit(
+          PurchaseEvents.PRACTISE_ACCEPT,
+          new PurchasePractiseAcceptEvent(
+            fundItem.userId,
+            fundItem.trainingId as number
+          )
+        );
+      }
+
+      return await this.reserveFundItemsRepository.update(fundItem.accept());
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async findReserveItemAll(
     options?: GetListOptions<ReserveFundItem>
   ): Promise<ReserveFundItemEntity[]> {
@@ -209,7 +246,7 @@ export class FundsService {
   }
 
   async countReserveItemAll(
-    condition: FilterQuery<ReserveFundItem>
+    condition: FilterQuery<ReserveFundItem> = {}
   ): Promise<number> {
     try {
       const count = await this.reserveFundItemsRepository.count(condition);
@@ -222,7 +259,8 @@ export class FundsService {
   }
 
   async deleteReserveItem(
-    condition: FilterQuery<ReserveFundItem>
+    condition: FilterQuery<ReserveFundItem>,
+    extra?: { notify?: boolean }
   ): Promise<{ deleted: boolean }> {
     try {
       const fundItem = await this.findReserveItem(condition);
@@ -238,13 +276,15 @@ export class FundsService {
 
       // Событие
       if (fundItem.type == ReserveFundItemType.PRACTISE) {
-        await this.eventEmitter.emit(
-          PurchaseEvents.PRACTISE_ABORT,
-          new PurchasePractiseAbortEvent(
-            fundItem.userId,
-            fundItem.trainingId as number
-          )
-        );
+        if (extra?.notify) {
+          await this.eventEmitter.emit(
+            PurchaseEvents.PRACTISE_ABORT,
+            new PurchasePractiseAbortEvent(
+              fundItem.userId,
+              fundItem.trainingId as number
+            )
+          );
+        }
       } else {
         await this.eventEmitter.emit(
           ReferralEvents.RESERVE_EXPIRED,

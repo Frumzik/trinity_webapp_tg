@@ -13,6 +13,7 @@ import {
   BannerEdit,
   BannerCreate,
   WithdrawList,
+  PractiseList,
 } from './resources';
 import { MyMenu } from './components';
 import { Dashboard } from './components';
@@ -80,6 +81,12 @@ export default function App() {
         name="withdraw"
         list={WithdrawList}
         options={{ label: 'Вывод' }}
+      />
+
+      <Resource
+        name="practise"
+        list={PractiseList}
+        options={{ label: 'Практики' }}
       />
     </Admin>
   );

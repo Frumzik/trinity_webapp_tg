@@ -102,12 +102,7 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.PRACTISE: {
-        await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.PRACTISE,
-          userId: purchase.userId,
-          sum: Math.abs(transaction.sum),
-          trainingId: purchase.contentId,
-        });
+
         break;
       }
       case PurchaseType.LESSON: {
