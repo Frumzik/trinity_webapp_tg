@@ -288,7 +288,7 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Доступ к приложению активирован на ${
-        days >= 360 ? '1 год' : formatDays(days as number)
+        days >= 360 ? '1 год' : `${days} ${formatDays(days as number)}`
       }`
     );
   }
