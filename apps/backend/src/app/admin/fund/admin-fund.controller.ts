@@ -11,7 +11,7 @@ import {
   Body,
   Res,
 } from '@nestjs/common';
-import { JWTAuthGuard, parseGetListQuery, Roles } from '../../service';
+import { JWTAuthGuard, parseGetListQuery, Roles, UserId } from '../../service';
 import { AdminFundService } from './admin-fund.service';
 import { UserRole } from '@trinity/shared';
 import { type Response } from 'express';
@@ -25,6 +25,9 @@ export class FundWithdrawRequestDto {
 
   @IsString()
   toAddress!: string;
+
+  @IsNumber()
+  userId!: number;
 
   @IsNumber()
   amount!: number;
@@ -67,8 +70,8 @@ export class AdminFundController {
   }
 
   @Post()
-  async create(@Body() dto: FundWithdrawRequestDto) {
-    return await this.adminFundService.create(dto);
+  async create(@Body() dto: FundWithdrawRequestDto, @UserId() userId: number) {
+    return await this.adminFundService.create({ ...dto, userId });
   }
 
   @Put(':id')

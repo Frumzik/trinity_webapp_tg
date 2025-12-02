@@ -1,7 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AdminUserController, AdminUserService } from './user';
 import { UsersModule } from '../account';
-import { AcquiringModule, TransactionsModule } from '../billing';
+import {
+  AcquiringModule,
+  TransactionsModule,
+} from '../billing';
 import { ContentModule } from '../lms';
 import { AdminTrainingController, AdminTrainingService } from './training';
 import { AdminLessonController, AdminLessonService } from './lesson';
@@ -15,6 +18,7 @@ import { FundsModule, ReferralsModule } from '../referrals';
 import { AdminPractiseController, AdminPractiseService } from './practise';
 import { AdminFundService } from './fund/admin-fund.service';
 import { AdminFundController } from './fund/admin-fund.controller';
+import { AdminTransactionController, AdminTransactionService } from './transaction';
 
 @Module({
   imports: [
@@ -25,7 +29,8 @@ import { AdminFundController } from './fund/admin-fund.controller';
     BannersModule,
     AcquiringModule,
     forwardRef(() => ReferralsModule),
-    FundsModule
+    FundsModule,
+    forwardRef(() => TransactionsModule),
   ],
   providers: [
     AdminUserService,
@@ -35,7 +40,8 @@ import { AdminFundController } from './fund/admin-fund.controller';
     AdminBannerService,
     AdminWithdrawService,
     AdminPractiseService,
-    AdminFundService
+    AdminFundService,
+    AdminTransactionService
   ],
   controllers: [
     AdminUserController,
@@ -45,7 +51,8 @@ import { AdminFundController } from './fund/admin-fund.controller';
     AdminBannerController,
     AdminWithdrawController,
     AdminPractiseController,
-    AdminFundController
+    AdminFundController,
+    AdminTransactionController
   ],
 })
 export class AdminModule {}
