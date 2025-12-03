@@ -11,6 +11,7 @@ export class ReserveFundItemEntity implements IReserveFundItem {
   stageLevel?: number;
   trainingId?: number;
   accepted?: boolean;
+  referralId?: number;
   endDate: Date | null = null;
 
   constructor(fundItem: Partial<IReserveFundItem>) {
