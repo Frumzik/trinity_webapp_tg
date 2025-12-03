@@ -1,4 +1,3 @@
-// src/shared/api/base.ts
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
   BaseQueryFn,
@@ -67,9 +66,10 @@ export const baseQueryWithAuth: BaseQueryFn<
     url.startsWith('/tg/') ||
     url.startsWith('/user/update/pin');
 
+  const isCheckTgRoute = url.startsWith('/auth/check-tg');
   const isUserRoute = url.startsWith('/user');
 
-  if (typeof window !== 'undefined' && tgId && token && !isAuthRoute) {
+  if (typeof window !== 'undefined' && tgId && token && !isAuthRoute && !isCheckTgRoute) {
     const checkRes = await rawBaseQuery(
       {
         url: '/auth/check-tg',
@@ -84,17 +84,6 @@ export const baseQueryWithAuth: BaseQueryFn<
     if ('error' in checkRes && checkRes.error) {
       const st = checkRes.error.status;
       if (st === 404 || st === 401) {
-        // пользователя нет → выкидываем
-        forceLogoutAndGoToPin(api);
-        return checkRes as any;
-      }
-    }
-
-    if ('data' in checkRes && checkRes.data) {
-      const d: any = checkRes.data;
-      const exists = d?.exists ?? d?.data?.exists ?? d?.data?.userExists;
-
-      if (exists === false) {
         forceLogoutAndGoToPin(api);
         return checkRes as any;
       }
