@@ -23,7 +23,7 @@ import {
 import { PurchaseService, TransactionsService } from '../../billing';
 import { ContentService } from '../../lms';
 import { UsersService } from '../../account';
-import { FundsService } from '../../referrals';
+import { FundsService, ReferralsService } from '../../referrals';
 
 @Injectable()
 export class PurchaseListener {
@@ -37,7 +37,9 @@ export class PurchaseListener {
     @Inject(forwardRef(() => TransactionsService))
     private readonly transactionsService: TransactionsService,
     private readonly fundsService: FundsService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => ReferralsService))
+    private readonly referralsService: ReferralsService
   ) {}
 
   @OnEvent(PurchaseEvents.CREATED)
@@ -106,6 +108,14 @@ export class PurchaseListener {
                 // Убираем из резерва
                 await this.fundsService.returnReserveItem(reserveItem);
                 reserveSum += reserveItem.sum;
+
+                await this.referralsService.incEarn(
+                  {
+                    partnerId: reserveItem.userId,
+                    referralId: reserveItem.referralId,
+                  },
+                  { inc: reserveItem.sum }
+                );
               }
             }
           }
@@ -176,6 +186,14 @@ export class PurchaseListener {
           await this.fundsService.returnReserveItem(reserveItem);
 
           reserveSum += reserveItem.sum;
+
+          await this.referralsService.incEarn(
+            {
+              partnerId: reserveItem.userId,
+              referralId: reserveItem.referralId,
+            },
+            { inc: reserveItem.sum }
+          );
         }
 
         if (reserveItems.length) {
