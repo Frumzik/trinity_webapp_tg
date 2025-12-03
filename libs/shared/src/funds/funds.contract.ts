@@ -44,6 +44,10 @@ export class ReserveFundItemCreateRequestDto {
   @IsOptional()
   trainingId?: number;
 
+  @IsNumber()
+  @IsOptional()
+  referralId?: number;
+
   @IsOptional()
   @IsDate()
   @Type(() => Date)

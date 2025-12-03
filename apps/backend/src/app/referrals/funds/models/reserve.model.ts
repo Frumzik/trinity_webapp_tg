@@ -29,6 +29,9 @@ export class ReserveFundItem
   trainingId?: number;
 
   @Prop({ required: false })
+  referralId?: number;
+
+  @Prop({ required: false })
   accepted?: boolean;
 
   @Prop({ type: Date, required: false, default: null })

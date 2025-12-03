@@ -37,6 +37,7 @@ export interface IReserveFundItem {
   stage?: number;
   stageLevel?: number;
   trainingId?: number;
+  referralId?: number;
   accepted?: boolean;
   endDate: Date | null;
 }
