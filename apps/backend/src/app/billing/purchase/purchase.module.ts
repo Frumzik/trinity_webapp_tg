@@ -10,7 +10,7 @@ import { SubscriptionsModule } from '../subscriptions';
 import { TransactionsModule } from '../transactions';
 import { ContentModule } from '../../lms';
 import { PurchaseListener } from './purchase.listener';
-import { FundsModule } from '../../referrals';
+import { FundsModule, ReferralsModule } from '../../referrals';
 import { NotificationsModule } from '../../notifications';
 
 @Module({
@@ -24,7 +24,8 @@ import { NotificationsModule } from '../../notifications';
     forwardRef(() => TransactionsModule),
     forwardRef(() => ContentModule),
     FundsModule,
-    forwardRef(() => NotificationsModule)
+    forwardRef(() => NotificationsModule),
+    forwardRef(() => ReferralsModule)
   ],
   providers: [PurchaseService, PurchasesRepository, PurchaseListener],
   controllers: [PurchaseController],
