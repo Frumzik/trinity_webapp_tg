@@ -110,6 +110,7 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.SUBSCRIPTION: {
+        await this.fundsService.incAdmin(Math.abs(transaction.sum));
         break;
       }
       default: {
@@ -198,7 +199,7 @@ export class ReferralsListener {
           stage: training.stage,
           stageLevel: training.stageLevel,
           endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-          referralId: purchase.userId
+          referralId: purchase.userId,
         });
 
         await this.eventEmitter.emit(
@@ -221,7 +222,7 @@ export class ReferralsListener {
         stage: training.stage,
         stageLevel: training.stageLevel,
         endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-        referralId: purchase.userId
+        referralId: purchase.userId,
       });
 
       await this.eventEmitter.emit(
@@ -331,7 +332,7 @@ export class ReferralsListener {
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
             endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-            referralId: purchase.userId
+            referralId: purchase.userId,
           });
 
           await this.eventEmitter.emit(
@@ -354,7 +355,7 @@ export class ReferralsListener {
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
           endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-          referralId: purchase.userId
+          referralId: purchase.userId,
         });
 
         await this.eventEmitter.emit(
@@ -546,7 +547,7 @@ export class ReferralsListener {
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
             endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-            referralId: purchase.userId
+            referralId: purchase.userId,
           });
 
           await this.eventEmitter.emit(
@@ -569,7 +570,7 @@ export class ReferralsListener {
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
           endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
-          referralId: purchase.userId
+          referralId: purchase.userId,
         });
 
         await this.eventEmitter.emit(
