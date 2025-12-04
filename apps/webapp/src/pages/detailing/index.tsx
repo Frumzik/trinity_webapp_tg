@@ -77,7 +77,7 @@ const Index = () => {
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
     const BOT_USERNAME = "TrinitySpaceBot";
-    const WEBAPP_SHORT_NAME = "TrinityFront";
+    const WEBAPP_SHORT_NAME = "app";
 
     const botDeepLink =
       `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
