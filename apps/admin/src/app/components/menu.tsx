@@ -12,6 +12,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ImageIcon from '@mui/icons-material/Image';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import MessageIcon from '@mui/icons-material/Message';
 import MoneyIcon from '@mui/icons-material/Money';
 
 export const MyMenu = () => {
@@ -111,14 +112,19 @@ export const MyMenu = () => {
       </MenuItem>
 
       {/* Выводы средств */}
-      <MenuItem
-        component={Link}
-        to="/fund"
-      >
+      <MenuItem component={Link} to="/fund">
         <ListItemIcon>
           <MoneyIcon />
         </ListItemIcon>
         <ListItemText primary="Фонды" />
+      </MenuItem>
+
+      {/* Выводы средств */}
+      <MenuItem component={Link} to="/mailing/create">
+        <ListItemIcon>
+          <MessageIcon />
+        </ListItemIcon>
+        <ListItemText primary="Рассылка" />
       </MenuItem>
     </Menu>
   );

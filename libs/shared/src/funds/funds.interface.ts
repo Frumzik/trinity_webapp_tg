@@ -8,7 +8,7 @@ export enum FundType {
 
 export enum FundTitle {
   RESERVE = 'Резервный фонд',
-  ADMIN = 'Админский доход',
+  ADMIN = 'Фонд ТРИНИТИ',
   MAIN = 'Фонд света',
 }
 
