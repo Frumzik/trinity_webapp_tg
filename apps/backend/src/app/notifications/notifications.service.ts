@@ -16,12 +16,13 @@ export class NotificationsService {
       this.configService.get<string>('BOT_URL') || 'http://localhost:3001';
   }
 
-  async sendBotMessage(tgId: number, message: string) {
+  async sendBotMessage(tgId: number, message: string, isHtml = false) {
     try {
       const res = await firstValueFrom(
         this.http.post(`${this.BOT_URL}/bot/message`, {
           tgId,
           message,
+          isHtml,
         })
       );
 
