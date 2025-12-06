@@ -38,6 +38,12 @@ export class BotService implements OnModuleInit {
     return this.bot.telegram.sendMessage(tgId, message);
   }
 
+  async sendHtmlMessage(tgId: number, message: string) {
+    return this.bot.telegram.sendMessage(tgId, message, {
+      parse_mode: 'HTML',
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendNewPractiseMessage(user: any, practise: any) {
     return this.bot.telegram.sendMessage(

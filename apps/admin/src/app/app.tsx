@@ -15,6 +15,7 @@ import {
   WithdrawList,
   PractiseList,
   FundList,
+  MailingCreate,
 } from './resources';
 import { MyMenu } from './components';
 import { Dashboard } from './components';
@@ -92,9 +93,9 @@ export default function App() {
 
       <Resource name="fund" list={FundList} options={{ label: 'Фонды' }} />
 
-      <Resource
-        name="transaction"
-        options={{ label: 'Транзакции' }}/>
+      <Resource name="transaction" options={{ label: 'Транзакции' }} />
+
+      <Resource name="mailing" create={MailingCreate} options={{ label: 'Создать рассылку' }} />
     </Admin>
   );
 }

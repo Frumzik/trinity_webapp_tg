@@ -1,6 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { BotService } from './bot.service';
-import { IsInt, IsObject, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 class sendMessageDto {
   @IsInt()
@@ -8,6 +14,10 @@ class sendMessageDto {
 
   @IsString()
   message!: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isHtml?: boolean;
 }
 
 class sendNewPractiseDto {
@@ -36,7 +46,12 @@ export class BotController {
 
   @Post('message')
   async message(@Body() dto: sendMessageDto) {
-    await this.botService.sendMessage(dto.tgId, dto.message);
+    if (dto.isHtml === true) {
+      await this.botService.sendHtmlMessage(dto.tgId, dto.message);
+    } else {
+      await this.botService.sendMessage(dto.tgId, dto.message);
+    }
+
     return { ok: true };
   }
 
