@@ -8,8 +8,9 @@ import "./detailing.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
-import helpIcon from "../../assets/icons/helpIcon.svg";
 import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+
+const getReferralEarn = (r: any) => Number(r.earn ?? 0);
 
 const formatName = (r: any) => {
   const u =
@@ -139,7 +140,7 @@ const Index = () => {
               {current.referrals.map((r, i) => (
                 <div className="row" key={r.id ?? r.userId ?? i}>
                   <span className="row__title">{formatName(r)}</span>
-                  <span className="row__count">{formatOM(r.amount)}</span>
+                  <span className="row__count">{formatOM(r.earn)}</span>
                 </div>
               ))}
             </div>
