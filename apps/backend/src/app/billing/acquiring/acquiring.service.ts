@@ -296,7 +296,7 @@ export class AcquiringService {
       type: WithdrawType.USER,
       userId: user.userId,
       amount: sum,
-      toAddress: address,
+      toAddress: address.toLowerCase(),
       user: user._id as Types.ObjectId,
       needModeration,
     });
@@ -344,7 +344,7 @@ export class AcquiringService {
       userId,
       fundType,
       amount,
-      toAddress: address,
+      toAddress: address.toLowerCase(),
       needModeration: false,
     });
 
@@ -421,7 +421,7 @@ export class AcquiringService {
 
   async handleWithdraw(body: AcquiringWithdrawWebhookDto) {
     const withdraw = await this.withdrawsService.find({
-      toAddress: body.toAddress,
+      toAddress: body.toAddress.toLowerCase(),
       // amount: body.amount,
     });
 
