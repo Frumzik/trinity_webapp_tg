@@ -12,7 +12,37 @@ export class BotService implements OnModuleInit {
     this.bot = new Telegraf(this.configService.get('BOT_TOKEN') || '');
 
     // /start командa с deep-link аргументом
-    this.bot.start(async (ctx) => ctx.reply('Добро пожаловать!'));
+    this.bot.start(async (ctx) =>
+      ctx.reply(
+        `✨ <strong>Дорогой Единомышленник!</strong>
+
+Добро пожаловать в <strong>Пространство ТРИНИТИ</strong> 🌟
+
+📖 <strong>Первый и самый важный шаг</strong> — обязательно ознакомься с Полным Руководством Пространства, чтобы легко и уверенно войти в процесс:
+<a href="https://teletype.in/@trinity_light/trinity_guide" target="_blank">https://teletype.in/@trinity_light/trinity_guide</a>
+
+Чтобы быть в потоке всех событий и возможностей, обязательно подпишись на наши официальные ресурсы:
+
+📢 <strong>Информационный Канал:</strong>
+<a href="https://t.me/trinity_channel" target="_blank">https://t.me/trinity_channel</a>
+
+💭 <strong>Чат Сообщества:</strong>
+<a href="https://t.me/trinity_space" target="_blank">https://t.me/trinity_space</a>
+
+💞 <strong>Канал Откликов:</strong>
+<a href="https://t.me/trinity_hearts" target="_blank">https://t.me/trinity_hearts</a>
+
+Если у тебя появятся вопросы — мы всегда рядом:
+🫶🏼 <strong>Помощь и Поддержка:</strong>
+<a href="https://t.me/trinity_light" target="_blank">https://t.me/trinity_light</a>
+
+✨ Благодарим тебя за доверие и выбор Пути вместе с <strong>ТРИНИТИ</strong> 💜
+`,
+        {
+          parse_mode: 'HTML',
+        }
+      )
+    );
     this.bot.help((ctx) => ctx.reply('Список команд...'));
 
     this.bot.launch();
