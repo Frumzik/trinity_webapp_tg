@@ -111,7 +111,8 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.SUBSCRIPTION: {
-        await this.addSubscriptionReward(purchase, transaction);
+        await this.fundsService.incAdmin(Math.abs(transaction.sum));
+        // await this.addSubscriptionReward(purchase, transaction);
         break;
       }
       default: {
