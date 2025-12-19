@@ -5,6 +5,12 @@ services:
       - "3111:3000"
     networks:
       - proxy
+    environment:
+    - TZ=${SYSTEM_TIMEZONE:-Europe/Moscow}
+  
+    volumes:
+    - grafana_data:/var/lib/grafana
+    - ./loki.yaml:/etc/grafana/provisioning/datasources/loki.yaml
 
   test_prometheus:
     image: prom/prometheus:latest
@@ -14,7 +20,13 @@ services:
       - proxy
 
   test_loki:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.9.0
+    command: -config.file=/etc/loki/local-config.yaml
+    environment:
+      TZ: ${SYSTEM_TIMEZONE:-Europe/Moscow}
+    volumes:
+      - loki_data:/loki
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
     ports:
       - "3110:3100"
     networks:
@@ -26,13 +38,13 @@ services:
       dockerfile: apps/backend/Dockerfile
     env_file:
       - ./apps/backend/envs/.env.test
-    expose:
-      - "3010"
+    ports:
+      - "3001:3000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-backend.rule=Host(`api.test.3nity.space`)"
       - "traefik.http.routers.test-backend.entrypoints=websecure"
-      - "traefik.http.services.test-backend.loadbalancer.server.port=3010"
+      - "traefik.http.services.test-backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.test-backend.tls.certresolver=letsEncrypt"
       - "traefik.http.routers.test-backend.tls=true"
     networks:
@@ -45,14 +57,14 @@ services:
     env_file:
       - ./apps/bot/envs/.env.test
     ports:
-      - "3011:3001"
+      - "3002:3001"
     # labels:
     #   - "traefik.enable=true"
-    #   - "traefik.http.routers.backend.rule=Host(`bot.test.3nity.space`)"
-    #   - "traefik.http.routers.backend.entrypoints=websecure"
-    #   - "traefik.http.services.backend.loadbalancer.server.port=3001"
-    #   - "traefik.http.routers.backend.tls.certresolver=letsEncrypt"
-    #   - "traefik.http.routers.backend.tls=true"
+    #   - "traefik.http.routers.bot.rule=Host(`bot.3nity.space`)"
+    #   - "traefik.http.routers.bot.entrypoints=websecure"
+    #   - "traefik.http.services.bot.loadbalancer.server.port=3001"
+    #   - "traefik.http.routers.bot.tls.certresolver=letsEncrypt"
+    #   - "traefik.http.routers.bot.tls=true"
     networks:
       - proxy
 
@@ -63,7 +75,7 @@ services:
     env_file:
       - apps/webapp/envs/.env.test
     ports:
-      - "4213:4203"
+      - "4203:4203"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-frontend.rule=Host(`app.test.3nity.space`)"
@@ -81,7 +93,7 @@ services:
     env_file:
       - ./apps/admin/envs/.env.test
     ports:
-      - "4211:4201"
+      - "4202:4201"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-admin.rule=Host(`admin.test.3nity.space`)"
@@ -95,3 +107,7 @@ services:
 networks:
   proxy:
     external: true
+
+volumes:
+  grafana_data:
+  loki_data:
