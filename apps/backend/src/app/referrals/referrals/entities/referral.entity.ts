@@ -9,7 +9,7 @@ export class ReferralEntity implements IReferral {
 
   partnerId!: number;
   referralId!: number;
-  
+
   level!: number;
   earn = 0;
 
@@ -18,7 +18,7 @@ export class ReferralEntity implements IReferral {
   }
 
   incEarn(sum: number) {
-    this.earn += sum;
+    this.earn += Math.round(Math.abs(sum) * 10) / 10;
 
     return this;
   }

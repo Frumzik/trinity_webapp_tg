@@ -19,16 +19,15 @@ function DesktopOnlyScreen() {
   );
 }
 
-const MIN_LOADER_MS = 500;
+const LOADER_DURATION_MS = 500;
 
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
+  // прелоадер включается на КАЖДЫЙ change location.key на 500 ms
   const [showLoader, setShowLoader] = useState(false);
-  const [isFirstRender, setIsFirstRender] = useState(true);
 
-  // один раз помечаем body
   useEffect(() => {
     document.body.classList.add('app-loaded');
     return () => {
@@ -36,26 +35,19 @@ export default function App() {
     };
   }, []);
 
-  // показываем прелоадер на каждый переход минимум на 500мс
   useEffect(() => {
-    let timeoutId: number | undefined;
-
-    // первый рендер — не мигаем прелоадером
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
-    }
-
+    // каждый раз при смене маршрута:
+    // 1) включаем прелоадер
+    // 2) через 500 ms выключаем
     setShowLoader(true);
-
-    timeoutId = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setShowLoader(false);
-    }, MIN_LOADER_MS);
+    }, LOADER_DURATION_MS);
 
     return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
+      window.clearTimeout(timer);
     };
-  }, [location.key, isFirstRender]);
+  }, [location.key]);
 
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -88,28 +80,46 @@ export default function App() {
       ? location.pathname
       : `/${location.pathname}`;
 
+    if (
+      normalizedPathname.startsWith('/player') &&
+      normalizedPathname !== '/player/complete'
+    ) {
+      return false;
+    }
+
     const withoutRect = [
       /^\/level(\/|$)/,
       /^\/lesson(\/|$)/,
-      /^\/player(\/|$)/,
       /^\/preview(\/|$)/,
     ];
 
     return !withoutRect.some((re) => re.test(normalizedPathname));
   };
 
-  const layoutStyle: React.CSSProperties = {
+  const layoutStyle = {
     backgroundImage: getBackgroundImage(),
-    ...(showLoader ? { pointerEvents: 'none' } : {}),
   };
 
   return (
     <FooterTabProvider>
-      {showLoader && <Preloader />}
+      {showLoader && (
+        <div className="global-preloader">
+          <Preloader />
+        </div>
+      )}
 
       <div className="app-layout" style={layoutStyle}>
-        {shouldShowTopRect() && <div className="top-rectangle"></div>}
-        {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
+        {shouldShowTopRect() && <div className="top-rectangle" />}
+
+        {!isMobile ? (
+          <div className="app-content">
+            <DesktopOnlyScreen />
+          </div>
+        ) : (
+          <div className="app-content">
+            <Outlet />
+          </div>
+        )}
       </div>
     </FooterTabProvider>
   );

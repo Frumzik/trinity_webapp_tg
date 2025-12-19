@@ -6,10 +6,11 @@ import {
   forwardRef,
   Get,
   Inject,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { JWTAuthGuard, UserId } from '../../service';
+import { JWTAuthGuard, ProdcutionGuard, UserId } from '../../service';
 import { AcquiringService } from './acquiring.service';
 import {
   ApiOperation,
@@ -47,10 +48,21 @@ export class AcquiringController {
     description: 'Возвращает адрес депозитного кошелька пользователя',
   })
   async getDepositAddress(@UserId() userId: number) {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
     let account;
 
+    // Проверяем кошелек
     try {
       account = await this.acquiringService.getAccount(userId.toString());
+
+      if (user.address != account.address) {
+        await this.usersService.bindAddress({ userId }, account.address);
+      }
     } catch (err: any) {
       // Если кошелька нет — создаём
       if (err?.response?.status === 404) {
@@ -68,7 +80,7 @@ export class AcquiringController {
   // Вывод средств
   // -------------------------
   @ApiBearerAuth('access_token')
-  @UseGuards(JWTAuthGuard)
+  @UseGuards(JWTAuthGuard, ProdcutionGuard)
   @Post('withdraw')
   @ApiOperation({ summary: 'Вывести средства на указанный адрес' })
   @ApiBody({ type: AcquiringWithdrawRequestDto })
@@ -80,38 +92,22 @@ export class AcquiringController {
     @UserId() userId: number,
     @Body() dto: AcquiringWithdrawRequestDto
   ) {
-    let account;
-
-    // Проверяем кошелек
-    try {
-      account = await this.acquiringService.getAccount(userId.toString());
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        account = await this.acquiringService.createAccount(userId.toString());
-        await this.usersService.bindAddress({ userId }, account.address);
-      } else {
-        throw err;
-      }
-    }
-
     // Выполняем вывод
-    await this.acquiringService.withdraw(dto.address, dto.amount);
-
-    return { success: true };
+    return await this.acquiringService.withdraw(userId, dto.address, dto.amount);
   }
 
   // -------------------------
   // Вебхуки
   // -------------------------
 
-  @Post('webhook/deposit')
+  @Post('webhook/deposits')
   @ApiOperation({ summary: 'Входящее уведомление о депозите' })
   @ApiBody({ type: AcquiringDepositWebhookDto })
   async handleDepositWebhook(@Body() body: AcquiringDepositWebhookDto) {
     return this.acquiringService.handleDeposit(body);
   }
 
-  @Post('webhook/withdraw')
+  @Post('webhook/withdraws')
   @ApiOperation({ summary: 'Входящее уведомление о выводе' })
   @ApiBody({ type: AcquiringWithdrawWebhookDto })
   async handleWithdrawWebhook(@Body() body: AcquiringWithdrawWebhookDto) {
@@ -127,7 +123,7 @@ export class AcquiringController {
     return this.acquiringService.handleInsufficientBalance(body);
   }
 
-  @Post('webhook/runtime-error')
+  @Post('webhook/runtime-errors')
   @ApiOperation({ summary: 'Входящее уведомление о runtime ошибке' })
   @ApiBody({ type: AcquiringErrorWebhookDto })
   async handleRuntimeErrorWebhook(@Body() body: AcquiringErrorWebhookDto) {

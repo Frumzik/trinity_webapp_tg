@@ -10,9 +10,19 @@ import {
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiConsumes,
+  ApiBody,
+  ApiProperty,
+} from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 class DeleteFileDto {
+  @IsString()
+  @ApiProperty()
   key!: string;
 }
 
@@ -43,7 +53,11 @@ export class FileController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Ссылка на загруженный файл', type: String })
+  @ApiResponse({
+    status: 201,
+    description: 'Ссылка на загруженный файл',
+    type: String,
+  })
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new InternalServerErrorException('Файл не предоставлен');

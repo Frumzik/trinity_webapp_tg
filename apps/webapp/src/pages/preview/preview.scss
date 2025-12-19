@@ -3,6 +3,15 @@
   //min-height: 100dvh;
 }
 
+.flexmodal__description{
+  color: #FFF;
+  font-family: "SF Pro Display";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 140%; /* 19.6px */
+  letter-spacing: 0.2px;
+}
 
 .preview__hero {
   position: relative;
@@ -76,9 +85,14 @@
 .preview__text {
   display: grid;
   gap: 12px;
-  font-size: 13px;
-  line-height: 1.45;
-  color: #2b2b2b;
+  color: #FFF;
+
+  font-family: "SF Pro Display";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0.2px;
 }
 
 .preview__price {

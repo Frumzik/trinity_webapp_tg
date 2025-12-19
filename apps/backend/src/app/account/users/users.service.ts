@@ -11,6 +11,7 @@ import {
   AuthRegisterEmailDto,
   AuthRegisterTgDto,
   CounterType,
+  GetListOptions,
   IUser,
   UserEvents,
   UserRole,
@@ -84,11 +85,25 @@ export class UsersService {
     }
   }
 
-  async findAll(condition: FilterQuery<User> = {}): Promise<UserEntity[]> {
+  async findAll(options?: GetListOptions<User>): Promise<UserEntity[]> {
     try {
-      const users = await this.usersRepository.findAll(condition);
+      const users = await this.usersRepository.findAll(options);
 
       return users;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при поиске пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<User> = {}): Promise<number> {
+    try {
+      const count = await this.usersRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error
@@ -128,7 +143,18 @@ export class UsersService {
 
   async updateProfile(
     condition: FilterQuery<User>,
-    updateData: Partial<Pick<IUser, 'name' | 'username'>>
+    updateData: Partial<
+      Pick<
+        IUser,
+        | 'name'
+        | 'username'
+        | 'email'
+        | 'height'
+        | 'weight'
+        | 'birthDate'
+        | 'gender'
+      >
+    >
   ): Promise<UserEntity> {
     try {
       const user = await this.usersRepository.find(condition);
@@ -263,7 +289,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateBalance(user.balance + updateData.inc)
+        await user.updateBalance(user.balance + Math.abs(updateData.inc))
       );
 
       return updated;
@@ -288,7 +314,7 @@ export class UsersService {
       }
 
       const updated = await this.usersRepository.update(
-        await user.updateBalance(user.balance - updateData.dec)
+        await user.updateBalance(user.balance - Math.abs(updateData.dec))
       );
 
       return updated;
@@ -393,6 +419,91 @@ export class UsersService {
 
       const updated = await this.usersRepository.update(
         await user.setAddress(address)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async updateNotifications(
+    condition: FilterQuery<User>,
+    updateData: {
+      meditationNotifications: string;
+      contentNotifications: boolean;
+      promoNotifications: boolean;
+    }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.updateNotifications(updateData)
+      );
+
+      this.eventEmitter.emit(
+        UserEvents.UPDATED,
+        new UserUpdatedEvent(user.userId)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении уведомлений пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async setBanned(
+    condition: FilterQuery<User>,
+    updateData: { banned: boolean }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.update(
+        await user.setBanned(updateData.banned)
+      );
+
+      return updated;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при обновлении профиля пользователя';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async changePartner(
+    condition: FilterQuery<User>,
+    updateData: { partnerId: number | null }
+  ): Promise<UserEntity> {
+    try {
+      const user = await this.usersRepository.find(condition);
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      const updated = await this.usersRepository.changePartner(
+        user.userId,
+        updateData.partnerId
       );
 
       return updated;

@@ -1,8 +1,8 @@
 type Props = {
-  showFav?: boolean; // ← управляет показом звезды
+  showFav?: boolean;
   isFav?: boolean;
   onBack: () => void;
-  onToggleFav?: () => void; // можно не передавать, если showFav=false
+  onToggleFav?: () => void;
   onMenu: () => void;
 };
 
@@ -92,9 +92,9 @@ export default function TopActions({
         </button>
       )}
 
-      <button className="icon-btn" onClick={onMenu} aria-label="Меню">
-        <KebabIcon />
-      </button>
+      {/*<button className="icon-btn" onClick={onMenu} aria-label="Меню">*/}
+      {/*  <KebabIcon />*/}
+      {/*</button>*/}
     </div>
   );
 }

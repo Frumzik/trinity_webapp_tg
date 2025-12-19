@@ -39,8 +39,10 @@ export class TrainingEntity implements ITraining {
   description: string | null = null;
   shortDescription: string | null = null;
   coverUrl: string | null = null;
+  bgUrl: string | null = null;
   iconUrl: string | null = null;
   duration: string | null = null;
+  link: string | null = null;
 
   // Условия доступности
   accessRules: TypeContentAccess[] = [];
@@ -49,6 +51,8 @@ export class TrainingEntity implements ITraining {
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
   progressPercent?: number;
+
+  deleted = false;
 
   constructor(training: Partial<ITraining> = {}) {
     Object.assign(this, training);
@@ -99,44 +103,45 @@ export class TrainingEntity implements ITraining {
         ITraining,
         | 'title'
         | 'description'
-        | 'coverUrl'
-        | 'price'
         | 'shortDescription'
         | 'duration'
-        | 'favoritesTag'
-        | 'salePrice'
+        | 'link'
+        | 'coverUrl'
         | 'iconUrl'
+        | 'bgUrl'
+        | 'merchantId'
+        | 'price'
+        | 'salePrice'
+        | 'stage'
+        | 'stageLevel'
+        | 'type'
+        | 'tag'
+        | 'favoritesTag'
       >
     >
   ) {
-    if (data.title !== undefined) {
-      this.title = data.title;
-    }
-    if (data.description !== undefined) {
-      this.description = data.description;
-    }
-    if (data.coverUrl !== undefined) {
-      this.coverUrl = data.coverUrl;
-    }
-    if (data.price !== undefined) {
-      this.price = data.price;
-    }
-
-    if (data.shortDescription !== undefined) {
+    if (data.title !== undefined) this.title = data.title;
+    if (data.description !== undefined) this.description = data.description;
+    if (data.shortDescription !== undefined)
       this.shortDescription = data.shortDescription;
-    }
-    if (data.duration !== undefined) {
-      this.duration = data.duration;
-    }
-    if (data.favoritesTag !== undefined) {
-      this.favoritesTag = data.favoritesTag;
-    }
-    if (data.salePrice !== undefined) {
-      this.salePrice = data.salePrice;
-    }
-    if (data.iconUrl !== undefined) {
-      this.iconUrl = data.iconUrl;
-    }
+    if (data.duration !== undefined) this.duration = data.duration;
+    if (data.link !== undefined) this.link = data.link;
+
+    if (data.coverUrl !== undefined) this.coverUrl = data.coverUrl;
+    if (data.iconUrl !== undefined) this.iconUrl = data.iconUrl;
+    if (data.bgUrl !== undefined) this.bgUrl = data.bgUrl;
+
+    if (data.merchantId !== undefined) this.merchantId = data.merchantId;
+
+    if (data.price !== undefined) this.price = data.price;
+    if (data.salePrice !== undefined) this.salePrice = data.salePrice;
+
+    if (data.stage !== undefined) this.stage = data.stage;
+    if (data.stageLevel !== undefined) this.stageLevel = data.stageLevel;
+
+    if (data.type !== undefined) this.type = data.type;
+    if (data.tag !== undefined) this.tag = data.tag;
+    if (data.favoritesTag !== undefined) this.favoritesTag = data.favoritesTag;
 
     return this;
   }

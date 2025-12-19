@@ -3,8 +3,8 @@ type Props = {
   onBack: () => void;
   onToggleFav: () => void;
   onMenu: () => void;
-  showFav?: boolean;     // <- опционально скрыть звезду (для плеера тоже подойдёт)
-  pending?: boolean;     // <- блокирует повторные клики, серый вид
+  showFav?: boolean;
+  pending?: boolean;
 };
 
 function BackIcon() {
@@ -78,10 +78,6 @@ export default function TopActions({
           <StarIcon filled={isFav} dimmed={pending} />
         </button>
       )}
-
-      <button className="icon-btn" onClick={onMenu} aria-label="Меню">
-        <KebabIcon />
-      </button>
     </div>
   );
 }

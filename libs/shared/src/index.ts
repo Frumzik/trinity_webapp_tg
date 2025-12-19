@@ -38,5 +38,8 @@ export * from './banners/banner.interface.js';
 export * from './funds/funds.interface.js';
 export * from './funds/funds.contract.js';
 
+export * from './acquiring/acquiring.contract.js';
+export * from './acquiring/acquiring.events.js';
+export * from './acquiring/acquiring.interface.js';
 
-export * from './acquiring/acquiring.contract.js'
+export * from './admin/admin.interface.js';

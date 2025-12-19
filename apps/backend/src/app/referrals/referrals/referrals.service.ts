@@ -11,7 +11,12 @@ import { ReferralsRepository } from './repositories';
 import { ReferralEntity } from './entities';
 import { Referral } from './models';
 import { UserEntity, UsersService } from '../../account';
-import { IUser, ReferralRegisteredEvent, RefferalEvents } from '@trinity/shared';
+import {
+  IUser,
+  ReferralRegisteredEvent,
+  ReferralEvents,
+  GetListOptions,
+} from '@trinity/shared';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -50,8 +55,12 @@ export class ReferralsService {
 
         // Событие
         this.eventEmitter.emit(
-          RefferalEvents.REGISTERED,
-          new ReferralRegisteredEvent(currentPartner.userId, referral.userId, level)
+          ReferralEvents.REGISTERED,
+          new ReferralRegisteredEvent(
+            currentPartner.userId,
+            referral.userId,
+            level
+          )
         );
 
         if (level === 1) firstLevelReferral = created;
@@ -99,14 +108,24 @@ export class ReferralsService {
     }
   }
 
-  async findAll(condition: FilterQuery<Referral>): Promise<ReferralEntity[]> {
+  async findAll(options?: GetListOptions<Referral>): Promise<ReferralEntity[]> {
     try {
-      const referrals = await this.referralsRepository.findAll(condition);
+      const funds = await this.referralsRepository.findAll(options);
 
-      return referrals;
+      return funds;
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при поиске реферала';
+      const message = error instanceof Error ? error.message : 'Ошибка';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Referral>): Promise<number> {
+    try {
+      const count = await this.referralsRepository.count(condition);
+
+      return count;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Ошибка';
       throw new InternalServerErrorException(message);
     }
   }

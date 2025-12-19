@@ -14,7 +14,11 @@
 .featureTile.is-clickable {
   cursor: pointer;
 }
-
+.featureTile__lock {
+  position: absolute;
+  right: 100px;
+  top: 30px;
+}
 .featureTile__bg {
   position: absolute;
   inset: 0;
@@ -60,6 +64,7 @@
   font-weight: 500;
   line-height: normal;
   margin-top: 3px;
+  margin-left: 1px;
 }
 .left-block-big{
   .featureTile__left{
@@ -75,21 +80,25 @@
   }
   .featureTile__btn {
     border-radius: 12px;
-    background: rgba(255, 106, 204, 0.84);
+    background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
     box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
   }
 }
 .left-block-color-yellow{
   .featureTile__left{
     border-radius: 15px;
-    background: rgba(66, 50, 1, 0.41);
+    background: rgba(66, 51, 11, 0.41);
     backdrop-filter: blur(2.6871166229248047px);
   }
   .featureTile__btn {
-    border-radius: 20.153px;
-    background: #FFC34F;
-    backdrop-filter: blur(7.658282279968262px);
-    box-shadow: none;
+    border-radius: 12px;
+    background: radial-gradient(
+                    circle at 50% 40%,
+                    #FF922D 0%,
+                    #FFB953 90%,
+                    #FFFDDC 100%
+    );
+    box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
   }
 }
 
@@ -97,7 +106,7 @@
 
 .featureTile__desc {
   position: absolute;
-  top: 35px;
+  top: 45px;
   color: #fff;
   font-family: "SF Pro Display";
   font-size: 10px;

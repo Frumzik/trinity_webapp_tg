@@ -8,6 +8,7 @@ import {
   ReserveFundItemSchema,
 } from './models';
 import { FundsRepository, ReserveFundItemsRepository } from './repositories';
+import { CountersModule } from '../../service';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { FundsRepository, ReserveFundItemsRepository } from './repositories';
       { name: Fund.name, schema: FundSchema },
       { name: ReserveFundItem.name, schema: ReserveFundItemSchema },
     ]),
+    CountersModule
   ],
   providers: [FundsService, FundsRepository, ReserveFundItemsRepository],
   exports: [FundsService],

@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDate,
   IsEmail,
   IsEnum,
@@ -78,6 +79,21 @@ export class UserInfoResponseDto implements IUser {
 
   @ApiProperty({ example: 250, description: 'Баланс пользователя' })
   balance!: number;
+
+  @ApiProperty({ example: '5:10', description: 'Уведомления' })
+  meditationNotifications!: string;
+
+  @ApiProperty({ example: true, description: 'Уведомления' })
+  contentNotifications!: boolean;
+
+  @ApiProperty({ example: false, description: 'Уведомления' })
+  promoNotifications!: boolean;
+
+  @ApiProperty({ description: 'Забанен', example: false })
+  banned!: boolean;
+
+  @ApiProperty({ description: 'id партнера', example: null })
+  partnerId!: number | null;
 }
 
 /* ============================================================
@@ -103,7 +119,7 @@ export class UserUpdateProfileRequestDto {
   @ApiProperty({ example: 75, required: false })
   @IsOptional()
   @IsInt({ message: 'height должен быть числом' })
-  height?: string;
+  height?: number;
 
   @ApiProperty({ example: new Date(), required: false })
   @IsOptional()
@@ -111,11 +127,12 @@ export class UserUpdateProfileRequestDto {
   @IsDate({ message: 'birthDate должен быть датой' })
   birthDate?: Date;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: UserGender,
     example: UserGender.MALE,
     description: 'Новый пользователя',
   })
+  @IsOptional()
   @IsEnum(UserGender, {
     message: 'Пол должен быть UserGender',
   })
@@ -187,6 +204,24 @@ export class UserUpdateEmailRequestDto {
   @IsString({ message: 'email должен быть строкой' })
   @IsNotEmpty({ message: 'email не может быть пустым' })
   email!: string;
+}
+
+/* ============================================================
+ * UPDATE NOTIFICATIONS
+ * ============================================================ */
+
+export class UserUpdateNotificationsRequestDto {
+  @ApiProperty({ example: '10:00', description: 'Уведомления о медитациях' })
+  @IsString({ message: 'meditationNotifications должен быть строкой' })
+  meditationNotifications!: string;
+
+  @ApiProperty({ example: true, description: 'Уведомления о контенте' })
+  @IsBoolean({ message: 'contentNotifications должен быть true/false' })
+  contentNotifications!: boolean;
+
+  @ApiProperty({ example: true, description: 'Уведомления о промо' })
+  @IsBoolean({ message: 'promoNotifications должен быть true/false' })
+  promoNotifications!: boolean;
 }
 
 /* ============================================================

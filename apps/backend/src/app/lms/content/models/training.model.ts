@@ -85,7 +85,13 @@ export class Training extends Document<Types.ObjectId> implements ITraining {
   coverUrl!: string | null;
 
   @Prop({ type: String, default: null })
+  bgUrl!: string | null;
+
+  @Prop({ type: String, default: null })
   iconUrl!: string | null;
+
+  @Prop({ type: String, default: null })
+  link!: string | null;
 
   // Условия доступности
   @Prop({ type: Array, default: [] })

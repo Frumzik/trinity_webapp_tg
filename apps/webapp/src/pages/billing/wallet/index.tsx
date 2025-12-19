@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import TopBar from "../../../widgets/topbarTextpage";
 import DepositInfo from "./ui/DepositInfo";
-import { getDepositAddress } from "../../../entities/wallet/api/walet.api";
-import type { DepositAddress } from "../../../entities/wallet/model/types";
+import { useGetDepositAddressQuery } from "../../../shared/api/acquiring.api";
 import { useGetUserQuery } from "../../../shared/api/user.api";
 import { getTelegramUser } from "../../../shared/telegram/telegram";
 import "./index.scss";
@@ -15,11 +14,8 @@ function avatarFrom(username?: string | null, name?: string | null) {
 }
 
 export default function WalletPage() {
-  const [addr, setAddr] = useState<DepositAddress | null>(null);
-
-  useEffect(() => {
-    getDepositAddress().then(setAddr);
-  }, []);
+  const { data: addrRes, isLoading } = useGetDepositAddressQuery();
+  const addr = addrRes?.data;
 
   const { data } = useGetUserQuery({ populate: true });
   const u = (data as any)?.data ?? (data as any);
@@ -38,22 +34,32 @@ export default function WalletPage() {
   }, [u, tg]);
 
   const avatarUrl = useMemo(() => {
-    return (u as any)?.avatarUrl || (tg as any)?.photo_url || avatarFrom(displayUsername, displayName);
+    return (
+      (u as any)?.avatarUrl ||
+      (tg as any)?.photo_url ||
+      avatarFrom(displayUsername, displayName)
+    );
   }, [u, tg, displayUsername, displayName]);
 
-  if (!addr) return null;
+  if (isLoading || !addr?.address) {
+    return (
+      <div className="wallet">
+        <TopBar title="Кошелек" />
+        <div style={{ padding: 16 }}>Загрузка…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="wallet">
       <TopBar title="Кошелек" />
       <DepositInfo
         avatarSrc={avatarUrl}
-        title="Пополнить счёт"
-        captionTop={`Это ваш адрес ${addr.network.replace("_", " ")}\nдля пополнения`}
-        warnTop={`Скопируйте и внимательно проверьте, один`}
+        title="Добавить ОМ"
+        warnTop={"Скопируйте и внимательно проверьте свой адрес для пополнения, один"}
         warnStrong={" пропущенный символ приведет к потере средств!"}
         warnBottom=""
-        note={"Убедитесь в корректности сети,\n которую вы выбрали для вывода!"}
+        note={"Убедитесь в корректности сети,\n которую вы выбрали!\n\n\n1 OM = 1 USDT\n\nUSDT (BEP-20)"}
         address={addr.address}
         cta="Скопировать адрес"
       />

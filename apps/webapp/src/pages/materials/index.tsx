@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
@@ -13,27 +13,35 @@ import CardImage2 from "../../assets/homePage/minicard2.svg";
 import CardImage3 from "../../assets/homePage/minicard3.svg";
 import "./materials.scss";
 
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+import { useGetUserQuery } from "../../shared/api/user.api";
+
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
-  const staticMaterials = [
-    {
-      key: "movies",
-      title: "Фильмы",
-      description: "Подборка фильмов для вдохновения и развития.",
-    },
-    {
-      key: "music",
-      title: "Музыка",
-      description: "Музыкальные треки и плейлисты для практик и отдыха.",
-    },
-    {
-      key: "books",
-      title: "Книги",
-      description: "Рекомендованные книги для осознанности и роста.",
-    },
-  ];
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({
+    populate: true,
+  });
+  const user = userRes?.data;
+
+  const hasPaidSubscription = useMemo(() => {
+    const type = String(user?.subscription?.type || "").toLowerCase();
+    return type === "pro" || type === "premium";
+  }, [user]);
+
+  const requireSub = (cb: () => void) => {
+    if (isUserLoading) return;
+
+    if (!hasPaidSubscription) {
+      setModalOpen(true);
+      return;
+    }
+
+    cb();
+  };
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
@@ -43,24 +51,40 @@ export default function Index() {
         <Title>Полезные материалы</Title>
 
         <div className="promo-container">
-
-            <PromoTile
-              title={"Фильмы"}
-              bgSrc={Bgmini}
-              imageUrl={CardImage1}
-              to="/films"
-            />
           <PromoTile
-            title={"Музыка"}
+            title="Фильмы"
+            bgSrc={Bgmini}
+            imageUrl={CardImage1}
+            to={hasPaidSubscription ? "/films" : undefined}
+            onClick={() =>
+              requireSub(() => {
+                navigate("/films");
+              })
+            }
+          />
+
+          <PromoTile
+            title="Музыка"
             bgSrc={Bgmini}
             imageUrl={CardImage2}
-            to="#"
+            href={hasPaidSubscription ? "https://t.me/trinity_music" : undefined}
+            onClick={() =>
+              requireSub(() => {
+                window.open("https://t.me/trinity_music", "_blank", "noopener,noreferrer");
+              })
+            }
           />
+
           <PromoTile
-            title={"Книги"}
+            title="Книги"
             bgSrc={Bgmini}
             imageUrl={CardImage3}
-            to="#"
+            href={hasPaidSubscription ? "https://t.me/trinity_books" : undefined}
+            onClick={() =>
+              requireSub(() => {
+                window.open("https://t.me/trinity_books", "_blank", "noopener,noreferrer");
+              })
+            }
           />
         </div>
       </main>
@@ -73,6 +97,15 @@ export default function Index() {
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
+
+      <SubscriptionRequiredModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onGoToSubscription={() => {
+          setModalOpen(false);
+          navigate("/subscription");
+        }}
+      />
     </div>
   );
 }

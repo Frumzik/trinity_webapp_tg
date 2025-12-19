@@ -30,21 +30,19 @@
   top: 11px;
   color: #FFF;
   font-family: "SF Pro Display";
-  font-size: 14px;
+  font-size: 16px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .tabs {
   display: flex;
   align-items: flex-end;
-  justify-content: left;
+  justify-content: space-around;
   height: 73px;
   width: 100%;
-  gap: 25px;
+  gap: 0px;
   margin-bottom: 10px;
-  margin-left: 14px;
-
   &__btn {
     width: 22vw;
     height: 28.82px;
@@ -144,7 +142,7 @@
     z-index: 1;
     display: grid;
     gap: 6px;
-    padding: 30px 30px 34px 14px;
+    padding: 30px 30px 55px 14px;
     border-radius: 0 0 12px 12px;
     background: rgba(20, 98, 65, 0.20);
     backdrop-filter: blur(7.5px);
@@ -155,7 +153,7 @@
     position: absolute;
     top: 10px;
     left: 14px;
-    width: 139px;
+    width: 300px;
     color: #fff;
     font-family: "SF Pro Display";
     font-size: 16px;
@@ -167,6 +165,7 @@
     position: absolute;
     top: -80px;
     left: 14px;
+    right: 14px;
     color: #fff;
     font-family: "SF Pro Display";
     font-size: 16px;
@@ -210,6 +209,9 @@
 
     &--done {
       background: rgba(88, 160, 112, 0.9);
+      position: absolute;
+      right: 9px;
+      bottom: 7px;
     }
 
     &--lock {
@@ -271,9 +273,9 @@
 
   &__hud {
     position: absolute;
-    left: 22px;
+    left: 13px;
     right: 22px;
-    bottom: 17px;
+    bottom: 13px;
     z-index: 3;
     display: flex;
     align-items: flex-end;
@@ -285,13 +287,20 @@
     }
 
     &-title {
+      width: 139px;
       color: #fff;
       font-family: "SF Pro Display";
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
-
+    &-time{
+      opacity: 0.95;
+      color: #fff;
+      font-family: "SF Pro Display";
+      font-size: 10px;
+      font-weight: 500;
+    }
     &-lock {
       display: inline-flex;
       width: 35px;

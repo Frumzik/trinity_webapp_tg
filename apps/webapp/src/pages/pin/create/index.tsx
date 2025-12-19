@@ -1,7 +1,6 @@
 // src/pages/pin/create/index.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TopBar from '../../../widgets/topbarTextpage';
 import GradientButton from '../../../shared/ui/gradient-button';
 import '../../pin/pin.scss';
 import { useRegisterTgMutation, useLoginTgMutation } from '../../../shared/api/auth.api';
@@ -10,7 +9,6 @@ import { sessionActions } from '../../../entities/session/model/session.slice';
 
 const toDigits = (v: string) => v.replace(/\D/g, '').slice(0, 4);
 
-// один и тот же pickToken, как в PinLoginPage
 const pickToken = (x: any): string | null =>
   x?.access_token ||
   x?.accessToken ||
@@ -20,7 +18,6 @@ const pickToken = (x: any): string | null =>
   x?.data?.token ||
   null;
 
-// --- decodeB64Url / parsePartnerId как у тебя было ---
 function decodeB64Url(s: string) {
   try {
     const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
@@ -103,7 +100,6 @@ export default function PinCreatePage() {
         ...(partnerIdNum !== undefined ? { partnerId: partnerIdNum } : {}),
       }).unwrap();
 
-      // 2. Сразу же логиним тем же PIN
       const resp = await loginTg({ type: 'TG', tgId, pin: pin1 }).unwrap();
       const token = pickToken(resp);
       if (!token) throw new Error('Токен не получен');
@@ -128,8 +124,9 @@ export default function PinCreatePage() {
   }, []);
   return (
     <div className="pin">
-      <TopBar title="Пин код" hideBackButton />
+      {/*<TopBar title={"Добро пожаловать в ТРИНИТИ!\n Установите PIN-код, чтобы защитить ваш доступ."} hideBackButton />*/}
       <main className="pin__main">
+        <div className="pin__main-title">Добро пожаловать в ТРИНИТИ! Установите PIN-код, чтобы защитить ваш доступ.</div>
         <div className="pin__form">
           <div className="pin__field">
             <input

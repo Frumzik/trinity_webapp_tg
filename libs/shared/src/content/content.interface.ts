@@ -17,11 +17,9 @@ export enum TrainingTag {
   STAGES_SPIRIT = 'stages_spirit',
   STAGE_LEVEL = 'stage_level',
   STAGE = 'stage',
-  SPIRITUAL_START = 'spiritual_start',
-  ACADEMY_SPIRIT = 'acedemy_spirit',
-  PRACTICE = 'practice',
   USEFUL_MATERIALS = 'userful_materials',
   KNOWLEDGE_WORKSHOP = 'knowledge_workshop',
+  GIFTS = 'gifts',
   HEALTH_LAB = 'health_lab',
   PRACTISE = 'practise',
   COURSE = 'course',
@@ -58,6 +56,8 @@ export interface ITraining {
   duration: string | null;
   coverUrl: string | null;
   iconUrl: string | null;
+  bgUrl: string | null;
+  link: string | null;
 
   // Условия доступности
   accessRules: TypeContentAccess[];
@@ -66,8 +66,8 @@ export interface ITraining {
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
   progressPercent?: number;
-  totalLessons?: number;
-  completedLessons?: number;
+  progressTotal?: number;
+  progressCompleted?: number;
 }
 
 // Уроки
@@ -132,7 +132,8 @@ export type ILessonContent =
   | ILessonVideoContent
   | ILessonAudioContent
   | ILessonTextContent
-  | ILessonFilmContent;
+  | ILessonFilmContent
+  | ILessonPractiseContent;
 
 export interface ILessonVideo extends ILesson {
   type: LessonType.VIDEO;
@@ -169,6 +170,7 @@ export type TypeLesson =
 export enum ContentAccessType {
   SUBSCRIPTION = 'subscription',
   ONE_TIME_PAYMENT = 'one_time_payment',
+  TRAINING_PURCHASED = 'training_purchased',
   FREE = 'free',
   DATE_UNLOCK = 'date_unlock',
   TRAINING_COMPLETED = 'training_completed',
@@ -177,7 +179,7 @@ export enum ContentAccessType {
 
 interface TypeContentAccessBase {
   type: ContentAccessType;
-  description?: string;
+  description: string | null;
 }
 
 export interface TypeContentAccessSubscription extends TypeContentAccessBase {
@@ -186,6 +188,12 @@ export interface TypeContentAccessSubscription extends TypeContentAccessBase {
 
 export interface TypeContentAccessOneTimePayment extends TypeContentAccessBase {
   type: ContentAccessType.ONE_TIME_PAYMENT;
+}
+
+export interface TypeContentAccessTrainingPurchased
+  extends TypeContentAccessBase {
+  type: ContentAccessType.TRAINING_PURCHASED;
+  value: number;
 }
 
 export interface TypeContentAccessFree extends TypeContentAccessBase {
@@ -215,4 +223,5 @@ export type TypeContentAccess =
   | TypeContentAccessFree
   | TypeContentAccessDateUnlock
   | TypeContentAccessTrainingCompleted
-  | TypeContentAccessLessonCompleted;
+  | TypeContentAccessLessonCompleted
+  | TypeContentAccessTrainingPurchased;

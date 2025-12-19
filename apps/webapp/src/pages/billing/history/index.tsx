@@ -1,12 +1,50 @@
-import TopBar from "../../../widgets/topbarTextpage"
-import BalanceCard from "../../../widgets/wallet/BalanceCard"
-import TransactionList from "../../../widgets/transactions/TransactionList"
-import "./index.scss"
-import { useGetUserQuery } from "../../../shared/api/user.api"
+// pages/wallet/billing-history/index.tsx
+import { useMemo } from "react";
+
+import TopBar from "../../../widgets/topbarTextpage";
+import BalanceCard from "../../../widgets/wallet/BalanceCard";
+import TransactionList from "../../../widgets/transactions/TransactionList";
+import "./index.scss";
+
+import { useGetUserQuery } from "../../../shared/api/user.api";
+import { useGetTransactionsQuery } from "../../../shared/api/transactions.api";
+import type { Transaction } from "../../../entities/wallet/model/types";
 
 export default function BillingHistoryPage() {
-  const { data, isLoading } = useGetUserQuery({ populate: false })
-  const amount = data?.data?.balance ?? 0
+  const { data, isLoading } = useGetUserQuery({ populate: false });
+  const amount = data?.data?.balance ?? 0;
+
+  const {
+    data: trxData,
+    isLoading: isTrxLoading,
+    isError: isTrxError,
+  } = useGetTransactionsQuery({ populate: true });
+
+  const items: Transaction[] = useMemo(
+    () => {
+      const src = (trxData?.data ?? []).slice();
+
+      src.sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+      });
+
+      return src.map((t) => {
+        const mappedType: Transaction["type"] =
+          t.type === "Purchase" ? "withdraw" : "deposit";
+
+        return {
+          id: t._id || String(t.transactionId || Math.random()),
+          type: mappedType,
+          amount: t.sum,
+          title: t.description || "Транзакция",
+          date: t.date,
+        } as Transaction;
+      });
+    },
+    [trxData]
+  );
 
   return (
     <>
@@ -18,8 +56,19 @@ export default function BillingHistoryPage() {
           onDeposit={() => {}}
           onWithdraw={() => {}}
         />
-        <TransactionList items={[]} />
+
+        {isTrxLoading && (
+          <div style={{ padding: 16, opacity: 0.7 }}>Загрузка транзакций…</div>
+        )}
+
+        {isTrxError && !isTrxLoading && (
+          <div style={{ padding: 16 }}>
+            Не удалось загрузить историю. Попробуй обновить позже.
+          </div>
+        )}
+
+        {!isTrxLoading && !isTrxError && <TransactionList items={items} />}
       </div>
     </>
-  )
+  );
 }

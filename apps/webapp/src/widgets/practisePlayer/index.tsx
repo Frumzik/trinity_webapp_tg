@@ -9,8 +9,8 @@ export type MediaTrack = {
   id: string | number;
   title: string;
   subtitle?: string;
-  mediaUrl?: string;     // AUDIO
-  videoUrl?: string;     // VIDEO
+  mediaUrl?: string;
+  videoUrl?: string;
   artworkUrl?: string;
   isFavorite?: boolean;
 };
@@ -29,6 +29,7 @@ type Props = {
   onPrev?: () => void;
   onNext?: () => void;
   onMenu?: () => void;
+  onProgress?: (p: PlayerPayload) => void;
   onToggleFav?: (next: boolean) => void;
   onExit?: (p: PlayerPayload) => void;
   onCompleted?: (p: PlayerPayload) => void;
@@ -37,7 +38,6 @@ type Props = {
   showFav?: boolean;
   className?: string;
 
-  /** НИЖНИЙ БЛОК: описание/прогресс/что угодно */
   extraBottom?: React.ReactNode;
 };
 
@@ -58,6 +58,7 @@ export default function PlayerPage({
                                      onMenu,
                                      onToggleFav,
                                      onExit,
+                                     onProgress,
                                      onCompleted,
                                      onDurationReady,
                                      resumeAtSec = 0,
@@ -103,14 +104,13 @@ export default function PlayerPage({
     scheduleHide();
   }, [isVideo, scheduleHide]);
 
-  // при смене трека — сброс и загрузка источника
   useEffect(() => {
     const m = mediaRef.current;
     setReady(false);
     setPlaying(false);
     setCurrent(0);
     setDuration(0);
-    setHudVisible(true); // при загрузке показать HUD
+    setHudVisible(true);
     clearHideTimer();
 
     if (m) {
@@ -136,17 +136,31 @@ export default function PlayerPage({
       onDurationReady?.(d);
     };
 
-    const onTime = () => { if (!scrub) setCurrent(m.currentTime); };
+    const onTime = () => {
+      if (!scrub) {
+        setCurrent(m.currentTime);
+
+        onProgress?.({
+          track,
+          current: m.currentTime,
+          duration: m.duration || 0,
+          progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
+          completed: false,
+        });
+      }
+    };
+
     const onPlay = () => {
       setPlaying(true);
-      // сразу спрятать HUD через небольшой таймаут
       scheduleHide();
     };
+
     const onPause = () => {
       setPlaying(false);
-      setHudVisible(true); // на паузе показываем HUD
+      setHudVisible(true);
       clearHideTimer();
     };
+
     const onEnded = () => {
       setPlaying(false);
       setHudVisible(true);
@@ -172,8 +186,7 @@ export default function PlayerPage({
       m.removeEventListener("pause", onPause);
       m.removeEventListener("ended", onEnded);
     };
-  }, [onCompleted, onDurationReady, scrub, track, resumeAtSec, scheduleHide]);
-
+  }, [onCompleted, onDurationReady, onProgress, scrub, track, resumeAtSec, scheduleHide]);
   // хоткеи
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -221,7 +234,9 @@ export default function PlayerPage({
     setScrub(false);
     if (isVideo && playing) scheduleHide();
   };
-
+  useEffect(() => {
+    setFav(!!track.isFavorite);
+  }, [track.isFavorite]);
   const toggleFav = () => {
     const next = !isFav;
     setFav(next);
@@ -251,7 +266,6 @@ export default function PlayerPage({
     else onBack();
   };
 
-  // события для показа HUD при взаимодействии мышью/тачем (только видео)
   const onUserInteract = () => bumpHud();
 
   return (
@@ -265,7 +279,6 @@ export default function PlayerPage({
       onPointerMove={isVideo ? onUserInteract : undefined}
       onPointerDown={isVideo ? onUserInteract : undefined}
     >
-      {/* фон и шейд — только для аудио */}
       {!isVideo && track.artworkUrl && (
         <>
           <img className="player__bg" src={track.artworkUrl} alt="" />
@@ -273,7 +286,6 @@ export default function PlayerPage({
         </>
       )}
 
-      {/* HUD: верхняя панель */}
       <div className="player__top hud">
         <TopActions
           onBack={backWithPayload}
@@ -284,7 +296,6 @@ export default function PlayerPage({
         />
       </div>
 
-      {/* HUD: стрелки навигации */}
       {onPrev && (
         <button className="player__nav player__nav--prev hud" onClick={onPrev} aria-label="Prev">
           <img src={leftArrow} alt="" />
@@ -296,7 +307,6 @@ export default function PlayerPage({
         </button>
       )}
 
-      {/* HUD: кнопка Play/Pause (оверлеем по центру) */}
       <button className="player__play hud" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}>
         <span className={clsx("player__knob", playing && "is-playing")}>
           <span className="player__play-icon">
@@ -307,7 +317,6 @@ export default function PlayerPage({
         </span>
       </button>
 
-      {/* HUD: таймлайн/тайминги */}
       <div className="player__panel hud">
         <div className="player__title">{track.title}</div>
         {track.subtitle && <div className="player__subtitle">{track.subtitle}</div>}
@@ -332,7 +341,6 @@ export default function PlayerPage({
         </div>
       </div>
 
-      {/* media */}
       {track.videoUrl ? (
         <video
           ref={mediaRef as React.RefObject<HTMLVideoElement>}
@@ -340,14 +348,13 @@ export default function PlayerPage({
           preload="metadata"
           playsInline
           controls={false}
-          onClick={onUserInteract}      // << оставить
-          onPointerDown={onUserInteract} // << добавить
+          onClick={onUserInteract}
+          onPointerDown={onUserInteract}
         />
       ) : (
         <audio ref={mediaRef as React.RefObject<HTMLAudioElement>} preload="metadata" />
       )}
 
-      {/* HUD: нижний блок (описание/прогресс) */}
       {extraBottom && (
         <div className="player__bottom hud">
           {extraBottom}

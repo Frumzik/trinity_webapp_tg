@@ -7,7 +7,7 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 
-type Tab = "home" | "favorites" | "development" | "profile" | "store";
+type Tab = "home" | "favorites" | "progress" | "profile" | "store";
 
 const FooterTabCtx = createContext<{
   tab: Tab;
@@ -16,7 +16,7 @@ const FooterTabCtx = createContext<{
 
 function detectInitialTab(pathname: string): Tab {
   if (pathname.startsWith("/favorites")) return "favorites";
-  if (pathname.startsWith("/development")) return "development";
+  if (pathname.startsWith("/progress")) return "progress";
   if (pathname.startsWith("/profile")) return "profile";
   if (pathname.startsWith("/store")) return "store";
   return "home";

@@ -42,10 +42,6 @@
     justify-self: end;
   }
 
-  &__pitch {
-    margin-top: 36px;
-  }
-
   &__h2 {
     color: #fff;
     font-family: "SF Pro Display";
@@ -99,7 +95,7 @@
     position: absolute;
     bottom: 0px;
     border-radius: 24px 24px 0 0;
-    min-height: 360px;
+    height: 360px;
     border-radius: 34px 34px 0 0;
     background: rgba(255, 255, 255, 0.30);
     width: 100%;
@@ -123,7 +119,7 @@
     );
     -webkit-tap-highlight-color: transparent;
     backdrop-filter: blur(6px);
-    padding: 16px;
+    padding: 15px 26px 36px 26px;
     border: 2px solid transparent;
     box-sizing: border-box;
     cursor: pointer;
@@ -143,7 +139,15 @@
   }
 
   &__offer-price {
-    color: #FF922D;
+    background: linear-gradient(
+                    180deg,
+                    #6f96ff 0%,
+                    #4169e1 50%,
+                    #243a8f 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     font-family: "SF Pro Display";
     font-size: 18px;
     font-style: normal;
@@ -153,7 +157,16 @@
   }
 
   &__offer-note {
-    color: rgba(255, 106, 204, 0.84);
+    background: linear-gradient(
+                    135deg,
+                    #6f96ff 0%,
+                    #4169e1 50%,
+                    #243a8f 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
     font-family: "SF Pro Display";
     font-size: 18px;
     font-style: normal;
@@ -230,4 +243,42 @@
   .sub__pill-right {
     color: #6A5017;
   }
+}
+
+@media (max-height: 820px) {
+  .sub{
+    .abc {
+      position: absolute;
+      bottom: 0px;
+      border-radius: 24px 24px 0 0;
+      height: 315px;
+      border-radius: 34px 34px 0 0;
+      background: rgba(255, 255, 255, 0.30);
+      width: 100%;
+    }
+  }
+
+  .sub__offer-card {
+    position: absolute;
+    bottom: 105px;
+    right: 24px;
+    left: 24px;
+    width: 88%;
+    border-radius: 12px;
+    background: linear-gradient(255deg, rgba(255, 210, 248, 0.6) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.4) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+    -webkit-tap-highlight-color: transparent;
+    backdrop-filter: blur(6px);
+    padding: 15px 26px 26px 26px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .sub__offer-card-month {
+    position: absolute;
+    bottom: 205px;
+    right: 24px;
+    left: 24px;
+  }
+
 }

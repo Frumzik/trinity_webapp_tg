@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { FavoriteType } from './favorites.interface.js';
 import { ILesson, ITraining } from '../content/content.interface.js';
@@ -90,5 +90,7 @@ export class FavoriteInfoResponseDto {
 
 
 export class FavoriteDeleteRequestDto {
+  @ApiProperty()
+  @IsNumber()
   favoriteId!: number;
 }

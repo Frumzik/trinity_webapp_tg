@@ -4,7 +4,7 @@ import { FilterQuery, Model } from 'mongoose';
 import { Referral } from '../models';
 import { ReferralEntity } from '../entities';
 import mongoose from 'mongoose';
-import { IUser } from '@trinity/shared';
+import { GetListOptions, IUser } from '@trinity/shared';
 
 @Injectable()
 export class ReferralsRepository {
@@ -26,11 +26,31 @@ export class ReferralsRepository {
     return referral ? new ReferralEntity(referral.toObject()) : null;
   }
 
-    // Поиск реферала
-  async findAll(condition: FilterQuery<Referral> = {}): Promise<ReferralEntity[]> {
-    const referrals = await this.referralModel.find(condition).lean().exec();
+  // Получение всех тренингов
+  async findAll(options?: GetListOptions<Referral>): Promise<ReferralEntity[]> {
+    const {
+      skip = 0,
+      limit = 0,
+      sort = {},
+      filter = {},
+      populate = [],
+    } = options || {};
 
-    return referrals.map((referral) => new ReferralEntity(referral.toObject()));
+    const items = await this.referralModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .populate(populate.map((path) => ({ path })))
+      .lean()
+      .exec();
+
+    return items.map((u) => new ReferralEntity(u));
+  }
+
+  // Подсчет баннера по условию
+  async count(filter: FilterQuery<Referral> = {}): Promise<number> {
+    return await this.referralModel.countDocuments(filter).exec();
   }
 
   // Обновление реферала

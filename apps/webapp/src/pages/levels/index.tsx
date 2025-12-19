@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 import Tabs from "./ui/Tabs";
 import LevelCard from "./ui/LevelCard";
@@ -10,9 +9,11 @@ import "./levels.scss";
 import Footer from "../../widgets/footer/footer";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
 import FlexibleModal from "../../widgets/flexible-modal";
-import { learningApi, useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
-import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
+import { useGetUserQuery, useLazyGetUserQuery } from "../../shared/api/user.api";
+import { useLocation } from "react-router-dom";
 
 export type LevelItem = {
   id: string;
@@ -22,7 +23,7 @@ export type LevelItem = {
   subtitle?: string;
   durationMin?: number;
   image: string;
-  description: string,
+  description: string;
   status: "available" | "done" | "locked";
   priceUSDT?: number;
 };
@@ -31,49 +32,67 @@ const numFromTitle = (t?: string) => {
   const m = (t || "").match(/\d+/);
   return m ? Number(m[0]) : undefined;
 };
+
 type LocalProgress = {
   seconds: number;
   duration: number;
-  status: 'in_progress' | 'completed';
+  status: "in_progress" | "completed";
 };
-const LP_KEY = 'lessonProgress';
+
+const LP_KEY = "lessonProgress";
 
 const lpLoad = (): Record<string, LocalProgress> => {
-  try { return JSON.parse(localStorage.getItem(LP_KEY) || '{}'); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(LP_KEY) || "{}");
+  } catch {
+    return {};
+  }
 };
+
 const lpSave = (obj: Record<string, LocalProgress>) => {
-  try { localStorage.setItem(LP_KEY, JSON.stringify(obj)); } catch {}
+  try {
+    localStorage.setItem(LP_KEY, JSON.stringify(obj));
+  } catch {}
 };
 
 const readLegacyLesson = (lessonId: number | string) => {
   try {
     const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
     if (!raw) return null;
-    const j = JSON.parse(raw); // { lessonId, current, duration, completed }
+    const j = JSON.parse(raw);
     const current = Math.max(0, Math.round(j?.current || 0));
     const duration = Math.max(0, Math.round(j?.duration || 0));
-    const completed = Boolean(j?.completed) || (duration > 0 && current >= duration);
-    return { seconds: current, duration, status: completed ? 'completed' as const : 'in_progress' as const };
-  } catch { return null; }
+    const completed =
+      Boolean(j?.completed) || (duration > 0 && current >= duration);
+    return {
+      seconds: current,
+      duration,
+      status: completed ? ("completed" as const) : ("in_progress" as const),
+    };
+  } catch {
+    return null;
+  }
 };
 
 const lpMigrateFromLegacy = () => {
   const lp = lpLoad();
   try {
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i) || '';
-      if (!key.startsWith('lessonProgress:')) continue;
-      const id = key.split(':')[1];
+      const key = localStorage.key(i) || "";
+      if (!key.startsWith("lessonProgress:")) continue;
+      const id = key.split(":")[1];
       if (!id) continue;
       const legacy = readLegacyLesson(id);
       if (legacy) {
-        // аккуратно объединяем
         const prev = lp[id];
         lp[id] = prev
           ? {
             seconds: Math.max(prev.seconds || 0, legacy.seconds || 0),
             duration: Math.max(prev.duration || 0, legacy.duration || 0),
-            status: (prev.status === 'completed' || legacy.status === 'completed') ? 'completed' : 'in_progress',
+            status:
+              prev.status === "completed" || legacy.status === "completed"
+                ? "completed"
+                : "in_progress",
           }
           : legacy;
       }
@@ -82,23 +101,16 @@ const lpMigrateFromLegacy = () => {
   } catch {}
 };
 
-const isLessonCompletedLocal = (lessonId: number | string, store?: Record<string, LocalProgress>) => {
+const isLessonCompletedLocal = (
+  lessonId: number | string,
+  store?: Record<string, LocalProgress>
+) => {
   const lp = store ?? lpLoad();
-  const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId); // учитываем и legacy
+  const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId);
   if (!rec) return false;
-  return rec.status === 'completed' || (rec.duration > 0 && rec.seconds >= rec.duration);
-};
-
-const isTrainingCompletedLocal = (node: BNode) => {
-  const lp = lpLoad();
-  const lessons = node.lessons ?? [];
-  if (!lessons.length) return false;
-  return lessons.every((l: any) => l.progressStatus === 'completed' || isLessonCompletedLocal(l.lessonId, lp));
-};
-const minutesFromDuration = (d?: string | null) => {
-  if (!d) return undefined;
-  const m = d.match(/\d+/);
-  return m ? Number(m[0]) : undefined;
+  return (
+    rec.status === "completed" || (rec.duration > 0 && rec.seconds >= rec.duration)
+  );
 };
 
 type BNode = {
@@ -122,9 +134,26 @@ type BNode = {
   lessons?: any[];
 };
 
+const isTrainingCompletedLocal = (node: BNode) => {
+  const lp = lpLoad();
+  const lessons = node.lessons ?? [];
+  if (!lessons.length) return false;
+  return lessons.every(
+    (l: any) =>
+      l.progressStatus === "completed" ||
+      isLessonCompletedLocal(l.lessonId, lp)
+  );
+};
+
+const minutesFromDuration = (d?: string | null) => {
+  if (!d) return undefined;
+  const m = d.match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+
 export default function Index() {
   const navigate = useAppNavigate();
-  const dispatch = useDispatch();
+  const location = useLocation();
 
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
@@ -139,6 +168,8 @@ export default function Index() {
 
   const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
+  const [fetchUser] = useLazyGetUserQuery();
 
   const root: BNode | undefined = useMemo(() => {
     const roots = (data?.data ?? []) as BNode[];
@@ -147,13 +178,33 @@ export default function Index() {
 
   const levelNodes: BNode[] = useMemo(() => {
     const arr = (root?.childrens ?? []) as BNode[];
-    const onlyLevels = arr.filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number");
+    const onlyLevels = arr.filter(
+      (n) => n.tag === "stage_level" || typeof n.stageLevel === "number"
+    );
     return [...onlyLevels].sort((a, b) => {
       const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
       const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
       return A - B;
     });
   }, [root]);
+
+  const [backTo, setBackTo] = useState<string>("/home");
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const fromQuery = searchParams.get("from");
+    const fromState = (location.state as any)?.from;
+    const stored = sessionStorage.getItem("levelsBackTo");
+    const next = fromQuery || fromState || stored || "/home";
+
+    setBackTo(next);
+
+    if (fromQuery || fromState) {
+      try {
+        sessionStorage.setItem("levelsBackTo", next);
+      } catch {}
+    }
+  }, [location]);
 
   const groups = useMemo(() => {
     const nums = levelNodes
@@ -167,7 +218,10 @@ export default function Index() {
   }, [groups, group]);
 
   const currentLevel: BNode | undefined = useMemo(
-    () => levelNodes.find((n) => (n.stageLevel ?? numFromTitle(n.title)) === group),
+    () =>
+      levelNodes.find(
+        (n) => (n.stageLevel ?? numFromTitle(n.title)) === group
+      ),
     [levelNodes, group]
   );
 
@@ -182,11 +236,13 @@ export default function Index() {
       const doneLocal = isTrainingCompletedLocal(s);
 
       const status: LevelItem["status"] =
-        s.progressStatus === "completed" || doneLocal
-          ? "done"
-          : s.accessStatus === "available"
-            ? "available"
-            : "locked";
+        group === 1 && stages[0]?.trainingId === s.trainingId
+          ? "available"
+          : s.progressStatus === "completed" || doneLocal
+            ? "done"
+            : s.accessStatus === "available"
+              ? "available"
+              : "locked";
 
       return {
         id: String(s.trainingId),
@@ -196,33 +252,39 @@ export default function Index() {
         durationMin: minutesFromDuration(s.duration),
         image: s.coverUrl || "",
         status,
-        // если цена в OM, название можно считать условным
-        priceUSDT: (s.salePrice ?? s.price) ?? undefined,
+        priceUSDT: s.salePrice ?? s.price ?? undefined,
+        description: s.shortDescription || s.description || "",
       };
     });
   }, [stages, group]);
 
   const purchaseLevels: PurchaseLevel[] = useMemo(
     () =>
-      stages.map((s) => {
+      stages.map((s, idx) => {
         const status: LevelItem["status"] =
-          s.progressStatus === "completed" || isTrainingCompletedLocal(s)
-            ? "done"
-            : s.accessStatus === "available"
-              ? "available"
-              : "locked";
+          group === 1 && stages[0]?.trainingId === s.trainingId
+            ? "available"
+            : s.progressStatus === "completed" || isTrainingCompletedLocal(s)
+              ? "done"
+              : s.accessStatus === "available"
+                ? "available"
+                : "locked";
+
+        const stepIndex =
+          typeof s.stage === "number"
+            ? s.stage
+            : numFromTitle(s.title) ?? idx;
 
         return {
           id: String(s.trainingId),
           title: s.title,
-          // актуальная цена: сначала salePrice, если есть, иначе price
           price: s.salePrice ?? s.price ?? 0,
-          // старая цена: если есть salePrice, то base = price
           salePrice: s.salePrice != null ? s.price ?? undefined : undefined,
           purchased: status !== "locked",
+          stepIndex,
         };
       }),
-    [stages]
+    [stages, group]
   );
 
   const handleCardClick = (l: LevelItem) => {
@@ -234,32 +296,82 @@ export default function Index() {
     }
   };
 
-  const openSuccessModal = (titles: string[]) => {
-    setResultTitle("Новый уровень открыт");
-    setResultItems(titles);
-    setResultCta("Открыть");
-    const first = purchaseLevels.find((pl) => titles.includes(pl.title));
-    setResultOnCta(() => (first ? () => navigate(`/level/${first.id}`) : () => setResultOpen(false)));
-    setResultOpen(true);
+  const buildStepTitle = (stepNumber: number, count: number) => {
+    if (count === 1) {
+      return `${stepNumber} Ступень Духа открыта`;
+    }
+
+    const lastTwo = count % 100;
+    const last = count % 10;
+
+    if (lastTwo >= 11 && lastTwo <= 14) {
+      return `${count} Ступеней Духа открыто`;
+    }
+
+    if (last === 1) {
+      return `${count} Ступень Духа открыта`;
+    }
+
+    if (last >= 2 && last <= 4) {
+      return `${count} Ступени Духа открыты`;
+    }
+
+    return `${count} Ступеней Духа открыто`;
   };
 
+  const openSuccessModal = (openedIds: number[]) => {
+    if (!openedIds.length) return;
+
+    const openedLevels = purchaseLevels.filter((pl) =>
+      openedIds.includes(Number(pl.id))
+    );
+
+    const first = openedLevels[0];
+
+    const mainStepNumber =
+      first && typeof first.stepIndex === "number"
+        ? first.stepIndex
+        : numFromTitle(first?.title) ?? 1;
+
+    const titleText = buildStepTitle(mainStepNumber, openedLevels.length);
+    setResultTitle(titleText);
+    setResultItems(undefined);
+    setResultDesc(undefined);
+    setResultCta("Перейти");
+
+    setResultOnCta(
+      () =>
+        first
+          ? () =>
+            navigate(`/level/${first.id}`, {
+              state: { returnTo: "/levels" },
+            })
+          : () => setResultOpen(false)
+    );
+
+    setResultOpen(true);
+  };
 
   const openErrorModal = (message?: string | string[], isInsufficient?: boolean) => {
     const msg = Array.isArray(message) ? message.join("\n") : message;
 
-    setResultTitle(msg || (isInsufficient ? "Недостаточно баланса" : "Произошла ошибка"));
+    setResultTitle(
+      msg || (isInsufficient ? "Недостаточно OM на балансе" : "Произошла ошибка")
+    );
     setResultItems(undefined);
 
-    setResultCta(isInsufficient ? "Пополнить баланс" : "Продолжить");
+    setResultCta(isInsufficient ? "Добавить OM" : "Продолжить");
 
-    setResultOnCta(() => () => {
-      if (isInsufficient) {
-        navigate("/wallet");
-        setResultOpen(false);
-      } else {
-        setResultOpen(false);
+    setResultOnCta(
+      () => () => {
+        if (isInsufficient) {
+          navigate("/wallet");
+          setResultOpen(false);
+        } else {
+          setResultOpen(false);
+        }
       }
-    });
+    );
 
     setResultOpen(true);
   };
@@ -271,7 +383,36 @@ export default function Index() {
   }) => {
     setModalOpen(false);
 
-    const ids = _p.levelIds.map((id) => Number(id)).filter(Number.isFinite) as number[];
+    let hasPaidSubscription = false;
+
+    try {
+      const freshUser = await fetchUser().unwrap();
+      const subscriptionType = freshUser?.data?.subscription?.type;
+      hasPaidSubscription =
+        subscriptionType === "pro" || subscriptionType === "premium";
+    } catch (err) {
+      console.error("Не удалось обновить данные пользователя перед покупкой", err);
+      const fallbackType = userRes?.data.subscription?.type;
+      hasPaidSubscription =
+        fallbackType === "pro" || fallbackType === "premium";
+    }
+
+    if (!hasPaidSubscription) {
+      setResultTitle("Недоступно");
+      setResultItems(undefined);
+      setResultDesc("У вас неактивен доступ к приложению");
+      setResultCta("Активировать");
+      setResultOnCta(() => () => {
+        setResultOpen(false);
+        navigate("/subscription");
+      });
+      setResultOpen(true);
+      return;
+    }
+
+    const ids = _p.levelIds
+      .map((id) => Number(id))
+      .filter((n) => Number.isFinite(n)) as number[];
     if (ids.length === 0) return;
 
     try {
@@ -281,37 +422,20 @@ export default function Index() {
         sale: Boolean(_p.discountedOM),
       }).unwrap();
 
-      dispatch(
-        learningApi.util.updateQueryData("getTrainingTree", undefined, (draft: any) => {
-          const nodes: any[] = draft?.data ?? [];
-          for (const root of nodes) {
-            const walk = (n: any) => {
-              if (typeof n?.trainingId === "number" && ids.includes(n.trainingId)) {
-                n.accessStatus = "available";
-                if (n.progressStatus !== "completed") n.progressStatus = "not_started";
-              }
-              (n.childrens ?? []).forEach(walk);
-            };
-            walk(root);
-          }
-        })
-      );
-      const titles = purchaseLevels
-        .filter((pl) => ids.includes(Number(pl.id)))
-        .map((pl) => pl.title);
-      openSuccessModal(titles);
-
       await refetch();
+      openSuccessModal(ids);
     } catch (e: any) {
       const raw = e?.data?.message ?? e?.error ?? "Ошибка покупки";
       const msg = Array.isArray(raw) ? raw[0] : raw;
 
-      const isInsufficient = msg === "Недостаточно баланса";
+      const isInsufficient = msg === "Недостаточно ОМ на балансе";
 
       openErrorModal(msg, isInsufficient);
     }
   };
+
   const anyModalOpen = modalOpen || resultOpen;
+
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar
@@ -319,11 +443,12 @@ export default function Index() {
         rightIconUrl={helpIcon}
         onRightClick={() =>
           window.open(
-            "https://docs.google.com/document/d/19hvbG7ZUQYpfMUF8oNz43oJlOQd-KdTKqMPf8QrWEME/edit?tab=t.0",
+            "https://docs.google.com/document/d/16k0o50V_jEfftCG-pIvr3RJAtZu9mFbiOr0MiVlpvhQ/edit?usp=sharing",
             "_blank",
             "noopener,noreferrer"
           )
         }
+        backTo={backTo}
       />
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
@@ -340,13 +465,20 @@ export default function Index() {
           </div>
 
           {isLoading && (
-            <div style={{ padding: "8px 0 0 4px", fontSize: 14, opacity: 0.7 }}>
+            <div
+              style={{
+                padding: "8px 0 0 4px",
+                fontSize: 14,
+                opacity: 0.7,
+              }}
+            >
               Загрузка…
             </div>
           )}
           {isError && (
             <div style={{ padding: "8px 0 0 4px", fontSize: 14 }}>
-              Не удалось загрузить. <button onClick={() => refetch()}>Повторить</button>
+              Не удалось загрузить.{" "}
+              <button onClick={() => refetch()}>Повторить</button>
             </div>
           )}
 
@@ -362,9 +494,9 @@ export default function Index() {
               zIndex: 10,
             }}
           >
-            <div className="levels__list" aria-busy={isBuying}>
+            <div className="levels__list" aria-busy={isBuying || isUserLoading}>
               {items.map((l) => (
-                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)}  />
+                <LevelCard key={l.id} item={l} onClick={() => handleCardClick(l)} />
               ))}
             </div>
           </ScrollPanel>
@@ -373,10 +505,11 @@ export default function Index() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="USDT = OM"
-            InfoIcon={(props) => <img src={Info} {...props} />}
+            rateText="1 USDT = 1 OM"
+            title={`${group} уровень`}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
+            isFirstLevel={group === 1}
           />
         </div>
       </main>

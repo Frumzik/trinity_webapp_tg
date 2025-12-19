@@ -4,11 +4,14 @@ import { IUser } from '../user/user.interface.js';
 export enum TransactionType {
   STANDART = 'Standart',
   REFERRAL = 'Referral',
+  MERCHANT = 'Merchant',
   PURCHASE = 'Purchase',
   SUBSCRIPTION = 'Subscription',
   REPLENISHMENT = 'Replenishment',
   WITHDRAWAL = 'Withdrawal',
+  FUND = 'Fund',
 }
+
 export interface ITransaction {
   _id?: Types.ObjectId;
   transactionId: number;
@@ -18,4 +21,5 @@ export interface ITransaction {
   sum: number;
   date: Date;
   description: string;
+  toAddress?: string;
 }

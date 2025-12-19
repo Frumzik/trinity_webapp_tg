@@ -59,6 +59,38 @@
 .refCard--166x123 {
   width: 100%;
   height: 123px;
+  .refCard__bar{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 36px;
+    border-radius: 20px;
+    border: none!important;
+    background: none!important;
+    backdrop-filter: none!important;
+    box-shadow: none!important;
+    z-index: 2;
+  }
+    .refCard__label{
+      display: flex;
+      position: absolute;
+      bottom: 7px;
+      left: 9px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(255deg, rgba(255, 210, 248, 0.6) 2.37%, rgba(255, 191, 245, 0.52) 16.08%, rgba(255, 162, 240, 0.41) 35.96%, rgba(255, 159, 240, 0.46) 57.32%, rgba(255, 145, 237, 0.4) 73.23%, rgba(255, 148, 238, 0.34) 89.62%);
+      width: 70px;
+      height: 24px;
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      font-family: "SF Pro Display";
+      font-size: 10px;
+      font-style: normal;
+      font-weight: 300;
+    }
+
 }
 
 .refCard--imgRight {

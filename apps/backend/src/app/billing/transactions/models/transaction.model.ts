@@ -23,7 +23,7 @@ export class Transaction
   })
   type!: TransactionType;
 
-  @Prop({ type: Number, required: true, min: 0 })
+  @Prop({ type: Number, required: true })
   sum!: number;
 
   @Prop({ type: Date, required: true, default: Date.now() })
@@ -31,6 +31,9 @@ export class Transaction
 
   @Prop({ type: String, required: true })
   description!: string;
+
+  @Prop({ type: String, required: false })
+  toAddress?: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

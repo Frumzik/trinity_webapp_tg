@@ -45,16 +45,16 @@ export default function WithdrawForm({ quote, submit }: Props) {
       )}
       <input
         className="wform__addr"
-        placeholder="Вставьте адрес USDT BEP 20"
+        placeholder="Вставьте адрес USDT (BEP-20)"
         value={addr}
         onChange={(e) => setAddr(e.target.value)}
       />
       <div className="wform__agree">
-        Нажимая кнопку «вывести», я подтверждаю, что ознакомился с Правилами
+        Нажимая кнопку «получить», я подтверждаю, что ознакомился с Правилами
         сервиса
       </div>
       <GradientButton onClick={onSend}>
-        Вывести ${q ? q.total.toFixed(0) : amount}
+        Получить ${q ? q.total.toFixed(0) : amount}
       </GradientButton>
     </div>
   );

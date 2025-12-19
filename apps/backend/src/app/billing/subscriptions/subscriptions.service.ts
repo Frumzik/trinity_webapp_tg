@@ -9,7 +9,11 @@ import { SubscriptionsRepository } from './repositories';
 import { UserEntity } from '../../account';
 import {
   CounterType,
+  GetListOptions,
+  SubscriptionDaysLeftEvent,
   SubscriptionEvents,
+  SubscriptionExpiredEvent,
+  SubscriptionPayedEvent,
   SubscriptionUpdatedEvent,
 } from '@trinity/shared';
 import { CountersService } from '../../service';
@@ -45,11 +49,35 @@ export class SubscriptionsService {
     try {
       const subscription = await this.subscriptionsRepository.find(condition);
 
-      if (!subscription) {
-        throw new NotFoundException('Подиска не найдена');
-      }
+      return subscription
+        ? await this.subscriptionsRepository.update(subscription.validate())
+        : null;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
 
-      return await this.subscriptionsRepository.update(subscription.validate());
+  async findAll(
+    options?: GetListOptions<Subscription>
+  ): Promise<SubscriptionEntity[]> {
+    try {
+      const subscriptions = await this.subscriptionsRepository.findAll(options);
+
+      return subscriptions;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске подписки';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async count(condition: FilterQuery<Subscription>): Promise<number> {
+    try {
+      const count = await this.subscriptionsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
@@ -122,14 +150,46 @@ export class SubscriptionsService {
         subscription.purchase(dto.days)
       );
 
-      this.eventEmitter.emit(
+      await this.eventEmitter.emit(
         SubscriptionEvents.UPDATED,
         new SubscriptionUpdatedEvent(updated.subscriptionId)
+      );
+      await this.eventEmitter.emit(
+        SubscriptionEvents.PAYED,
+        new SubscriptionPayedEvent(dto.days, subscription.subscriptionId)
       );
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске подписки';
       throw new InternalServerErrorException(message);
+    }
+  }
+
+  async checkAndUpdateAll() {
+    const subscriptions = await this.findAll();
+
+    const now = new Date();
+
+    for (const subscription of subscriptions) {
+      if (subscription.endDate) {
+        const diffMs = subscription.endDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        // осталось 3 дня
+        if (diffDays == 3) {
+          await this.eventEmitter.emit(
+            SubscriptionEvents.DAYS_LEFT,
+            new SubscriptionDaysLeftEvent(subscription.subscriptionId, diffDays)
+          );
+        } else if (subscription.endDate <= now) {
+          await this.eventEmitter.emit(
+            SubscriptionEvents.EXPIRED,
+            new SubscriptionExpiredEvent(subscription.subscriptionId)
+          );
+        }
+      }
+
+      await this.subscriptionsRepository.update(subscription.validate());
     }
   }
 }

@@ -1,5 +1,13 @@
-import { IsString, IsEnum, IsNumber, IsNotEmpty } from 'class-validator';
-import { FundType } from './funds.interface.js';
+import {
+  IsString,
+  IsEnum,
+  IsNumber,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+} from 'class-validator';
+import { FundType, ReserveFundItemType } from './funds.interface.js';
+import { Type } from 'class-transformer';
 
 export class FundCreateRequestDto {
   @IsString()
@@ -11,6 +19,9 @@ export class FundCreateRequestDto {
 }
 
 export class ReserveFundItemCreateRequestDto {
+  @IsEnum(ReserveFundItemType)
+  type!: ReserveFundItemType;
+
   @IsNumber()
   userId!: number;
 
@@ -18,8 +29,27 @@ export class ReserveFundItemCreateRequestDto {
   sum!: number;
 
   @IsNumber()
-  stage!: number;
+  @IsOptional()
+  stage?: number;
 
   @IsNumber()
-  stageLevel!: number;
+  @IsOptional()
+  stageLevel?: number;
+
+  @IsNumber()
+  @IsOptional()
+  accepted?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  trainingId?: number;
+
+  @IsNumber()
+  @IsOptional()
+  referralId?: number;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  endDate?: Date | null;
 }

@@ -6,8 +6,8 @@ export class BannerEntity implements IBanner {
 
   bannerId!: number;
 
-  miniatureUrl!: string;
-  imageUrl!: string;
+  miniatureUrl: string | null = null;
+  imageUrl: string | null = null;
   linkUrl: string | null = null;
   description: string | null = null;
 
@@ -22,6 +22,23 @@ export class BannerEntity implements IBanner {
 
   addViewedUser(userId: number) {
     this.viewedUsers.push(userId);
+
+    return this;
+  }
+
+  update(
+    data: Partial<
+      Pick<
+        IBanner,
+        'miniatureUrl' | 'imageUrl' | 'linkUrl' | 'description' | 'endDate'
+      >
+    >
+  ) {
+    if (data.miniatureUrl) this.miniatureUrl = data.miniatureUrl;
+    if (data.imageUrl) this.imageUrl = data.imageUrl;
+    if (data.linkUrl) this.linkUrl = data.linkUrl;
+    if (data.description) this.description = data.description;
+    if (data.endDate) this.endDate = data.endDate;
 
     return this;
   }

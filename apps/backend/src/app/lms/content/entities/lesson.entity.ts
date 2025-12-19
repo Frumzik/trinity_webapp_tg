@@ -39,6 +39,8 @@ export class LessonEntity implements ILesson {
   accessStatus?: LearningAccessStatus;
   progressStatus?: LearningProgressStatus;
 
+  deleted = false;
+
   constructor(lesson: Partial<ILesson> = {}) {
     Object.assign(this, lesson);
   }
@@ -60,11 +62,14 @@ export class LessonEntity implements ILesson {
         ILesson,
         | 'title'
         | 'description'
-        | 'coverUrl'
-        | 'price'
-        | 'content'
+        | 'shortDescription'
+        | 'duration'
         | 'favoritesTag'
+        | 'coverUrl'
+        | 'iconUrl'
         | 'bgUrl'
+        | 'content'
+        | 'price'
         | 'salePrice'
       >
     >
@@ -75,20 +80,36 @@ export class LessonEntity implements ILesson {
     if (data.description !== undefined) {
       this.description = data.description;
     }
-    if (data.coverUrl !== undefined) {
-      this.coverUrl = data.coverUrl;
+    if (data.shortDescription !== undefined) {
+      this.shortDescription = data.shortDescription;
     }
-    if (data.price !== undefined) {
-      this.price = data.price;
+
+    if (data.duration !== undefined) {
+      this.duration = data.duration;
     }
-    if (data.content !== undefined) {
-      this.content = data.content as ILessonContent;
-    }
+
     if (data.favoritesTag !== undefined) {
       this.favoritesTag = data.favoritesTag;
     }
+
+    if (data.coverUrl !== undefined) {
+      this.coverUrl = data.coverUrl;
+    }
+
+    if (data.iconUrl !== undefined) {
+      this.iconUrl = data.iconUrl;
+    }
+
     if (data.bgUrl !== undefined) {
       this.bgUrl = data.bgUrl;
+    }
+
+    if (data.content !== undefined) {
+      this.content = data.content as ILessonContent;
+    }
+
+    if (data.price !== undefined) {
+      this.price = data.price;
     }
     if (data.salePrice !== undefined) {
       this.salePrice = data.salePrice;

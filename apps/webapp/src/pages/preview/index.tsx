@@ -1,5 +1,4 @@
-// pages/preview/index.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
@@ -8,49 +7,42 @@ import Hero from "./ui/Hero";
 import TopActions from "./ui/TopActions";
 import Sheet from "./ui/Sheet";
 import Price from "./ui/Price";
-import TextPage from "../../shared/ui/TextPage";
 import "./preview.scss";
 
 import { useAddPurchaseMutation } from "../../shared/api/purchase.api";
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import { useGetUserTrainingByIdQuery } from "../../shared/api/learning.api";
+import {
+  useGetFavoritesQuery,
+  useAddFavoriteMutation,
+  useDeleteFavoriteMutation,
+} from "../../shared/api/favorites.api";
+import type { LearningNode } from "../../shared/api/learning.api";
+import { useGetUserQuery } from "../../shared/api/user.api";
 
-const toSections = (text: string) => [
-  { title: "", paragraphs: text.trim() ? [text] : [] },
-];
+import FlexibleModal from "../../widgets/flexible-modal";
+import helpIcon from "../../assets/icons/closeIcon.png";
 
 type State = {
   trainingId: number;
   returnTo?: string;
 };
 
-type TrainingResponse = {
-  data: {
-    trainingId: number;
-    title: string;
-    description?: string | null;
-    shortDescription?: string | null;
-    coverUrl?: string | null;
-    iconUrl?: string | null;
-    price?: number | null;
-    salePrice?: number | null;
-  };
-};
-
-const stripHtml = (html?: string | null) =>
-  (html ?? "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "")
-    .trim();
+type ModalKind = "success" | "no-balance" | "error";
 
 export default function PreviewPage() {
   const navigate = useNavigate();
-  const [fav, setFav] = useState(false);
 
   const st = (useLocation().state || {}) as Partial<State>;
   const trainingId = st.trainingId;
 
-  // если trainingId нет – уходим назад
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultKind, setResultKind] = useState<ModalKind>("success");
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultItems, setResultItems] = useState<string[] | undefined>();
+  const [resultDesc, setResultDesc] = useState<string | undefined>();
+  const [resultCta, setResultCta] = useState<string | undefined>();
+  const [resultOnCta, setResultOnCta] = useState<(() => void) | undefined>();
+
   useEffect(() => {
     if (!trainingId) {
       navigate(st.returnTo || "/", { replace: true });
@@ -59,35 +51,169 @@ export default function PreviewPage() {
 
   if (!trainingId) return null;
 
-  // тянем конкретный тренинг/практику по id
-  const { data, isLoading, isError } = useGetTrainingTreeQuery(
-    trainingId
-  ) as {
-    data?: TrainingResponse;
+  const { data, isLoading, isError } = useGetUserTrainingByIdQuery({
+    id: trainingId,
+  }) as {
+    data?: { success: true; data: LearningNode };
     isLoading: boolean;
     isError: boolean;
   };
 
-  const node = data?.data;
+  // ---------- избранное ----------
+  const { data: favoritesData } = useGetFavoritesQuery();
 
+  const favoriteEntries = useMemo(
+    () => (favoritesData ?? []).flatMap((cat) => cat.favorites),
+    [favoritesData]
+  );
+
+  // запись избранного именно для этого тренинга
+  const currentFavEntry = useMemo(
+    () =>
+      favoriteEntries.find(
+        (f) =>
+          f.type === "Training" &&
+          (f.trainingId === trainingId || f.favoriteId === trainingId)
+      ),
+    [favoriteEntries, trainingId]
+  );
+
+  const isFav = !!currentFavEntry;
+
+  const [addFavorite] = useAddFavoriteMutation();
+  const [deleteFavorite] = useDeleteFavoriteMutation();
+
+  const [isFavLocal, setIsFavLocal] = useState(isFav);
+  const [favPending, setFavPending] = useState(false);
+
+  // синк с серверным состоянием, когда оно реально меняется
+  useEffect(() => {
+    setIsFavLocal(isFav);
+  }, [isFav]);
+
+  const handleToggleFav = async () => {
+    if (!trainingId || favPending) return;
+
+    setFavPending(true);
+
+    try {
+      if (currentFavEntry) {
+        // Удаляем по favoriteId
+        await deleteFavorite({ favoriteId: currentFavEntry.favoriteId }).unwrap();
+      } else {
+        // Добавляем
+        await addFavorite({ type: "Training", trainingId }).unwrap();
+      }
+      // isFav подтянется из useGetFavoritesQuery после invalidatesTags
+      // и через useEffect обновит isFavLocal
+    } catch (e) {
+      console.error("favorite toggle error", e);
+    } finally {
+      setFavPending(false);
+    }
+  };
+
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
+  const subscriptionType = userRes?.data.subscription?.type;
+  const hasPaidSubscription =
+    subscriptionType === "pro" || subscriptionType === "premium";
+
+  const node = data?.data;
   const title = node?.title || "Практика";
-  const desc =
-    stripHtml(node?.shortDescription) || stripHtml(node?.description) || "";
-  const image = node?.coverUrl || undefined;
+  const descHtml = node?.description || "";
+  const image = (node as any)?.bgUrl || node?.coverUrl || undefined;
   const price = node?.salePrice ?? node?.price ?? 0;
 
   const [addPurchase, { isLoading: isBuying }] = useAddPurchaseMutation();
 
+  const isTraining = node?.type === "training";
+  const isPractise = node?.type === "practise" || node?.tag === "practise";
+
   const handlePurchase = async () => {
+    if (!hasPaidSubscription) {
+      setResultKind("error");
+      setResultTitle("Недоступно");
+      setResultItems(undefined);
+      setResultDesc("У вас неактивен доступ к приложению");
+      setResultCta("Активировать");
+      setResultOnCta(() => () => {
+        setResultOpen(false);
+        navigate("/subscription");
+      });
+      setResultOpen(true);
+      return;
+    }
+
+    const purchaseType: "Training" | "Practise" =
+      isPractise ? "Practise" : "Training";
+
     try {
-      await addPurchase({ trainingId }).unwrap();
-      navigate(`/trainings/${trainingId}`, { replace: true });
+      await addPurchase({ type: purchaseType, content: [trainingId] }).unwrap();
+
+      if (isTraining) {
+        if (typeof window !== "undefined") {
+          const key = `training_bought_${trainingId}`;
+          window.localStorage.setItem(key, "1");
+        }
+
+        navigate(`/trainings/${trainingId}`, {
+          replace: true,
+          state: { returnTo: st.returnTo || "/workshop" },
+        });
+        return;
+      }
+
+      if (isPractise) {
+        setResultKind("success");
+        setResultTitle("Успешно");
+        setResultItems(undefined);
+        setResultDesc(
+          "В ближайшее время мастер свяжется с вами для согласования времени проведения практики."
+        );
+        setResultOnCta(() => () => setResultOpen(false));
+        setResultOpen(true);
+        return;
+      }
+
+      setResultKind("success");
+      setResultTitle("Успешно");
+      setResultItems(undefined);
+      setResultDesc("Покупка оформлена.");
+      setResultCta("Понятно");
+      setResultOnCta(() => () => setResultOpen(false));
+      setResultOpen(true);
     } catch (e: any) {
-      const msg =
-        e?.data?.message?.[0] ||
-        e?.error ||
-        "Покупка не оформлена. Попробуй ещё раз.";
-      alert(msg);
+      const status = e?.status;
+
+      const raw = Array.isArray(e?.data?.message)
+        ? e.data.message[0]
+        : e?.data?.message ?? e?.error;
+
+      const msg: string =
+        typeof raw === "string" && raw.trim()
+          ? raw
+          : "Покупка не оформлена. Попробуй ещё раз.";
+
+      if (status === 409) {
+        setResultKind("no-balance");
+        setResultTitle("Недостаточно ОМ на балансе");
+        setResultItems(undefined);
+        setResultDesc("");
+        setResultCta("Добавить ОМ");
+        setResultOnCta(() => () => {
+          setResultOpen(false);
+          navigate("/wallet");
+        });
+      } else {
+        setResultKind("error");
+        setResultTitle(msg);
+        setResultItems(undefined);
+        setResultDesc("");
+        setResultCta("Понятно");
+        setResultOnCta(() => () => setResultOpen(false));
+      }
+
+      setResultOpen(true);
     }
   };
 
@@ -95,17 +221,16 @@ export default function PreviewPage() {
     <div className="preview">
       <Hero imageSrc={image} title={title}>
         <TopActions
-          isFav={fav}
+          isFav={isFavLocal}
+          pending={favPending}
           onBack={() => navigate(-1)}
-          onToggleFav={() => setFav((v) => !v)}
+          onToggleFav={handleToggleFav}
           onMenu={() => {}}
         />
       </Hero>
 
       <Sheet head="Описание">
-        {isLoading && (
-          <div style={{ padding: 16 }}>Загрузка описания…</div>
-        )}
+        {isLoading && <div style={{ padding: 16 }}>Загрузка описания…</div>}
 
         {isError && !isLoading && (
           <div style={{ padding: 16 }}>
@@ -127,9 +252,9 @@ export default function PreviewPage() {
                 zIndex: 20,
               }}
             >
-              <TextPage
-                sections={toSections(desc)}
+              <div
                 className="preview__text"
+                dangerouslySetInnerHTML={{ __html: descHtml }}
               />
             </ScrollPanel>
 
@@ -138,13 +263,24 @@ export default function PreviewPage() {
             <GradientButton
               className="preview__cta"
               onClick={handlePurchase}
-              disabled={isBuying}
+              disabled={isBuying || isUserLoading}
             >
-              {isBuying ? "Покупка..." : "Приобрести"}
+              {isBuying ? "Покупка..." : "Пройти"}
             </GradientButton>
           </>
         )}
       </Sheet>
+
+      <FlexibleModal
+        open={resultOpen}
+        title={resultTitle}
+        items={resultItems}
+        description={resultDesc}
+        ctaLabel={resultCta}
+        onCta={resultOnCta}
+        closeIconUrl={helpIcon}
+        onClose={() => setResultOpen(false)}
+      />
     </div>
   );
 }

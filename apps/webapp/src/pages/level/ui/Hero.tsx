@@ -4,9 +4,7 @@ import HeroHeading, { type HeroHeaderData } from "./HeroHeading";
 
 type Props = {
   imageSrc: string;
-  /** новый путь: готовая структура заголовка с бэка */
   header?: HeroHeaderData;
-  /** старый путь: просто крупный заголовок */
   title?: string;
   children?: ReactNode;
   className?: string;

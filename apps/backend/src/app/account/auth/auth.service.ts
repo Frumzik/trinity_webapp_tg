@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from '../users/entities/user.entity';
 import {
@@ -44,15 +45,38 @@ export class AuthService {
           .split('/')
           .filter((p) => p); // убираем пустые
         referralPathArr.push(partner.userId.toString());
-        referralPath = referralPathArr.join('/');
+        referralPath = referralPathArr.slice(-9).join('/');
+      } else {
+        dto.partnerId = undefined;
       }
     }
 
     let newUser = await this.usersService.create({ ...dto }, { referralPath });
     let newSubscription = await this.subscriptionsService.create();
-    const newWallet = await this.acquiringService.createAccount(
-      newUser.userId.toString()
-    );
+
+    let walletAddress = null;
+    try {
+      const account = await this.acquiringService.getAccount(
+        newUser.userId.toString()
+      );
+      walletAddress = account.address;
+    } catch (err: any) {
+      // Если кошелька нет — создаём
+      if (err?.response?.status === 404) {
+        const account = await this.acquiringService.createAccount(
+          newUser.userId.toString()
+        );
+
+        walletAddress = account.address;
+      }
+    }
+
+    if (walletAddress) {
+      await this.usersService.bindAddress(
+        { userId: newUser.userId },
+        walletAddress
+      );
+    }
 
     newUser = await this.usersService.bindSubscription(
       newUser,
@@ -61,11 +85,6 @@ export class AuthService {
     newSubscription = await this.subscriptionsService.bindUser(
       newSubscription,
       newUser
-    );
-
-    newUser = await this.usersService.bindAddress(
-      { userId: newUser.userId },
-      newWallet.address
     );
 
     if (dto.partnerId) {
@@ -111,6 +130,10 @@ export class AuthService {
     dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
   ): Promise<AuthLoginResponseDto> {
     const user = await this.validate(dto);
+
+    if (user.banned) {
+      throw new Error('Пользователь заблокирован');
+    }
 
     this.eventEmitter.emit(
       UserEvents.LOGGED_IN,

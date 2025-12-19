@@ -4,8 +4,7 @@ import { IUser } from '../user/user.interface.js';
 export enum SubscriptionType {
   FREE = 'free',
   TRIAL = 'trial',
-  PREMIUM = 'premium',
-  EXPIRED = 'expired',
+  PREMIUM = 'premium'
 }
 
 export interface ISubscription {

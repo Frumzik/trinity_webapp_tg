@@ -8,17 +8,26 @@ type Props = {
   onRightClick?: () => void;
   hideBackButton?: boolean;
   backTo?: string;
-
 };
 
-export default function TopBar({
-                                 title,
-                                 rightIconUrl,
-                                 onRightClick,
-                                 hideBackButton,
-                                 backTo = "/home",
-                               }: Props) {
+export default function TopBar(props: Props) {
+  const {
+    title,
+    rightIconUrl,
+    onRightClick,
+    hideBackButton,
+    backTo,
+  } = props;
+
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (backTo) {
+      navigate(backTo);
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <div className="topbar-text">
@@ -26,7 +35,7 @@ export default function TopBar({
         {!hideBackButton && (
           <button
             className="topbar__btn-text topbar__btn--ghost-text"
-            onClick={() => navigate(backTo, { replace: true })}
+            onClick={handleBack}
           >
             <img src={BackIcon} alt="Назад" />
           </button>

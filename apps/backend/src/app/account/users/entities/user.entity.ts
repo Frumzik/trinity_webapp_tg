@@ -31,8 +31,15 @@ export class UserEntity implements IUser {
   role: UserRole = UserRole.User;
   balance = 0;
 
+  meditationNotifications = '10:00';
+  contentNotifications = true;
+  promoNotifications = false;
+
+  banned = false;
+
   // Рефералка
   referralPath = '';
+  partnerId: number | null = null;
 
   constructor(user: Partial<IUser> = {}) {
     Object.assign(this, user);
@@ -83,7 +90,13 @@ export class UserEntity implements IUser {
     data: Partial<
       Pick<
         IUser,
-        'name' | 'username' | 'weight' | 'height' | 'birthDate' | 'gender'
+        | 'name'
+        | 'username'
+        | 'email'
+        | 'height'
+        | 'weight'
+        | 'birthDate'
+        | 'gender'
       >
     >
   ) {
@@ -92,6 +105,9 @@ export class UserEntity implements IUser {
     }
     if (data.username !== undefined) {
       this.username = data.username;
+    }
+    if (data.email !== undefined) {
+      this.email = data.email;
     }
     if (data.weight !== undefined) {
       this.weight = data.weight;
@@ -120,7 +136,7 @@ export class UserEntity implements IUser {
   }
 
   public updateBalance(balance: number) {
-    this.balance = balance;
+    this.balance = Math.round(balance * 10) / 10;
 
     return this;
   }
@@ -133,6 +149,24 @@ export class UserEntity implements IUser {
 
   public updateEmail(email: string) {
     this.email = email;
+
+    return this;
+  }
+
+  public updateNotifications(body: {
+    meditationNotifications: string;
+    contentNotifications: boolean;
+    promoNotifications: boolean;
+  }) {
+    this.meditationNotifications = body.meditationNotifications;
+    this.contentNotifications = body.contentNotifications;
+    this.promoNotifications = body.promoNotifications;
+
+    return this;
+  }
+
+  public setBanned(status: boolean) {
+    this.banned = status;
 
     return this;
   }

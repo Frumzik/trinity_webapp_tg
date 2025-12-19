@@ -60,12 +60,13 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 5px;
-  width: 136px;
-  height: 26px;
+  height: auto;
+  width: 130px;
+  min-height: 26px;
   z-index: 2;
   display: grid;
   place-items: center;
-
+  padding: 3px 5px;
   color: #fff;
   text-align: center;
   font-family: "Alegreya_Sans";

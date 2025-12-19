@@ -1,0 +1,236 @@
+import { useMemo, useState } from 'react';
+
+import MiniCardSlider from "../../widgets/card-slider-homePage";
+import TopBar from "../../widgets/topbarprogress/topbarpr";
+import Footer from "../../widgets/footer/footer";
+import BurgerMenu from "../../widgets/menuBurger/burger";
+
+import Blur from "../../../public/blurs/blur-1.png"
+import bg from "../../../public/bg/progress_bg.png"
+import infoIcon from "../../assets/icons/popup.svg"
+import lockImg from "../../assets/icons/lock.svg"
+import "./progress.scss";
+
+import {
+  useAddBannerViewMutation,
+  useGetBannersQuery,
+} from '../../shared/api/banners.api';
+
+import {
+  useGetTrainingTreeQuery,
+  useGetCurrentStageQuery
+} from "../../shared/api/learning.api";
+import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import LevelProgress from '../level/ui/LevelProgress';
+
+type BNode = {
+  _id: string;
+  trainingId: number;
+  type: "training" | "product" | "practise";
+  tag?: string | null;
+  title: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  duration?: string | null;
+  coverUrl?: string | null;
+  iconUrl?: string | null;
+  accessStatus: "available" | "locked";
+  progressStatus: "not_started" | "in_progress" | "completed";
+  price?: number | null;
+  salePrice?: number | null;
+  stage?: number | null;
+  stageLevel?: number | null;
+  parentId?: number | null;
+  childrens?: BNode[];
+  lessons?: any[];
+};
+
+const numFromTitle = (t?: string) => {
+  const m = (t || "").match(/\d+/);
+  return m ? Number(m[0]) : undefined;
+};
+
+export default function SupportPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const nav = useAppNavigate();
+
+  const { data: banners = [] } = useGetBannersQuery();
+  const [addView] = useAddBannerViewMutation();
+
+  const { data: tree } = useGetTrainingTreeQuery();
+  const { data: currentStageRes } = useGetCurrentStageQuery();
+
+  const allNodes = useMemo(() => {
+    return (tree?.data ?? []) as BNode[];
+  }, [tree]);
+
+  const stagesRoot = useMemo(() => {
+    return allNodes.find(
+      (r) => r.tag === "stages_spirit" && r.parentId == null
+    );
+  }, [allNodes]);
+
+  // 🔹 Корневой узел Лаборатории Здоровья (trainingId 30)
+  const healthLabRoot = useMemo(() => {
+    return allNodes.find(
+      (r) => r.tag === "health_lab" && r.parentId == null
+    );
+  }, [allNodes]);
+
+  const fallbackStageLabel = useMemo(() => {
+    const root = stagesRoot;
+    if (!root) return undefined;
+
+    const levelNodes = allNodes
+      .filter(
+        (n) =>
+          (n.tag === "stage_level" || typeof n.stageLevel === "number") &&
+          n.parentId === root.trainingId
+      );
+
+    if (!levelNodes.length) return undefined;
+
+    levelNodes.sort((a, b) => {
+      const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
+      const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
+
+    for (const lvl of levelNodes) {
+      const levelIndex = lvl.stageLevel ?? numFromTitle(lvl.title);
+
+      const stages = allNodes.filter(
+        (s) =>
+          (s.tag === "stage" || typeof s.stage === "number") &&
+          s.parentId === lvl.trainingId
+      );
+
+      stages.sort((a, b) => {
+        const A = a.stage ?? numFromTitle(a.title) ?? 0;
+        const B = b.stage ?? numFromTitle(b.title) ?? 0;
+        return A - B;
+      });
+
+      for (const st of stages) {
+        const done = st.progressStatus === "completed";
+        if (!done) {
+          const stageIndex = st.stage ?? numFromTitle(st.title);
+          if (levelIndex && stageIndex) {
+            return `${stageIndex} ступень`;
+          }
+        }
+      }
+    }
+
+    const lastLevel = levelNodes[levelNodes.length - 1];
+
+    const lastStages = allNodes.filter(
+      (s) =>
+        (s.tag === "stage" || typeof s.stage === "number") &&
+        s.parentId === lastLevel.trainingId
+    );
+
+    if (!lastStages.length) return undefined;
+
+    lastStages.sort((a, b) => {
+      const A = a.stage ?? numFromTitle(a.title) ?? 0;
+      const B = b.stage ?? numFromTitle(b.title) ?? 0;
+      return A - B;
+    });
+
+    const lastStage = lastStages[lastStages.length - 1];
+    const stageIndex =
+      lastStage.stage ?? numFromTitle(lastStage.title) ?? lastStages.length;
+
+    return `${stageIndex} ступень`;
+  }, [stagesRoot, allNodes]);
+
+  const currentStageLabel = useMemo(() => {
+    const node = currentStageRes?.data;
+    if (node) {
+      if (typeof node.stage === "number") return `${node.stage} ступень`;
+      const n = numFromTitle(node.title);
+      if (n) return `${n} ступень`;
+    }
+    return fallbackStageLabel;
+  }, [currentStageRes, fallbackStageLabel]);
+
+  const handleCardClick = (it: { id: string | number }) => {
+    const src = banners.find(b => String(b.id) === String(it.id));
+    if (!src) return;
+
+    const idNum = Number(src.id);
+    if (Number.isFinite(idNum)) addView(idNum as any).catch(() => {});
+
+    const url = (src.linkUrl || '').trim();
+    if (!url) return;
+
+    if (/^(https?:)?\/\//i.test(url)) {
+      const tg = (window as any)?.Telegram?.WebApp;
+      if (tg?.openLink) tg.openLink(url);
+      else window.open(url, '_blank');
+      return;
+    }
+
+    const path = url.startsWith('/') ? url : `/${url}`;
+    nav(path);
+  };
+  const allTrainings = useMemo(
+    () => allNodes.filter((n) => n.type === "training"),
+    [allNodes]
+  );
+
+// всего тренингов
+  const totalTrainings = allTrainings.length;
+
+// сколько тренингов завершено
+  const completedTrainings = allTrainings.filter(
+    (t) => t.progressStatus === "completed"
+  ).length;
+  const handleHealthLabClick = () => {
+    const lab = healthLabRoot;
+    if (!lab) {
+      nav("/health-lab");
+      return;
+    }
+
+    if (lab.accessStatus === "available") {
+      nav("/health-lab");
+    } else {
+      nav("/preview", {
+        state: {
+          trainingId: lab.trainingId,
+          returnTo: "/health-lab",
+        },
+      });
+    }
+  };
+
+  return (
+    <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
+      <img src={Blur} className={"blur"} alt="" />
+      <TopBar onMenu={() => setMenuOpen(true)} />
+
+      <main className="screen" style={{ padding: "5px 0px 0px 0px" }}>
+        <div className="progressPage-bar" style={{ padding: "5px 16px 0px 16px" }}>
+          <div className="progress-label">
+            <div className="progress-label-title">Прогресс</div>
+            <img src={infoIcon} alt="" />
+          </div>
+          <LevelProgress
+            current={completedTrainings}
+            total={totalTrainings || 1}
+            variant="secondary"
+          />
+        </div>
+        <div className="progressPage" style={{ marginTop: 10 }}>
+          <img className={"progressPage-img"} src={bg} alt="bg" />
+          <img className={"lockimg"} src={lockImg} alt="" />
+        </div>
+      </main>
+
+      <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <Footer />
+    </div>
+  );
+}

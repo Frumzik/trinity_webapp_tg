@@ -20,7 +20,7 @@ export default function SupportPage() {
       <TopBar onMenu={() => setMenuOpen(true)} />
       <main className="screen">
         <div className="supportPage">
-          <Title>Поддержка</Title>
+          <Title>Наши Официальные Ресурсы</Title>
 
           <div className="supportPage__cards">
             <GreyTile
@@ -28,6 +28,7 @@ export default function SupportPage() {
               imageUrl={ChannelImg}
               buttonText={"Перейти"}
               href="https://t.me/trinity_channel"
+              style={{ height: "115px" }}
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
@@ -35,19 +36,20 @@ export default function SupportPage() {
               imageUrl={ChatImg}
               buttonText={"Перейти"}
               href="https://t.me/trinity_space"
+              style={{ height: "115px" }}
               buttonStyle={{ width: "78px" }}
             />
             <GreyTile
               title={
                 <>
-                  Помощь<br />и Поддержка
+                  Помощь и Поддержка
                 </>
               }
               buttonText={"Перейти"}
               imageUrl={SupportImg}
               href="https://t.me/trinity_light"
-              style={{ height: "110px" }}
-              buttonStyle={{ width: "78px" }}
+              style={{ height: "115px" }}
+              buttonStyle={{ width: "78px", position: "absolute", bottom:"8px", left: "16px" }}
             />
           </div>
         </div>

@@ -1,4 +1,3 @@
-// pages/practise/index.tsx
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -30,6 +29,8 @@ type TrainingNode = {
   coverUrl?: string | null;
   iconUrl?: string | null;
   childrens?: TrainingNode[];
+  parentId?: number | null;
+  accessStatus?: "available" | "locked"; // добавили, чтобы проверять доступ к Лабе
 };
 
 // конфиг только для картинок/классов, верстку не трогаем
@@ -50,7 +51,7 @@ const PRACTICE_TILES_CONFIG: Record<
   42: {
     bgImageUrl: Card5,
     rightImageUrl: Card3,
-    className: "left-block-color-yellow",
+    className: "left-block-big left-block-color-yellow",
   },
 };
 
@@ -66,13 +67,22 @@ export default function PractisePage() {
     isError: boolean;
   };
 
+  const allNodes = useMemo(() => data?.data ?? [], [data]);
+
   // ищем в списке ноду "Практики" (type: "practise")
   const practices = useMemo(() => {
-    const root = data?.data?.find(
+    const root = allNodes.find(
       (item) => item.type === "practise" && item.tag === "practise"
     );
     return root?.childrens ?? [];
-  }, [data]);
+  }, [allNodes]);
+
+  // корневая нода "Лаборатория Здоровья"
+  const healthLabRoot = useMemo(() => {
+    return allNodes.find(
+      (item) => item.tag === "health_lab" && item.parentId == null
+    );
+  }, [allNodes]);
 
   const openPractice = (trainingId: number) => {
     navigate("/preview", {
@@ -81,6 +91,28 @@ export default function PractisePage() {
         returnTo: location.pathname,
       },
     });
+  };
+
+  const handleHealthLabClick = () => {
+    const lab = healthLabRoot;
+
+    if (!lab) {
+      navigate("/health-lab");
+      return;
+    }
+
+    if (lab.accessStatus === "available") {
+      navigate(`/trainings/${lab.trainingId}`, {
+        state: { returnTo: location.pathname },
+      });
+    } else {
+      navigate("/preview", {
+        state: {
+          trainingId: lab.trainingId,
+          returnTo: `/trainings/${lab.trainingId}`,
+        },
+      });
+    }
   };
 
   return (
@@ -105,38 +137,38 @@ export default function PractisePage() {
             )}
 
             {!isLoading && !isError && (
-              <ScrollPanel
-                maxHeight="62dvh"
-                vars={{
-                  railRight: "-15px",
-                  railTop: "4px",
-                  railBottom: "4px",
-                  railWidth: "3px",
-                  railColor: "#E8E8E8",
-                  thumbColor: "#C7C7C7",
-                  zIndex: 20,
-                }}
-              >
-                {practices.map((p) => {
-                  const cfg = PRACTICE_TILES_CONFIG[p.trainingId];
+              <>
+                <ScrollPanel
+                  maxHeight="62dvh"
+                  vars={{
+                    railRight: "-15px",
+                    railTop: "4px",
+                    railBottom: "4px",
+                    railWidth: "3px",
+                    railColor: "#E8E8E8",
+                    thumbColor: "#C7C7C7",
+                    zIndex: 20,
+                  }}
+                >
+                  {practices.map((p) => {
+                    const cfg = PRACTICE_TILES_CONFIG[p.trainingId];
 
-                  // если нет конфига – можно вообще не рисовать или
-                  // сделать дефолтную карточку с coverUrl
-                  if (!cfg) return null;
+                    if (!cfg) return null;
 
-                  return (
-                    <FeatureTile
-                      key={p.trainingId}
-                      title={p.title}
-                      bgImageUrl={cfg.bgImageUrl}
-                      rightImageUrl={cfg.rightImageUrl}
-                      enabled
-                      onClick={() => openPractice(p.trainingId)}
-                      className={cfg.className}
-                    />
-                  );
-                })}
-              </ScrollPanel>
+                    return (
+                      <FeatureTile
+                        key={p.trainingId}
+                        title={p.title}
+                        bgImageUrl={cfg.bgImageUrl}
+                        rightImageUrl={cfg.rightImageUrl}
+                        enabled
+                        onClick={() => openPractice(p.trainingId)}
+                        className={cfg.className}
+                      />
+                    );
+                  })}
+                </ScrollPanel>
+              </>
             )}
           </div>
         </div>

@@ -10,8 +10,11 @@ export class Fund extends Document<Types.ObjectId> implements IFund {
   @Prop({ required: true })
   title!: string;
 
-  @Prop({ required: false })
+  @Prop({ required: true, default: 0 })
   balance!: number;
+
+  @Prop({ required: true, default: 0 })
+  earn!: number;
 }
 
 export const FundSchema = SchemaFactory.createForClass(Fund);

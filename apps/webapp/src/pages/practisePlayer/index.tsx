@@ -1,3 +1,4 @@
+// src/pages/practisePlayer/PlayerScreen.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PlayerPage, {
@@ -19,7 +20,11 @@ type MediaTrack = {
   videoUrl?: string;
   artworkUrl?: string;
 };
-
+type StoredProgress = {
+  current: number;
+  duration: number;
+  completed: boolean;
+};
 type NavState = {
   track?: any;
   current?: number;
@@ -27,6 +32,7 @@ type NavState = {
   progressPct?: number;
   completed?: boolean;
   decision?: 'save' | 'discard';
+  initialProgress?: StoredProgress | null;
   meta?: { action: 'back' | 'prev' | 'next' | 'autoNext' };
   queue?: MediaTrack[];
   index?: number;
@@ -53,16 +59,36 @@ function saveLessonProgress(
   completed: boolean
 ) {
   try {
-    localStorage.setItem(
-      `lessonProgress:${lessonId}`,
-      JSON.stringify({
-        lessonId,
-        current,
-        duration,
-        completed,
-        updatedAt: Date.now(),
-      })
-    );
+    console.log('[saveLessonProgress]', { lessonId, current, duration, completed });
+    const key = `lessonProgress:${lessonId}`;
+
+    const newCur = Math.max(0, Math.round(current || 0));
+    const newDur = Math.max(0, Math.round(duration || 0));
+
+    // читаем предыдущий прогресс
+    let prev: { current: number; duration: number; completed: boolean } | null = null;
+    const rawPrev = localStorage.getItem(key);
+    if (rawPrev) {
+      try {
+        const j = JSON.parse(rawPrev);
+        prev = {
+          current: Number(j.current) || 0,
+          duration: Number(j.duration) || 0,
+          completed: Boolean(j.completed),
+        };
+      } catch {}
+    }
+
+    const merged = {
+      lessonId,
+      current: prev ? Math.max(prev.current, newCur) : newCur,
+      duration: prev ? Math.max(prev.duration, newDur) : newDur,
+      completed: (prev?.completed ?? false) || completed,
+      updatedAt: Date.now(),
+    };
+
+    console.log('[saveLessonProgress]', merged);
+    localStorage.setItem(key, JSON.stringify(merged));
   } catch {}
 }
 
@@ -89,6 +115,7 @@ export default function PlayerScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const navState = (location.state as NavState) ?? null;
+  const cameFromExit = !!navState?.decision;
 
   const { data: lessonRes } = useGetLessonAdminQuery(
     { id: Number(trackId), populate: true },
@@ -125,9 +152,10 @@ export default function PlayerScreen() {
     currentTrainingId
   );
 
-  // первичная подгрузка одиночного урока
+  // первичная подгрузка одиночного урока (когда зашли по /player/:trackId без очереди)
   useEffect(() => {
     if (queue.length || !lessonRes?.data) return;
+
     const l: any = lessonRes.data;
     const media = l?.content?.audioUrl || l?.mediaUrl;
     const vurl = l?.content?.videoUrl || l?.videoUrl;
@@ -137,25 +165,42 @@ export default function PlayerScreen() {
     if (!returnToRef.current && trainingIdRef.current != null) {
       returnToRef.current = `/level/${trainingIdRef.current}`;
     }
-    setDesc(l?.description ?? null);
+
+    const descText =
+      l?.description ??
+      l?.shortDescription ??
+      l?.parent?.description ??
+      null;
+    setDesc(descText);
+
+    // фоновая картинка ДЛЯ АУДИО: сначала bgUrl, потом parent.bgUrl, потом cover'ы
+    const bgImage =
+      !vurl
+        ? (l?.bgUrl ??
+          l?.parent?.bgUrl ??
+          l?.coverUrl ??
+          l?.parent?.coverUrl ??
+          undefined)
+        : undefined;
 
     setQueue([
       {
         id: l.lessonId,
         title: l.title,
-        subtitle: l.duration ?? undefined,
+        subtitle: descText || undefined,
         mediaUrl: media,
         videoUrl: vurl,
-        artworkUrl: l.coverUrl ?? undefined,
+        artworkUrl: bgImage,
       },
     ]);
     setIndex(0);
   }, [lessonRes, queue.length]);
 
-  // догружаем медиа/описание для элемента очереди
+  // догружаем медиа/описание/фон для элемента очереди
   useEffect(() => {
     (async () => {
-      if (!track || track.mediaUrl || track.videoUrl) return;
+      if (!track) return;
+
       try {
         const res = await fetchLesson({
           id: Number(track.id),
@@ -164,26 +209,52 @@ export default function PlayerScreen() {
         const l: any = res.data;
         const media = l?.content?.audioUrl || l?.mediaUrl;
         const vurl = l?.content?.videoUrl || l?.videoUrl;
-        setDesc(l?.description ?? null);
 
-        if (media || vurl) {
-          setQueue((q) =>
-            q.map((t, i) =>
-              i === index ? { ...t, mediaUrl: media, videoUrl: vurl } : t
-            )
-          );
-        }
-      } catch {}
+        const descText =
+          l?.description ??
+          l?.shortDescription ??
+          l?.parent?.description ??
+          null;
+        setDesc(descText);
+
+        const bgImage =
+          !vurl
+            ? (l?.bgUrl ??
+              l?.parent?.bgUrl ??
+              l?.coverUrl ??
+              l?.parent?.coverUrl ??
+              undefined)
+            : undefined;
+
+        setQueue((q) =>
+          q.map((t, i) =>
+            i === index
+              ? {
+                ...t,
+                ...(media ? { mediaUrl: media } : {}),
+                ...(vurl ? { videoUrl: vurl } : {}),
+                subtitle: descText || t.subtitle,
+                // фон для аудио
+                ...(bgImage ? { artworkUrl: bgImage } : {}),
+              }
+              : t
+          )
+        );
+      } catch {
+        // молча
+      }
     })();
-  }, [track?.id, track?.mediaUrl, track?.videoUrl, index, fetchLesson]);
+  }, [track?.id, index, fetchLesson]);
 
   // таймер «прослушано/просмотрено»
   useEffect(() => {
     if (!track) return;
+
     if (tickerRef.current) {
       clearInterval(tickerRef.current);
       tickerRef.current = null;
     }
+
     startedAtRef.current = Date.now();
     tickerRef.current = window.setInterval(() => {
       if (startedAtRef.current != null) {
@@ -192,6 +263,7 @@ export default function PlayerScreen() {
         startedAtRef.current = now;
       }
     }, 250);
+
     return () => {
       if (tickerRef.current) {
         clearInterval(tickerRef.current);
@@ -223,14 +295,15 @@ export default function PlayerScreen() {
 
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const requestConfirm = (act: PendingAction) => {
+  const requestConfirm = (act: PendingAction, payload?: PlayerPayload) => {
+    const initial =
+      currentLessonId != null ? loadLessonProgress(currentLessonId) : null;
     if (!track) return;
-    if (startedAtRef.current != null) {
-      playedMsRef.current += Date.now() - startedAtRef.current;
-      startedAtRef.current = Date.now();
-    }
+
     setPendingAction(act);
-    const p = buildPayload(false);
+
+    const p = payload ?? buildPayload(false);
+
     navigate('/player/exit', {
       state: {
         ...p,
@@ -239,6 +312,7 @@ export default function PlayerScreen() {
         trainingId: trainingIdRef.current,
         meta: { action: act?.kind || 'back' },
         returnTo: returnToRef.current,
+        initialProgress: initial,
       },
     });
   };
@@ -266,7 +340,22 @@ export default function PlayerScreen() {
       },
     });
   };
+  function getResumeSeconds(lessonId: number | string): number {
+    try {
+      const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
+      if (!raw) return 0;
 
+      const data = JSON.parse(raw);
+      const cur = Math.max(0, Math.round(data.current ?? 0));
+      const dur = Math.max(0, Math.round(data.duration ?? 0));
+
+      if (!dur || cur <= 0 || cur >= dur - 3) return 0;
+
+      return cur;
+    } catch {
+      return 0;
+    }
+  }
   useEffect(() => {
     if (trackId) lpMarkInProgress(Number(trackId));
   }, [trackId]);
@@ -275,31 +364,36 @@ export default function PlayerScreen() {
     if (currentLessonId != null) lpMarkInProgress(currentLessonId);
   }, [currentLessonId]);
 
-
   useEffect(() => {
     const st = (location.state as NavState) || null;
     if (!st?.decision || !st?.meta?.action) return;
+
+    // 1. Обрабатываем решение пользователя
+    if (st.decision === 'discard') {
+      const trackId = st.track?.id;
+      if (trackId != null) {
+        const key = `lessonProgress:${trackId}`;
+        const init = st.initialProgress;
+        if (init) {
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              lessonId: trackId,
+              current: init.current,
+              duration: init.duration,
+              completed: init.completed,
+              updatedAt: Date.now(),
+            })
+          );
+        } else {
+          localStorage.removeItem(key);
+        }
+      }
+    }
     if (Array.isArray(st.queue)) setQueue(st.queue);
     if (typeof st.index === 'number') setIndex(st.index);
     if (st.trainingId != null) trainingIdRef.current = st.trainingId;
     if (st.returnTo) returnToRef.current = st.returnTo;
-
-    const p: PlayerPayload =
-      st.track && typeof st.duration === 'number'
-        ? {
-            track: st.track,
-            current: st.current ?? 0,
-            duration: st.duration ?? 0,
-            progressPct: st.progressPct ?? 0,
-            completed: false,
-          }
-        : buildPayload(false);
-
-    if (st.decision === 'save') {
-      const completed = ratio(p) >= 0.5;
-      saveLessonProgress(p.track.id, p.current, p.duration, completed);
-    }
-
 
     const a = st.meta.action;
     if (a === 'back') {
@@ -320,7 +414,42 @@ export default function PlayerScreen() {
 
     navigate('.', { replace: true, state: {} });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.state]);
+  const [resumeAtSec, setResumeAtSec] = useState(0);
+  function loadLessonProgress(lessonId: number | string): StoredProgress | null {
+    try {
+      const raw = localStorage.getItem(`lessonProgress:${lessonId}`);
+      if (!raw) return null;
+      const j = JSON.parse(raw);
+      if (typeof j.current === 'number') {
+        return {
+          current: Number(j.current) || 0,
+          duration: Number(j.duration) || 0,
+          completed: Boolean(j.completed),
+        };
+      }
+    } catch {}
+    return null;
+  }
+
+  useEffect(() => {
+    if (currentLessonId == null) return;
+    const rec = loadLessonProgress(currentLessonId);
+    if (rec && rec.current > 0 && rec.current < rec.duration) {
+      setResumeAtSec(rec.current);
+    } else {
+      setResumeAtSec(0);
+    }
+  }, [currentLessonId]);
+
+  const handleProgress = (p: PlayerPayload) => {
+    const completed = ratio(p) >= 0.5 || p.completed;
+    saveLessonProgress(p.track.id, p.current, p.duration, completed);
+
+    if (p.track.id != null) {
+      lpMarkInProgress(Number(p.track.id));
+    }
+  };
 
   const progressNode = (() => {
     const lp = lpLoad();
@@ -328,9 +457,9 @@ export default function PlayerScreen() {
       currentLessonId != null ? lp[String(currentLessonId)] : undefined;
     const donePct = rec?.duration
       ? Math.min(
-          100,
-          Math.round((rec.seconds / Math.max(1, rec.duration)) * 100)
-        )
+        100,
+        Math.round((rec.seconds / Math.max(1, rec.duration)) * 100)
+      )
       : 0;
 
     return (
@@ -347,7 +476,6 @@ export default function PlayerScreen() {
     );
   })();
 
-  // фуллскрин/ландшафт
   const [isFs, setIsFs] = useState(false);
   const toggleFullscreenLandscape = async () => {
     const el = document.fullscreenElement
@@ -358,8 +486,6 @@ export default function PlayerScreen() {
         if (el && 'requestFullscreen' in el) {
           await (el as any).requestFullscreen();
         }
-        // попытка залочить ориентацию — только в фуллскрине и где доступно
-        // некоторые вебвью (в т.ч. TG) могут игнорить — это ок
         // @ts-ignore
         if (screen.orientation && screen.orientation.lock) {
           try {
@@ -378,11 +504,9 @@ export default function PlayerScreen() {
         setIsFs(false);
       }
     } catch {
-      // graceful fallback
       setIsFs(!!document.fullscreenElement);
     }
   };
-
 
   if (!track || (!track.mediaUrl && !track.videoUrl)) {
     return (
@@ -391,7 +515,16 @@ export default function PlayerScreen() {
       </div>
     );
   }
-
+  if (cameFromExit) {
+    return null;
+  }
+  if (!track || (!track.mediaUrl && !track.videoUrl)) {
+    return (
+      <div className="player player--loading">
+        <div className="player__spinner">Загрузка…</div>
+      </div>
+    );
+  }
   return (
     <PlayerPage
       track={toUI(track, isFav)}
@@ -399,16 +532,15 @@ export default function PlayerScreen() {
       onPrev={onPrev}
       onNext={onNext}
       onMenu={() => {}}
-      onExit={() => requestConfirm({ kind: 'back' })}
+      onExit={(p) => requestConfirm({ kind: 'back' }, p)}
       onCompleted={handleCompleted}
       onDurationReady={onDurationReady}
+      onProgress={handleProgress}
+      resumeAtSec={resumeAtSec }
       showFav
-      isFav={isFav}
       onToggleFav={() => !pending && toggle()}
       extraBottom={progressNode}
-      onToggleFullscreen={
-        track.videoUrl ? toggleFullscreenLandscape : undefined
-      }
+      onToggleFullscreen={track.videoUrl ? toggleFullscreenLandscape : undefined}
       isFullscreen={isFs}
     />
   );

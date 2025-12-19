@@ -13,6 +13,7 @@ export type Transaction = {
   currency: Fiat;
   title: string;
   type: "deposit" | "withdraw" | "reward";
+  date?: string;
 };
 
 export type DepositAddress = {

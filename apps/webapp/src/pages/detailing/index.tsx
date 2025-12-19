@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import Footer from "../../widgets/footer/footer";
-import TopBar from "../../widgets/topbar/topbar";
+import TopBar from "../../widgets/topbarTextpage";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import Title from "../../shared/ui/title/Title";
 import GradientButton from "../../shared/ui/gradient-button";
@@ -8,6 +8,9 @@ import "./detailing.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
 import { useGetUserQuery } from "../../shared/api/user.api";
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+
+const getReferralEarn = (r: any) => Number(r.earn ?? 0);
 
 const formatName = (r: any) => {
   const u =
@@ -36,12 +39,23 @@ const pickAppUserId = (u?: any) => {
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [subModalOpen, setSubModalOpen] = useState(false); // модалка подписки
   const location = useLocation();
+  const nav = useNavigate();
+
   const levelFromState = (location.state as any)?.level as number | undefined;
   const level = levelFromState ?? 1;
 
   const { data: userData } = useGetUserQuery({ populate: true });
   const u = userData?.data;
+
+  const premium = useMemo(() => {
+    const type =
+      typeof u?.subscription === "object" && u?.subscription
+        ? u.subscription.type
+        : "free";
+    return type && type !== "free";
+  }, [u]);
 
   const {
     data: levelsData,
@@ -63,23 +77,32 @@ const Index = () => {
 
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
-    const BOT_USERNAME = "TrinityFrontTestBot";
-    const WEBAPP_SHORT_NAME = "TrinityFront";
+    const BOT_USERNAME = "TrinitySpaceBot";
+    const WEBAPP_SHORT_NAME = "app";
 
     const botDeepLink =
       `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
       (appUserId ? `?startapp=${appUserId}` : "");
     const share = new URL("https://t.me/share/url");
     share.searchParams.set("url", botDeepLink);
-    share.searchParams.set("text", "Присоединяйся к проекту ✨");
     return share.toString();
   }, [u]);
 
+  const handleInviteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+
+    if (premium) {
+      window.open(inviteHref, "_blank");
+    } else {
+      setSubModalOpen(true);
+    }
+  };
+
   return (
     <div className="app">
-      <TopBar onMenu={() => setMenuOpen(true)} />
-
-      <main className="screen">
+      <TopBar
+      />
+      <main className="screen" style={{ marginTop: 36 }}>
         <Title
           right={
             <button
@@ -95,7 +118,7 @@ const Index = () => {
         <section className="scrollBox stack" style={{ marginTop: "20px" }}>
           <div className="list__referals-det">
             <div className="list__referals-title-det">
-              <div className="list__referals-title-up-det">Поколения</div>
+              <div className="list__referals-title-up-det">Поколение</div>
               <div className="list__referals-title-balance-det">{level}</div>
             </div>
           </div>
@@ -117,7 +140,7 @@ const Index = () => {
               {current.referrals.map((r, i) => (
                 <div className="row" key={r.id ?? r.userId ?? i}>
                   <span className="row__title">{formatName(r)}</span>
-                  <span className="row__count">{formatOM(r.amount)}</span>
+                  <span className="row__count">{formatOM(r.earn)}</span>
                 </div>
               ))}
             </div>
@@ -129,11 +152,20 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton href={inviteHref} target="_blank">
-            Пригласительная ссылка
+          <GradientButton onClick={handleInviteClick}>
+            Пригласить
           </GradientButton>
         </div>
       </div>
+
+      <SubscriptionRequiredModal
+        open={subModalOpen}
+        onClose={() => setSubModalOpen(false)}
+        onGoToSubscription={() => {
+          setSubModalOpen(false);
+          nav("/subscription");
+        }}
+      />
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />

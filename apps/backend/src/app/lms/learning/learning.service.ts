@@ -12,6 +12,7 @@ import { LearningEntity } from './entities';
 import { FilterQuery, Types } from 'mongoose';
 import {
   ContentAccessType,
+  GetListOptions,
   ILearningLesson,
   LearningAccessStatus,
   LearningEvents,
@@ -51,17 +52,29 @@ export class LearningService {
     }
   }
 
-  async findAll(condition: FilterQuery<Learning>): Promise<LearningEntity[]> {
-    try {
-      const learning = await this.learningRepository.findAll(condition);
-
-      return learning;
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
-      throw new InternalServerErrorException(message);
+    async findAll(options?: GetListOptions<Learning>): Promise<LearningEntity[]> {
+      try {
+        const learnings = await this.learningRepository.findAll(options);
+  
+        return learnings;
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
+        throw new InternalServerErrorException(message);
+      }
     }
-  }
+  
+    async count(condition: FilterQuery<Learning>): Promise<number> {
+      try {
+        const count = await this.learningRepository.count(condition);
+  
+        return count;
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Ошибка при поиске прогресса';
+        throw new InternalServerErrorException(message);
+      }
+    }
 
   async calculateAccess(
     user: UserEntity,
@@ -80,7 +93,7 @@ export class LearningService {
       });
 
       if (!subscription) {
-        throw new Error('Не найдена подписка для пользователя');
+        return LearningAccessStatus.LOCKED;
       }
 
       // Пробегаем по каждому условию
@@ -109,6 +122,19 @@ export class LearningService {
                     userId: user.userId,
                     contentId: content.lessonId,
                   };
+
+            if (!(await this.purchaseService.find(purchaseQuery))) {
+              return LearningAccessStatus.LOCKED;
+            }
+            break;
+          }
+
+          case ContentAccessType.TRAINING_PURCHASED: {
+            const purchaseQuery = {
+              type: PurchaseType.TRAINING,
+              userId: user.userId,
+              contentId: rule.value,
+            };
 
             if (!(await this.purchaseService.find(purchaseQuery))) {
               return LearningAccessStatus.LOCKED;
@@ -153,8 +179,6 @@ export class LearningService {
             }
             break;
           }
-          default:
-            return LearningAccessStatus.LOCKED;
         }
       }
 
@@ -170,8 +194,8 @@ export class LearningService {
     try {
       // 1️⃣ Получаем существующий прогресс
       const learning = await this.learningRepository.find({
-        user: user._id,
-        training: training._id,
+        userId: user.userId,
+        trainingId: training.trainingId,
       });
 
       // --- Вычисляем доступ для родительского тренинга ---
@@ -448,7 +472,7 @@ export class LearningService {
     return await this.learningRepository.delete(options);
   }
 
-  async getLearningTree(condition?: FilterQuery<Learning>) {
+  async getLearningTree(condition?: FilterQuery<Learning>, depth?: number) {
     if (condition?.trainingId) {
       const training = await this.contentService.findTraining({
         trainingId: condition.trainingId,
@@ -458,7 +482,7 @@ export class LearningService {
         throw new NotFoundException('Тренинг не найден');
       }
     }
-    return await this.learningRepository.getLearningTree(condition);
+    return await this.learningRepository.getLearningTree(condition, depth);
   }
 
   async getCurrentStage(userId: number) {

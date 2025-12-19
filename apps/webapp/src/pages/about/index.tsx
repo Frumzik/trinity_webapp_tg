@@ -8,7 +8,11 @@ import Footer from "../../widgets/footer/footer";
 export default function AboutPage() {
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
-      <TopBar title="О проекте" />
+      <TopBar title={
+        <span style={{textTransform: "none"}}>
+          О проекте ТРИНИТИ
+        </span>
+      }/>
 
       <main className="screen">
         <ScrollPanel

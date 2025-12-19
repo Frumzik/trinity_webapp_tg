@@ -66,12 +66,18 @@
     border-top: 0;
   }
 }
-
+.acc__chev.acc__chev-password{
+  font-size: 80px;
+  letter-spacing: -7px;
+  margin-bottom: 40px;
+}
 .acc__row--select {
   justify-content: space-between;
   align-items: center;
 }
-
+.acc__row{
+  height: 52px;
+}
 .acc__select {
   color: #FFF;
   font-family: "SF Pro Display";

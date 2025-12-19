@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom"; // ← ДОБАВИЛ useLocation
 import ScrollPanel from "../../../shared/ui/scroll-panel/scroll-panel";
 import Hero from "../../preview/ui/Hero";
 import TopActions from "../../preview/ui/TopActions";
@@ -11,27 +11,26 @@ import { useGetLessonAdminQuery } from "../../../shared/api/contentAdmin.api";
 import { smartBack } from "../../../shared/navigation/smartBack";
 import { useLessonFavorite } from "../../../shared/lib/hooks/useLessonFavorite";
 
-function htmlToParagraphs(html?: string | null): string[] {
-  if (!html) return [];
-  let txt = html
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<li[^>]*>/gi, "• ")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<\/h[1-6]>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "");
-  txt = txt
-    .split("\n")
-    .map((s) => s.trim())
-    .join("\n");
-  return txt.split(/\n{2,}/g).map((p) => p.trim()).filter(Boolean);
-}
-
-type Section = { title: string; paragraphs: string[] };
+type Section = {
+  title?: string;
+  paragraphs?: string[];
+  list?: string[];
+  ordered?: boolean;
+  html?: string;
+};
 
 export default function LessonTextPage() {
   const navigate = useNavigate();
-  const { trainingId: trainingIdStr, lessonId: lessonIdStr } = useParams<{ trainingId: string; lessonId: string }>();
+  const location = useLocation() as {
+    state?: {
+      trainingType?: string;
+      filmDuration?: string;
+    };
+  };
+
+  const { trainingId: trainingIdStr, lessonId: lessonIdStr } =
+    useParams<{ trainingId: string; lessonId: string }>();
+
   const trainingId = Number(trainingIdStr);
   const lessonId = Number(lessonIdStr);
 
@@ -44,19 +43,33 @@ export default function LessonTextPage() {
 
   const lesson = data?.data;
   const title = lesson?.title || "Урок";
-  const subtitle = lesson?.duration || (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
+
+  // ---- тут логика подстановки длительности фильма из ступени ----
+  const isFilmTraining = location.state?.trainingType === "film";
+  const filmDurationFromStep = location.state?.filmDuration; // "1 час 36 минут"
+
+  // если это тренинг-фильм и в state есть длительность — показываем её,
+  // иначе старое поведение
+  const subtitle =
+    isFilmTraining && filmDurationFromStep
+      ? filmDurationFromStep
+      : lesson?.duration ||
+      (lesson?.type ? String(lesson.type).toUpperCase() : undefined);
+
   const description = lesson?.description || "Описание";
   const imageSrc = lesson?.coverUrl || Card1;
 
-  const sections: Section[] = useMemo(() => {
-    const paragraphs = htmlToParagraphs((lesson as any)?.content?.html);
-    return [
+  const html = (lesson as any)?.content?.html || "";
+
+  const sections: Section[] = useMemo(
+    () => [
       {
         title: description,
-        paragraphs: paragraphs.length ? paragraphs : ["Контент появится позже."],
+        html,
       },
-    ];
-  }, [lesson, description]);
+    ],
+    [description, html]
+  );
 
   if (isLoading) {
     return (
@@ -70,7 +83,8 @@ export default function LessonTextPage() {
     return (
       <div className="preview">
         <div style={{ padding: 16 }}>
-          Не удалось загрузить урок. <button onClick={() => refetch()}>Повторить</button>
+          Не удалось загрузить урок.{" "}
+          <button onClick={() => refetch()}>Повторить</button>
         </div>
       </div>
     );
@@ -99,6 +113,7 @@ export default function LessonTextPage() {
             thumbColor: "#C7C7C7",
             zIndex: 20,
           }}
+          contentStyle={{ display: "contents" }}
         >
           <TextPage sections={sections} className="preview__text" />
         </ScrollPanel>

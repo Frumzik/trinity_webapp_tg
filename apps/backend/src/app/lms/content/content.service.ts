@@ -14,6 +14,7 @@ import {
   ContentLessonInfoResponseDto,
   ContentTrainingInfoResponseDto,
   CounterType,
+  GetListOptions,
   ILesson,
   ITraining,
   LessonCreatedEvent,
@@ -95,12 +96,24 @@ export class ContentService {
   }
 
   async findAllTrainings(
-    condition: FilterQuery<Training> = {}
+    options?: GetListOptions<Training>
   ): Promise<TrainingEntity[]> {
     try {
-      const trainings = await this.trainingsRepository.findAll(condition);
+      const trainings = await this.trainingsRepository.findAll(options);
 
       return trainings;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async countTrainings(condition?: FilterQuery<Training>): Promise<number> {
+    try {
+      const count = await this.trainingsRepository.count(condition);
+
+      return count;
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
@@ -163,7 +176,25 @@ export class ContentService {
   async updateTraining(
     condition: FilterQuery<Training>,
     updateData: Partial<
-      Pick<ITraining, 'title' | 'description' | 'coverUrl' | 'price'>
+      Pick<
+        ITraining,
+        | 'title'
+        | 'description'
+        | 'shortDescription'
+        | 'duration'
+        | 'link'
+        | 'coverUrl'
+        | 'iconUrl'
+        | 'bgUrl'
+        | 'merchantId'
+        | 'price'
+        | 'salePrice'
+        | 'stage'
+        | 'stageLevel'
+        | 'type'
+        | 'tag'
+        | 'favoritesTag'
+      >
     >
   ) {
     try {
@@ -233,6 +264,32 @@ export class ContentService {
     }
   }
 
+  async findAllLessons(
+    options?: GetListOptions<Lesson>
+  ): Promise<LessonEntity[]> {
+    try {
+      const lessons = await this.lessonsRepository.findAll(options);
+
+      return lessons;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
+  async countLessons(condition: FilterQuery<Lesson> = {}): Promise<number> {
+    try {
+      const count = await this.lessonsRepository.count(condition);
+
+      return count;
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Ошибка при поиске тренинга';
+      throw new InternalServerErrorException(message);
+    }
+  }
+
   async populateLesson(
     condition: FilterQuery<Lesson>
   ): Promise<LessonEntity | null> {
@@ -296,7 +353,20 @@ export class ContentService {
   async updateLesson(
     condition: FilterQuery<Lesson>,
     updateData: Partial<
-      Pick<ILesson, 'title' | 'description' | 'coverUrl' | 'price' | 'content'>
+      Pick<
+        ILesson,
+        | 'title'
+        | 'description'
+        | 'shortDescription'
+        | 'duration'
+        | 'favoritesTag'
+        | 'coverUrl'
+        | 'iconUrl'
+        | 'bgUrl'
+        | 'content'
+        | 'price'
+        | 'salePrice'
+      >
     >
   ) {
     try {

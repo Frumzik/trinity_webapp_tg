@@ -1,52 +1,101 @@
-// Uncomment this line to use CSS modules
-// import styles from './app.module.scss';
-import NxWelcome from './nx-welcome';
+import { Admin, Layout, Resource } from 'react-admin';
+import simpleRestProvider from 'ra-data-simple-rest';
+import { authProvider } from './authProvider';
+import { httpClient } from './httpClient';
+// Импорт кастомных компонентов (можно оставить ListGuesser на первых порах)
+import {
+  UserList,
+  UserEdit,
+  FileListWithCopy,
+  UserShow,
+  BannerList,
+  BannerShow,
+  BannerEdit,
+  BannerCreate,
+  WithdrawList,
+  PractiseList,
+  FundList,
+  MailingCreate,
+} from './resources';
+import { MyMenu } from './components';
+import { Dashboard } from './components';
+import {
+  TrainingCreate,
+  TrainingEdit,
+  TrainingList,
+  TrainingShow,
+} from './resources';
+import { LessonCreate, LessonEdit, LessonList, LessonShow } from './resources';
 
-import { Route, Routes, Link } from 'react-router-dom';
+// URL должен вести на твой backend /admin
+const dataProvider = simpleRestProvider(
+  `${import.meta.env.VITE_API_URL}/admin`,
+  httpClient
+);
 
-export function App() {
+export default function App() {
   return (
-    <div>
-      <NxWelcome title="@trinity/admin" />
+    <Admin
+      title="Trinity"
+      dataProvider={dataProvider}
+      authProvider={authProvider}
+      dashboard={Dashboard}
+      layout={(props) => <Layout {...props} menu={MyMenu} />}
+    >
+      <Resource
+        name="user"
+        list={UserList}
+        edit={UserEdit}
+        show={UserShow}
+        options={{ label: 'Пользователи' }}
+      />
+      <Resource
+        name="training"
+        list={TrainingList}
+        show={TrainingShow}
+        edit={TrainingEdit}
+        create={TrainingCreate}
+        options={{ label: 'Тренинги' }}
+      />
+      <Resource
+        name="lesson"
+        list={LessonList}
+        show={LessonShow}
+        edit={LessonEdit}
+        create={LessonCreate}
+        options={{ label: 'Уроки' }}
+      />
+      <Resource
+        name="file"
+        list={FileListWithCopy}
+        options={{ label: 'Файлы' }}
+      />
+      <Resource
+        name="banner"
+        list={BannerList}
+        show={BannerShow}
+        edit={BannerEdit}
+        create={BannerCreate}
+        options={{ label: 'Баннеры' }}
+      />
 
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
-    </div>
+      <Resource
+        name="withdraw"
+        list={WithdrawList}
+        options={{ label: 'Вывод' }}
+      />
+
+      <Resource
+        name="practise"
+        list={PractiseList}
+        options={{ label: 'Практики' }}
+      />
+
+      <Resource name="fund" list={FundList} options={{ label: 'Фонды' }} />
+
+      <Resource name="transaction" options={{ label: 'Транзакции' }} />
+
+      <Resource name="mailing" create={MailingCreate} options={{ label: 'Создать рассылку' }} />
+    </Admin>
   );
 }
-
-export default App;

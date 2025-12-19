@@ -5,6 +5,7 @@ import { useAppSelector } from './store'
 import AuthGate from './AuthGate'
 
 import HomePage from '../pages/home'
+import ProgressPage from '../pages/progress'
 import FilmsPage from '../pages/films'
 import PolicyPage from '../pages/policy'
 import PracticePage from '../pages/practice'
@@ -114,6 +115,7 @@ export const router = createBrowserRouter([
               { path: 'subscription', element: wrap(<SubscriptionPage />) },
               { path: 'faq', element: wrap(<FaqPage />) },
               { path: 'health-lab', element: wrap(<HealthLabPage />) },
+              { path: 'progress', element: wrap(<ProgressPage />) },
             ],
           },
         ],

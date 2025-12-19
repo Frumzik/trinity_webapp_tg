@@ -1,4 +1,3 @@
-// shared/api/purchase.api.ts
 import { learningApi } from "./learning.api";
 
 export type AddPurchaseReq = {

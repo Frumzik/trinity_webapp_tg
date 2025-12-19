@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import MiniCardSlider from "../../widgets/card-slider-homePage";
+import MiniCardSlider, {
+  MiniCardItem,
+} from '../../widgets/card-slider-homePage';
 import TopBar from "../../widgets/topbarlk/topbarlk";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
 
-import Blur from "../../../public/blurs/blur-1.png"
+import Blur from "../../../public/blurs/blur-1.png";
 import Card1 from "../../assets/home/card1.png";
 import Card2 from "../../assets/home/card2.png";
 import Card3 from "../../assets/home/card3.png";
@@ -21,15 +23,21 @@ import ReferralsCard from "../../widgets/tiles/FriendsTile/FriendsTile";
 import {
   useAddBannerViewMutation,
   useGetBannersQuery,
-} from '../../shared/api/banners.api';
+} from "../../shared/api/banners.api";
 
-import { useGetTrainingTreeQuery, useGetCurrentStageQuery } from "../../shared/api/learning.api";
-import { useAppNavigate } from '../../shared/lib/hooks/useAppNavigate';
+import {
+  useGetTrainingTreeQuery,
+  useGetCurrentStageQuery,
+} from "../../shared/api/learning.api";
+
+import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
+import { useGetUserQuery } from "../../shared/api/user.api";
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
 
 type BNode = {
   _id: string;
   trainingId: number;
-  type: "training" | "product";
+  type: "training" | "product" | "practise";
   tag?: string | null;
   title: string;
   description?: string | null;
@@ -53,8 +61,19 @@ const numFromTitle = (t?: string) => {
   return m ? Number(m[0]) : undefined;
 };
 
+const GIFTS_ID = "gifts";
+const GIFTS_TITLE = "Дары";
+
+const isGiftsItem = (it: MiniCardItem) => {
+  if (String(it.id) === GIFTS_ID) return true;
+  if (it.title?.trim() === GIFTS_TITLE) return true;
+  return /дары/i.test(it.title || "");
+};
+
 export default function SupportPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [subModalOpen, setSubModalOpen] = useState(false);
+
   const nav = useAppNavigate();
 
   const { data: banners = [] } = useGetBannersQuery();
@@ -63,23 +82,50 @@ export default function SupportPage() {
   const { data: tree } = useGetTrainingTreeQuery();
   const { data: currentStageRes } = useGetCurrentStageQuery();
 
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({
+    populate: true,
+  });
+  const user = userRes?.data;
+
+  const hasPaidSubscription = useMemo(() => {
+    const type = String(user?.subscription?.type || "").toLowerCase();
+    const paid = type === "pro" || type === "premium";
+    return paid;
+  }, [user]);
+
+  const requirePaid = (action: () => void) => {
+    if (isUserLoading) return;
+
+    if (!hasPaidSubscription) {
+      setSubModalOpen(true);
+      return;
+    }
+    action();
+  };
+
   const allNodes = useMemo(() => {
     return (tree?.data ?? []) as BNode[];
   }, [tree]);
+
   const stagesRoot = useMemo(() => {
-    return allNodes.find((r) => r.tag === "stages_spirit" && (r.parentId == null));
+    return allNodes.find(
+      (r) => r.tag === "stages_spirit" && r.parentId == null
+    );
+  }, [allNodes]);
+
+  const healthLabRoot = useMemo(() => {
+    return allNodes.find((r) => r.tag === "health_lab" && r.parentId == null);
   }, [allNodes]);
 
   const fallbackStageLabel = useMemo(() => {
     const root = stagesRoot;
     if (!root) return undefined;
 
-    const levelNodes = allNodes
-      .filter(
-        (n) =>
-          (n.tag === "stage_level" || typeof n.stageLevel === "number") &&
-          n.parentId === root.trainingId
-      );
+    const levelNodes = allNodes.filter(
+      (n) =>
+        (n.tag === "stage_level" || typeof n.stageLevel === "number") &&
+        n.parentId === root.trainingId
+    );
 
     if (!levelNodes.length) return undefined;
 
@@ -148,25 +194,50 @@ export default function SupportPage() {
     return fallbackStageLabel;
   }, [currentStageRes, fallbackStageLabel]);
 
-  const handleCardClick = (it: { id: string | number }) => {
-    const src = banners.find(b => String(b.id) === String(it.id));
+  const handleCardClick = (it: MiniCardItem) => {
+    if (isGiftsItem(it)) {
+      requirePaid(() => nav("/gifts"));
+      return;
+    }
+
+    const src = banners.find((b) => String(b.id) === String(it.id));
     if (!src) return;
 
     const idNum = Number(src.id);
-    if (Number.isFinite(idNum)) addView(idNum as any).catch(() => {});
+    if (Number.isFinite(idNum)) {
+      addView(idNum as any).catch(() => {});
+    }
 
-    const url = (src.linkUrl || '').trim();
+    const url = (src.linkUrl || "").trim();
     if (!url) return;
 
     if (/^(https?:)?\/\//i.test(url)) {
       const tg = (window as any)?.Telegram?.WebApp;
       if (tg?.openLink) tg.openLink(url);
-      else window.open(url, '_blank');
+      else window.open(url, "_blank");
       return;
     }
 
-    const path = url.startsWith('/') ? url : `/${url}`;
+    const path = url.startsWith("/") ? url : `/${url}`;
     nav(path);
+  };
+  const handleHealthLabClick = () => {
+    const lab = healthLabRoot;
+    if (!lab) {
+      nav("/health-lab");
+      return;
+    }
+
+    if (lab.accessStatus === "available") {
+      nav("/health-lab");
+    } else {
+      nav("/preview", {
+        state: {
+          trainingId: lab.trainingId,
+          returnTo: "/health-lab",
+        },
+      });
+    }
   };
 
   return (
@@ -177,54 +248,77 @@ export default function SupportPage() {
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <MiniCardSlider items={banners} onItemClick={handleCardClick} />
 
-        <div className="supportPage" style={{marginTop:10}}>
+        <div className="supportPage" style={{ marginTop: 10 }}>
           <div className="supportPage__cards" style={{ gap: "10px" }}>
             <FeatureTile
-              title="Академия Души"
+              title={
+                <>
+                  Академия<br />
+                  Духа
+                </>
+              }
               description=""
               bgImageUrl={Tile1}
               rightImageUrl={Card1}
               className="featureTile--altFont"
               enabled
-              to="/academy"
+              onClick={() => nav("/academy")}
             />
+
             <FeatureTile
-              title="Все продукты"
+              title="Основные Разделы"
               description=""
               bgImageUrl={Tile2}
               enabled
               rightImageUrl={Card2}
               className="featureTile--altFont"
-              to="/products"
+              onClick={() => nav("/products")}
             />
 
-            <div className="refcardhome" style={{ display: "flex", gap: "11px" }}>
-              <ReferralsCard
-                imageUrl={Card4}
-                titleTop="Пройти Практику"
-                labelBottom="Перейти"
-                href="/practice"
-                className="refCard--imgRight refCard--166x123 "
-                background="none"
-              />
-              <ReferralsCard
-                imageUrl={Card3}
-                titleTop="Ступени Духа"
-                labelBottom={currentStageLabel || "Ступени Духа"}
-                href="/levels"
-                className="refCard--imgRight refCard--166x123 "
-                background="none"
-              />
+            <div
+              className="refcardhome"
+              style={{ display: "flex", gap: "11px" }}
+            >
+              <div
+                onClick={() => nav("/practice")}
+                style={{ flex: 1 }}
+              >
+                <ReferralsCard
+                  imageUrl={Card4}
+                  titleTop="Практики"
+                  labelBottom="Перейти"
+                  href={undefined}
+                  className="refCard--imgRight refCard--166x123"
+                  background="none"
+                  clickable={false}
+                />
+              </div>
+
+              <div
+                onClick={() => nav("/levels?from=/home")}
+                style={{ flex: 1 }}
+              >
+                <ReferralsCard
+                  imageUrl={Card3}
+                  titleTop="Ступени Духа"
+                  labelBottom={"Перейти"}
+                  href={undefined}
+                  className="refCard--imgRight refCard--166x123"
+                  background="none"
+                  clickable={false}
+                />
+              </div>
             </div>
 
             <FeatureTile
-              title="Лаборатория здоровья"
+              title="Лаборатория Здоровья"
               description=""
               bgImageUrl={Tile2}
-              enabled
+              enabled={false}
               rightImageUrl={Card5}
               className="featureTile--altFont"
-              to="/health-lab"
+              onClick={handleHealthLabClick}
+              showImageWhenDisabled
             />
           </div>
         </div>
@@ -232,6 +326,15 @@ export default function SupportPage() {
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
+
+      <SubscriptionRequiredModal
+        open={subModalOpen}
+        onClose={() => setSubModalOpen(false)}
+        onGoToSubscription={() => {
+          setSubModalOpen(false);
+          nav("/subscription");
+        }}
+      />
     </div>
   );
 }

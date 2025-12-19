@@ -23,7 +23,7 @@ const DATA: FaqItem[] = [
   {
     id: '2',
     q: 'Что означает «структура единомышленников»?',
-    a: 'Это все участники, которые присоединились к Проекту Тринити через вас по цепочке рекомендаций.',
+    a: 'Это все участники, которые присоединились к проекту ТРИНИТИ через вас по цепочке рекомендаций.',
   },
   {
     id: '3',
@@ -34,13 +34,13 @@ const DATA: FaqItem[] = [
     id: '4',
     q: 'В чём уникальность практик, ведь в интернете много бесплатных материалов?',
     a:
-      'Практики Тринити созданы чистым проводником в состоянии Божественного потока.\n' +
+      'Практики ТРИНИТИ созданы чистым проводником в состоянии Божественного потока.\n' +
       'В них собраны лучшие материалы для вашего роста и развития, продумана последовательность и соизмеримость прохождения от ступени к ступени в соответствии с Законами Мироздания.\n' +
       'Подобных материалов в бесплатном формате мы не встречали.\n',
   },
   {
     id: '5',
-    q: 'Кого я могу пригласить в проект Тринити?',
+    q: 'Кого я могу пригласить в проект ТРИНИТИ?',
     a: 'Всех, кто заинтересован в своём духовном и материальном росте, кто стремится к значительным улучшениям во всех сферах жизни.',
   },
 ];
@@ -60,18 +60,18 @@ export default function FaqPage() {
             <TopBar title="Частые вопросы" />
 
             <main className="faq__main">
-                <label className="faq__search">
-                    <span className="faq__search-ico" aria-hidden ><img src={SearchIcon} alt=""/></span>
-                    <input
-                        className="faq__search-input"
-                        placeholder="Найти…"
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        type="search"
-                        autoCorrect="off"
-                        spellCheck={false}
-                    />
-                </label>
+                {/*<label className="faq__search">*/}
+                {/*    <span className="faq__search-ico" aria-hidden ><img src={SearchIcon} alt=""/></span>*/}
+                {/*    <input*/}
+                {/*        className="faq__search-input"*/}
+                {/*        placeholder="Найти…"*/}
+                {/*        value={query}*/}
+                {/*        onChange={e => setQuery(e.target.value)}*/}
+                {/*        type="search"*/}
+                {/*        autoCorrect="off"*/}
+                {/*        spellCheck={false}*/}
+                {/*    />*/}
+                {/*</label>*/}
 
                 <ul className="faq__list">
                     {list.map(i => (
