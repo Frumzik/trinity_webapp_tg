@@ -35,6 +35,7 @@ import { ReferralsService } from './referrals.service';
 import { UsersService } from '../../account';
 import { FundsService } from '../funds';
 import { TrainingEntity } from '../../lms/content/entities';
+import { formatDays } from '../../service';
 
 @Injectable()
 export class ReferralsListener {
@@ -110,7 +111,7 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.SUBSCRIPTION: {
-        await this.fundsService.incAdmin(Math.abs(transaction.sum));
+        await this.addSubscriptionReward(purchase, transaction);
         break;
       }
       default: {
@@ -236,6 +237,94 @@ export class ReferralsListener {
           training.stage
         )
       );
+    }
+  }
+
+  private async addSubscriptionReward(
+    purchase: PurchaseEntity,
+    transaction: TransactionEntity
+  ) {
+    // Пополняем банк
+    await this.fundsService.incMain(
+      Math.abs(transaction.sum) * this.fundPercent
+    );
+
+    for (const [_level, percent] of Object.entries(this.levelPercents)) {
+      const level = +_level;
+
+      const sum = Math.abs(transaction.sum) * percent;
+
+      const partner = await this.referralsService.find({
+        referralId: purchase.userId,
+        level,
+      });
+
+      if (!partner) {
+        await this.fundsService.incAdmin(sum);
+
+        continue;
+      }
+
+      const partnerSubscription = await this.subscriptionsService.find({
+        userId: partner.partnerId,
+      });
+
+      if (!partnerSubscription) {
+        throw new NotFoundException('Подписка партнера не найдена');
+      }
+
+      if (partnerSubscription.isActive()) {
+        // Обновляем балансы
+        await this.referralsService.incEarn(partner, { inc: sum });
+        await this.usersService.incBalance(
+          {
+            userId: partner.partnerId,
+          },
+          {
+            inc: sum,
+          }
+        );
+
+        await this.transactionsService.create({
+          userId: partner.partnerId,
+          type: TransactionType.REFERRAL,
+          sum: sum,
+          description: `Ваш Единомышленник в ${level} поколении приобрел доступ на ${
+            purchase.days
+          } ${formatDays(purchase.days as number)}}.\nВы получили +${sum} OM (${
+            percent * 100
+          }%).`,
+        });
+
+        await this.eventEmitter.emit(
+          ReferralEvents.BUY,
+          new ReferralBuyEvent(
+            partner.partnerId,
+            partner.referralId,
+            partner.level,
+            sum,
+            `Доступ на ${purchase.days} ${formatDays(purchase.days as number)}`
+          )
+        );
+      } else {
+        await this.fundsService.createReserveItem({
+          type: ReserveFundItemType.SUBSCRIPTION,
+          userId: partner.partnerId,
+          sum,
+          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          referralId: purchase.userId,
+        });
+
+        await this.eventEmitter.emit(
+          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+          new ReferralReserveBySubscriptionEvent(
+            partner.partnerId,
+            partner.referralId,
+            sum,
+            `Доступ на ${purchase.days} ${formatDays(purchase.days as number)}`
+          )
+        );
+      }
     }
   }
 
