@@ -7,6 +7,7 @@ import {
   NotFoundException,
   UseGuards,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -365,8 +366,11 @@ export class AcquiringService {
         )
       );
     } catch (error: unknown) {
+      Logger.log(error);
+
       throw new InternalServerErrorException(
-        'Ошибка при создании заявки на вывод', error as string
+        'Ошибка при создании заявки на вывод',
+        error as string
       );
     }
   }
@@ -444,7 +448,7 @@ export class AcquiringService {
         type: TransactionType.WITHDRAWAL,
         sum: -sum,
         description: `${sum} ОМ выведено`,
-        toAddress: body.toAddress
+        toAddress: body.toAddress,
       });
       await this.fundsService.incAdmin(this.withdrawComission);
 
@@ -466,7 +470,7 @@ export class AcquiringService {
         type: TransactionType.FUND,
         sum: -withdraw.amount,
         description: `Вывод из "${fund?.title}"`,
-        toAddress: body.toAddress
+        toAddress: body.toAddress,
       });
     }
 
