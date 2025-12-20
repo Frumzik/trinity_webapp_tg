@@ -63,13 +63,13 @@ export class LoggingMiddleware implements NestMiddleware {
     // Завершение ответа
     // -----------------------------
     res.on('finish', () => {
-      // let responseBody = '';
+      let responseBody = '';
 
-      // try {
-      //   responseBody = Buffer.concat(chunks).toString('utf8');
-      // } catch {
-      //   responseBody = '<unreadable>';
-      // }
+      try {
+        responseBody = Buffer.concat(chunks).toString('utf8');
+      } catch {
+        responseBody = '<unreadable>';
+      }
 
       const ms = Date.now() - start;
 
@@ -80,7 +80,7 @@ export class LoggingMiddleware implements NestMiddleware {
           status: res.statusCode,
           duration_ms: ms,
           request_body: requestBody,
-          // response_body: responseBody,
+          response_body: responseBody,
         })
       );
     });
