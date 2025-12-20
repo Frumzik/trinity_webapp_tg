@@ -366,7 +366,7 @@ export class AcquiringService {
       );
     } catch (error: unknown) {
       throw new InternalServerErrorException(
-        'Ошибка при создании заявки на вывод'
+        'Ошибка при создании заявки на вывод', error as string
       );
     }
   }
