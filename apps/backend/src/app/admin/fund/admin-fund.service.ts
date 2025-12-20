@@ -73,9 +73,9 @@ export class AdminFundService {
   /**
    * CREATE
    */
-  async create(data: FundWithdrawRequestDto) {
+  async create(data: FundWithdrawRequestDto, userId: number) {
     await this.acquiringService.fundWithdraw(
-      data.userId,
+      userId,
       data.fundType as FundType,
       data.toAddress,
       data.amount

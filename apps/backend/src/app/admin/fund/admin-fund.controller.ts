@@ -27,11 +27,9 @@ export class FundWithdrawRequestDto {
   toAddress!: string;
 
   @IsNumber()
-  userId!: number;
-
-  @IsNumber()
   amount!: number;
 }
+
 @Roles(UserRole.Admin, UserRole.Moderator)
 @UseGuards(JWTAuthGuard)
 @ApiBearerAuth('access_token')
@@ -71,7 +69,7 @@ export class AdminFundController {
 
   @Post()
   async create(@Body() dto: FundWithdrawRequestDto, @UserId() userId: number) {
-    return await this.adminFundService.create({ ...dto, userId });
+    return await this.adminFundService.create(dto, userId);
   }
 
   @Put(':id')
