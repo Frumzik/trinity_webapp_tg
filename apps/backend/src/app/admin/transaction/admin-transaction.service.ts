@@ -36,7 +36,7 @@ export class AdminTransactionService {
 
       const total = await this.transactionsService.count(
         options.filter?.type == TransactionType.FUND
-          ? { type: TransactionType.FUND }
+          ? { type: TransactionType.FUND, sum: { $gt: 0 } }
           : { type: { $ne: TransactionType.FUND } }
       );
 
