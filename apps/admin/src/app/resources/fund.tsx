@@ -136,7 +136,7 @@ export const TransactionList = () => {
         <h3>Транзакции</h3>
         <List
           resource="transaction"
-          filter={{ type: 'Fund' }} // type !== FUND
+          filter={{ type: 'Fund', sum: { $gt: 0 } }}
           actions={false}
         >
           <Datagrid rowClick={false} bulkActionButtons={false}>
@@ -154,7 +154,7 @@ export const TransactionList = () => {
             <NumberField source="sum" label="Сумма" />
             <TextField source="description" label="Комментарий" />
             <TextField source="toAddress" label="Адрес" />
-            <DateField source="createdAt" showTime label="Дата"/>
+            <DateField source="createdAt" showTime label="Дата" />
           </Datagrid>
         </List>
       </CardContent>

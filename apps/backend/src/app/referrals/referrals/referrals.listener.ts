@@ -22,6 +22,7 @@ import {
   ReferralReserveByStageEvent,
   ReferralReserveBySubscriptionEvent,
   ReferralBuyPractiseEvent,
+  FundType,
 } from '@trinity/shared';
 import {
   PurchaseEntity,
@@ -111,7 +112,6 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.SUBSCRIPTION: {
-        // await this.fundsService.incAdmin(Math.abs(transaction.sum));
         await this.addSubscriptionReward(purchase, transaction);
         break;
       }
@@ -134,9 +134,16 @@ export class ReferralsListener {
     const sum = Math.abs(transaction.sum) * (1 - this.fundPercent);
 
     // Пополняем банк
-    await this.fundsService.incMain(
-      Math.abs(transaction.sum) * this.fundPercent
-    );
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку ступени`,
+    });
 
     const partner = await this.referralsService.find({
       referralId: purchase.userId,
@@ -145,6 +152,14 @@ export class ReferralsListener {
 
     if (!partner) {
       await this.fundsService.incAdmin(sum);
+
+      await this.transactionsService.create({
+        userId: +purchase.userId,
+        type: TransactionType.FUND,
+        sum: sum,
+        fundType: FundType.ADMIN,
+        description: `Комиссия за отсутствие партнёра ${level} уровня`,
+      });
 
       return;
     }
@@ -162,8 +177,8 @@ export class ReferralsListener {
       contentId: training.trainingId,
     });
 
-    if (partnerSubscription.isActive()) {
-      if (partnerPurchase) {
+    if (partnerPurchase) {
+      if (partnerSubscription.isActive()) {
         // Обновляем балансы
         await this.referralsService.incEarn(partner, { inc: sum });
         await this.usersService.incBalance(
@@ -195,7 +210,7 @@ export class ReferralsListener {
         );
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.STAGE,
+          type: ReserveFundItemType.SUBSCRIPTION,
           userId: partner.partnerId,
           sum,
           stage: training.stage,
@@ -206,7 +221,7 @@ export class ReferralsListener {
 
         await this.eventEmitter.emit(
           ReferralEvents.RESERVE_STAGE_BY_STAGE,
-          new ReferralReserveStageByStageEvent(
+          new ReferralReserveStageBySubscriptionEvent(
             partner.partnerId,
             partner.referralId,
             partner.level,
@@ -218,7 +233,7 @@ export class ReferralsListener {
       }
     } else {
       await this.fundsService.createReserveItem({
-        type: ReserveFundItemType.SUBSCRIPTION,
+        type: ReserveFundItemType.STAGE,
         userId: partner.partnerId,
         sum,
         stage: training.stage,
@@ -229,7 +244,7 @@ export class ReferralsListener {
 
       await this.eventEmitter.emit(
         ReferralEvents.RESERVE_STAGE_BY_STAGE,
-        new ReferralReserveStageBySubscriptionEvent(
+        new ReferralReserveStageByStageEvent(
           partner.partnerId,
           partner.referralId,
           partner.level,
@@ -246,9 +261,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(
-      Math.abs(transaction.sum) * this.fundPercent
-    );
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку подписки`,
+    });
 
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
@@ -262,6 +284,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -334,7 +364,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(transaction.sum * this.fundPercent);
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку тренинга`,
+    });
 
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
@@ -348,6 +387,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -382,8 +429,8 @@ export class ReferralsListener {
         throw new NotFoundException('Подписка партнера не найдена');
       }
 
-      if (partnerSubscription.isActive()) {
-        if (partnerPurchase) {
+      if (partnerPurchase) {
+        if (partnerSubscription.isActive()) {
           // Обновляем балансы
           await this.referralsService.incEarn(partner, { inc: sum });
           await this.usersService.incBalance(
@@ -416,7 +463,7 @@ export class ReferralsListener {
           );
         } else {
           await this.fundsService.createReserveItem({
-            type: ReserveFundItemType.STAGE,
+            type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
             stage: stageTraining.stage,
@@ -426,20 +473,18 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_BY_STAGE,
-            new ReferralReserveByStageEvent(
+            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+            new ReferralReserveBySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
               sum,
-              stageTraining.stageLevel ?? 1,
-              stageTraining.stage ?? level,
               training.title ?? ''
             )
           );
         }
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.SUBSCRIPTION,
+          type: ReserveFundItemType.STAGE,
           userId: partner.partnerId,
           sum,
           stage: stageTraining.stage,
@@ -449,11 +494,13 @@ export class ReferralsListener {
         });
 
         await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
-          new ReferralReserveBySubscriptionEvent(
+          ReferralEvents.RESERVE_BY_STAGE,
+          new ReferralReserveByStageEvent(
             partner.partnerId,
             partner.referralId,
             sum,
+            stageTraining.stageLevel ?? 1,
+            stageTraining.stage ?? level,
             training.title ?? ''
           )
         );
@@ -466,7 +513,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(transaction.sum * this.fundPercent);
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку тренинга`,
+    });
 
     for (const [level, percent] of Object.entries(this.levelPercents)) {
       const sum = Math.abs(transaction.sum) * percent;
@@ -478,6 +534,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -567,6 +631,14 @@ export class ReferralsListener {
       if (!partner) {
         await this.fundsService.incAdmin(sum);
 
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
+
         continue;
       }
 
@@ -592,8 +664,8 @@ export class ReferralsListener {
         throw new NotFoundException('Подписка партнера не найдена');
       }
 
-      if (partnerSubscription.isActive()) {
-        if (partnerPurchase) {
+      if (partnerPurchase) {
+        if (partnerSubscription.isActive()) {
           // Обновляем балансы
           await this.referralsService.incEarn(partner, { inc: sum });
           await this.usersService.incBalance(
@@ -626,12 +698,19 @@ export class ReferralsListener {
           );
 
           // Пополняем банк
-          await this.fundsService.incMain(
-            Math.abs(transaction.sum) * this.fundPercent
-          );
+          const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+          await this.fundsService.incMain(fundComission);
+          await this.transactionsService.create({
+            userId: +purchase.userId,
+            type: TransactionType.FUND,
+            sum: fundComission,
+            fundType: FundType.MAIN,
+            description: `Комиссия за проведение практики`,
+          });
         } else {
           await this.fundsService.createReserveItem({
-            type: ReserveFundItemType.STAGE,
+            type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
             stage: stageTraining.stage,
@@ -641,20 +720,18 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_BY_STAGE,
-            new ReferralReserveByStageEvent(
+            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+            new ReferralReserveBySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
               sum,
-              stageTraining.stageLevel ?? 1,
-              stageTraining.stage ?? level,
               practise.title ?? ''
             )
           );
         }
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.SUBSCRIPTION,
+          type: ReserveFundItemType.STAGE,
           userId: partner.partnerId,
           sum,
           stage: stageTraining.stage,
@@ -664,11 +741,13 @@ export class ReferralsListener {
         });
 
         await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
-          new ReferralReserveBySubscriptionEvent(
+          ReferralEvents.RESERVE_BY_STAGE,
+          new ReferralReserveByStageEvent(
             partner.partnerId,
             partner.referralId,
             sum,
+            stageTraining.stageLevel ?? 1,
+            stageTraining.stage ?? level,
             practise.title ?? ''
           )
         );
