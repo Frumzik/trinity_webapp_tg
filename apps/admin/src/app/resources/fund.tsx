@@ -136,7 +136,7 @@ export const TransactionList = () => {
         <h3>Транзакции</h3>
         <List
           resource="transaction"
-          filter={{ type: 'Fund', sum: { $gt: 0 } }}
+          filter={{ type: 'Fund', sum: { $lt: 0 } }}
           actions={false}
         >
           <Datagrid rowClick={false} bulkActionButtons={false}>
