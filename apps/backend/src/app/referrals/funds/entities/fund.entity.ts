@@ -15,16 +15,17 @@ export class FundEntity implements IFund {
   }
 
   incBalance(sum: number) {
-    this.balance += sum
+    sum = Math.round(sum * 1000) / 1000;
+    this.balance += sum;
 
-    if (this.type !== FundType.RESERVE)
-      this.earn += sum
+    if (this.type !== FundType.RESERVE) this.earn += sum;
 
     return this;
   }
 
   decBalance(sum: number) {
-    this.balance -= sum
+    sum = Math.round(sum * 1000) / 1000;
+    this.balance -= sum;
 
     return this;
   }
