@@ -49,7 +49,7 @@ Thumbs.db
 #logs
 *.log
 
-/traefik/acme.json
+traefik/acme.json
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
