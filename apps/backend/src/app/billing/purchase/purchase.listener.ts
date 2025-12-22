@@ -15,7 +15,6 @@ import {
   PurchaseType,
   ReferralEvents,
   ReferralReserveStageReturnedEvent,
-  ReferralReserveSubscriptionReturnedEvent,
   ReserveFundItemType,
   TrainingType,
   TransactionType,
