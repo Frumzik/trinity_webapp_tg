@@ -136,7 +136,7 @@ export class UserEntity implements IUser {
   }
 
   public updateBalance(balance: number) {
-    this.balance = Math.round(balance * 10) / 10;
+    this.balance = balance;
 
     return this;
   }
