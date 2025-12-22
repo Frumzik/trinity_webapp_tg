@@ -131,10 +131,13 @@ export class ReferralsListener {
     }
 
     const level = Math.floor(training.stage / training.stageLevel);
-    const sum = Math.abs(transaction.sum) * (1 - this.fundPercent);
+    const sum =
+      Math.round(Math.abs(transaction.sum * (1 - this.fundPercent)) * 1000) /
+      1000;
 
     // Пополняем банк
-    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+    const fundComission =
+      Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -261,7 +264,8 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+    const fundComission =
+      Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -275,7 +279,10 @@ export class ReferralsListener {
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
+      const sum =
+        Math.round(
+          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
+        ) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -322,7 +329,7 @@ export class ReferralsListener {
           sum: sum,
           description: `Ваш Единомышленник в ${level} поколении приобрел доступ на ${
             purchase.days
-          } ${formatDays(purchase.days as number)}}.\nВы получили +${sum} OM (${
+          } ${formatDays(purchase.days as number)}.\nВы получили +${sum} OM (${
             percent * 100
           }%).`,
         });
@@ -364,7 +371,8 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+    const fundComission =
+      Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -378,7 +386,10 @@ export class ReferralsListener {
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
+      const sum =
+        Math.round(
+          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
+        ) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -513,7 +524,8 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+    const fundComission =
+      Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -525,7 +537,10 @@ export class ReferralsListener {
     });
 
     for (const [level, percent] of Object.entries(this.levelPercents)) {
-      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
+      const sum =
+        Math.round(
+          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
+        ) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -619,9 +634,12 @@ export class ReferralsListener {
       const level = +_level;
 
       const sum =
-        Math.abs(transaction.sum) *
-        (1 - this.merchantPercent - this.fundPercent) *
-        percent;
+        Math.round(
+          Math.abs(transaction.sum) *
+            (1 - this.merchantPercent - this.fundPercent) *
+            percent *
+            1000
+        ) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -698,7 +716,7 @@ export class ReferralsListener {
           );
 
           // Пополняем банк
-          const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+          const fundComission = Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
           await this.fundsService.incMain(fundComission);
           await this.transactionsService.create({
@@ -767,7 +785,7 @@ export class ReferralsListener {
     });
 
     if (merchant) {
-      const merchantSum = Math.abs(transaction.sum) * this.merchantPercent;
+      const merchantSum = Math.round(Math.abs(transaction.sum) * this.merchantPercent * 1000) / 1000;
 
       await this.usersService.incBalance(
         { userId: merchant.userId },

@@ -16,6 +16,7 @@ import {
   ReferralEvents,
   ReferralReserveStageReturnedEvent,
   ReserveFundItemType,
+  TrainingTag,
   TrainingType,
   TransactionType,
 } from '@trinity/shared';
@@ -71,7 +72,8 @@ export class PurchaseListener {
 
         if (
           training.type == TrainingType.TRAINING &&
-          !(training.stage && training.stageLevel)
+          !(training.stage && training.stageLevel) &&
+          training.tag == TrainingTag.PRACTISE
         ) {
           this.eventEmitter.emit(
             PurchaseEvents.BUY,
@@ -182,7 +184,7 @@ export class PurchaseListener {
 
         for (const reserveItem of reserveItems) {
           // Убираем из резерва
-          await this.fundsService.returnReserveItem(reserveItem, true);
+          await this.fundsService.returnReserveItem(reserveItem);
 
           reserveSum += reserveItem.sum;
 
@@ -195,7 +197,7 @@ export class PurchaseListener {
           );
         }
 
-        if (reserveItems.length) {
+        if (reserveSum > 0) {
           await this.transactionsService.create({
             userId: purchase.userId,
             type: TransactionType.REFERRAL,
@@ -207,6 +209,14 @@ export class PurchaseListener {
             { userId: purchase.userId },
             { inc: reserveSum }
           );
+
+          // await this.eventEmitter.emit(
+          //   ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
+          //   new ReferralReserveSubscriptionReturnedEvent(
+          //     purchase.userId,
+          //     reserveSum
+          //   )
+          // );
         }
 
         break;
