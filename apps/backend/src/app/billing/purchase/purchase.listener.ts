@@ -16,6 +16,7 @@ import {
   ReferralEvents,
   ReferralReserveStageReturnedEvent,
   ReserveFundItemType,
+  TrainingTag,
   TrainingType,
   TransactionType,
 } from '@trinity/shared';
@@ -71,7 +72,8 @@ export class PurchaseListener {
 
         if (
           training.type == TrainingType.TRAINING &&
-          !(training.stage && training.stageLevel)
+          !(training.stage && training.stageLevel) &&
+          training.tag == TrainingTag.PRACTISE
         ) {
           this.eventEmitter.emit(
             PurchaseEvents.BUY,
