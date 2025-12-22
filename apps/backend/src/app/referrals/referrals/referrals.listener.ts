@@ -132,7 +132,7 @@ export class ReferralsListener {
 
     const level = Math.floor(training.stage / training.stageLevel);
     const sum =
-      Math.round(Math.abs(transaction.sum * (1 - this.fundPercent)) * 10000) /
+      Math.round(Math.abs(transaction.sum * (1 - this.fundPercent)) * 1000) /
       1000;
 
     // Пополняем банк
