@@ -182,7 +182,7 @@ export class PurchaseListener {
 
         for (const reserveItem of reserveItems) {
           // Убираем из резерва
-          await this.fundsService.returnReserveItem(reserveItem, true);
+          await this.fundsService.returnReserveItem(reserveItem);
 
           reserveSum += reserveItem.sum;
 
