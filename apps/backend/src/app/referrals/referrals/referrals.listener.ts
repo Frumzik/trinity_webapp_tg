@@ -162,8 +162,8 @@ export class ReferralsListener {
       contentId: training.trainingId,
     });
 
-    if (partnerSubscription.isActive()) {
-      if (partnerPurchase) {
+    if (partnerPurchase) {
+      if (partnerSubscription.isActive()) {
         // Обновляем балансы
         await this.referralsService.incEarn(partner, { inc: sum });
         await this.usersService.incBalance(
@@ -195,7 +195,7 @@ export class ReferralsListener {
         );
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.STAGE,
+          type: ReserveFundItemType.SUBSCRIPTION,
           userId: partner.partnerId,
           sum,
           stage: training.stage,
@@ -206,7 +206,7 @@ export class ReferralsListener {
 
         await this.eventEmitter.emit(
           ReferralEvents.RESERVE_STAGE_BY_STAGE,
-          new ReferralReserveStageByStageEvent(
+          new ReferralReserveStageBySubscriptionEvent(
             partner.partnerId,
             partner.referralId,
             partner.level,
@@ -218,7 +218,7 @@ export class ReferralsListener {
       }
     } else {
       await this.fundsService.createReserveItem({
-        type: ReserveFundItemType.SUBSCRIPTION,
+        type: ReserveFundItemType.STAGE,
         userId: partner.partnerId,
         sum,
         stage: training.stage,
@@ -229,7 +229,7 @@ export class ReferralsListener {
 
       await this.eventEmitter.emit(
         ReferralEvents.RESERVE_STAGE_BY_STAGE,
-        new ReferralReserveStageBySubscriptionEvent(
+        new ReferralReserveStageByStageEvent(
           partner.partnerId,
           partner.referralId,
           partner.level,
@@ -382,8 +382,8 @@ export class ReferralsListener {
         throw new NotFoundException('Подписка партнера не найдена');
       }
 
-      if (partnerSubscription.isActive()) {
-        if (partnerPurchase) {
+      if (partnerPurchase) {
+        if (partnerSubscription.isActive()) {
           // Обновляем балансы
           await this.referralsService.incEarn(partner, { inc: sum });
           await this.usersService.incBalance(
@@ -416,7 +416,7 @@ export class ReferralsListener {
           );
         } else {
           await this.fundsService.createReserveItem({
-            type: ReserveFundItemType.STAGE,
+            type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
             stage: stageTraining.stage,
@@ -426,20 +426,18 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_BY_STAGE,
-            new ReferralReserveByStageEvent(
+            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+            new ReferralReserveBySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
               sum,
-              stageTraining.stageLevel ?? 1,
-              stageTraining.stage ?? level,
               training.title ?? ''
             )
           );
         }
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.SUBSCRIPTION,
+          type: ReserveFundItemType.STAGE,
           userId: partner.partnerId,
           sum,
           stage: stageTraining.stage,
@@ -449,11 +447,13 @@ export class ReferralsListener {
         });
 
         await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
-          new ReferralReserveBySubscriptionEvent(
+          ReferralEvents.RESERVE_BY_STAGE,
+          new ReferralReserveByStageEvent(
             partner.partnerId,
             partner.referralId,
             sum,
+            stageTraining.stageLevel ?? 1,
+            stageTraining.stage ?? level,
             training.title ?? ''
           )
         );
@@ -592,8 +592,8 @@ export class ReferralsListener {
         throw new NotFoundException('Подписка партнера не найдена');
       }
 
-      if (partnerSubscription.isActive()) {
-        if (partnerPurchase) {
+      if (partnerPurchase) {
+        if (partnerSubscription.isActive()) {
           // Обновляем балансы
           await this.referralsService.incEarn(partner, { inc: sum });
           await this.usersService.incBalance(
@@ -631,7 +631,7 @@ export class ReferralsListener {
           );
         } else {
           await this.fundsService.createReserveItem({
-            type: ReserveFundItemType.STAGE,
+            type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
             stage: stageTraining.stage,
@@ -641,20 +641,18 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_BY_STAGE,
-            new ReferralReserveByStageEvent(
+            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
+            new ReferralReserveBySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
               sum,
-              stageTraining.stageLevel ?? 1,
-              stageTraining.stage ?? level,
               practise.title ?? ''
             )
           );
         }
       } else {
         await this.fundsService.createReserveItem({
-          type: ReserveFundItemType.SUBSCRIPTION,
+          type: ReserveFundItemType.STAGE,
           userId: partner.partnerId,
           sum,
           stage: stageTraining.stage,
@@ -664,11 +662,13 @@ export class ReferralsListener {
         });
 
         await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_BY_SUBSCRIPTION,
-          new ReferralReserveBySubscriptionEvent(
+          ReferralEvents.RESERVE_BY_STAGE,
+          new ReferralReserveByStageEvent(
             partner.partnerId,
             partner.referralId,
             sum,
+            stageTraining.stageLevel ?? 1,
+            stageTraining.stage ?? level,
             practise.title ?? ''
           )
         );
