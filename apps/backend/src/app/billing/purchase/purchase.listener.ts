@@ -208,13 +208,13 @@ export class PurchaseListener {
             { inc: reserveSum }
           );
 
-          await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
-            new ReferralReserveSubscriptionReturnedEvent(
-              purchase.userId,
-              reserveSum
-            )
-          );
+          // await this.eventEmitter.emit(
+          //   ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
+          //   new ReferralReserveSubscriptionReturnedEvent(
+          //     purchase.userId,
+          //     reserveSum
+          //   )
+          // );
         }
 
         break;
