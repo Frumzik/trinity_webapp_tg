@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FundsService } from './funds.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
@@ -9,6 +9,7 @@ import {
 } from './models';
 import { FundsRepository, ReserveFundItemsRepository } from './repositories';
 import { CountersModule } from '../../service';
+import { TransactionsModule } from '../../billing';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { CountersModule } from '../../service';
       { name: Fund.name, schema: FundSchema },
       { name: ReserveFundItem.name, schema: ReserveFundItemSchema },
     ]),
-    CountersModule
+    CountersModule,
+    forwardRef(() => TransactionsModule),
   ],
   providers: [FundsService, FundsRepository, ReserveFundItemsRepository],
   exports: [FundsService],
