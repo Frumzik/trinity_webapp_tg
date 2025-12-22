@@ -275,7 +275,7 @@ export class ReferralsListener {
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum = Math.abs(transaction.sum) * percent;
+      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -378,7 +378,7 @@ export class ReferralsListener {
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum = Math.abs(transaction.sum) * percent;
+      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -525,7 +525,7 @@ export class ReferralsListener {
     });
 
     for (const [level, percent] of Object.entries(this.levelPercents)) {
-      const sum = Math.abs(transaction.sum) * percent;
+      const sum = Math.abs(transaction.sum) * (1 - this.fundPercent) * percent;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
