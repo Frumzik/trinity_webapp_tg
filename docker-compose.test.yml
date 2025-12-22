@@ -39,7 +39,7 @@ services:
     env_file:
       - ./apps/backend/envs/.env.test
     ports:
-      - "3001:3000"
+      - "3020:3000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-backend.rule=Host(`api.test.3nity.space`)"
@@ -57,7 +57,7 @@ services:
     env_file:
       - ./apps/bot/envs/.env.test
     ports:
-      - "3002:3001"
+      - "3021:3001"
     # labels:
     #   - "traefik.enable=true"
     #   - "traefik.http.routers.bot.rule=Host(`bot.3nity.space`)"
@@ -75,7 +75,7 @@ services:
     env_file:
       - apps/webapp/envs/.env.test
     ports:
-      - "4203:4203"
+      - "4223:4203"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-frontend.rule=Host(`app.test.3nity.space`)"
@@ -93,7 +93,7 @@ services:
     env_file:
       - ./apps/admin/envs/.env.test
     ports:
-      - "4202:4201"
+      - "4221:4201"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.test-admin.rule=Host(`admin.test.3nity.space`)"
