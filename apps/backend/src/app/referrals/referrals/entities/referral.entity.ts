@@ -18,7 +18,7 @@ export class ReferralEntity implements IReferral {
   }
 
   incEarn(sum: number) {
-    this.earn += Math.round(Math.abs(sum) * 10) / 10;
+    this.earn += sum
 
     return this;
   }

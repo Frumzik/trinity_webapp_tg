@@ -18,6 +18,5 @@ export class TransactionEntity implements ITransaction {
 
   constructor(transaction: Partial<ITransaction>) {
     Object.assign(this, transaction);
-    this.sum = Math.round(this.sum * 10) / 10;
   }
 }
