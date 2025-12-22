@@ -15,7 +15,6 @@ import {
   PurchaseType,
   ReferralEvents,
   ReferralReserveStageReturnedEvent,
-  ReferralReserveSubscriptionReturnedEvent,
   ReserveFundItemType,
   TrainingType,
   TransactionType,
@@ -183,7 +182,7 @@ export class PurchaseListener {
 
         for (const reserveItem of reserveItems) {
           // Убираем из резерва
-          await this.fundsService.returnReserveItem(reserveItem, true);
+          await this.fundsService.returnReserveItem(reserveItem);
 
           reserveSum += reserveItem.sum;
 
@@ -196,15 +195,7 @@ export class PurchaseListener {
           );
         }
 
-        if (reserveItems.length) {
-          await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
-            new ReferralReserveSubscriptionReturnedEvent(
-              purchase.userId,
-              reserveSum
-            )
-          );
-
+        if (reserveSum > 0) {
           await this.transactionsService.create({
             userId: purchase.userId,
             type: TransactionType.REFERRAL,
@@ -216,6 +207,14 @@ export class PurchaseListener {
             { userId: purchase.userId },
             { inc: reserveSum }
           );
+
+          // await this.eventEmitter.emit(
+          //   ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
+          //   new ReferralReserveSubscriptionReturnedEvent(
+          //     purchase.userId,
+          //     reserveSum
+          //   )
+          // );
         }
 
         break;
