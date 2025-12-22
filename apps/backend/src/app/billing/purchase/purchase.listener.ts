@@ -106,7 +106,7 @@ export class PurchaseListener {
                 new Date().getTime() < new Date(reserveItem.endDate).getTime()
               ) {
                 // Убираем из резерва
-                await this.fundsService.returnReserveItem(reserveItem);
+                await this.fundsService.returnReserveItem(reserveItem, true);
                 reserveSum += reserveItem.sum;
 
                 await this.referralsService.incEarn(
@@ -183,7 +183,7 @@ export class PurchaseListener {
 
         for (const reserveItem of reserveItems) {
           // Убираем из резерва
-          await this.fundsService.returnReserveItem(reserveItem);
+          await this.fundsService.returnReserveItem(reserveItem, true);
 
           reserveSum += reserveItem.sum;
 
@@ -197,14 +197,6 @@ export class PurchaseListener {
         }
 
         if (reserveItems.length) {
-          await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
-            new ReferralReserveSubscriptionReturnedEvent(
-              purchase.userId,
-              reserveSum
-            )
-          );
-
           await this.transactionsService.create({
             userId: purchase.userId,
             type: TransactionType.REFERRAL,

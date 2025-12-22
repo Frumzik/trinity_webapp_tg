@@ -374,7 +374,8 @@ export class FundsService {
   }
 
   async returnReserveItem(
-    condition: FilterQuery<ReserveFundItem>
+    condition: FilterQuery<ReserveFundItem>,
+    silent = false
   ): Promise<{ deleted: boolean }> {
     try {
       const fundItem = await this.findReserveItem(condition);
@@ -388,27 +389,29 @@ export class FundsService {
       await this.decReserve(fundItem.sum);
 
       // Событие
-      if (fundItem.type == ReserveFundItemType.STAGE) {
-        await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_STAGE_RETURNED,
-          new ReferralReserveStageReturnedEvent(fundItem.userId, fundItem.sum)
-        );
-      } else if (fundItem.type == ReserveFundItemType.SUBSCRIPTION) {
-        await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
-          new ReferralReserveSubscriptionReturnedEvent(
-            fundItem.userId,
-            fundItem.sum
-          )
-        );
-      } else if (fundItem.type == ReserveFundItemType.PRACTISE) {
-        await this.eventEmitter.emit(
-          PurchaseEvents.PRACTISE_DONE,
-          new PurchasePractiseDoneEvent(
-            fundItem.userId,
-            fundItem.trainingId as number
-          )
-        );
+      if (!silent) {
+        if (fundItem.type == ReserveFundItemType.STAGE) {
+          await this.eventEmitter.emit(
+            ReferralEvents.RESERVE_STAGE_RETURNED,
+            new ReferralReserveStageReturnedEvent(fundItem.userId, fundItem.sum)
+          );
+        } else if (fundItem.type == ReserveFundItemType.SUBSCRIPTION) {
+          await this.eventEmitter.emit(
+            ReferralEvents.RESERVE_SUBSCRIPTION_RETURNED,
+            new ReferralReserveSubscriptionReturnedEvent(
+              fundItem.userId,
+              fundItem.sum
+            )
+          );
+        } else if (fundItem.type == ReserveFundItemType.PRACTISE) {
+          await this.eventEmitter.emit(
+            PurchaseEvents.PRACTISE_DONE,
+            new PurchasePractiseDoneEvent(
+              fundItem.userId,
+              fundItem.trainingId as number
+            )
+          );
+        }
       }
 
       return result;
