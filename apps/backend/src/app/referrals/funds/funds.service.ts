@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -22,11 +24,13 @@ import {
   GetListOptions,
   PurchasePractiseAcceptEvent,
   CounterType,
+  TransactionType,
 } from '@trinity/shared';
 import { FundEntity, ReserveFundItemEntity } from './entities';
 import { Fund, ReserveFundItem } from './models';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CountersService } from '../../service';
+import { TransactionsService } from '../../billing';
 
 @Injectable()
 export class FundsService {
@@ -34,7 +38,9 @@ export class FundsService {
     private readonly fundsRepository: FundsRepository,
     private readonly reserveFundItemsRepository: ReserveFundItemsRepository,
     private readonly eventEmitter: EventEmitter2,
-    private readonly countersService: CountersService
+    private readonly countersService: CountersService,
+    @Inject(forwardRef(() => TransactionsService))
+    private readonly transactionsService: TransactionsService
   ) {}
 
   async onModuleInit() {
@@ -346,6 +352,13 @@ export class FundsService {
         }
       } else {
         await this.incMain(fundItem.sum);
+        await this.transactionsService.create({
+          userId: fundItem.userId,
+          type: TransactionType.FUND,
+          sum: fundItem.sum,
+          fundType: FundType.MAIN,
+          description: `Комиссия за покупку истечение резервного срока`,
+        });
 
         await this.eventEmitter.emit(
           ReferralEvents.RESERVE_EXPIRED,

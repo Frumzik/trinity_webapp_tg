@@ -22,6 +22,7 @@ import {
   ReferralReserveByStageEvent,
   ReferralReserveBySubscriptionEvent,
   ReferralBuyPractiseEvent,
+  FundType,
 } from '@trinity/shared';
 import {
   PurchaseEntity,
@@ -111,7 +112,6 @@ export class ReferralsListener {
         break;
       }
       case PurchaseType.SUBSCRIPTION: {
-        // await this.fundsService.incAdmin(Math.abs(transaction.sum));
         await this.addSubscriptionReward(purchase, transaction);
         break;
       }
@@ -134,9 +134,16 @@ export class ReferralsListener {
     const sum = Math.abs(transaction.sum) * (1 - this.fundPercent);
 
     // Пополняем банк
-    await this.fundsService.incMain(
-      Math.abs(transaction.sum) * this.fundPercent
-    );
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку ступени`,
+    });
 
     const partner = await this.referralsService.find({
       referralId: purchase.userId,
@@ -145,6 +152,14 @@ export class ReferralsListener {
 
     if (!partner) {
       await this.fundsService.incAdmin(sum);
+
+      await this.transactionsService.create({
+        userId: +purchase.userId,
+        type: TransactionType.FUND,
+        sum: sum,
+        fundType: FundType.ADMIN,
+        description: `Комиссия за отсутствие партнёра ${level} уровня`,
+      });
 
       return;
     }
@@ -246,9 +261,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(
-      Math.abs(transaction.sum) * this.fundPercent
-    );
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку подписки`,
+    });
 
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
@@ -262,6 +284,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -334,7 +364,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(transaction.sum * this.fundPercent);
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку тренинга`,
+    });
 
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
@@ -348,6 +387,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -466,7 +513,16 @@ export class ReferralsListener {
     transaction: TransactionEntity
   ) {
     // Пополняем банк
-    await this.fundsService.incMain(transaction.sum * this.fundPercent);
+    const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за покупку тренинга`,
+    });
 
     for (const [level, percent] of Object.entries(this.levelPercents)) {
       const sum = Math.abs(transaction.sum) * percent;
@@ -478,6 +534,14 @@ export class ReferralsListener {
 
       if (!partner) {
         await this.fundsService.incAdmin(sum);
+
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
 
         continue;
       }
@@ -567,6 +631,14 @@ export class ReferralsListener {
       if (!partner) {
         await this.fundsService.incAdmin(sum);
 
+        await this.transactionsService.create({
+          userId: +purchase.userId,
+          type: TransactionType.FUND,
+          sum: sum,
+          fundType: FundType.ADMIN,
+          description: `Комиссия за отсутствие партнёра ${level} уровня`,
+        });
+
         continue;
       }
 
@@ -626,9 +698,16 @@ export class ReferralsListener {
           );
 
           // Пополняем банк
-          await this.fundsService.incMain(
-            Math.abs(transaction.sum) * this.fundPercent
-          );
+          const fundComission = Math.abs(transaction.sum) * this.fundPercent;
+
+          await this.fundsService.incMain(fundComission);
+          await this.transactionsService.create({
+            userId: +purchase.userId,
+            type: TransactionType.FUND,
+            sum: fundComission,
+            fundType: FundType.MAIN,
+            description: `Комиссия за проведение практики`,
+          });
         } else {
           await this.fundsService.createReserveItem({
             type: ReserveFundItemType.SUBSCRIPTION,

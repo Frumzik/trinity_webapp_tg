@@ -450,7 +450,15 @@ export class AcquiringService {
         description: `${sum} ОМ выведено`,
         toAddress: body.toAddress,
       });
+
       await this.fundsService.incAdmin(this.withdrawComission);
+      await this.transactionsService.create({
+        userId: +user.userId,
+        type: TransactionType.FUND,
+        sum: this.withdrawComission,
+        fundType: FundType.ADMIN,
+        description: `Комиссия с вывода`,
+      });
 
       await this.eventEmitter.emit(
         AcquiringEvents.WITHDRAW,
