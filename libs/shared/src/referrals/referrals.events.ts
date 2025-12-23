@@ -1,13 +1,17 @@
 // events/user.events.ts
 export const ReferralEvents = {
   REGISTERED: 'referral.registered',
-  BUY_STAGE: 'refferral.buy-stage',
   BUY: 'refferral.buy',
+  BUY_SUBSCRIPTION: 'referral.buy-subscription',
+  BUY_STAGE: 'refferral.buy-stage',
   BUY_PRACTISE: 'refferral.buy-practise',
   RESERVE_STAGE_BY_STAGE: 'refferral.reserve-stage-by-stage',
   RESERVE_STAGE_BY_SUBSCRIPTION: 'refferral.reserve-subscription-by-stage',
   RESERVE_BY_STAGE: 'refferral.reserve-by-stage',
   RESERVE_BY_SUBSCRIPTION: 'refferral.reserve-by-subscription',
+  RESERVE_SUBSCRIPTION_BY_STAGE: 'refferral.reserve-subscription-by-stage',
+  RESERVE_SUBSCRIPTION_BY_SUBSCRIPTION:
+    'refferral.reserve-subscription-by-subscription',
   RESERVE_DAYS_LEFT: 'refferral.reserve-days-left',
   RESERVE_EXPIRED: 'refferral.reserve-expired',
   RESERVE_STAGE_RETURNED: 'refferral.reserve-stage-returned',
@@ -29,7 +33,8 @@ export class ReferralBuyStageEvent {
     public readonly level: number,
     public readonly sum: number,
     public readonly stageLevel: number,
-    public readonly stage: number
+    public readonly stage: number,
+    public readonly percent: number
   ) {}
 }
 
@@ -39,7 +44,19 @@ export class ReferralBuyEvent {
     public readonly referralId: number,
     public readonly level: number,
     public readonly sum: number,
-    public readonly title: string
+    public readonly title: string,
+    public readonly percent: number,
+  ) {}
+}
+
+export class ReferralBuySubscriptionEvent {
+  constructor(
+    public readonly partnerId: number,
+    public readonly referralId: number,
+    public readonly level: number,
+    public readonly sum: number,
+    public readonly percent: number,
+    public readonly days: number
   ) {}
 }
 
@@ -49,7 +66,8 @@ export class ReferralBuyPractiseEvent {
     public readonly referralId: number,
     public readonly level: number,
     public readonly sum: number,
-    public readonly title: string
+    public readonly title: string,
+    public readonly percent: number
   ) {}
 }
 
@@ -72,6 +90,28 @@ export class ReferralReserveStageBySubscriptionEvent {
     public readonly sum: number,
     public readonly stageLevel: number,
     public readonly stage: number
+  ) {}
+}
+
+export class ReferralReserveSubscriptionByStageEvent {
+  constructor(
+    public readonly partnerId: number,
+    public readonly referralId: number,
+    public readonly level: number,
+    public readonly sum: number,
+    public readonly days: number,
+    public readonly stageLevel: number,
+    public readonly stage: number
+  ) {}
+}
+
+export class ReferralReserveSubscriptionBySubscriptionEvent {
+  constructor(
+    public readonly partnerId: number,
+    public readonly referralId: number,
+    public readonly level: number,
+    public readonly sum: number,
+    public readonly days: number
   ) {}
 }
 
