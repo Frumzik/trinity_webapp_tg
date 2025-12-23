@@ -23,6 +23,9 @@ import {
   ReferralReserveBySubscriptionEvent,
   ReferralBuyPractiseEvent,
   FundType,
+  ReferralReserveSubscriptionByStageEvent,
+  ReferralReserveSubscriptionBySubscriptionEvent,
+  ReferralBuySubscriptionEvent,
 } from '@trinity/shared';
 import {
   PurchaseEntity,
@@ -208,7 +211,8 @@ export class ReferralsListener {
             partner.level,
             sum,
             training.stageLevel,
-            training.stage
+            training.stage,
+            1 - this.fundPercent
           )
         );
       } else {
@@ -350,15 +354,14 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.BUY,
-            new ReferralBuyEvent(
+            ReferralEvents.BUY_SUBSCRIPTION,
+            new ReferralBuySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
               partner.level,
               sum,
-              `Доступ на ${purchase.days} ${formatDays(
-                purchase.days as number
-              )}`
+              percent,
+              purchase.days as number
             )
           );
         } else {
@@ -371,14 +374,13 @@ export class ReferralsListener {
           });
 
           await this.eventEmitter.emit(
-            ReferralEvents.RESERVE_BY_SUBSCRIPTION,
-            new ReferralReserveBySubscriptionEvent(
+            ReferralEvents.RESERVE_SUBSCRIPTION_BY_SUBSCRIPTION,
+            new ReferralReserveSubscriptionBySubscriptionEvent(
               partner.partnerId,
               partner.referralId,
+              level,
               sum,
-              `Доступ на ${purchase.days} ${formatDays(
-                purchase.days as number
-              )}`
+              purchase.days as number
             )
           );
         }
@@ -394,14 +396,15 @@ export class ReferralsListener {
         });
 
         await this.eventEmitter.emit(
-          ReferralEvents.RESERVE_BY_STAGE,
-          new ReferralReserveByStageEvent(
+          ReferralEvents.RESERVE_SUBSCRIPTION_BY_STAGE,
+          new ReferralReserveSubscriptionByStageEvent(
             partner.partnerId,
             partner.referralId,
+            level,
             sum,
-            stageTraining.stageLevel ?? 1,
-            stageTraining.stage ?? level,
-            `Доступ на ${purchase.days} ${formatDays(purchase.days as number)}`
+            purchase.days as number,
+            stageTraining.stage as number,
+            stageTraining.stageLevel as number
           )
         );
       }
@@ -511,7 +514,8 @@ export class ReferralsListener {
               partner.referralId,
               partner.level,
               sum,
-              training.title ?? ''
+              training.title ?? '',
+              percent
             )
           );
         } else {
@@ -634,7 +638,8 @@ export class ReferralsListener {
           partner.referralId,
           partner.level,
           sum,
-          lesson?.title ?? ''
+          lesson?.title ?? '',
+          percent
         )
       );
     }
@@ -753,7 +758,8 @@ export class ReferralsListener {
               partner.referralId,
               partner.level,
               sum,
-              practise?.title ?? ''
+              practise?.title ?? '',
+              percent
             )
           );
 
