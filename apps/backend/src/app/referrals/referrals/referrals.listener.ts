@@ -403,8 +403,8 @@ export class ReferralsListener {
             level,
             sum,
             purchase.days as number,
-            stageTraining.stage as number,
-            stageTraining.stageLevel as number
+            stageTraining.stageLevel as number,
+            stageTraining.stage as number
           )
         );
       }
