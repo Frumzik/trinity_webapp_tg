@@ -34,6 +34,9 @@ import {
   PurchasePractiseAcceptEvent,
   PurchasePractiseDoneEvent,
   ReferralBuyPractiseEvent,
+  ReferralReserveSubscriptionByStageEvent,
+  ReferralReserveSubscriptionBySubscriptionEvent,
+  ReferralBuySubscriptionEvent,
 } from '@trinity/shared';
 import { NotificationsService } from './notifications.service';
 import { UsersService } from '../account';
@@ -65,12 +68,12 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `В вашей структуре появился новый единомышленник.\n@${referral.username}\nПоколение: ${level}.\nСтруктура продолжает расти.`
+      `В вашей структуре появился новый Единомышленник.\n${referral.username ? '@' + referral.username : referral.name}\nПоколение: ${level}.\nСтруктура продолжает расти.`
     );
   }
 
   @OnEvent(ReferralEvents.BUY)
-  async onReferralBuy({ partnerId, level, sum, title }: ReferralBuyEvent) {
+  async onReferralBuy({ partnerId, level, sum, title, percent }: ReferralBuyEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
     if (!partner) {
@@ -79,7 +82,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM`
+      `Ваш Единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM (${percent * 100}%)`
     );
   }
 
@@ -89,6 +92,7 @@ export class NotificationsListener {
     level,
     sum,
     title,
+    percent
   }: ReferralBuyPractiseEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
@@ -98,7 +102,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM`
+      `Ваш Единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM (${percent * 100}%)`
     );
   }
 
@@ -109,6 +113,7 @@ export class NotificationsListener {
     sum,
     stageLevel,
     stage,
+    percent
   }: ReferralBuyStageEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
@@ -118,7 +123,34 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш единомышленник в ${level} поколении открыл ${stage} Ступень духа ${stageLevel} Уровня\nВы получили +${sum} OM`
+      `Ваш Единомышленник в ${level} поколении открыл ${stage} Ступень духа ${stageLevel} Уровня\nВы получили +${sum} OM (${percent * 100}%)`
+    );
+  }
+
+  @OnEvent(ReferralEvents.BUY_SUBSCRIPTION)
+  async onReferralBuySubscription({
+    partnerId,
+    level,
+    sum,
+    days,
+    percent,
+  }: ReferralBuySubscriptionEvent) {
+    const partner = await this.usersService.find({ userId: partnerId });
+
+    if (!partner) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    const daysFormatted =
+      days >= 360
+        ? '1 год'
+        : days == 30
+        ? '1 месяц'
+        : days + ' ' + formatDays(days);
+
+    await this.notificationsService.sendBotMessage(
+      partner.tgId as number,
+      `Ваш Единомышленник в ${level} поколении активировал доступ к приложению на ${daysFormatted}.
+Вы получили +${sum} OM (${percent * 100}%).`
     );
   }
 
@@ -208,6 +240,62 @@ export class NotificationsListener {
     );
   }
 
+  @OnEvent(ReferralEvents.RESERVE_SUBSCRIPTION_BY_STAGE)
+  async onReserveSubscriptionByStage({
+    partnerId,
+    sum,
+    level,
+    days,
+  }: ReferralReserveSubscriptionByStageEvent) {
+    const partner = await this.usersService.find({ userId: partnerId });
+
+    if (!partner) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const daysFormatted =
+      days >= 360
+        ? '1 год'
+        : days == 30
+        ? '1 месяц'
+        : days + ' ' + formatDays(days);
+
+    await this.notificationsService.sendBotMessage(
+      partner.tgId as number,
+      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за активацию доступа на ${daysFormatted}.
+Вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+Откройте ${level} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
+    );
+  }
+
+  @OnEvent(ReferralEvents.RESERVE_SUBSCRIPTION_BY_SUBSCRIPTION)
+  async onReserveSubscriptionBySubscription({
+    partnerId,
+    sum,
+    days,
+    level,
+  }: ReferralReserveSubscriptionBySubscriptionEvent) {
+    const partner = await this.usersService.find({ userId: partnerId });
+
+    if (!partner) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const daysFormatted =
+      days >= 360
+        ? '1 год'
+        : days == 30
+        ? '1 месяц'
+        : days + ' ' + formatDays(days);
+
+    await this.notificationsService.sendBotMessage(
+      partner.tgId as number,
+      `Вы упустили вознаграждение ${sum} OM с ${level} поколения за активацию доступа на ${daysFormatted}.
+Вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
+    );
+  }
+
   @OnEvent(ReferralEvents.RESERVE_DAYS_LEFT)
   async onReferralReserveDaysLeft({
     userId,
@@ -222,7 +310,7 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
-      `Внимание: осталось ${days} дня, чтобы вернуть ${sum} OM из Резервного Фонда.`
+      `Внимание: осталось ${days} ${formatDays(days)}, чтобы вернуть ${sum} OM из Резервного Фонда.`
     );
   }
 
@@ -255,7 +343,7 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Вознаграждение ${sum} OM возвращено вам из Резервного Фонда.
-Вы открыли необходимую ступень`
+Вы открыли необходимую Ступень Духа вовремя.`
     );
   }
 
@@ -273,7 +361,7 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Вознаграждение ${sum} OM возвращено вам из Резервного Фонда.
-Вы активировали доступ вовремя`
+Вы активировали доступ к приложению вовремя.`
     );
   }
 
@@ -436,7 +524,7 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Заявку на вашу практику "${training.title}" подтвердил эксперт @${
-        merchant?.username ?? ''
+        merchant?.username ? merchant.username : merchant?.name
       }`
     );
   }
