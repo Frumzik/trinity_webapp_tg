@@ -244,7 +244,6 @@ export class NotificationsListener {
   async onReserveSubscriptionByStage({
     partnerId,
     sum,
-    stage,
     level,
     days,
   }: ReferralReserveSubscriptionByStageEvent) {
@@ -265,7 +264,7 @@ export class NotificationsListener {
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за активацию доступа на ${daysFormatted}.
 Вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
-Откройте ${stage} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
+Откройте ${level} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
 
