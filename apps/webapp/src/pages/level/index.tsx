@@ -327,11 +327,23 @@ export default function Index() {
     <div className="preview">
       <TopActions
         onBack={() => {
-          if (returnTo) {
-            navigate(returnTo, { replace: true });
-          } else {
-            navigate('/levels', { replace: true });
+          const st = location.state as any;
+          const returnTo = st?.returnTo as string | undefined;
+
+          if (returnTo === "/training-levels") {
+            navigate("/training-levels", {
+              replace: true,
+              state: {
+                rootTrainingId: st?.rootTrainingId,
+                title: st?.title || "Тренинг",
+                from: st?.from || "/health-lab",
+              },
+            });
+            return;
           }
+
+          if (returnTo) navigate(returnTo, { replace: true });
+          else navigate("/levels", { replace: true });
         }}
         onMenu={() => {}}
       />
