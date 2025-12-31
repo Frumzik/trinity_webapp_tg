@@ -48,6 +48,7 @@ import PinLoginPage from '../pages/pin/login'
 import TrainingPage from '../pages/training'
 import LessonTextPage from "../pages/level/text-level"
 import EntryPage from "../pages/entry"
+import TrainingLevelsIndex from '../pages/training-levels';
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
@@ -116,6 +117,7 @@ export const router = createBrowserRouter([
               { path: 'faq', element: wrap(<FaqPage />) },
               { path: 'health-lab', element: wrap(<HealthLabPage />) },
               { path: 'progress', element: wrap(<ProgressPage />) },
+              { path: 'training-levels', element: wrap(<TrainingLevelsIndex />) },
             ],
           },
         ],
