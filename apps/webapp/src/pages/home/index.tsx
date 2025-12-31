@@ -222,22 +222,9 @@ export default function SupportPage() {
     nav(path);
   };
   const handleHealthLabClick = () => {
-    const lab = healthLabRoot;
-    if (!lab) {
+
       nav("/health-lab");
       return;
-    }
-
-    if (lab.accessStatus === "available") {
-      nav("/health-lab");
-    } else {
-      nav("/preview", {
-        state: {
-          trainingId: lab.trainingId,
-          returnTo: "/health-lab",
-        },
-      });
-    }
   };
 
   return (
@@ -314,11 +301,11 @@ export default function SupportPage() {
               title="Лаборатория Здоровья"
               description=""
               bgImageUrl={Tile2}
-              enabled={false}
+              enabled
               rightImageUrl={Card5}
-              className="featureTile--altFont"
+              // className="featureTile--altFont"
               onClick={handleHealthLabClick}
-              showImageWhenDisabled
+              // showImageWhenDisabled
             />
           </div>
         </div>

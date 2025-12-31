@@ -4,67 +4,62 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Bg1 from "../../assets/icons/bg1.svg";
-import Card1 from "../../assets/icons/products/card1.svg";
-import Card2 from "../../assets/icons/products/card2.svg";
+
 import "./health-lab.scss";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
-import { useGetTrainingTreeQuery } from "../../shared/api/learning.api";
+import Card1 from "../../assets/products/card1.png";
+import Card2 from "../../assets/products/card2.png";
+import Card3 from "../../assets/products/card3.png";
+import Tile2 from "../../assets/homePage/tile3.png";
+import Tile1 from "../../assets/homePage/tile1.png";
+import Tile3 from "../../assets/homePage/tile2.png";
 
-type Node = {
-  _id: string;
-  trainingId: number;
-  type: "training" | "product" | "practise";
-  tag?: string | null;
-  parentId?: number | null;
-  title: string;
-  description?: string | null;
-  shortDescription?: string | null;
-  coverUrl?: string | null;
-  iconUrl?: string | null;
-  accessStatus: "available" | "locked";
-  price?: number | null;
-  salePrice?: number | null;
-  childrens?: Node[];
-};
-
-const iconFallback = (i: number) => [Card1, Card2][i % 2];
+const TILES = [
+  {
+    title: (
+      <>
+        Основы здорового <br />образа жизни
+      </>
+    ),
+    pageTitle: "Основы здорового образа жизни",
+    trainingId: 31,
+    bgImageUrl: Tile1,
+    rightImageUrl: Card1,
+    className: "left-block-color",
+  },
+  {
+    title: "Природное оздоровление",
+    pageTitle: "Природное оздоровление",
+    trainingId: 32,
+    bgImageUrl: Tile3,
+    rightImageUrl: Card2,
+    className: "left-block-color-blue",
+  },
+  {
+    title: "Энциклопедия здоровья",
+    pageTitle: "Энциклопедия здоровья",
+    trainingId: 33,
+    bgImageUrl: Tile2,
+    rightImageUrl: Card3,
+    className: "left-block-color-yellow",
+  },
+] as const;
 
 export default function HealthLabIndex() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery();
 
-  const roots = useMemo(() => {
-    const all = (data?.data ?? []) as Node[];
-    return all.filter((n) => (n as any).parentId == null);
-  }, [data]);
-
-  const healthLab = useMemo(() => {
-    return (
-      roots.find((r) => r.tag === "health_lab") ||
-      roots.find(
-        (r) => r.title?.trim().toLowerCase() === "лаборатория Здоровья"
-      )
-    );
-  }, [roots]);
-
-  const items = healthLab?.childrens ?? [];
-
-  const openItem = (t: Node, idx: number) => {
-    navigate("/preview", {
+  const openTraining = (trainingId: number, title: string) => {
+    navigate("/training-levels", {
       state: {
-        trainingId: t.trainingId,
-        title: t.title,
-        description: t.shortDescription || t.description || "",
-        coverUrl: t.coverUrl,
-        price: t.salePrice ?? t.price ?? 0,
+        rootTrainingId: trainingId,
+        title,
+        from: location.pathname,
         bg: Bg1,
-        icon: t.iconUrl || iconFallback(idx),
-        returnTo: location.pathname,
       },
     });
   };
@@ -77,49 +72,32 @@ export default function HealthLabIndex() {
         <div className="supportPage">
           <Title>Лаборатория Здоровья</Title>
 
-          {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
-
-          {isError && (
-            <div style={{ padding: 16 }}>
-              Не удалось загрузить.{" "}
-              <button onClick={() => refetch()}>Повторить</button>
-            </div>
-          )}
-
-          {!isLoading && !isError && (
-            <div className="supportPage__cards">
-              <ScrollPanel
-                maxHeight="62dvh"
-                vars={{
-                  railRight: "-15px",
-                  railTop: "4px",
-                  railBottom: "4px",
-                  railWidth: "3px",
-                  railColor: "#E8E8E8",
-                  thumbColor: "#C7C7C7",
-                  zIndex: 20,
-                }}
-              >
-                {items.map((t, idx) => (
-                  <FeatureTile
-                    key={t._id}
-                    title={t.title}
-                    description={t.shortDescription || t.description || ""}
-                    bgImageUrl={Bg1}
-                    rightImageUrl={t.iconUrl || t.coverUrl || iconFallback(idx)}
-                    enabled={t.accessStatus === "available"}
-                    onClick={() => openItem(t, idx)}
-                  />
-                ))}
-
-                {items.length === 0 && (
-                  <div style={{ padding: 16, opacity: 0.7 }}>
-                    Раздел пуст или не найден.
-                  </div>
-                )}
-              </ScrollPanel>
-            </div>
-          )}
+          <div className="supportPage__cards">
+            <ScrollPanel
+              maxHeight="62dvh"
+              vars={{
+                railRight: "-15px",
+                railTop: "4px",
+                railBottom: "4px",
+                railWidth: "3px",
+                railColor: "#E8E8E8",
+                thumbColor: "#C7C7C7",
+                zIndex: 20,
+              }}
+            >
+              {TILES.map((t, i) => (
+                <FeatureTile
+                  key={i}
+                  title={t.title as any}
+                  bgImageUrl={t.bgImageUrl}
+                  rightImageUrl={t.rightImageUrl}
+                  enabled
+                  className={t.className}
+                  onClick={() => openTraining(t.trainingId, t.pageTitle)}
+                />
+              ))}
+            </ScrollPanel>
+          </div>
         </div>
       </main>
 
