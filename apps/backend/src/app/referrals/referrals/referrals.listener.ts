@@ -271,9 +271,11 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
-    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const adminComission =
+      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
     const partnerCommission =
-      Math.abs(transaction.sum) - fundComission - adminComission;
+      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -428,9 +430,11 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
-    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const adminComission =
+      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
     const partnerCommission =
-      Math.abs(transaction.sum) - fundComission - adminComission;
+      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -591,9 +595,11 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
-    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const adminComission =
+      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
     const partnerCommission =
-      Math.abs(transaction.sum) - fundComission - adminComission;
+      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
