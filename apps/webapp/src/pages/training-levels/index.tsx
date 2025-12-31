@@ -4,7 +4,6 @@ import Tabs from "../levels/ui/Tabs";
 import LevelCard from "../levels/ui/LevelCard";
 import TopBar from "../../widgets/topbarTextpage";
 import helpIcon from "../../assets/icons/helpIcon.svg";
-// import "./training-levels.scss";
 import Footer from "../../widgets/footer/footer";
 import LevelPurchaseModal, { type PurchaseLevel } from "../../widgets/level-purchase-modal";
 import FlexibleModal from "../../widgets/flexible-modal";
@@ -66,10 +65,7 @@ const readLegacyLesson = (lessonId: number | string) => {
   }
 };
 
-const isLessonCompletedLocal = (
-  lessonId: number | string,
-  store?: Record<string, LocalProgress>
-) => {
+const isLessonCompletedLocal = (lessonId: number | string, store?: Record<string, LocalProgress>) => {
   const lp = store ?? lpLoad();
   const rec = lp[String(lessonId)] ?? readLegacyLesson(lessonId);
   if (!rec) return false;
@@ -77,9 +73,10 @@ const isLessonCompletedLocal = (
 };
 
 type BNode = {
-  _id: string;
+  _id?: string;
   trainingId: number;
-  type: "training" | "product";
+  type: string;
+  favoritesTag?: string | null;
   tag?: string | null;
   title: string;
   description?: string | null;
@@ -87,6 +84,7 @@ type BNode = {
   duration?: string | null;
   coverUrl?: string | null;
   iconUrl?: string | null;
+  bgUrl?: string | null;
   accessStatus: "available" | "locked";
   progressStatus: "not_started" | "in_progress" | "completed";
   price?: number | null;
@@ -101,15 +99,31 @@ const isTrainingCompletedLocal = (node: BNode) => {
   const lp = lpLoad();
   const lessons = node.lessons ?? [];
   if (!lessons.length) return false;
-  return lessons.every(
-    (l: any) => l.progressStatus === "completed" || isLessonCompletedLocal(l.lessonId, lp)
-  );
+  return lessons.every((l: any) => l.progressStatus === "completed" || isLessonCompletedLocal(l.lessonId, lp));
 };
 
 const minutesFromDuration = (d?: string | null) => {
   if (!d) return undefined;
   const m = d.match(/\d+/);
   return m ? Number(m[0]) : undefined;
+};
+
+const norm = (v?: string | null) => (v || "").trim().toLowerCase();
+
+const isLevel = (n: BNode) => n.tag === "stage_level" || typeof n.stageLevel === "number";
+
+const isStage = (n: BNode) => n.tag === "stage" || typeof n.stage === "number";
+
+const isStandardish = (n: BNode) => {
+  const t = norm(n.tag);
+  const f = norm(n.favoritesTag);
+  return t === "standart" || f === "standart";
+};
+
+const sortByIndex = (a: BNode, b: BNode) => {
+  const A = (a.stageLevel ?? a.stage ?? numFromTitle(a.title) ?? 0) as number;
+  const B = (b.stageLevel ?? b.stage ?? numFromTitle(b.title) ?? 0) as number;
+  return A - B;
 };
 
 export default function TrainingLevelsIndex() {
@@ -136,31 +150,39 @@ export default function TrainingLevelsIndex() {
   const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({ populate: true });
   const [fetchUser] = useLazyGetUserQuery();
 
+  const findNodeByTrainingId = (nodes: BNode[], id: number): BNode | undefined => {
+    const stack = [...nodes];
+    while (stack.length) {
+      const n = stack.pop()!;
+      if (n.trainingId === id) return n;
+      const ch = n.childrens ?? [];
+      for (let i = 0; i < ch.length; i++) stack.push(ch[i]);
+    }
+    return undefined;
+  };
+
   const root: BNode | undefined = useMemo(() => {
     const all = (data?.data ?? []) as BNode[];
-    if (typeof rootTrainingId === "number") return all.find((n) => n.trainingId === rootTrainingId);
-    return undefined;
+    if (typeof rootTrainingId !== "number") return undefined;
+    return findNodeByTrainingId(all, rootTrainingId);
   }, [data, rootTrainingId]);
 
-  const levelNodes: BNode[] = useMemo(() => {
-    const arr = (root?.childrens ?? []) as BNode[];
-    const onlyLevels = arr.filter((n) => n.tag === "stage_level" || typeof n.stageLevel === "number");
-    return [...onlyLevels].sort((a, b) => {
-      const A = a.stageLevel ?? numFromTitle(a.title) ?? 0;
-      const B = b.stageLevel ?? numFromTitle(b.title) ?? 0;
-      return A - B;
-    });
-  }, [root]);
+  const rootChildren: BNode[] = useMemo(() => ((root?.childrens ?? []) as BNode[]).slice(), [root]);
 
-  const directStages: BNode[] = useMemo(() => {
-    const arr = (root?.childrens ?? []) as BNode[];
-    return arr.filter((n) => n.tag === "stage" || typeof n.stage === "number");
-  }, [root]);
+  const levelNodes: BNode[] = useMemo(() => {
+    const explicit = rootChildren.filter(isLevel);
+    if (explicit.length) return [...explicit].sort(sortByIndex);
+
+    const hasAnyStageLevel = rootChildren.some((n) => typeof n.stageLevel === "number");
+    if (hasAnyStageLevel) return [...rootChildren].filter((n) => typeof n.stageLevel === "number").sort(sortByIndex);
+
+    return [];
+  }, [rootChildren]);
 
   const groups = useMemo(() => {
     if (!levelNodes.length) return [1];
     const nums = levelNodes
-      .map((n) => n.stageLevel ?? numFromTitle(n.title))
+      .map((n, idx) => n.stageLevel ?? numFromTitle(n.title) ?? idx + 1)
       .filter((x): x is number => typeof x === "number");
     return nums.length ? nums : [1];
   }, [levelNodes]);
@@ -171,22 +193,45 @@ export default function TrainingLevelsIndex() {
 
   const currentLevel: BNode | undefined = useMemo(() => {
     if (!levelNodes.length) return undefined;
-    return levelNodes.find((n) => (n.stageLevel ?? numFromTitle(n.title)) === group);
+    return levelNodes.find((n, idx) => (n.stageLevel ?? numFromTitle(n.title) ?? idx + 1) === group);
   }, [levelNodes, group]);
 
   const stages: BNode[] = useMemo(() => {
-    if (!levelNodes.length) return directStages;
-    return ((currentLevel?.childrens ?? []) as BNode[]).filter(
-      (s) => s.tag === "stage" || typeof s.stage === "number"
-    );
-  }, [currentLevel, levelNodes.length, directStages]);
+    if (!root) return [];
+
+    if (!levelNodes.length) {
+      const explicit = rootChildren.filter(isStage);
+      if (explicit.length) return [...explicit].sort(sortByIndex);
+
+      return [...rootChildren]
+        .filter((n) => (n.childrens?.length ?? 0) > 0 || (n.lessons?.length ?? 0) > 0 || isStandardish(n))
+        .sort(sortByIndex)
+        .map((n, idx) => ({ ...n, stage: n.stage ?? numFromTitle(n.title) ?? idx + 1 }));
+    }
+
+    const children = ((currentLevel?.childrens ?? []) as BNode[]).slice();
+
+    const explicit = children.filter(isStage);
+    if (explicit.length) return [...explicit].sort(sortByIndex);
+
+    return [...children]
+      .filter((n) => (n.childrens?.length ?? 0) > 0 || (n.lessons?.length ?? 0) > 0 || isStandardish(n))
+      .sort(sortByIndex)
+      .map((n, idx) => ({ ...n, stage: n.stage ?? numFromTitle(n.title) ?? idx + 1 }));
+  }, [root, rootChildren, levelNodes.length, currentLevel]);
+
+  const nodeById = useMemo(() => {
+    const m = new Map<string, BNode>();
+    stages.forEach((s) => m.set(String(s.trainingId), s));
+    return m;
+  }, [stages]);
 
   const items: LevelItem[] = useMemo(() => {
-    return stages.map((s): LevelItem => {
+    return stages.map((s, idx): LevelItem => {
       const doneLocal = isTrainingCompletedLocal(s);
 
       const status: LevelItem["status"] =
-        group === 1 && stages[0]?.trainingId === s.trainingId
+        group === 1 && idx === 0
           ? "available"
           : s.progressStatus === "completed" || doneLocal
             ? "done"
@@ -200,7 +245,7 @@ export default function TrainingLevelsIndex() {
         title: s.title,
         subtitle: undefined,
         durationMin: minutesFromDuration(s.duration),
-        image: s.coverUrl || "",
+        image: s.coverUrl || s.bgUrl || "",
         status,
         priceUSDT: s.salePrice ?? s.price ?? undefined,
         description: s.shortDescription || s.description || "",
@@ -211,7 +256,7 @@ export default function TrainingLevelsIndex() {
   const purchaseLevels: PurchaseLevel[] = useMemo(() => {
     return stages.map((s, idx) => {
       const status: LevelItem["status"] =
-        group === 1 && stages[0]?.trainingId === s.trainingId
+        group === 1 && idx === 0
           ? "available"
           : s.progressStatus === "completed" || isTrainingCompletedLocal(s)
             ? "done"
@@ -222,7 +267,7 @@ export default function TrainingLevelsIndex() {
       const stepIndex =
         typeof s.stage === "number"
           ? s.stage
-          : numFromTitle(s.title) ?? idx;
+          : numFromTitle(s.title) ?? idx + 1;
 
       return {
         id: String(s.trainingId),
@@ -235,13 +280,35 @@ export default function TrainingLevelsIndex() {
     });
   }, [stages, group]);
 
+  const openNode = (node: BNode) => {
+    const hasChildren = (node.childrens?.length ?? 0) > 0;
+    const hasLessons = (node.lessons?.length ?? 0) > 0;
+
+    if (hasChildren && !hasLessons) {
+      navigate("/training-levels", {
+        state: {
+          rootTrainingId: node.trainingId,
+          title: node.title,
+          from: "/training-levels",
+        },
+      });
+      return;
+    }
+
+    navigate(`/level/${node.trainingId}`, { state: { returnTo: "/training-levels" } });
+  };
+
   const handleCardClick = (l: LevelItem) => {
+    const node = nodeById.get(String(l.id));
+    if (!node) return;
+
     if (l.status === "locked") {
       setClickedId(l.id);
       setModalOpen(true);
-    } else {
-      navigate(`/level/${l.id}`, { state: { returnTo: "/training-levels" } });
+      return;
     }
+
+    openNode(node);
   };
 
   const buildStepTitle = (stepNumber: number, count: number) => {
@@ -271,7 +338,10 @@ export default function TrainingLevelsIndex() {
     setResultCta("Перейти");
     setResultOnCta(() => () => {
       if (!first) return setResultOpen(false);
-      navigate(`/level/${first.id}`, { state: { returnTo: "/training-levels" } });
+      const node = nodeById.get(String(first.id));
+      if (!node) return setResultOpen(false);
+      setResultOpen(false);
+      openNode(node);
     });
     setResultOpen(true);
   };
@@ -331,7 +401,6 @@ export default function TrainingLevelsIndex() {
   };
 
   const anyModalOpen = modalOpen || resultOpen;
-
   const backTo = fromState || "/health-lab";
 
   return (
@@ -340,7 +409,7 @@ export default function TrainingLevelsIndex() {
 
       <main className="screen" style={{ padding: "5px 16px 0px 16px" }}>
         <div className="levels">
-          {!!levelNodes.length && (
+          {!!levelNodes.length && groups.length > 1 && (
             <div className="levels__header">
               <div className="levels__tabs">
                 <div className="levels__tabs-title">Уровни</div>
