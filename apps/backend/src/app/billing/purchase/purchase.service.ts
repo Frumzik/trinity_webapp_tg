@@ -68,7 +68,7 @@ export class PurchaseService {
       const totalPrice = await this.validateContentAndCalcTotalPrice(dto);
 
       // Проверка баланса
-      if (user.balance < totalPrice) {
+      if (!dto.isGift && user.balance < totalPrice) {
         throw new ConflictException('Недостаточно ОМ на балансе');
       }
 
@@ -295,10 +295,11 @@ export class PurchaseService {
         throw new Error('Заявка на практику уже создана');
       }
 
-      const price =
-        dto.sale && training.salePrice
-          ? training.salePrice ?? 0
-          : training.price ?? 0;
+      const price = dto.isGift
+        ? 0
+        : dto.sale && training.salePrice
+        ? training.salePrice ?? 0
+        : training.price ?? 0;
 
       const transaction = await this.transactionsService.create({
         type: TransactionType.PURCHASE,
@@ -321,6 +322,7 @@ export class PurchaseService {
         transaction: transaction._id,
         transactionId: transaction.transactionId,
         contentId,
+        isGift: dto.isGift,
       });
 
       await this.purchasesRepository.create(purchase);
@@ -358,10 +360,11 @@ export class PurchaseService {
       });
       if (!training) throw new NotFoundException('Тренинг не найден');
 
-      const price =
-        dto.sale && training.salePrice
-          ? training.salePrice ?? 0
-          : training.price ?? 0;
+      const price = dto.isGift
+        ? 0
+        : dto.sale && training.salePrice
+        ? training.salePrice ?? 0
+        : training.price ?? 0;
 
       const transaction = await this.transactionsService.create({
         type: TransactionType.PURCHASE,
@@ -386,6 +389,7 @@ export class PurchaseService {
         transaction: transaction._id,
         transactionId: transaction.transactionId,
         contentId,
+        isGift: dto.isGift,
       });
 
       await this.purchasesRepository.create(purchase);
@@ -412,10 +416,11 @@ export class PurchaseService {
       });
       if (!lesson) throw new NotFoundException('Урок не найден');
 
-      const price =
-        dto.sale && lesson.salePrice
-          ? lesson.salePrice ?? 0
-          : lesson.price ?? 0;
+      const price = dto.isGift
+        ? 0
+        : dto.sale && lesson.salePrice
+        ? lesson.salePrice ?? 0
+        : lesson.price ?? 0;
 
       const transaction = await this.transactionsService.create({
         type: TransactionType.PURCHASE,
@@ -438,6 +443,7 @@ export class PurchaseService {
         transaction: transaction._id,
         transactionId: transaction.transactionId,
         contentId,
+        isGift: dto.isGift,
       });
 
       await this.purchasesRepository.create(purchase);
@@ -458,7 +464,7 @@ export class PurchaseService {
     user: UserEntity,
     dto: PurchaseCreateRequestDto
   ) {
-    const totalPrice = dto.subscriptionSum ?? 0;
+    const totalPrice = dto.isGift ? 0 : dto.subscriptionSum ?? 0;
 
     const transaction = await this.transactionsService.create({
       type: TransactionType.SUBSCRIPTION,
@@ -487,6 +493,7 @@ export class PurchaseService {
       transaction: transaction._id,
       transactionId: transaction.transactionId,
       days: dto.subscriptionDays,
+      isGift: dto.isGift,
     });
 
     await this.purchasesRepository.create(purchase);

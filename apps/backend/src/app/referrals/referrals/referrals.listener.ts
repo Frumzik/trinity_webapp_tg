@@ -81,6 +81,8 @@ export class ReferralsListener {
       throw new NotFoundException('Покупка не найдена');
     }
 
+    if (purchase.isGift) return;
+
     const transaction = await this.transactionsService.find({
       transactionId: purchase.transactionId,
     });

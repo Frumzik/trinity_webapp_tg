@@ -39,4 +39,12 @@ export class PurchaseCreateRequestDto {
     default: undefined,
   })
   subscriptionSum?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Это подарок?',
+    default: false,
+  })
+  isGift?: boolean;
 }
