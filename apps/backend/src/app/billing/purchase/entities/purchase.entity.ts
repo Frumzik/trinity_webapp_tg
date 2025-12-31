@@ -15,6 +15,8 @@ export class PurchaseEntity implements IPurchase {
   days?: number;
   contentId?: number;
 
+  isGift = false;
+
   constructor(purchase: Partial<IPurchase>) {
     Object.assign(this, purchase);
   }

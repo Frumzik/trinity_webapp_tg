@@ -1,32 +1,32 @@
-import { useMemo, useState } from "react";
-import WebApp from "@twa-dev/sdk";
+import { useMemo, useState } from 'react';
+import WebApp from '@twa-dev/sdk';
 
-import Footer from "../../widgets/footer/footer";
-import TopBar from "../../widgets/topbarlk/topbarlk";
-import Title from "../../shared/ui/title/Title";
-import ProfileHeader from "../../widgets/profile-header";
-import IncomeTile from "../../widgets/tiles/MoneyTile/Income";
-import GreyTile from "../../widgets/tiles/GreyTile/GreyTile";
-import ReferralsTile from "../../widgets/tiles/FriendsTile/FriendsTile";
-import GradientButton from "../../shared/ui/gradient-button";
-import PresentationSentModal from "../../widgets/presentation-sent-modal";
-import Tile1 from "../../assets/homePage/tile1.png";
-import Card1 from "../../assets/products/card7.png";
+import Footer from '../../widgets/footer/footer';
+import TopBar from '../../widgets/topbarlk/topbarlk';
+import Title from '../../shared/ui/title/Title';
+import ProfileHeader from '../../widgets/profile-header';
+import IncomeTile from '../../widgets/tiles/MoneyTile/Income';
+import GreyTile from '../../widgets/tiles/GreyTile/GreyTile';
+import ReferralsTile from '../../widgets/tiles/FriendsTile/FriendsTile';
+import GradientButton from '../../shared/ui/gradient-button';
+import PresentationSentModal from '../../widgets/presentation-sent-modal';
+import Tile1 from '../../assets/homePage/tile1.png';
+import Card1 from '../../assets/products/card7.png';
 
-import Card3 from "../../assets/products/card8.png";
-import Card5 from "../../assets/products/card9.png";
-import EditIcon from "../../assets/icons/edit.svg";
-import "./profile.scss";
-import { Link, useNavigate } from "react-router-dom";
-import BurgerMenu from "../../widgets/menuBurger/burger";
-import { useGetUserQuery } from "../../shared/api/user.api";
-import { getTelegramUser } from "../../shared/telegram/telegram";
-import { useGetReferralsStatsQuery } from "../../shared/api/referrals.api";
-import Blur from "../../../public/blurs/blur-1.png";
-import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+import Card3 from '../../assets/products/card8.png';
+import Card5 from '../../assets/products/card9.png';
+import EditIcon from '../../assets/icons/edit.svg';
+import './profile.scss';
+import { Link, useNavigate } from 'react-router-dom';
+import BurgerMenu from '../../widgets/menuBurger/burger';
+import { useGetUserQuery } from '../../shared/api/user.api';
+import { getTelegramUser } from '../../shared/telegram/telegram';
+import { useGetReferralsStatsQuery } from '../../shared/api/referrals.api';
+import Blur from '../../../public/blurs/blur-1.png';
+import SubscriptionRequiredModal from '../../widgets/flexible-modal/subscription-required-modal';
 
 function avatarFrom(username?: string | null, name?: string | null) {
-  const seed = username || name || "user";
+  const seed = username || name || 'user';
   return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
     seed
   )}`;
@@ -48,12 +48,12 @@ const Index = () => {
   const displayName = useMemo(() => {
     if (u?.name) return u.name;
     if (tg?.first_name || tg?.last_name)
-      return [tg?.first_name, tg?.last_name].filter(Boolean).join(" ");
-    return "Без имени";
+      return [tg?.first_name, tg?.last_name].filter(Boolean).join(' ');
+    return 'Без имени';
   }, [u, tg]);
 
   const displayUsername = useMemo(() => {
-    return u?.username || tg?.username || "—";
+    return u?.username || tg?.username || '—';
   }, [u, tg]);
 
   const avatarUrl = useMemo(() => {
@@ -68,11 +68,10 @@ const Index = () => {
 
   const premium = useMemo(() => {
     const type =
-      typeof (u as any)?.subscription === "object" &&
-      (u as any)?.subscription
+      typeof (u as any)?.subscription === 'object' && (u as any)?.subscription
         ? (u as any).subscription.type
-        : "free";
-    return type && type !== "free";
+        : 'free';
+    return type && type !== 'free';
   }, [u]);
 
   const totalEarn = useMemo(
@@ -89,36 +88,39 @@ const Index = () => {
       (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
 
     if (!tgId) {
-      console.error("tgId не найден, возможно, ты не в Telegram WebApp");
-      alert("Не могу найти tgId. Открой приложение внутри Telegram.");
+      console.error('tgId не найден, возможно, ты не в Telegram WebApp');
+      alert('Не могу найти tgId. Открой приложение внутри Telegram.');
       return;
     }
 
     try {
       setIsLoading(true);
-      console.log("Отправляю запрос в бота с tgId =", tgId);
+      console.log('Отправляю запрос в бота с tgId =', tgId);
 
-      const res = await fetch("https://api.3nity.space/notifications/presentation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tgId }),
-      });
+      const res = await fetch(
+        'https://api.3nity.space/notifications/presentation',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ tgId }),
+        }
+      );
 
-      console.log("Ответ от сервера (PROFILE):", res);
+      console.log('Ответ от сервера (PROFILE):', res);
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        console.error("Ошибка ответа:", res.status, text);
+        const text = await res.text().catch(() => '');
+        console.error('Ошибка ответа:', res.status, text);
         alert(`Ошибка отправки презентации: ${res.status}`);
         return;
       }
 
       setOpenModal(true);
     } catch (err) {
-      console.error("Сетевая ошибка при запросе в бота (PROFILE):", err);
-      alert("Не получилось достучаться до сервера бота (network error).");
+      console.error('Сетевая ошибка при запросе в бота (PROFILE):', err);
+      alert('Не получилось достучаться до сервера бота (network error).');
     } finally {
       setIsLoading(false);
     }
@@ -129,20 +131,18 @@ const Index = () => {
     [stats]
   );
   const pickAppUserId = (u?: any) => {
-    const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
+    const id = u?.userId ?? (typeof u?._id === 'number' ? u._id : undefined);
     return id == null ? undefined : String(id);
   };
 
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
-    const BOT_USERNAME = "TrinitySpaceBot";
-    const WEBAPP_SHORT_NAME = "app";
+    const BOT_USERNAME = 'TrinitySpaceBot';
+    const WEBAPP_SHORT_NAME = 'app';
 
-    const botDeepLink =
-      `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
-      (appUserId ? `?startapp=${appUserId}` : "");
-    const share = new URL("https://t.me/share/url");
-    share.searchParams.set("url", botDeepLink);
+    const botDeepLink = `https://t.me/${BOT_USERNAME}?start=${appUserId}`;
+    const share = new URL('https://t.me/share/url');
+    share.searchParams.set('url', botDeepLink);
     return share.toString();
   }, [u]);
 
@@ -150,7 +150,7 @@ const Index = () => {
     e?.preventDefault();
 
     if (premium) {
-      window.open(inviteHref, "_blank");
+      window.open(inviteHref, '_blank');
     } else {
       setSubModalOpen(true);
     }
@@ -158,9 +158,9 @@ const Index = () => {
 
   return (
     <div className="app lk-bg">
-      <img src={Blur} className={"blur"} alt="" />
+      <img src={Blur} className={'blur'} alt="" />
       <TopBar onMenu={() => setMenuOpen(true)} />
-      <main className="screen" style={{ paddingTop: "20px" }}>
+      <main className="screen" style={{ paddingTop: '20px' }}>
         <Title
           right={
             <Link to="/account" className="icon-btn">
@@ -177,7 +177,7 @@ const Index = () => {
           username={displayUsername}
           premium={premium}
           balance={balanceText}
-          onStatusClick={() => nav("/subscription")}
+          onStatusClick={() => nav('/subscription')}
         />
 
         <section className="scrollBox stack">
@@ -193,7 +193,7 @@ const Index = () => {
             <GreyTile
               title="О проекте"
               imageUrl={Card3}
-              buttonText={isLoading ? "Отправляем…" : "Скачать презентацию"}
+              buttonText={isLoading ? 'Отправляем…' : 'Скачать презентацию'}
               onClick={onDownload}
             />
           </div>
@@ -223,21 +223,24 @@ const Index = () => {
                   className="row is-clickable"
                   role="button"
                   tabIndex={0}
-                  onClick={() => nav("/detailing", { state: { level: row.level } })}
+                  onClick={() =>
+                    nav('/detailing', { state: { level: row.level } })
+                  }
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      nav("/detailing", { state: { level: row.level } });
+                      nav('/detailing', { state: { level: row.level } });
                     }
                   }}
                 >
                   <span className="row__num">{row.level}</span>
                   <span className="row__count">
-  {Number.isInteger(Number(row.totalEarn))
-    ? Number(row.totalEarn)
-    : Number(row.totalEarn).toFixed(2)
-  } OM
-</span>                </div>
+                    {Number.isInteger(Number(row.totalEarn))
+                      ? Number(row.totalEarn)
+                      : Number(row.totalEarn).toFixed(2)}{' '}
+                    OM
+                  </span>{' '}
+                </div>
               ))}
             </div>
           </div>
@@ -247,7 +250,9 @@ const Index = () => {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={handleInviteClick}>Пригласить</GradientButton>
+          <GradientButton onClick={handleInviteClick}>
+            Пригласить
+          </GradientButton>
         </div>
       </div>
 
@@ -264,7 +269,7 @@ const Index = () => {
         onClose={() => setSubModalOpen(false)}
         onGoToSubscription={() => {
           setSubModalOpen(false);
-          nav("/subscription");
+          nav('/subscription');
         }}
       />
 

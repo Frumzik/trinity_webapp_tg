@@ -6,7 +6,7 @@ export const ReferralEvents = {
   BUY_STAGE: 'refferral.buy-stage',
   BUY_PRACTISE: 'refferral.buy-practise',
   RESERVE_STAGE_BY_STAGE: 'refferral.reserve-stage-by-stage',
-  RESERVE_STAGE_BY_SUBSCRIPTION: 'refferral.reserve-subscription-by-stage',
+  RESERVE_STAGE_BY_SUBSCRIPTION: 'refferral.reserve-stage-by-subscription',
   RESERVE_BY_STAGE: 'refferral.reserve-by-stage',
   RESERVE_BY_SUBSCRIPTION: 'refferral.reserve-by-subscription',
   RESERVE_SUBSCRIPTION_BY_STAGE: 'refferral.reserve-subscription-by-stage',
