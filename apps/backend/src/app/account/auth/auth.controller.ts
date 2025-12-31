@@ -8,6 +8,7 @@ import {
   AuthRegisterTgDto,
   AuthRegisterResponseDto,
   AuthType,
+  UserRole,
 } from '@trinity/shared';
 import {
   ApiBody,
@@ -18,7 +19,13 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { JWTAuthGuard } from '../../service';
+import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
+import { IsNumber } from 'class-validator';
+
+class SubloginDto {
+  @IsNumber()
+  userId!: number;
+}
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -114,6 +121,15 @@ export class AuthController {
     @Body() dto: AuthLoginEmailRequestDto | AuthLoginTgRequestDto
   ): Promise<AuthLoginResponseDto> {
     return this.authService.login(dto);
+  }
+
+  @Post('sublogin')
+  @Roles(UserRole.Admin)
+  @UseGuards(JWTAuthGuard)
+  @ApiOperation({ summary: 'Саблогин' })
+  @ApiResponse({ type: AuthLoginResponseDto })
+  async sublogin(@Body() dto: SubloginDto): Promise<AuthLoginResponseDto> {
+    return this.authService.sublogin(dto.userId);
   }
 
   // 🔍 Проверка Telegram ID

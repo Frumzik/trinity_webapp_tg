@@ -1,6 +1,6 @@
-import { Types } from "mongoose";
-import { IUser } from "../user/user.interface.js";
-import { ITransaction } from "../transactions/transactions.interface.js";
+import { Types } from 'mongoose';
+import { IUser } from '../user/user.interface.js';
+import { ITransaction } from '../transactions/transactions.interface.js';
 
 export enum PurchaseType {
   TRAINING = 'Training',
@@ -16,12 +16,12 @@ export interface IPurchase {
 
   user: Types.ObjectId | IUser;
   userId: number;
-  
+
   transaction: Types.ObjectId | ITransaction;
   transactionId: number;
-  
+
   days?: number;
   contentId?: number;
+
+  isGift?: boolean;
 }
-
-
