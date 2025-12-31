@@ -141,10 +141,7 @@ export class ReferralsListener {
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
 
-    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
-    const partnerCommission =
-      Math.abs(transaction.sum) - fundComission - adminComission;
-    const sum = partnerCommission;
+    const sum = Math.abs(transaction.sum) - fundComission;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -152,15 +149,6 @@ export class ReferralsListener {
       type: TransactionType.FUND,
       sum: fundComission,
       fundType: FundType.MAIN,
-      description: `Комиссия за покупку ступени`,
-    });
-
-    await this.fundsService.incAdmin(adminComission);
-    await this.transactionsService.create({
-      userId: +purchase.userId,
-      type: TransactionType.FUND,
-      sum: fundComission,
-      fundType: FundType.ADMIN,
       description: `Комиссия за покупку ступени`,
     });
 
