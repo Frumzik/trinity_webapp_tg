@@ -299,16 +299,20 @@ export default function TrainingLevelsIndex() {
   };
 
   const handleCardClick = (l: LevelItem) => {
-    const node = nodeById.get(String(l.id));
-    if (!node) return;
-
     if (l.status === "locked") {
       setClickedId(l.id);
       setModalOpen(true);
       return;
     }
 
-    openNode(node);
+    navigate(`/level/${l.id}`, {
+      state: {
+        returnTo: "/training-levels",
+        from: backTo,
+        rootTrainingId,
+        title: pageTitle,
+      },
+    });
   };
 
   const buildStepTitle = (stepNumber: number, count: number) => {
