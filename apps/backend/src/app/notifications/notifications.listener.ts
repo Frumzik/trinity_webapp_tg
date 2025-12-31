@@ -68,12 +68,20 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `В вашей структуре появился новый Единомышленник.\n${referral.username ? '@' + referral.username : referral.name}\nПоколение: ${level}.\nСтруктура продолжает расти.`
+      `В вашей структуре появился новый Единомышленник.\n${
+        referral.username ? '@' + referral.username : referral.name
+      }\nПоколение: ${level}.\nСтруктура продолжает расти.`
     );
   }
 
   @OnEvent(ReferralEvents.BUY)
-  async onReferralBuy({ partnerId, level, sum, title, percent }: ReferralBuyEvent) {
+  async onReferralBuy({
+    partnerId,
+    level,
+    sum,
+    title,
+    percent,
+  }: ReferralBuyEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
     if (!partner) {
@@ -82,7 +90,9 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш Единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM (${percent * 100}%)`
+      `Ваш Единомышленник в ${level} поколении приобрёл "${title}"\nВы получили +${sum} OM (${
+        percent * 100
+      }%)`
     );
   }
 
@@ -92,7 +102,7 @@ export class NotificationsListener {
     level,
     sum,
     title,
-    percent
+    percent,
   }: ReferralBuyPractiseEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
@@ -102,7 +112,9 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш Единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM (${percent * 100}%)`
+      `Ваш Единомышленник в ${level} поколении прошёл практику "${title}"\nВы получили +${sum} OM (${
+        percent * 100
+      }%)`
     );
   }
 
@@ -113,7 +125,7 @@ export class NotificationsListener {
     sum,
     stageLevel,
     stage,
-    percent
+    percent,
   }: ReferralBuyStageEvent) {
     const partner = await this.usersService.find({ userId: partnerId });
 
@@ -123,7 +135,9 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
-      `Ваш Единомышленник в ${level} поколении открыл ${stage} Ступень духа ${stageLevel} Уровня\nВы получили +${sum} OM (${percent * 100}%)`
+      `Ваш Единомышленник в ${level} поколении открыл ${stage} Ступень духа ${stageLevel} Уровня\nВы получили +${sum} OM (${
+        percent * 100
+      }%)`
     );
   }
 
@@ -171,7 +185,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
-вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Откройте ${stage} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -193,7 +207,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за открытие ${stage} Ступени духа ${stageLevel} Уровня
-вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -214,7 +228,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM за приобретение "${title}"
-вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Откройте ${stage} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -235,7 +249,7 @@ export class NotificationsListener {
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM за приобретение "${title}"
 Причина: доступ к приложению не активирован
-вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -263,7 +277,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за активацию доступа на ${daysFormatted}.
-Вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+Вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Откройте ${level} Ступень Духа, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -291,7 +305,7 @@ export class NotificationsListener {
     await this.notificationsService.sendBotMessage(
       partner.tgId as number,
       `Вы упустили вознаграждение ${sum} OM с ${level} поколения за активацию доступа на ${daysFormatted}.
-Вознаграждение отправлено в Резервный Фонд (срок хранения: 33 дня).
+Вознаграждение отправлено в Резервный Фонд (срок хранения: 9 дня).
 Активируйте доступ к приложению, чтобы вернуть упущенное вознаграждение обратно.`
     );
   }
@@ -310,7 +324,9 @@ export class NotificationsListener {
 
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
-      `Внимание: осталось ${days} ${formatDays(days)}, чтобы вернуть ${sum} OM из Резервного Фонда.`
+      `Внимание: осталось ${days} ${formatDays(
+        days
+      )}, чтобы вернуть ${sum} OM из Резервного Фонда.`
     );
   }
 
@@ -411,7 +427,7 @@ ${sum} OM отправлены в Фонд Света`
     await this.notificationsService.sendBotMessage(
       user.tgId as number,
       `Доступ к приложению не активен.
-Все вознаграждения будут уходить в Резервный Фонд и храниться там 33 дня до момента активации доступа.`
+Все вознаграждения будут уходить в Резервный Фонд и храниться там 9 дней до момента активации доступа.`
     );
   }
 

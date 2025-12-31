@@ -81,6 +81,8 @@ export class ReferralsListener {
       throw new NotFoundException('Покупка не найдена');
     }
 
+    if (purchase.isGift) return;
+
     const transaction = await this.transactionsService.find({
       transactionId: purchase.transactionId,
     });
@@ -134,13 +136,15 @@ export class ReferralsListener {
     }
 
     const level = Math.floor(training.stage / training.stageLevel);
-    const sum =
-      Math.round(Math.abs(transaction.sum * (1 - this.fundPercent)) * 1000) /
-      1000;
 
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
+
+    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const partnerCommission =
+      Math.abs(transaction.sum) - fundComission - adminComission;
+    const sum = partnerCommission;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -148,6 +152,15 @@ export class ReferralsListener {
       type: TransactionType.FUND,
       sum: fundComission,
       fundType: FundType.MAIN,
+      description: `Комиссия за покупку ступени`,
+    });
+
+    await this.fundsService.incAdmin(adminComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.ADMIN,
       description: `Комиссия за покупку ступени`,
     });
 
@@ -222,7 +235,7 @@ export class ReferralsListener {
           sum,
           stage: training.stage,
           stageLevel: training.stageLevel,
-          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -245,7 +258,7 @@ export class ReferralsListener {
         sum,
         stage: training.stage,
         stageLevel: training.stageLevel,
-        endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+        endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
         referralId: purchase.userId,
       });
 
@@ -270,6 +283,9 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
+    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const partnerCommission =
+      Math.abs(transaction.sum) - fundComission - adminComission;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -280,13 +296,19 @@ export class ReferralsListener {
       description: `Комиссия за покупку подписки`,
     });
 
+    await this.fundsService.incAdmin(adminComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: adminComission,
+      fundType: FundType.ADMIN,
+      description: `Комиссия за покупку подписки`,
+    });
+
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum =
-        Math.round(
-          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
-        ) / 1000;
+      const sum = Math.round(partnerCommission * percent * 1000) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -369,7 +391,7 @@ export class ReferralsListener {
             type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
-            endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -391,7 +413,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -418,6 +440,9 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
+    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const partnerCommission =
+      Math.abs(transaction.sum) - fundComission - adminComission;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -428,13 +453,19 @@ export class ReferralsListener {
       description: `Комиссия за покупку тренинга`,
     });
 
+    await this.fundsService.incAdmin(adminComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.ADMIN,
+      description: `Комиссия за покупку тренинга`,
+    });
+
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum =
-        Math.round(
-          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
-        ) / 1000;
+      const sum = Math.round(partnerCommission * percent * 1000) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -525,7 +556,7 @@ export class ReferralsListener {
             sum,
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
-            endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -546,7 +577,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -572,6 +603,9 @@ export class ReferralsListener {
     // Пополняем банк
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
+    const adminComission = (Math.abs(transaction.sum) - fundComission) / 2;
+    const partnerCommission =
+      Math.abs(transaction.sum) - fundComission - adminComission;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -582,11 +616,17 @@ export class ReferralsListener {
       description: `Комиссия за покупку тренинга`,
     });
 
+    await this.fundsService.incAdmin(adminComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: adminComission,
+      fundType: FundType.ADMIN,
+      description: `Комиссия за покупку тренинга`,
+    });
+
     for (const [level, percent] of Object.entries(this.levelPercents)) {
-      const sum =
-        Math.round(
-          Math.abs(transaction.sum) * (1 - this.fundPercent) * percent * 1000
-        ) / 1000;
+      const sum = Math.round(partnerCommission * percent * 1000) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -677,16 +717,46 @@ export class ReferralsListener {
       throw new NotFoundException('Практика не найдена');
     }
 
+    const fundComission =
+      Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
+    const merchantComission =
+      Math.round(
+        (Math.abs(transaction.sum) - fundComission) *
+          this.merchantPercent *
+          1000
+      ) / 1000;
+    const adminComission =
+      (Math.abs(transaction.sum) - fundComission - merchantComission) / 2;
+    const partnerCommission =
+      Math.abs(transaction.sum) -
+      fundComission -
+      adminComission -
+      merchantComission;
+
+    // Пополняем банк
+    await this.fundsService.incMain(fundComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: fundComission,
+      fundType: FundType.MAIN,
+      description: `Комиссия за проведение практики`,
+    });
+
+    // Пополняем банк
+    await this.fundsService.incAdmin(adminComission);
+    await this.transactionsService.create({
+      userId: +purchase.userId,
+      type: TransactionType.FUND,
+      sum: adminComission,
+      fundType: FundType.ADMIN,
+      description: `Комиссия за проведение практики`,
+    });
+
     for (const [_level, percent] of Object.entries(this.levelPercents)) {
       const level = +_level;
 
-      const sum =
-        Math.round(
-          Math.abs(transaction.sum) *
-            (1 - this.merchantPercent - this.fundPercent) *
-            percent *
-            1000
-        ) / 1000;
+      const sum = Math.round(partnerCommission * percent * 1000) / 1000;
 
       const partner = await this.referralsService.find({
         referralId: purchase.userId,
@@ -762,20 +832,6 @@ export class ReferralsListener {
               percent
             )
           );
-
-          // Пополняем банк
-          const fundComission =
-            Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) /
-            1000;
-
-          await this.fundsService.incMain(fundComission);
-          await this.transactionsService.create({
-            userId: +purchase.userId,
-            type: TransactionType.FUND,
-            sum: fundComission,
-            fundType: FundType.MAIN,
-            description: `Комиссия за проведение практики`,
-          });
         } else {
           await this.fundsService.createReserveItem({
             type: ReserveFundItemType.SUBSCRIPTION,
@@ -783,7 +839,7 @@ export class ReferralsListener {
             sum,
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
-            endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -804,7 +860,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() + 33 * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 

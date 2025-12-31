@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
-import Footer from "../../widgets/footer/footer";
-import TopBar from "../../widgets/topbarTextpage";
-import BurgerMenu from "../../widgets/menuBurger/burger";
-import Title from "../../shared/ui/title/Title";
-import GradientButton from "../../shared/ui/gradient-button";
-import "./detailing.scss";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useGetReferralsLevelsQuery } from "../../shared/api/referrals.api";
-import { useGetUserQuery } from "../../shared/api/user.api";
-import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+import { useMemo, useState } from 'react';
+import Footer from '../../widgets/footer/footer';
+import TopBar from '../../widgets/topbarTextpage';
+import BurgerMenu from '../../widgets/menuBurger/burger';
+import Title from '../../shared/ui/title/Title';
+import GradientButton from '../../shared/ui/gradient-button';
+import './detailing.scss';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useGetReferralsLevelsQuery } from '../../shared/api/referrals.api';
+import { useGetUserQuery } from '../../shared/api/user.api';
+import SubscriptionRequiredModal from '../../widgets/flexible-modal/subscription-required-modal';
 
 const getReferralEarn = (r: any) => Number(r.earn ?? 0);
 
@@ -24,16 +24,16 @@ const formatName = (r: any) => {
     r.email ||
     r.id;
 
-  if (!u) return "—";
+  if (!u) return '—';
   const s = String(u).trim();
   const hasHandle = !!(r.username || r.tgUsername);
-  return hasHandle ? (s.startsWith("@") ? s : `@${s}`) : s;
+  return hasHandle ? (s.startsWith('@') ? s : `@${s}`) : s;
 };
 
-const formatOM = (v: unknown) => `${Number(v ?? 0).toLocaleString("ru-RU")} OM`;
+const formatOM = (v: unknown) => `${Number(v ?? 0).toLocaleString('ru-RU')} OM`;
 
 const pickAppUserId = (u?: any) => {
-  const id = u?.userId ?? (typeof u?._id === "number" ? u._id : undefined);
+  const id = u?.userId ?? (typeof u?._id === 'number' ? u._id : undefined);
   return id == null ? undefined : String(id);
 };
 
@@ -51,10 +51,10 @@ const Index = () => {
 
   const premium = useMemo(() => {
     const type =
-      typeof u?.subscription === "object" && u?.subscription
+      typeof u?.subscription === 'object' && u?.subscription
         ? u.subscription.type
-        : "free";
-    return type && type !== "free";
+        : 'free';
+    return type && type !== 'free';
   }, [u]);
 
   const {
@@ -77,14 +77,12 @@ const Index = () => {
 
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
-    const BOT_USERNAME = "TrinitySpaceBot";
-    const WEBAPP_SHORT_NAME = "app";
+    const BOT_USERNAME = 'TrinitySpaceBot';
+    const WEBAPP_SHORT_NAME = 'app';
 
-    const botDeepLink =
-      `https://t.me/${BOT_USERNAME}/${WEBAPP_SHORT_NAME}` +
-      (appUserId ? `?startapp=${appUserId}` : "");
-    const share = new URL("https://t.me/share/url");
-    share.searchParams.set("url", botDeepLink);
+    const botDeepLink = `https://t.me/${BOT_USERNAME}?start=${appUserId}`;
+    const share = new URL('https://t.me/share/url');
+    share.searchParams.set('url', botDeepLink);
     return share.toString();
   }, [u]);
 
@@ -92,7 +90,7 @@ const Index = () => {
     e?.preventDefault();
 
     if (premium) {
-      window.open(inviteHref, "_blank");
+      window.open(inviteHref, '_blank');
     } else {
       setSubModalOpen(true);
     }
@@ -100,8 +98,7 @@ const Index = () => {
 
   return (
     <div className="app">
-      <TopBar
-      />
+      <TopBar />
       <main className="screen" style={{ marginTop: 36 }}>
         <Title
           right={
@@ -112,10 +109,10 @@ const Index = () => {
             />
           }
         >
-          <div style={{ fontSize: "27px" }}>Детализация</div>
+          <div style={{ fontSize: '27px' }}>Детализация</div>
         </Title>
 
-        <section className="scrollBox stack" style={{ marginTop: "20px" }}>
+        <section className="scrollBox stack" style={{ marginTop: '20px' }}>
           <div className="list__referals-det">
             <div className="list__referals-title-det">
               <div className="list__referals-title-up-det">Поколение</div>
@@ -126,7 +123,7 @@ const Index = () => {
           {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
           {isError && (
             <div style={{ padding: 16 }}>
-              Не удалось загрузить.{" "}
+              Не удалось загрузить.{' '}
               <button onClick={() => refetch()}>Повторить</button>
             </div>
           )}
@@ -163,7 +160,7 @@ const Index = () => {
         onClose={() => setSubModalOpen(false)}
         onGoToSubscription={() => {
           setSubModalOpen(false);
-          nav("/subscription");
+          nav('/subscription');
         }}
       />
 

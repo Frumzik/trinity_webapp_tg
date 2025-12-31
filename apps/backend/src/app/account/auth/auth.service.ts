@@ -148,6 +148,26 @@ export class AuthService {
     };
   }
 
+  async sublogin(userId: number): Promise<AuthLoginResponseDto> {
+    const user = await this.usersService.find({ userId });
+
+    if (!user) {
+      throw new Error('Пользователь не найден');
+    }
+
+    this.eventEmitter.emit(
+      UserEvents.LOGGED_IN,
+      new UserLoggedInEvent(user.userId)
+    );
+
+    return {
+      access_token: await this.jwtService.signAsync({
+        userId: user.userId,
+        role: user.role,
+      }),
+    };
+  }
+
   async checkTg(tgId: number): Promise<boolean> {
     const user = await this.usersService.find({ tgId });
 

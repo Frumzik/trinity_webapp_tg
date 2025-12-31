@@ -33,6 +33,9 @@ export class Purchase extends Document<Types.ObjectId> implements IPurchase {
 
   @Prop({ required: false })
   contentId?: number;
+
+  @Prop({ type: Boolean, default: false, required: false })
+  isGift?: boolean;
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);
