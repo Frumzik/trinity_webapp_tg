@@ -233,7 +233,7 @@ export class ReferralsListener {
           sum,
           stage: training.stage,
           stageLevel: training.stageLevel,
-          endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -256,7 +256,7 @@ export class ReferralsListener {
         sum,
         stage: training.stage,
         stageLevel: training.stageLevel,
-        endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+        endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
         referralId: purchase.userId,
       });
 
@@ -389,7 +389,7 @@ export class ReferralsListener {
             type: ReserveFundItemType.SUBSCRIPTION,
             userId: partner.partnerId,
             sum,
-            endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -411,7 +411,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -554,7 +554,7 @@ export class ReferralsListener {
             sum,
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
-            endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -575,7 +575,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
@@ -837,7 +837,7 @@ export class ReferralsListener {
             sum,
             stage: stageTraining.stage,
             stageLevel: stageTraining.stageLevel,
-            endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+            endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
             referralId: purchase.userId,
           });
 
@@ -858,7 +858,7 @@ export class ReferralsListener {
           sum,
           stage: stageTraining.stage,
           stageLevel: stageTraining.stageLevel,
-          endDate: new Date(Date.now() +  * 24 * 60 * 60 * 1000),
+          endDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
           referralId: purchase.userId,
         });
 
