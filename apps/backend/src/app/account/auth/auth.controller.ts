@@ -11,6 +11,7 @@ import {
   UserRole,
 } from '@trinity/shared';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
   ApiOperation,
@@ -124,6 +125,7 @@ export class AuthController {
   }
 
   @Post('sublogin')
+  @ApiBearerAuth('access_token')
   @Roles(UserRole.Admin)
   @UseGuards(JWTAuthGuard)
   @ApiOperation({ summary: 'Саблогин' })
