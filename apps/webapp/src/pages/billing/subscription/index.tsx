@@ -53,8 +53,8 @@ function Bullet({ children }: { children: string }) {
 }
 
 export default function SubscriptionManagePage({
-                                                 priceYearUSD = 33,
-                                                 priceMonthUSD = 3,
+                                                 priceYearUSD = 99,
+                                                 priceMonthUSD = 9,
                                                }: Props) {
   const navigate = useNavigate();
 
