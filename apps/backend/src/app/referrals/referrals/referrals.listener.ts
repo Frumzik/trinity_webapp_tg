@@ -272,10 +272,12 @@ export class ReferralsListener {
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
     const adminComission =
-      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
-    const partnerCommission =
-      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      Math.round(((Math.abs(transaction.sum) - fundComission) / 2) * 1000) /
       1000;
+    const partnerCommission =
+      Math.round(
+        (Math.abs(transaction.sum) - fundComission - adminComission) * 1000
+      ) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -431,10 +433,12 @@ export class ReferralsListener {
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
     const adminComission =
-      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
-    const partnerCommission =
-      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      Math.round(((Math.abs(transaction.sum) - fundComission) / 2) * 1000) /
       1000;
+    const partnerCommission =
+      Math.round(
+        (Math.abs(transaction.sum) - fundComission - adminComission) * 1000
+      ) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
@@ -596,10 +600,12 @@ export class ReferralsListener {
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
     const adminComission =
-      Math.round((Math.abs(transaction.sum) - fundComission) / 2) / 1000;
-    const partnerCommission =
-      Math.round(Math.abs(transaction.sum) - fundComission - adminComission) /
+      Math.round(((Math.abs(transaction.sum) - fundComission) / 2) * 1000) /
       1000;
+    const partnerCommission =
+      Math.round(
+        (Math.abs(transaction.sum) - fundComission - adminComission) * 1000
+      ) / 1000;
 
     await this.fundsService.incMain(fundComission);
     await this.transactionsService.create({
