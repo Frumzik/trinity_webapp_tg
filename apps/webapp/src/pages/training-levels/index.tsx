@@ -133,7 +133,7 @@ export default function TrainingLevelsIndex() {
   const rootTrainingId: number | undefined = (location.state as any)?.rootTrainingId;
   const pageTitle: string = (location.state as any)?.title || "Тренинг";
   const fromState: string | undefined = (location.state as any)?.from;
-
+  const backTo = fromState || "/health-lab";
   const [group, setGroup] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [clickedId, setClickedId] = useState<string | number | undefined>();
@@ -295,7 +295,15 @@ export default function TrainingLevelsIndex() {
       return;
     }
 
-    navigate(`/level/${node.trainingId}`, { state: { returnTo: "/training-levels" } });
+    navigate(`/level/${node.trainingId}`, {
+      state: {
+        returnTo: "/training-levels",
+        hideSectionHeader: true,
+        rootTrainingId,
+        title: pageTitle,
+        from: backTo,
+      },
+    });
   };
 
   const handleCardClick = (l: LevelItem) => {
@@ -308,6 +316,7 @@ export default function TrainingLevelsIndex() {
     navigate(`/level/${l.id}`, {
       state: {
         returnTo: "/training-levels",
+        hideSectionHeader: true,
         from: backTo,
         rootTrainingId,
         title: pageTitle,
@@ -405,7 +414,7 @@ export default function TrainingLevelsIndex() {
   };
 
   const anyModalOpen = modalOpen || resultOpen;
-  const backTo = fromState || "/health-lab";
+
 
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
