@@ -4,7 +4,7 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-import { useState } from "react";
+import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import Bg1 from "../../assets/icons/bg1.svg";
 
@@ -21,26 +21,26 @@ const TILES = [
   {
     title: (
       <>
-        Основы здорового <br />образа жизни
+        Основы Здорового <br />Образа Жизни
       </>
     ),
-    pageTitle: "Основы здорового образа жизни",
+    pageTitle: "Основы Здорового Образа Жизни",
     trainingId: 31,
     bgImageUrl: Tile1,
     rightImageUrl: Card1,
     className: "left-block-color",
   },
   {
-    title: "Природное оздоровление",
-    pageTitle: "Природное оздоровление",
+    title: "Природное Оздоровление",
+    pageTitle: "Природное Здоровление",
     trainingId: 32,
     bgImageUrl: Tile3,
     rightImageUrl: Card2,
     className: "left-block-color-blue",
   },
   {
-    title: "Энциклопедия здоровья",
-    pageTitle: "Энциклопедия здоровья",
+    title: "Энциклопедия Здоровья",
+    pageTitle: "Энциклопедия Здоровья",
     trainingId: 33,
     bgImageUrl: Tile2,
     rightImageUrl: Card3,
@@ -63,7 +63,10 @@ export default function HealthLabIndex() {
       },
     });
   };
-
+  const from =
+    location.state?.from ||
+    sessionStorage.getItem("healthLabFrom") ||
+    "/";
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
@@ -103,7 +106,11 @@ export default function HealthLabIndex() {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={() => navigate(-1)}>Назад</GradientButton>
+          <GradientButton
+            onClick={() => navigate(from)}
+          >
+            Назад
+          </GradientButton>
         </div>
       </div>
 

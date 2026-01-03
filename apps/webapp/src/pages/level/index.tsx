@@ -322,7 +322,7 @@ export default function Index() {
       </div>
     );
   }
-
+  const hideCount = Boolean((location.state as any)?.hideSectionHeader);
   return (
     <div className="preview">
       <TopActions
@@ -361,7 +361,12 @@ export default function Index() {
       <Sheet>
         {groupedTiles.map(([groupTitle, groupTiles]) => (
           <div key={groupTitle}>
-            <SectionHeader title={groupTitle} count={groupTiles.length} />
+            <SectionHeader
+              title={groupTitle}
+              count={groupTiles.length}
+              hideCount={hideCount}
+            />
+
             <PracticeSlider
               items={groupTiles.map((t) => ({
                 id: t.id,

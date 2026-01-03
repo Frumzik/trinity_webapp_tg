@@ -7,7 +7,7 @@ import FeatureTile from "../../widgets/tiles/FeatureTile";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   useGetTrainingTreeQuery,
   useGetCurrentStageQuery,
@@ -42,7 +42,7 @@ const numFromTitle = (t?: string | null) => {
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { data, isLoading, isError } = useGetTrainingTreeQuery();
   const {
     data: currentStageRes,
@@ -194,6 +194,12 @@ export default function Index() {
     );
   }
 
+  const goHealthLab = () => {
+    const from = location.pathname + location.search;
+
+    sessionStorage.setItem("healthLabFrom", from);  // <- ВАЖНО
+    navigate("/health-lab", { state: { from } });
+  };
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
@@ -283,7 +289,7 @@ export default function Index() {
                 enabled
                 rightImageUrl={Card5}
                 className="left-block-color-blue"
-                to="/health-lab"
+                onClick={goHealthLab}
                 showImageWhenDisabled
               />
             </ScrollPanel>
