@@ -33,6 +33,7 @@ import {
 import { useAppNavigate } from "../../shared/lib/hooks/useAppNavigate";
 import { useGetUserQuery } from "../../shared/api/user.api";
 import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
+import { useLocation } from 'react-router-dom';
 
 type BNode = {
   _id: string;
@@ -221,10 +222,12 @@ export default function SupportPage() {
     const path = url.startsWith("/") ? url : `/${url}`;
     nav(path);
   };
-  const handleHealthLabClick = () => {
+  const location = useLocation();
+  const goHealthLab = () => {
+    const from = location.pathname + location.search;
 
-      nav("/health-lab");
-      return;
+    sessionStorage.setItem("healthLabFrom", from);  // <- ВАЖНО
+    nav("/health-lab", { state: { from } });
   };
 
   return (
@@ -304,7 +307,7 @@ export default function SupportPage() {
               enabled
               rightImageUrl={Card5}
               // className="featureTile--altFont"
-              onClick={handleHealthLabClick}
+              onClick={goHealthLab}
               // showImageWhenDisabled
             />
           </div>
