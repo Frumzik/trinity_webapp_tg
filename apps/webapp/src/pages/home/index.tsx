@@ -307,7 +307,7 @@ export default function SupportPage() {
               enabled
               rightImageUrl={Card5}
               // className="featureTile--altFont"
-              onClick={goHealthLab}
+              onClick={() => requirePaid(goHealthLab)}
               // showImageWhenDisabled
             />
           </div>
