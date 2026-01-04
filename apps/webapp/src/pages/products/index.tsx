@@ -7,11 +7,15 @@ import FeatureTile from "../../widgets/tiles/FeatureTile";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
 
 import { useState, useMemo } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
+
 import {
   useGetTrainingTreeQuery,
   useGetCurrentStageQuery,
 } from "../../shared/api/learning.api";
+
+import { useGetUserQuery } from "../../shared/api/user.api";
+import SubscriptionRequiredModal from "../../widgets/flexible-modal/subscription-required-modal";
 
 import "./products.scss";
 import Tile2 from "../../assets/homePage/tile3.png";
@@ -41,15 +45,21 @@ const numFromTitle = (t?: string | null) => {
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [subModalOpen, setSubModalOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { data, isLoading, isError } = useGetTrainingTreeQuery();
-  const {
-    data: currentStageRes,
-    isLoading: isStageLoading,
-  } = useGetCurrentStageQuery();
 
-  const trainings = data?.data?.filter((item) => item.parentId === null) ?? [];
+  const { data, isLoading, isError } = useGetTrainingTreeQuery();
+  const { data: currentStageRes, isLoading: isStageLoading } =
+    useGetCurrentStageQuery();
+
+  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({
+    populate: true,
+  });
+  const user = userRes?.data;
+
+  const trainings = data?.data?.filter((item: any) => item.parentId === null) ?? [];
 
   const isAcademy = (t: any) =>
     t?.type === "stages_spirit" ||
@@ -58,7 +68,7 @@ export default function Index() {
 
   const handleClick = (training: any) => {
     if (isAcademy(training)) {
-      navigate("/levels"); // <- сразу на страницу уровней
+      navigate("/levels");
     } else {
       navigate(`/trainings/${training.trainingId}`);
     }
@@ -70,9 +80,8 @@ export default function Index() {
     return roots.find((r) => r.tag === "stages_spirit");
   }, [data]);
 
-  // считаем по ТЕКУЩЕМУ уровню:
-  //   totalStages  – всего ступеней в уровне
-  //   lastBought   – номер последней купленной ступени (по stage / числу в title), с нуля
+  // totalStages – всего ступеней в уровне
+  // lastBought  – номер последней купленной ступени
   const { totalStages, lastBought } = useMemo(() => {
     if (!spiritRoot) return { totalStages: 0, lastBought: 0 };
 
@@ -85,14 +94,10 @@ export default function Index() {
     const currentStage = currentStageRes?.data as SpiritNode | undefined;
     let currentLevel: SpiritNode | undefined;
 
-    // пробуем найти уровень по stageLevel
     if (typeof currentStage?.stageLevel === "number") {
-      currentLevel = levels.find(
-        (lvl) => lvl.stageLevel === currentStage.stageLevel
-      );
+      currentLevel = levels.find((lvl) => lvl.stageLevel === currentStage.stageLevel);
     }
 
-    // если не нашли — ищем уровень, внутри которого есть текущая ступень
     if (!currentLevel && typeof currentStage?.trainingId === "number") {
       currentLevel = levels.find((lvl) =>
         (lvl.childrens ?? []).some(
@@ -103,7 +108,6 @@ export default function Index() {
       );
     }
 
-    // если всё равно не нашли — берём первый уровень
     if (!currentLevel) currentLevel = levels[0];
 
     const stages = (currentLevel.childrens ?? []).filter(
@@ -112,34 +116,21 @@ export default function Index() {
 
     if (!stages.length) return { totalStages: 0, lastBought: 0 };
 
-    // сортируем ступени по stage / числу в заголовке, как на странице уровней
     const sortedStages = [...stages].sort((a, b) => {
-      const A =
-        typeof a.stage === "number"
-          ? a.stage
-          : numFromTitle(a.title) ?? 0;
-      const B =
-        typeof b.stage === "number"
-          ? b.stage
-          : numFromTitle(b.title) ?? 0;
+      const A = typeof a.stage === "number" ? a.stage : numFromTitle(a.title) ?? 0;
+      const B = typeof b.stage === "number" ? b.stage : numFromTitle(b.title) ?? 0;
       return A - B;
     });
 
     const total = sortedStages.length;
 
-    // "куплена" = не locked (есть доступ / завершена)
     let lastBoughtIdx = 0;
     let hasAnyBought = false;
 
     for (const s of sortedStages) {
-      const idx =
-        typeof s.stage === "number"
-          ? s.stage
-          : numFromTitle(s.title) ?? 0;
+      const idx = typeof s.stage === "number" ? s.stage : numFromTitle(s.title) ?? 0;
 
-      const isBought =
-        s.accessStatus === "available" ||
-        s.progressStatus === "completed";
+      const isBought = s.accessStatus === "available" || s.progressStatus === "completed";
 
       if (isBought) {
         hasAnyBought = true;
@@ -147,11 +138,7 @@ export default function Index() {
       }
     }
 
-    if (!hasAnyBought) {
-      // ничего не куплено — отображаем 0
-      return { totalStages: total, lastBought: 0 };
-    }
-
+    if (!hasAnyBought) return { totalStages: total, lastBought: 0 };
     return { totalStages: total, lastBought: lastBoughtIdx };
   }, [spiritRoot, currentStageRes]);
 
@@ -161,6 +148,31 @@ export default function Index() {
       : totalStages > 0
         ? `Пройдено ${lastBought}/${totalStages - 1}`
         : "Пройдено 0/0";
+
+  // ====== ПРОВЕРКА ПОДПИСКИ (как на Home) ======
+  const hasPaidSubscription = useMemo(() => {
+    const type = String(user?.subscription?.type || "").toLowerCase();
+    return type === "pro" || type === "premium";
+  }, [user]);
+
+  const requirePaid = (action: () => void) => {
+    if (isUserLoading) return;
+
+    if (!hasPaidSubscription) {
+      setSubModalOpen(true);
+      return;
+    }
+    action();
+  };
+
+  const goHealthLab = () => {
+    const from = location.pathname + location.search;
+    try {
+      sessionStorage.setItem("healthLabFrom", from);
+    } catch {}
+    navigate("/health-lab", { state: { from } });
+  };
+  // ===========================================
 
   if (isLoading) {
     return (
@@ -194,12 +206,6 @@ export default function Index() {
     );
   }
 
-  const goHealthLab = () => {
-    const from = location.pathname + location.search;
-
-    sessionStorage.setItem("healthLabFrom", from);  // <- ВАЖНО
-    navigate("/health-lab", { state: { from } });
-  };
   return (
     <div className="app" style={{ ["--gbutton-h" as any]: "60px" }}>
       <TopBar onMenu={() => setMenuOpen(true)} />
@@ -221,30 +227,25 @@ export default function Index() {
                 zIndex: 20,
               }}
             >
-              {/*{trainings.map((t) => (*/}
-              {/*  <FeatureTile*/}
-              {/*    key={t._id}*/}
-              {/*    title={t.title}*/}
-              {/*    description={t.shortDescription || ""}*/}
-              {/*    bgImageUrl={*/}
-              {/*      t.type === "stages_spirit"*/}
-              {/*        ? Bg1*/}
-              {/*        : t.type === "course"*/}
-              {/*          ? OrangeBg*/}
-              {/*          : Bgblue*/}
-              {/*    }*/}
-              {/*    rightImageUrl={t.iconUrl || Bg1}*/}
-              {/*    enabled={t.accessStatus === "available"}*/}
-              {/*    onClick={() => handleClick(t)}*/}
-              {/*  />*/}
-              {/*))}*/}
+              {/* Если хочешь вернуть динамику, оставил handleClick */}
+              {/* {trainings.map((t) => (
+                <FeatureTile
+                  key={t._id}
+                  title={t.title}
+                  description={t.shortDescription || ""}
+                  bgImageUrl={...}
+                  rightImageUrl={t.iconUrl || ...}
+                  enabled={t.accessStatus === "available"}
+                  onClick={() => handleClick(t)}
+                />
+              ))} */}
 
               <FeatureTile
                 title={
-                <>
-                Ступени<br />Духа
-                </>
-              }
+                  <>
+                    Ступени<br />Духа
+                  </>
+                }
                 // description={descStages}
                 bgImageUrl={Tile1}
                 rightImageUrl={Card1}
@@ -282,6 +283,8 @@ export default function Index() {
                 to="/materials"
                 className={"left-block-color"}
               />
+
+              {/* ✅ ТОЛЬКО ЗДЕСЬ БЛОКИРУЕМ БЕЗ ПОДПИСКИ */}
               <FeatureTile
                 title="Лаборатория здоровья"
                 description=""
@@ -289,7 +292,7 @@ export default function Index() {
                 enabled
                 rightImageUrl={Card5}
                 className="left-block-color-blue"
-                onClick={goHealthLab}
+                onClick={() => requirePaid(goHealthLab)}
                 showImageWhenDisabled
               />
             </ScrollPanel>
@@ -299,14 +302,21 @@ export default function Index() {
 
       <div className="gbtn-bar">
         <div className="gbtn-bar__inner">
-          <GradientButton onClick={() => navigate("/home")}>
-            Назад
-          </GradientButton>
+          <GradientButton onClick={() => navigate("/home")}>Назад</GradientButton>
         </div>
       </div>
 
       <BurgerMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <Footer />
+
+      <SubscriptionRequiredModal
+        open={subModalOpen}
+        onClose={() => setSubModalOpen(false)}
+        onGoToSubscription={() => {
+          setSubModalOpen(false);
+          navigate("/subscription");
+        }}
+      />
     </div>
   );
 }
