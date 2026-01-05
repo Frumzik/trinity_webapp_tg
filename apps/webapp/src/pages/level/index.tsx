@@ -353,7 +353,7 @@ export default function Index() {
         header={{
           title: training.title,
           subtitle: training.description ?? '',
-          practicesCount: lessons.length,
+          // practicesCount: lessons.length,
           progress: headerProgress,
         }}
       />

@@ -13,6 +13,7 @@ type Props = {
     style?: React.CSSProperties;
     buttonClassName?: string;
     buttonStyle?: React.CSSProperties;
+    imgStyle?: React.CSSProperties;
     ariaLabel?: string;
 };
 
@@ -27,6 +28,7 @@ export default function GreyTitle({
                                       buttonClassName,
                                       buttonStyle,
                                       ariaLabel,
+                                      imgStyle,
                                   }: Props) {
     return (
         <TileWrapper
@@ -39,7 +41,7 @@ export default function GreyTitle({
             <div
                 className="promoCard__img"
                 aria-hidden
-                style={{ backgroundImage: `url(${imageUrl})` }}
+                style={{ backgroundImage: `url(${imageUrl})`, ...imgStyle}}
             />
             <div className="promoCard__panel">
                 <div className="promoCard__title">{title}</div>
