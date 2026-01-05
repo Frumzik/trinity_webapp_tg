@@ -14,7 +14,9 @@ export default function Hero({ imageSrc, title, subtitle, children }: Props) {
       <div className="preview__content">
         {children}
         <h1 className="preview__title">{title}</h1>
-        {subtitle && <p className="preview__subtitle">{subtitle}</p>}
+        {subtitle && subtitle !== "TEXT" && (
+          <p className="preview__subtitle">{subtitle}</p>
+        )}
       </div>
     </div>
   );
