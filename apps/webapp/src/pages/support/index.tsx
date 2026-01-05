@@ -48,8 +48,9 @@ export default function SupportPage() {
               buttonText={"Перейти"}
               imageUrl={SupportImg}
               href="https://t.me/trinity_light"
-              style={{ height: "115px" }}
-              buttonStyle={{ width: "78px", position: "absolute", bottom:"8px", left: "16px" }}
+              imgStyle={{}}
+              style={{ height: "115px"}}
+              buttonStyle={{ width: "78px", position: "absolute", bottom:"18px", left: "16px" }}
             />
           </div>
         </div>

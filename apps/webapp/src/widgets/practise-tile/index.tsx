@@ -6,7 +6,7 @@ type Img = string | ComponentType<SVGProps<SVGSVGElement>>;
 type Props = {
   title: string;
   imageUrl: Img;
-  subtitle?: string; // ← любая строка, например "25 min"
+  subtitle?: string;
   onClick?: () => void;
   className?: string;
 };

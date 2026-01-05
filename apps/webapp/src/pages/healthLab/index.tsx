@@ -4,15 +4,15 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-import { useRef, useState } from 'react';
+import {  useState } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import Bg1 from "../../assets/icons/bg1.svg";
 
 import "./health-lab.scss";
 import ScrollPanel from "../../shared/ui/scroll-panel/scroll-panel";
-import Card1 from "../../assets/products/card1.png";
-import Card2 from "../../assets/products/card2.png";
-import Card3 from "../../assets/products/card3.png";
+import Card1 from "../../assets/products/card12.png";
+import Card2 from "../../assets/products/card13.png";
+import Card3 from "../../assets/products/card14.png";
 import Tile2 from "../../assets/homePage/tile3.png";
 import Tile1 from "../../assets/homePage/tile1.png";
 import Tile3 from "../../assets/homePage/tile2.png";
@@ -32,7 +32,7 @@ const TILES = [
   },
   {
     title: "Природное Оздоровление",
-    pageTitle: "Природное Здоровление",
+    pageTitle: "Природное Оздоровление",
     trainingId: 32,
     bgImageUrl: Tile3,
     rightImageUrl: Card2,
