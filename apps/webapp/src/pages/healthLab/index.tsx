@@ -4,7 +4,7 @@ import TopBar from "../../widgets/topbar/topbar";
 import Footer from "../../widgets/footer/footer";
 import BurgerMenu from "../../widgets/menuBurger/burger";
 import FeatureTile from "../../widgets/tiles/FeatureTile";
-import { useRef, useState } from 'react';
+import {  useState } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import Bg1 from "../../assets/icons/bg1.svg";
 
@@ -32,7 +32,7 @@ const TILES = [
   },
   {
     title: "Природное Оздоровление",
-    pageTitle: "Природное Здоровление",
+    pageTitle: "Природное Оздоровление",
     trainingId: 32,
     bgImageUrl: Tile3,
     rightImageUrl: Card2,
