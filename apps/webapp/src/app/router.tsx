@@ -49,6 +49,7 @@ import TrainingPage from '../pages/training'
 import LessonTextPage from "../pages/level/text-level"
 import EntryPage from "../pages/entry"
 import TrainingLevelsIndex from '../pages/training-levels';
+import TransfersPage from '../pages/billing/transfer/index';
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
               { path: 'billing', element: wrap(<BillingHistoryPage />) },
               { path: 'wallet', element: wrap(<WalletPage />) },
               { path: 'withdraw', element: wrap(<WithdrawPage />) },
+              { path: 'transfers', element: wrap(<TransfersPage />) },
               { path: 'settings', element: wrap(<BillingSettingsPage />) },
               { path: 'profile', element: wrap(<ProfilePage />) },
               { path: 'support', element: wrap(<SupportPage />) },

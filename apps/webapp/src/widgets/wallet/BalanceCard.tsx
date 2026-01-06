@@ -34,6 +34,7 @@ export default function BalanceCard({ amount, onDeposit, onWithdraw }: Props) {
           Добавить ОМ
         </button>
       </NavLink>
+
       </div>
     </div>
   );

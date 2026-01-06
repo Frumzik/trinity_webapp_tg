@@ -1,0 +1,209 @@
+.wform {
+  padding: 8px 14px 24px;
+  display: grid;
+  gap: 14px;
+  background-color: transparent;
+}
+
+.wform__head {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.wform__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.wform__title {
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.wform__sub {
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.56;
+
+}
+
+.wform__amount {
+  display: grid;
+  gap: 8px;
+  padding-top: 30px;
+}
+
+.wform__label {
+  color: #fff;
+  text-align: center;
+  opacity: 0.56;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.wform__input-wrap {
+  display: flex;
+  justify-content: left;
+  align-items: baseline;
+  //gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E4E7EC;
+}
+
+.wform__input {
+  width: 200px;
+  text-align: right;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.wform__cents {
+  color: rgba(255, 255, 255, 0.32);
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+
+}
+
+.wform__usd {
+  color: #FFF;
+  text-align: center;
+  font-family: "SF Pro Display";
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.wform__chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.wform__chip {
+  height: 28px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.wform__fee {
+  text-align: center;
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  margin-top: 25px;
+  b{
+    color: #fff;
+    font-family: "SF Pro Display";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+  }
+}
+
+.wform__fee-sub {
+  color: #fff;
+  /* Text style/text-normal */
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+.wform__addr {
+  margin-top: 50px;
+  border-bottom: 1px solid #e9edf3;
+  display: grid;
+  gap: 6px;
+}
+
+
+.wform__addr-input {
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+}
+.wform__addr-input::placeholder {
+  color: #fff;
+  opacity: 0.56;
+}
+.wform__agree {
+  margin-top: 42px;
+  color: #FFF;
+  text-align: center;
+  font-family: "SF Pro Text";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px;
+}
+
+.wform__agree a {
+  color: #FFD0AC;
+  text-decoration: underline;
+}
+
+.wform__cta {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: linear-gradient(90deg, #FBFFE8 0.03%, #FEEEC1 50.49%, #F8BF5E 100.13%);
+  display: grid;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.wform__btn {
+  height: 50px;
+  border-radius: 14px;
+  width: 100%;
+}
+
+.wform__pill {
+  justify-self: center;
+  width: 110px;
+  height: 6px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06) inset;
+}
