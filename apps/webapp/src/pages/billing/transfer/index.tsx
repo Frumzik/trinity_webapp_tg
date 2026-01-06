@@ -40,7 +40,7 @@ export default function TransferToUserPage() {
         loading={false}
         showFeeBlock={false}
         showToInput={true}
-        toLabel="Username получателя"
+        toLabel="Никнейм Telegram"
         toPlaceholder="@username"
         toValue={username}
         onChangeTo={setUsername}

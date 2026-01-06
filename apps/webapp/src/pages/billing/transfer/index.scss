@@ -15,9 +15,11 @@
   border: 0.1px solid #FFF;
   border-radius: 12px;
   display: flex;
-  gap: 170px;
+  //gap: 170px;
   opacity: 1;
-  justify-content: center;
+  justify-content: space-between;
+  padding-left: 18px;
+  padding-right: 18px;
   align-items: center;
 }
 
@@ -38,7 +40,7 @@
   border-radius: 12px;
   background: transparent;
   height: 54px;
-  padding-left: 30px;
+  padding-left: 18px;
   font-family: "SF Pro Text";
   font-size: 14px;
   font-style: normal;
