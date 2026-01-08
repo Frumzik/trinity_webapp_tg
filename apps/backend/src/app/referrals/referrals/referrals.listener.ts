@@ -720,18 +720,11 @@ export class ReferralsListener {
     const fundComission =
       Math.round(Math.abs(transaction.sum) * this.fundPercent * 1000) / 1000;
     const merchantComission =
-      Math.round(
-        (Math.abs(transaction.sum) - fundComission) *
-          this.merchantPercent *
-          1000
-      ) / 1000;
-    const adminComission =
-      (Math.abs(transaction.sum) - fundComission - merchantComission) / 2;
+      Math.round(Math.abs(transaction.sum) * this.merchantPercent * 1000) /
+      1000;
+
     const partnerCommission =
-      Math.abs(transaction.sum) -
-      fundComission -
-      adminComission -
-      merchantComission;
+      Math.abs(transaction.sum) - fundComission - merchantComission;
 
     // Пополняем банк
     await this.fundsService.incMain(fundComission);
@@ -740,16 +733,6 @@ export class ReferralsListener {
       type: TransactionType.FUND,
       sum: fundComission,
       fundType: FundType.MAIN,
-      description: `Комиссия за проведение практики`,
-    });
-
-    // Пополняем банк
-    await this.fundsService.incAdmin(adminComission);
-    await this.transactionsService.create({
-      userId: +purchase.userId,
-      type: TransactionType.FUND,
-      sum: adminComission,
-      fundType: FundType.ADMIN,
       description: `Комиссия за проведение практики`,
     });
 
