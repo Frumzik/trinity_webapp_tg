@@ -15,49 +15,57 @@ export default function TransferToUserPage() {
   const { data } = useGetUserQuery({ populate: false });
   const balance = data?.data?.balance ?? 0;
 
-  const [username, setUsername] = useState("");
+  const [toValue, setToValue] = useState("");
+  const [toMode, setToMode] = useState<"username" | "wallet">("username");
 
   const [resultOpen, setResultOpen] = useState(false);
   const [resultTitle, setResultTitle] = useState<string | undefined>();
   const [resultDesc, setResultDesc] = useState<string | undefined>();
   const [resultCta, setResultCta] = useState<string | undefined>();
   const [resultOnCta, setResultOnCta] = useState<(() => void) | undefined>();
-
   return (
     <div className="withdraw">
       <TopBar title="Перевести" />
 
       <WithdrawForm
         title={
-          <>
-            <p style={{ width: "250px", lineHeight: "25px" }}>
-              Внутренний перевод внутри системы
-            </p>
-          </>
+          <p style={{ width: "250px", lineHeight: "25px" }}>
+            Внутренний перевод внутри системы
+          </p>
         }
         subtitle="Комиссия не взимается"
         balance={balance}
         loading={false}
         showFeeBlock={false}
         showToInput={true}
-        toLabel="Никнейм Telegram"
-        toPlaceholder="@username"
-        toValue={username}
-        onChangeTo={setUsername}
+        toValue={toValue}
+        onChangeTo={setToValue}
+        toMode={toMode}
+        onToggleToMode={(next) => {
+          setToMode(next);
+          setToValue("");
+        }}
         submitButtonText={({ amount }) => <>ВЫВЕСТИ {amount.toFixed(2)} OM</>}
-        submit={async (value, to) => {
+        submit={async (value, to, mode) => {
           try {
-            // Пример: тут будет твой API перевода
-            // await transfer({ username: to, amount: String(value) }).unwrap();
+            if (mode === "username") {
+              // await transferToUser({ username: to, amount: String(value) }).unwrap();
+            } else {
+              // await withdrawToWallet({ address: to, amount: String(value) }).unwrap();
+            }
 
-            setResultTitle("Перевод отправлен");
-            setResultDesc(`Вы отправили ${value} OM пользователю ${to}`);
+            setResultTitle(mode === "username" ? "Перевод отправлен" : "Вывод создан");
+            setResultDesc(
+              mode === "username"
+                ? `Вы отправили ${value} OM пользователю ${to}`
+                : `Вы отправили ${value} OM на адрес ${to}`
+            );
+
             setResultCta(undefined);
             setResultOnCta(undefined);
             setResultOpen(true);
           } catch (e: any) {
-            const raw =
-              e?.data?.message ?? e?.error ?? "Не удалось выполнить перевод";
+            const raw = e?.data?.message ?? e?.error ?? "Не удалось выполнить перевод";
             const msg = Array.isArray(raw) ? raw[0] : String(raw);
 
             setResultTitle(msg);
@@ -71,6 +79,7 @@ export default function TransferToUserPage() {
           }
         }}
       />
+
 
       <FlexibleModal
         open={resultOpen}
