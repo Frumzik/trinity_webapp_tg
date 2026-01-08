@@ -268,7 +268,7 @@ export default function Index() {
                 title="Мастерская Знаний"
                 description=""
                 bgImageUrl={Tile2}
-                rightImageUrl={Card3}
+                rightImageUrl={Card2}
                 enabled
                 to="/workshop"
                 className={"left-block-color-yellow"}
@@ -278,13 +278,12 @@ export default function Index() {
                 title="Полезные Материалы"
                 description=""
                 bgImageUrl={Tile1}
-                rightImageUrl={Card2}
+                rightImageUrl={Card3}
                 enabled
                 to="/materials"
                 className={"left-block-color"}
               />
 
-              {/* ✅ ТОЛЬКО ЗДЕСЬ БЛОКИРУЕМ БЕЗ ПОДПИСКИ */}
               <FeatureTile
                 title="Лаборатория здоровья"
                 description=""

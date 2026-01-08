@@ -35,6 +35,9 @@
   gap: 8px;
   margin-top: 24px;
 }
+.balance__actions > :nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
 .balance__btn {
   height: 36px;
   border: 0;
