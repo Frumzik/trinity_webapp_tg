@@ -10,7 +10,7 @@ import GreyTile from '../../widgets/tiles/GreyTile/GreyTile';
 import ReferralsTile from '../../widgets/tiles/FriendsTile/FriendsTile';
 import GradientButton from '../../shared/ui/gradient-button';
 import PresentationSentModal from '../../widgets/presentation-sent-modal';
-import Tile1 from '../../assets/homePage/tile1.png';
+import Tile1 from '../../assets/homePage/tile8.png';
 import Tile2 from '../../assets/homePage/tile7.png';
 
 import Card3 from '../../assets/products/card8.png';
