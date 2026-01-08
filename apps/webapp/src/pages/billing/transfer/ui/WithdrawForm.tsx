@@ -7,6 +7,7 @@ import Arrow from '../../../../assets/image/level/arrow-down.svg'
 import "./withdraw-form.scss";
 import { Link } from "react-router-dom";
 
+type ToMode = "username" | "wallet";
 type Props = {
   avatarSrc?: string;
   title: React.ReactNode;
@@ -14,15 +15,15 @@ type Props = {
   balance: number;
   loading?: boolean;
 
-  submit: (value: number, to: string) => Promise<void>;
+  submit: (value: number, to: string, mode: ToMode) => Promise<void>;
+  toMode: ToMode;
+  onToggleToMode: (next: ToMode) => void;
 
   amountLabel?: string;
 
   showFeeBlock?: boolean;
 
   showToInput?: boolean;
-  toLabel?: string;
-  toPlaceholder?: string;
   toValue: string;
   onChangeTo: (v: string) => void;
 
@@ -48,12 +49,13 @@ export default function WithdrawForm({
                                        loading = false,
                                        submit,
 
+                                       toMode,
+                                       onToggleToMode,
+
                                        amountLabel = "Введите количество OM",
                                        showFeeBlock = true,
 
                                        showToInput = true,
-                                       toLabel,
-                                       toPlaceholder = "",
                                        toValue,
                                        onChangeTo,
 
@@ -74,6 +76,10 @@ export default function WithdrawForm({
     }
     return "Без имени";
   }, [u, tg]);
+  const isUsername = toMode === "username";
+
+  const label = isUsername ? "Никнейм Telegram" : "Адрес кошелька";
+  const placeholder = isUsername ? "@username" : "Вставьте адрес USDT (BEP-20)";
 
   const displayUsername = useMemo(() => {
     return u?.username || tg?.username || "—";
@@ -118,7 +124,7 @@ export default function WithdrawForm({
     setSending(true);
     try {
       const to = showToInput ? toValue.trim() : "";
-      await submit(amount, to);
+      await submit(amount, to, toMode);
     } finally {
       setSending(false);
     }
@@ -169,14 +175,19 @@ export default function WithdrawForm({
 
       {showToInput && (
         <div className="wform__addr-tg">
-          {toLabel &&
-            <div className="wform__label_tg">
-              <p className="wform__label_tg-text">{toLabel} </p>
-              <img className="arrow-tg" src={Arrow} alt="arrow" style={{transform: "rotate(270deg)"}}/>
-            </div>}
+          <button
+            type="button"
+            className="wform__label_tg"
+            onClick={() => onToggleToMode(isUsername ? "wallet" : "username")}
+          >
+            <p className="wform__label_tg-text">{label}</p>
+            <img className="arrow-tg" src={Arrow} alt="arrow"
+                 style={{ transform: "rotate(270deg)" }} />
+          </button>
+
           <input
             className="wform__input-tg"
-            placeholder={toPlaceholder}
+            placeholder={placeholder}
             value={toValue}
             onChange={(e) => onChangeTo(e.target.value)}
           />
