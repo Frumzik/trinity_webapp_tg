@@ -11,7 +11,7 @@ import ReferralsTile from '../../widgets/tiles/FriendsTile/FriendsTile';
 import GradientButton from '../../shared/ui/gradient-button';
 import PresentationSentModal from '../../widgets/presentation-sent-modal';
 import Tile1 from '../../assets/homePage/tile1.png';
-import Card1 from '../../assets/products/card7.png';
+import Tile2 from '../../assets/homePage/tile7.png';
 
 import Card3 from '../../assets/products/card8.png';
 import Card5 from '../../assets/products/card9.png';
@@ -183,11 +183,23 @@ const Index = () => {
         <section className="scrollBox stack">
           <div className="tiles">
             <IncomeTile
-              title="Общие вознаграждения"
+              title="Общие Вознаграждения"
               amountOM={totalEarn}
               showIncome
               imageUrl={Tile1}
-              overlayImageUrl={Card1}
+              // overlayImageUrl={Card1}
+              to="/withdraw"
+            /><IncomeTile
+              title="Резервный Фонд"
+              amountOM={totalEarn}
+              showIncome
+              imageUrl={Tile2}
+              // overlayImageUrl={Card1}
+              showBtn={false}
+              showText={true}
+              tallyStyle={{background: "#B3B6FF"}}
+              panelStyle={{background: "rgba(36, 31, 90, 0.5)"}}
+              titleClassName="incomeCard__title--blue"
               to="/withdraw"
             />
             <GreyTile

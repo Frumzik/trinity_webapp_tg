@@ -38,14 +38,17 @@
   border-radius: 15px;
   background: rgba(91, 34, 41, 0.60);
   backdrop-filter: blur(5.699999809265137px);
-  width: 158px;
+  //width: 158px;
   height: 27px;
   display: flex;
   align-items: center;
   justify-content: center;
 
 }
-
+.incomeCard__title--blue{
+  background: #BBB5FF;
+  border:0.6px solid rgba(255, 255, 255, 0.31);
+}
 
 .incomeCard__amount {
   color: #fff;
@@ -84,10 +87,10 @@
 .incomeMini__tally {
   position: relative;
   z-index: 2;
-  width: 158px;
+  //width: 158px;
   height: 21px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 0.6fr 0.6fr 1fr;
   align-items: center;
   padding: 0 12px;
   margin-top: -22px;
@@ -103,7 +106,7 @@
   align-items: center;
   justify-content: space-around;
   height: 100%;
-
+  opacity: 0.5;
   color: #fff;
 
   text-align: center;
@@ -120,6 +123,7 @@
 
 .incomeMini__cell--active {
   color: #fff;
+  opacity: 1;
 }
 
 .incomeMini__unit {
@@ -140,7 +144,7 @@
   margin-top: -20px;
   padding: 30px 16px 0 16px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  width: 158px;
+  //width: 158px;
   border-radius: 0 0 15px 15px;
   background: rgba(91, 34, 41, 0.60);
   backdrop-filter: blur(5.699999809265137px);
@@ -159,6 +163,16 @@
   border-radius: 12px;
   background: linear-gradient(90deg, #F6C5D1 0%, #EF99B2 50%, #A39AFF 100%), rgba(255, 106, 204, 0.84);
   box-shadow: 0 6px 12px 3px rgba(255, 111, 215, 0.22);
+}
+.incomeMini__descr{
+  font-family: "SF Pro Display";
+  font-size: 10px;
+  text-align: center;
+  font-style: normal;
+  font-weight: 500;
+  color: #FFF;
+  margin-top: 10px;
+  height: 9px;
 }
 .incomeCard.is-clickable {
   cursor: pointer;
