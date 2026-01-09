@@ -34,16 +34,16 @@ export default function BalanceCard({ amount, onDeposit, onWithdraw }: Props) {
           Добавить ОМ
         </button>
       </NavLink>
-        <NavLink to="/transfers">
-        <button className="balance__btn is-full" onClick={onDeposit}>
-          Внутренний перевод
-        </button>
-      </NavLink>
-        <NavLink to="/wallet">
-        <button className="balance__btn is-full" onClick={onDeposit}>
-          Добавить ОМ за ₽
-        </button>
-      </NavLink>
+      {/*  <NavLink to="/transfers">*/}
+      {/*  <button className="balance__btn is-full" onClick={onDeposit}>*/}
+      {/*    Внутренний перевод*/}
+      {/*  </button>*/}
+      {/*</NavLink>*/}
+      {/*  <NavLink to="/wallet">*/}
+      {/*  <button className="balance__btn is-full" onClick={onDeposit}>*/}
+      {/*    Добавить ОМ за ₽*/}
+      {/*  </button>*/}
+      {/*</NavLink>*/}
 
       </div>
     </div>
