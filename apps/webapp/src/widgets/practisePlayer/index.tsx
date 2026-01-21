@@ -391,6 +391,7 @@ export default function PlayerPage({
         </div>
       </div>
 
+
       {track.videoUrl ? (
         <video
           ref={mediaRef as React.RefObject<HTMLVideoElement>}
