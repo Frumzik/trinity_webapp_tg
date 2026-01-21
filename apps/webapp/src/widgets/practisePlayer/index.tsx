@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import clsx from "clsx";
-import TopActions from "../../pages/level/ui/TopActions";
-import rigthArrow from "../../assets/image/level/arrow-right.svg";
-import leftArrow from "../../assets/image/level/arrow-left.svg";
-import "../../pages/practisePlayer/player.scss";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import clsx from 'clsx';
+import TopActions from '../../pages/level/ui/TopActions';
+import rigthArrow from '../../assets/image/level/arrow-right.svg';
+import leftArrow from '../../assets/image/level/arrow-left.svg';
+import '../../pages/practisePlayer/player.scss';
 
 export type MediaTrack = {
   id: string | number;
@@ -33,7 +33,7 @@ type Props = {
   onToggleFav?: (next: boolean) => void;
   onExit?: (p: PlayerPayload) => void;
   onCompleted?: (p: PlayerPayload) => void;
-  onDurationReady?: (sec:number) => void;
+  onDurationReady?: (sec: number) => void;
   resumeAtSec?: number;
   showFav?: boolean;
   className?: string;
@@ -44,32 +44,32 @@ type Props = {
 const AUTOHIDE_MS = 2000;
 
 function formatTime(sec: number) {
-  if (!Number.isFinite(sec)) return "00:00";
+  if (!Number.isFinite(sec)) return '00:00';
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 export default function PlayerPage({
-                                     track,
-                                     onBack,
-                                     onPrev,
-                                     onNext,
-                                     onMenu,
-                                     onToggleFav,
-                                     onExit,
-                                     onProgress,
-                                     onCompleted,
-                                     onDurationReady,
-                                     resumeAtSec = 0,
-                                     showFav = true,
-                                     className,
-                                     extraBottom,
-                                   }: Props) {
+  track,
+  onBack,
+  onPrev,
+  onNext,
+  onMenu,
+  onToggleFav,
+  onExit,
+  onProgress,
+  onCompleted,
+  onDurationReady,
+  resumeAtSec = 0,
+  showFav = true,
+  className,
+  extraBottom,
+}: Props) {
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const isVideo = !!track.videoUrl;
-  const src = isVideo ? track.videoUrl! : (track.mediaUrl || "");
-
+  const src = isVideo ? track.videoUrl! : track.mediaUrl || '';
+  const lastSavedRef = useRef(0);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -87,6 +87,14 @@ export default function PlayerPage({
       hideTimerRef.current = null;
     }
   };
+
+  const onErr = () => {
+    const m = mediaRef.current;
+    console.log('MEDIA ERROR', m?.error, { src });
+  };
+
+  const onStalled = () => console.log('MEDIA STALLED', { src });
+  const onWaiting = () => console.log('MEDIA WAITING', { src });
 
   const scheduleHide = useCallback(() => {
     if (!isVideo) return;
@@ -139,14 +147,17 @@ export default function PlayerPage({
     const onTime = () => {
       if (!scrub) {
         setCurrent(m.currentTime);
-
-        onProgress?.({
-          track,
-          current: m.currentTime,
-          duration: m.duration || 0,
-          progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
-          completed: false,
-        });
+        const now = Date.now();
+        if (now - lastSavedRef.current > 2000) {
+          lastSavedRef.current = now;
+          onProgress?.({
+            track,
+            current: m.currentTime,
+            duration: m.duration || 0,
+            progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
+            completed: false,
+          });
+        }
       }
     };
 
@@ -174,30 +185,45 @@ export default function PlayerPage({
       });
     };
 
-    m.addEventListener("loadedmetadata", onLoaded);
-    m.addEventListener("timeupdate", onTime);
-    m.addEventListener("play", onPlay);
-    m.addEventListener("pause", onPause);
-    m.addEventListener("ended", onEnded);
+    m.addEventListener('loadedmetadata', onLoaded);
+    m.addEventListener('timeupdate', onTime);
+    m.addEventListener('play', onPlay);
+    m.addEventListener('pause', onPause);
+    m.addEventListener('ended', onEnded);
     return () => {
-      m.removeEventListener("loadedmetadata", onLoaded);
-      m.removeEventListener("timeupdate", onTime);
-      m.removeEventListener("play", onPlay);
-      m.removeEventListener("pause", onPause);
-      m.removeEventListener("ended", onEnded);
+      m.removeEventListener('loadedmetadata', onLoaded);
+      m.removeEventListener('timeupdate', onTime);
+      m.removeEventListener('play', onPlay);
+      m.removeEventListener('pause', onPause);
+      m.removeEventListener('ended', onEnded);
     };
-  }, [onCompleted, onDurationReady, onProgress, scrub, track, resumeAtSec, scheduleHide]);
+  }, [
+    onCompleted,
+    onDurationReady,
+    onProgress,
+    scrub,
+    track,
+    resumeAtSec,
+    scheduleHide,
+  ]);
   // хоткеи
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === "Space") { e.preventDefault(); togglePlay(); }
-      else if (e.code === "ArrowLeft" && onPrev) { e.preventDefault(); onPrev(); }
-      else if (e.code === "ArrowRight" && onNext) { e.preventDefault(); onNext(); }
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowLeft' && onPrev) {
+        e.preventDefault();
+        onPrev();
+      } else if (e.code === 'ArrowRight' && onNext) {
+        e.preventDefault();
+        onNext();
+      }
       // любое взаимодействие — показать HUD и перезапланировать скрытие (когда видео играет)
       if (isVideo) bumpHud();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [onPrev, onNext, ready, playing, isVideo, bumpHud]);
 
   const togglePlay = async () => {
@@ -225,7 +251,8 @@ export default function PlayerPage({
     if (isVideo) setHudVisible(true);
     clearHideTimer();
   };
-  const onScrubChange = (e: React.ChangeEvent<HTMLInputElement>) => setCurrent(Number(e.target.value));
+  const onScrubChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setCurrent(Number(e.target.value));
 
   const onScrubEnd = () => {
     const m = mediaRef.current;
@@ -254,13 +281,15 @@ export default function PlayerPage({
   }, [isVideo, playing, scheduleHide]);
   const backWithPayload = () => {
     const m = mediaRef.current;
-    const payload = m ? {
-      track,
-      current: m.currentTime,
-      duration: m.duration || 0,
-      progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
-      completed: false,
-    } : undefined;
+    const payload = m
+      ? {
+          track,
+          current: m.currentTime,
+          duration: m.duration || 0,
+          progressPct: ((m.currentTime || 0) / (m.duration || 1)) * 100,
+          completed: false,
+        }
+      : undefined;
 
     if (onExit && payload) onExit(payload);
     else onBack();
@@ -271,9 +300,9 @@ export default function PlayerPage({
   return (
     <div
       className={clsx(
-        "player",
-        isVideo && "player--video",
-        isVideo && !hudVisible && "is-hud-hidden",
+        'player',
+        isVideo && 'player--video',
+        isVideo && !hudVisible && 'is-hud-hidden',
         className
       )}
       onPointerMove={isVideo ? onUserInteract : undefined}
@@ -297,21 +326,40 @@ export default function PlayerPage({
       </div>
 
       {onPrev && (
-        <button className="player__nav player__nav--prev hud" onClick={onPrev} aria-label="Prev">
+        <button
+          className="player__nav player__nav--prev hud"
+          onClick={onPrev}
+          aria-label="Prev"
+        >
           <img src={leftArrow} alt="" />
         </button>
       )}
       {onNext && (
-        <button className="player__nav player__nav--next hud" onClick={onNext} aria-label="Next">
+        <button
+          className="player__nav player__nav--next hud"
+          onClick={onNext}
+          aria-label="Next"
+        >
           <img src={rigthArrow} alt="" />
         </button>
       )}
 
-      <button className="player__play hud" onClick={togglePlay} aria-label={playing ? "Pause" : "Play"}>
-        <span className={clsx("player__knob", playing && "is-playing")}>
+      <button
+        className="player__play hud"
+        onClick={togglePlay}
+        aria-label={playing ? 'Pause' : 'Play'}
+      >
+        <span className={clsx('player__knob', playing && 'is-playing')}>
           <span className="player__play-icon">
             <svg width="80" height="80" viewBox="0 0 28 28" fill="none">
-              <path d="M10 7 L10 21 L20 14 Z" fill="none" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M10 7 L10 21 L20 14 Z"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </span>
         </span>
@@ -319,9 +367,11 @@ export default function PlayerPage({
 
       <div className="player__panel hud">
         <div className="player__title">{track.title}</div>
-        {track.subtitle && <div className="player__subtitle">{track.subtitle}</div>}
+        {track.subtitle && (
+          <div className="player__subtitle">{track.subtitle}</div>
+        )}
 
-        <div className="player__seek" style={{ ["--pct" as any]: `${pct}%` }}>
+        <div className="player__seek" style={{ ['--pct' as any]: `${pct}%` }}>
           <span className="player__time">{formatTime(current)}</span>
           <input
             type="range"
@@ -350,16 +400,21 @@ export default function PlayerPage({
           controls={false}
           onClick={onUserInteract}
           onPointerDown={onUserInteract}
+          onError={onErr}
+          onStalled={onStalled}
+          onWaiting={onWaiting}
         />
       ) : (
-        <audio ref={mediaRef as React.RefObject<HTMLAudioElement>} preload="metadata" />
+        <audio
+          ref={mediaRef as React.RefObject<HTMLAudioElement>}
+          preload="metadata"
+          onError={onErr}
+          onStalled={onStalled}
+          onWaiting={onWaiting}
+        />
       )}
 
-      {extraBottom && (
-        <div className="player__bottom hud">
-          {extraBottom}
-        </div>
-      )}
+      {extraBottom && <div className="player__bottom hud">{extraBottom}</div>}
     </div>
   );
 }
