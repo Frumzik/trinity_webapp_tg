@@ -3,6 +3,9 @@ import clsx from 'clsx';
 import TopActions from '../../pages/level/ui/TopActions';
 import rigthArrow from '../../assets/image/level/arrow-right.svg';
 import leftArrow from '../../assets/image/level/arrow-left.svg';
+import DebugOverlay from "../../shared/debug/DebugOverlay";
+import { useMediaDiagnostics } from "../../shared/debug/useMediaDiagnostics";
+import { pushLog } from "../../shared/debug/inAppLogger";
 import '../../pages/practisePlayer/player.scss';
 
 export type MediaTrack = {
@@ -69,6 +72,7 @@ export default function PlayerPage({
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const isVideo = !!track.videoUrl;
   const src = isVideo ? track.videoUrl! : track.mediaUrl || '';
+  useMediaDiagnostics(mediaRef, src);
   const lastSavedRef = useRef(0);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -90,11 +94,11 @@ export default function PlayerPage({
 
   const onErr = () => {
     const m = mediaRef.current;
-    console.log('MEDIA ERROR', m?.error, { src });
+    pushLog("error", "MEDIA_ERROR", m?.error, { src });
   };
 
-  const onStalled = () => console.log('MEDIA STALLED', { src });
-  const onWaiting = () => console.log('MEDIA WAITING', { src });
+  const onStalled = () => pushLog("warn", "MEDIA_STALLED", { src });
+  const onWaiting = () => pushLog("warn", "MEDIA_WAITING", { src });
 
   const scheduleHide = useCallback(() => {
     if (!isVideo) return;
@@ -111,6 +115,25 @@ export default function PlayerPage({
     setHudVisible(true);
     scheduleHide();
   }, [isVideo, scheduleHide]);
+
+  useEffect(() => {
+    const onVis = () => pushLog("log", "app:visibility", { hidden: document.hidden });
+    const onFocus = () => pushLog("log", "app:focus", { type: "focus" });
+    const onBlur = () => pushLog("warn", "app:focus", { type: "blur" });
+
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+
+    // стартовое состояние
+    onVis();
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
 
   useEffect(() => {
     const m = mediaRef.current;
@@ -404,6 +427,8 @@ export default function PlayerPage({
           onError={onErr}
           onStalled={onStalled}
           onWaiting={onWaiting}
+          onPause={() => pushLog("warn", "MEDIA_PAUSE", { src })}
+          onEnded={() => pushLog("log", "MEDIA_ENDED", { src })}
         />
       ) : (
         <audio
@@ -412,10 +437,13 @@ export default function PlayerPage({
           onError={onErr}
           onStalled={onStalled}
           onWaiting={onWaiting}
+          onPause={() => pushLog("warn", "MEDIA_PAUSE", { src })}
+          onEnded={() => pushLog("log", "MEDIA_ENDED", { src })}
         />
       )}
 
       {extraBottom && <div className="player__bottom hud">{extraBottom}</div>}
+      <DebugOverlay />
     </div>
   );
 }
