@@ -81,15 +81,15 @@ function saveLessonProgress(
 
     const merged = {
       lessonId,
-      current: prev ? Math.max(prev.current, newCur) : newCur,
-      duration: prev ? Math.max(prev.duration, newDur) : newDur,
+      current: newCur,
+      duration: Math.max(prev?.duration ?? 0, newDur),
       completed: (prev?.completed ?? false) || completed,
       updatedAt: Date.now(),
     };
 
     console.log('[saveLessonProgress]', merged);
     localStorage.setItem(key, JSON.stringify(merged));
-  } catch {}
+  } catch { /* empty */ }
 }
 
 const ratio = (p: PlayerPayload) => {
@@ -435,16 +435,24 @@ export default function PlayerScreen() {
   useEffect(() => {
     if (currentLessonId == null) return;
     const rec = loadLessonProgress(currentLessonId);
-    if (rec && rec.current > 0 && rec.current < rec.duration) {
-      setResumeAtSec(rec.current);
-    } else {
+    if (!rec) {
       setResumeAtSec(0);
+      return;
+    }
+    const cur = Math.max(0, Math.round(rec.current || 0));
+    const dur = Math.max(0, Math.round(rec.duration || 0));
+    if (!dur || cur <= 0 || cur >= dur - 3) {
+      setResumeAtSec(0);
+    } else {
+      setResumeAtSec(cur);
     }
   }, [currentLessonId]);
 
   const handleProgress = (p: PlayerPayload) => {
-    const completed = ratio(p) >= 0.5 || p.completed;
-    saveLessonProgress(p.track.id, p.current, p.duration, completed);
+    const dur = Math.max(0, p.duration || 0);
+    const cur = Math.max(0, p.current || 0);
+    const completed = dur > 0 && cur >= dur - 3;
+    saveLessonProgress(p.track.id, cur, dur, completed);
 
     if (p.track.id != null) {
       lpMarkInProgress(Number(p.track.id));
