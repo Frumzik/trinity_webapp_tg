@@ -190,19 +190,19 @@ const Index = () => {
               // overlayImageUrl={Card1}
               to="/withdraw"
             />
-            <IncomeTile
-              title="Резервный Фонд"
-              amountOM={totalEarn}
-              showIncome
-              imageUrl={Tile2}
-              // overlayImageUrl={Card1}
-              showBtn={false}
-              showText={true}
-              tallyStyle={{background: "#B3B6FF"}}
-              panelStyle={{background: "rgba(36, 31, 90, 0.5)"}}
-              titleClassName="incomeCard__title--blue"
-              to="/withdraw"
-            />
+            {/*<IncomeTile*/}
+            {/*  title="Резервный Фонд"*/}
+            {/*  amountOM={totalEarn}*/}
+            {/*  showIncome*/}
+            {/*  imageUrl={Tile2}*/}
+            {/*  // overlayImageUrl={Card1}*/}
+            {/*  showBtn={false}*/}
+            {/*  showText={true}*/}
+            {/*  tallyStyle={{background: "#B3B6FF"}}*/}
+            {/*  panelStyle={{background: "rgba(36, 31, 90, 0.5)"}}*/}
+            {/*  titleClassName="incomeCard__title--blue"*/}
+            {/*  to="/withdraw"*/}
+            {/*/>*/}
             <GreyTile
               title="О проекте"
               imageUrl={Card3}
