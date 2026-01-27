@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { FooterTabProvider } from './footer-tab';
 import '../shared/styles/main.scss';
 import { useSyncTelegramAvatar } from '../shared/lib/hooks/useSyncTelegramAvatar';
 import Preloader from '../widgets/preloader';
+import "./app.scss"
 
 function DesktopOnlyScreen() {
   return (
@@ -21,12 +22,60 @@ function DesktopOnlyScreen() {
 
 const LOADER_DURATION_MS = 500;
 
+function isMobileUserAgent() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+}
+
+function getBackgroundImage(pathname: string) {
+  if (pathname === '/home') return "url('/bg/bgmain.jpg')";
+
+  if (
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/detailing') ||
+    pathname.startsWith('/about')
+  ) {
+    return "url('/bg/bglk.jpg')";
+  }
+
+  if (pathname.startsWith('/pin/create') || pathname.startsWith('/pin/login')) {
+    return "url('/bg/bgpin.jpg')";
+  }
+
+  return "url('/bg/bgmain.jpg')";
+}
+
+function shouldShowTopRect(pathname: string) {
+  const normalized = pathname.startsWith('/') ? pathname : `/${pathname}`;
+
+  if (normalized.startsWith('/player') && normalized !== '/player/complete') {
+    return false;
+  }
+
+  const withoutRect = [/^\/level(\/|$)/, /^\/lesson(\/|$)/, /^\/preview(\/|$)/];
+
+  return !withoutRect.some((re) => re.test(normalized));
+}
+
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
 
-  // прелоадер включается на КАЖДЫЙ change location.key на 500 ms
+  // 1) Мобильность лучше вычислить один раз (чтоб не дергалось)
+  const isMobile = useMemo(() => isMobileUserAgent(), []);
+
+  // 2) Глобальный лоадер
   const [showLoader, setShowLoader] = useState(false);
+
+  // 3) Заморозка фона на время лоадера, чтобы не было “мигания” из-за смены bg
+  const lastBgRef = useRef<string>(getBackgroundImage(location.pathname));
+
+  // Всегда обновляем “последний фон” когда лоадера нет
+  const nextBg = getBackgroundImage(location.pathname);
+  if (!showLoader) {
+    lastBgRef.current = nextBg;
+  }
 
   useEffect(() => {
     document.body.classList.add('app-loaded');
@@ -35,92 +84,44 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    // каждый раз при смене маршрута:
-    // 1) включаем прелоадер
-    // 2) через 500 ms выключаем
+  // КЛЮЧЕВОЕ: useLayoutEffect вместо useEffect (до отрисовки!)
+  useLayoutEffect(() => {
     setShowLoader(true);
+
     const timer = window.setTimeout(() => {
       setShowLoader(false);
     }, LOADER_DURATION_MS);
 
-    return () => {
-      window.clearTimeout(timer);
-    };
+    return () => window.clearTimeout(timer);
   }, [location.key]);
 
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+  const layoutStyle = useMemo(
+    () => ({
+      backgroundImage: showLoader ? lastBgRef.current : nextBg,
+    }),
+    [showLoader, nextBg]
+  );
 
-  const getBackgroundImage = () => {
-    if (location.pathname === '/home') {
-      return "url('/bg/bgmain.jpg')";
-    }
-    if (
-      location.pathname.startsWith('/profile') ||
-      location.pathname.startsWith('/detailing') ||
-      location.pathname.startsWith('/about')
-    ) {
-      return "url('/bg/bglk.jpg')";
-    }
-    if (
-      location.pathname.startsWith('/pin/create') ||
-      location.pathname.startsWith('/pin/login')
-    ) {
-      return "url('/bg/bgpin.jpg')";
-    }
-
-    return "url('/bg/bgmain.jpg')";
-  };
-
-  const shouldShowTopRect = () => {
-    const normalizedPathname = location.pathname.startsWith('/')
-      ? location.pathname
-      : `/${location.pathname}`;
-
-    if (
-      normalizedPathname.startsWith('/player') &&
-      normalizedPathname !== '/player/complete'
-    ) {
-      return false;
-    }
-
-    const withoutRect = [
-      /^\/level(\/|$)/,
-      /^\/lesson(\/|$)/,
-      /^\/preview(\/|$)/,
-    ];
-
-    return !withoutRect.some((re) => re.test(normalizedPathname));
-  };
-
-  const layoutStyle = {
-    backgroundImage: getBackgroundImage(),
-  };
+  const topRectVisible = useMemo(
+    () => shouldShowTopRect(location.pathname),
+    [location.pathname]
+  );
 
   return (
     <FooterTabProvider>
+      <div className="app-layout" style={layoutStyle}>
+        {topRectVisible && <div className="top-rectangle" />}
+
+        <div className="app-content">
+          {!isMobile ? <DesktopOnlyScreen /> : <Outlet />}
+        </div>
+      </div>
+
       {showLoader && (
-        <div className="global-preloader">
+        <div className="global-preloader" aria-busy="true" aria-live="polite">
           <Preloader />
         </div>
       )}
-
-      <div className="app-layout" style={layoutStyle}>
-        {shouldShowTopRect() && <div className="top-rectangle" />}
-
-        {!isMobile ? (
-          <div className="app-content">
-            <DesktopOnlyScreen />
-          </div>
-        ) : (
-          <div className="app-content">
-            <Outlet />
-          </div>
-        )}
-      </div>
     </FooterTabProvider>
   );
 }
