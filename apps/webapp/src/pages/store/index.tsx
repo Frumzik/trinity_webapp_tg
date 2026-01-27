@@ -18,10 +18,11 @@ function childrenCount(n) {
 }
 
 export default function StoreIndex() {
-  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery({ depth: 2 });
+  const { data, isLoading, isError, refetch } = useGetTrainingTreeQuery({ depth: 10 });
   const all = data?.data ?? [];
 
-  const roots = useMemo(() => all.filter((n) => !n.parentId && !n.parent), [all]);
+  const roots = useMemo(
+    () => all.filter((n) => !n.parentId && !n.parent && n.type === "practise"), [all]);
 
   return (
     <div className="supportPage">
@@ -37,7 +38,18 @@ export default function StoreIndex() {
 
       {!isLoading && !isError && (
         <div className="supportPage__cards">
-          <ScrollPanel maxHeight="62dvh">
+          <ScrollPanel
+            maxHeight="62dvh"
+                       vars={{
+                         railRight: "-15px",
+                         railTop: "4px",
+                         railBottom: "4px",
+                         railWidth: "3px",
+                         railColor: "#E8E8E8",
+                         thumbColor: "#C7C7C7",
+                         zIndex: 20,
+                       }}
+          >
             {roots.map((n) => {
               const kind = kindFromNode(n);
               return (
