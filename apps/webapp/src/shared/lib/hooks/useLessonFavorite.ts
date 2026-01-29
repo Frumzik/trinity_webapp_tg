@@ -1,4 +1,3 @@
-// src/shared/lib/hooks/useLessonFavorite.ts
 import { useMemo, useState, useEffect } from "react";
 import {
   useAddFavoriteMutation,
