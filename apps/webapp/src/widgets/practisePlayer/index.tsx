@@ -443,7 +443,7 @@ export default function PlayerPage({
       )}
 
       {extraBottom && <div className="player__bottom hud">{extraBottom}</div>}
-      {/*<DebugOverlay />*/}
+      <DebugOverlay />
     </div>
   );
 }
