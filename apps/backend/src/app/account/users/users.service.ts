@@ -45,13 +45,20 @@ export class UsersService {
       }
 
       // Создаем UserEntity
-      const newUser = new UserEntity({
+      let newUser = new UserEntity({
         userId: await this.countersService.saveNextSequence(
           CounterType.USER_ID
         ),
         ...dto,
         referralPath: extra.referralPath || '',
       });
+
+      if (dto.tags) {
+        for (const tag of dto.tags) {
+          newUser = newUser.removeTag(tag);
+          newUser = newUser.addTag(tag);
+        }
+      }
 
       if (dto.type === 'TG' && dto.pin) {
         await newUser.setPin(dto.pin);
