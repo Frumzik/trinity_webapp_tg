@@ -173,4 +173,10 @@ export class AuthService {
 
     return Boolean(user);
   }
+
+  async checkPin(tgId: number): Promise<boolean> {
+    const user = await this.usersService.find({ tgId });
+
+    return Boolean(user?.pinHash);
+  }
 }
