@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -45,10 +44,9 @@ export class AuthRegisterEmailDto {
   partnerId?: number;
 
   @ApiProperty({ example: 'tag', required: false })
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsOptional()
-  tags?: string[];
+  tag?: string;
 }
 
 @ApiExtraModels()
@@ -83,10 +81,9 @@ export class AuthRegisterTgDto {
   partnerId?: number;
 
   @ApiProperty({ example: 'tag', required: false })
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   @IsOptional()
-  tags?: string[];
+  tag?: string;
 }
 
 export class AuthRegisterResponseDto {

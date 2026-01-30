@@ -53,11 +53,8 @@ export class UsersService {
         referralPath: extra.referralPath || '',
       });
 
-      if (dto.tags) {
-        for (const tag of dto.tags) {
-          newUser = newUser.removeTag(tag);
-          newUser = newUser.addTag(tag);
-        }
+      if (dto.tag) {
+        newUser = newUser.addTag(dto.tag);
       }
 
       if (dto.type === 'TG' && dto.pin) {
