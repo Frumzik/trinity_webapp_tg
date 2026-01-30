@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -42,6 +43,12 @@ export class AuthRegisterEmailDto {
   @IsNumber()
   @IsOptional()
   partnerId?: number;
+
+  @ApiProperty({ example: 'tag', required: false })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 }
 
 @ApiExtraModels()
@@ -55,9 +62,10 @@ export class AuthRegisterTgDto {
   tgId!: number;
 
   @ApiProperty({ example: '1234' })
+  @IsOptional()
   @IsString()
   @MinLength(4)
-  pin!: string;
+  pin?: string;
 
   @ApiProperty({ example: 'ivan_tg', required: false })
   @IsString()
@@ -73,6 +81,12 @@ export class AuthRegisterTgDto {
   @IsNumber()
   @IsOptional()
   partnerId?: number;
+
+  @ApiProperty({ example: 'tag', required: false })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 }
 
 export class AuthRegisterResponseDto {
