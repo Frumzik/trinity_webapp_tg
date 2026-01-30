@@ -46,18 +46,22 @@ function getBackgroundImage(pathname: string) {
   return "url('/bg/bgmain.jpg')";
 }
 
-function shouldShowTopRect(pathname: string) {
-  const normalized = pathname.startsWith('/') ? pathname : `/${pathname}`;
+function shouldShowTopRect(pathname) {
+  const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
 
-  if (normalized.startsWith('/player') && normalized !== '/player/complete') {
+  if (normalized.startsWith("/player") && normalized !== "/player/complete") {
     return false;
   }
 
-  const withoutRect = [/^\/level(\/|$)/, /^\/lesson(\/|$)/, /^\/preview(\/|$)/];
+  const withoutRect = [
+    /^\/level(\/|$)/,
+    /^\/lesson(\/|$)/,
+    /^\/preview(\/|$)/,
+    /^\/store-preview(\/|$)/,
+  ];
 
   return !withoutRect.some((re) => re.test(normalized));
 }
-
 export default function App() {
   useSyncTelegramAvatar();
   const location = useLocation();
