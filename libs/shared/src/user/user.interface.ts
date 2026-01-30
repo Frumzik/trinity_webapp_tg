@@ -46,6 +46,7 @@ export interface IUser {
   promoNotifications: boolean;
 
   banned: boolean;
+  tags: string[];
 
   // Рефералка
   referralPath: string;

@@ -89,6 +89,9 @@ export class UserInfoResponseDto implements IUser {
   @ApiProperty({ example: false, description: 'Уведомления' })
   promoNotifications!: boolean;
 
+  @ApiProperty({ description: 'Тэги', example: [] })
+  tags!: string[];
+
   @ApiProperty({ description: 'Забанен', example: false })
   banned!: boolean;
 

@@ -36,6 +36,7 @@ export class UserEntity implements IUser {
   promoNotifications = false;
 
   banned = false;
+  tags: string[] = [];
 
   // Рефералка
   referralPath = '';
@@ -98,7 +99,7 @@ export class UserEntity implements IUser {
         | 'birthDate'
         | 'gender'
       >
-    >
+    >,
   ) {
     if (data.name !== undefined) {
       this.name = data.name;
