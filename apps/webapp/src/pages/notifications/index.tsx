@@ -82,9 +82,9 @@ export default function NotificationsPage() {
               onChange={setReminderOn}
             />
           </div>
-          <GradientButton variant="alt" onClick={clearAccessTokenOnly}>
-            Очистить access_token
-          </GradientButton>
+          {/*<GradientButton variant="alt" onClick={clearAccessTokenOnly}>*/}
+          {/*  Очистить access_token*/}
+          {/*</GradientButton>*/}
           {reminderOn && (
             <div className="notif__time">
               <TimePicker value={time} onChange={setTime} is24h />
