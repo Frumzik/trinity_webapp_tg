@@ -60,12 +60,13 @@ export default function WithdrawPage() {
         }}
       />
       <FlexibleModal
-              open={resultOpen}
-              title={resultTitle}
-              description={resultDesc}
-              ctaLabel={resultCta}
-              onCta={resultOnCta}
-              onClose={() => setResultOpen(false)} closeIconUrl={''}      />
+        open={resultOpen}
+        title={resultTitle}
+        description={resultDesc}
+        ctaLabel={resultCta}
+        onCta={resultOnCta}
+        onClose={() => setResultOpen(false)}
+      />
     </div>
   );
 }

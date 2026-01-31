@@ -20,7 +20,7 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { JWTAuthGuard, Roles, RolesGuard } from '../../service';
+import { JWTAuthGuard, Roles } from '../../service';
 import { IsNumber } from 'class-validator';
 
 class SubloginDto {
@@ -148,6 +148,22 @@ export class AuthController {
   })
   async checkTg(@Query('id') tgId: number) {
     return await this.authService.checkTg(tgId);
+  }
+
+    // 🔍 Проверка Telegram ID
+  @Get('check-pin')
+  @ApiOperation({
+    summary: 'Проверить pin Telegram-пользователя по ID',
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'Telegram ID пользователя',
+    example: 6,
+    type: Number,
+    required: true,
+  })
+  async checkPin(@Query('id') tgId: number) {
+    return await this.authService.checkPin(tgId);
   }
 
   // 🔍 Проверка авторизации

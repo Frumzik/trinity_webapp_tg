@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetUserQuery } from "../../api/user.api";
 import { hasPaidSubscription } from "../subscription";
+import { useAuthedUserQuery } from './useAuthedUser';
 
 export function useSubscriptionGuard() {
   const navigate = useNavigate();
 
-  const { data: userRes, isLoading: isUserLoading } = useGetUserQuery({
+  const { data: userRes, isLoading: isUserLoading } = useAuthedUserQuery({
     populate: true,
   });
   const user = userRes?.data;

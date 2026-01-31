@@ -5,6 +5,9 @@ import Switch from '../../shared/ui/switch'
 import TimePicker, { type TimeValue } from '../../shared/ui/time-picker'
 import { useGetUserQuery, useUpdateNotificationsMutation } from '../../shared/api/user.api'
 import './notifications.scss'
+import { sessionActions } from '../../entities/session/model/session.slice';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../app/store';
 
 const pad2 = (n: number) => String(n).padStart(2, '0')
 const parseTime = (s: string | null | undefined): TimeValue | null => {
@@ -19,11 +22,17 @@ const formatTime = (t: TimeValue): string =>
 export default function NotificationsPage() {
   const { data, isLoading: isUserLoading } = useGetUserQuery()
   const [updateNotifications, { isLoading: isSaving }] = useUpdateNotificationsMutation()
-
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch()
   const [reminderOn, setReminderOn] = useState(true)
   const [contentOn, setContentOn] = useState(true)
   const [promoOn, setPromoOn] = useState(false)
   const [time, setTime] = useState<TimeValue>({ hours: 10, minutes: 0 })
+
+  const clearAccessTokenOnly = () => {
+    dispatch(sessionActions.setToken(null))
+    navigate('/pin/login', { replace: true })
+  }
 
   useEffect(() => {
     const user = data?.data
@@ -73,7 +82,9 @@ export default function NotificationsPage() {
               onChange={setReminderOn}
             />
           </div>
-
+          {/*<GradientButton variant="alt" onClick={clearAccessTokenOnly}>*/}
+          {/*  Очистить access_token*/}
+          {/*</GradientButton>*/}
           {reminderOn && (
             <div className="notif__time">
               <TimePicker value={time} onChange={setTime} is24h />

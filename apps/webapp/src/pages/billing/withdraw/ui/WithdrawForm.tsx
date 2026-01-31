@@ -77,15 +77,20 @@ export default function WithdrawForm({
 
   const total = useMemo(() => amount, [amount]);
 
+  const totalText = useMemo(
+    () =>
+      total.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [total]
+  );
 
   const hasBalance = total <= balance;
   const canSend =
     amount > 0 && addr.trim().length > 0 && !sending && !loading && hasBalance;
 
-  const onSend = async (e?: React.SyntheticEvent) => {
-    e?.stopPropagation();
-    e?.preventDefault();
-
+  const onSend = async () => {
     if (!canSend) return;
     setSending(true);
     try {
@@ -96,72 +101,67 @@ export default function WithdrawForm({
   };
 
   return (
-    <div>
+    <div className="wform">
+      <div className="wform__head">
+        <img className="wform__avatar" src={finalAvatar} alt="" />
+        <div className="wform__title">{title}</div>
+        {subtitle && <div className="wform__sub">{subtitle}</div>}
+      </div>
 
-      <div className="wform">
-        <div className="wform__head">
-          <img className="wform__avatar" src={finalAvatar} alt="" />
-          <div className="wform__title">{title}</div>
-          {subtitle && <div className="wform__sub">{subtitle}</div>}
-        </div>
-
-        <div className="wform__amount">
-          <div className="wform__label">Введите количество OM</div>
-          <div className="wform__input-wrap">
-            <input
-              className="wform__input"
-              value={intPart.replace(/,/g, "")}
-              onChange={(e) => {
-                const next = Number(e.target.value.replace(/\D/g, "") || 0);
-                setAmount(next);
-              }}
-              inputMode="numeric"
-            />
-            <span className="wform__cents">.{fracPart}</span>
-            <span className="wform__usd"> OM</span>
-          </div>
-        </div>
-
-        <div className="wform__chips">
-          <div className="wform__chip">
-            ДОСТУПНЫЙ БАЛАНС: {balance ?? 0} OM
-          </div>
-          <div className="wform__chip">1 OM = 1 USDT</div>
-        </div>
-
-        <div className="wform__fee">
-          Комиссия составит <b>{fee.toFixed(2)} OM</b>
-          <div className="wform__fee-sub">
-            (фиксированная {FIXED_FEE_OM} USDT)
-          </div>
-          {!hasBalance && amount > 0 && (
-            <div className="wform__fee-error">
-              <br />
-              Недостаточно OM для вывода
-            </div>
-          )}
-        </div>
-
-        <div className="wform__addr">
+      <div className="wform__amount">
+        <div className="wform__label">Введите количество OM</div>
+        <div className="wform__input-wrap">
           <input
-            className="wform__addr-input"
-            placeholder="Вставьте адрес USDT (BEP-20)"
-            value={addr}
-            onChange={(e) => setAddr(e.target.value)}
+            className="wform__input"
+            value={intPart.replace(/,/g, "")}
+            onChange={(e) => {
+              const next = Number(e.target.value.replace(/\D/g, "") || 0);
+              setAmount(next);
+            }}
+            inputMode="numeric"
           />
+          <span className="wform__cents">.{fracPart}</span>
+          <span className="wform__usd"> OM</span>
         </div>
+      </div>
 
-        <div className="wform__agree">
-          Нажимая кнопку «ПОЛУЧИТЬ USDT»,<br />
-          я подтверждаю, что ознакомился
-          <br />
-          с <Link to="/policy">Правилами сервиса</Link>
+      <div className="wform__chips">
+        <div className="wform__chip">
+          ДОСТУПНЫЙ БАЛАНС: {balance ?? 0} OM
         </div>
+        <div className="wform__chip">1 OM = 1 USDT</div>
+      </div>
 
-        <div className="wform__info">
+      <div className="wform__fee">
+        Комиссия составит <b>{fee.toFixed(2)} OM</b>
+        <div className="wform__fee-sub">
+          (фиксированная {FIXED_FEE_OM} USDT)
         </div>
+        {!hasBalance && amount > 0 && (
+          <div className="wform__fee-error">
+            <br />
+            Недостаточно OM для вывода
+          </div>
+        )}
+      </div>
 
+      <div className="wform__addr">
+        <input
+          className="wform__addr-input"
+          placeholder="Вставьте адрес USDT (BEP-20)"
+          value={addr}
+          onChange={(e) => setAddr(e.target.value)}
+        />
+      </div>
 
+      <div className="wform__agree">
+        Нажимая кнопку «ПОЛУЧИТЬ USDT»,<br />
+        я подтверждаю, что ознакомился
+        <br />
+        с <Link to="/policy">Правилами сервиса</Link>
+      </div>
+
+      <div className="wform__info">
       </div>
 
       <div className="gbtn-bar rectangle-btn">
@@ -176,6 +176,5 @@ export default function WithdrawForm({
         </div>
       </div>
     </div>
-
   );
 }

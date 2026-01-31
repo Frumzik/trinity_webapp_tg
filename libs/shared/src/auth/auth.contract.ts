@@ -42,6 +42,11 @@ export class AuthRegisterEmailDto {
   @IsNumber()
   @IsOptional()
   partnerId?: number;
+
+  @ApiProperty({ example: 'tag', required: false })
+  @IsString()
+  @IsOptional()
+  tag?: string;
 }
 
 @ApiExtraModels()
@@ -55,9 +60,10 @@ export class AuthRegisterTgDto {
   tgId!: number;
 
   @ApiProperty({ example: '1234' })
+  @IsOptional()
   @IsString()
   @MinLength(4)
-  pin!: string;
+  pin?: string;
 
   @ApiProperty({ example: 'ivan_tg', required: false })
   @IsString()
@@ -73,6 +79,11 @@ export class AuthRegisterTgDto {
   @IsNumber()
   @IsOptional()
   partnerId?: number;
+
+  @ApiProperty({ example: 'tag', required: false })
+  @IsString()
+  @IsOptional()
+  tag?: string;
 }
 
 export class AuthRegisterResponseDto {
@@ -105,6 +116,22 @@ export class AuthLoginTgRequestDto {
   @ApiProperty({ enum: AuthType, example: AuthType.TG })
   @IsEnum(AuthType)
   type!: AuthType.TG;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  tgId!: number;
+
+  @ApiProperty({ example: '1234' })
+  @IsString()
+  @MinLength(4)
+  pin!: string;
+}
+
+@ApiExtraModels()
+export class AuthLoginPromoTgRequestDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.PROMO_TG })
+  @IsEnum(AuthType)
+  type!: AuthType.PROMO_TG;
 
   @ApiProperty({ example: 1 })
   @IsNumber()

@@ -12,6 +12,7 @@ import {
   UserLoggedInEvent,
   UserRegisteredEvent,
   AuthLoginEmailRequestDto,
+  AuthLoginPromoTgRequestDto,
 } from '@trinity/shared';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -106,10 +107,15 @@ export class AuthService {
 
   // AuthService
   async validate(
-    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+    dto:
+      | AuthLoginTgRequestDto
+      | AuthLoginEmailRequestDto
+      | AuthLoginPromoTgRequestDto
   ): Promise<UserEntity> {
     const condition =
-      dto.type === AuthType.TG ? { tgId: dto.tgId } : { email: dto.email };
+      dto.type === AuthType.TG || dto.type === AuthType.PROMO_TG
+        ? { tgId: dto.tgId }
+        : { email: dto.email };
     const user = await this.usersService.find(condition);
 
     if (!user) {
@@ -117,7 +123,7 @@ export class AuthService {
     }
 
     const isValid =
-      dto.type === AuthType.TG
+      dto.type === AuthType.TG || dto.type === AuthType.PROMO_TG
         ? await user.validatePin(dto.pin)
         : await user.validatePassword(dto.password);
 
@@ -127,8 +133,25 @@ export class AuthService {
   }
 
   async login(
-    dto: AuthLoginTgRequestDto | AuthLoginEmailRequestDto
+    dto:
+      | AuthLoginTgRequestDto
+      | AuthLoginEmailRequestDto
+      | AuthLoginPromoTgRequestDto
   ): Promise<AuthLoginResponseDto> {
+    if (dto.type == AuthType.PROMO_TG) {
+      const user = await this.usersService.find({ tgId: dto.tgId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+
+      if (user.pinHash != null) {
+        throw new Error('Пользователь уже активирован');
+      }
+
+      await this.usersService.updatePin({ tgId: dto.tgId }, { pin: dto.pin });
+    }
+
     const user = await this.validate(dto);
 
     if (user.banned) {
@@ -172,5 +195,11 @@ export class AuthService {
     const user = await this.usersService.find({ tgId });
 
     return Boolean(user);
+  }
+
+  async checkPin(tgId: number): Promise<boolean> {
+    const user = await this.usersService.find({ tgId });
+
+    return Boolean(user?.pinHash);
   }
 }

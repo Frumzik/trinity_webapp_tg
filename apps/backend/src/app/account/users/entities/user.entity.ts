@@ -36,6 +36,7 @@ export class UserEntity implements IUser {
   promoNotifications = false;
 
   banned = false;
+  tags: string[] = [];
 
   // Рефералка
   referralPath = '';
@@ -82,6 +83,18 @@ export class UserEntity implements IUser {
 
   public async setAddress(address: string) {
     this.address = address;
+
+    return this;
+  }
+
+  public addTag(tag: string) {
+    this.tags.push(tag);
+
+    return this;
+  }
+
+  public removeTag(tag: string) {
+    this.tags = this.tags.filter((el) => el !== tag);
 
     return this;
   }

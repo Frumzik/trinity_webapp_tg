@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useGetUserQuery, useUpdateProfileMutation } from '../../../shared/api/user.api';
+import { useAuthedUserQuery } from './useAuthedUser';
 
 export function useSyncTelegramAvatar() {
-  const { data: userRes } = useGetUserQuery();
+  const { data: userRes } = useAuthedUserQuery();
   const [updateProfile] = useUpdateProfileMutation();
 
   useEffect(() => {
