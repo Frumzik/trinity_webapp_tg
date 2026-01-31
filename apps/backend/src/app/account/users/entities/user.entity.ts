@@ -87,6 +87,18 @@ export class UserEntity implements IUser {
     return this;
   }
 
+  public addTag(tag: string) {
+    this.tags.push(tag);
+
+    return this;
+  }
+
+  public removeTag(tag: string) {
+    this.tags = this.tags.filter((el) => el !== tag);
+
+    return this;
+  }
+
   public updateProfile(
     data: Partial<
       Pick<
@@ -99,7 +111,7 @@ export class UserEntity implements IUser {
         | 'birthDate'
         | 'gender'
       >
-    >,
+    >
   ) {
     if (data.name !== undefined) {
       this.name = data.name;

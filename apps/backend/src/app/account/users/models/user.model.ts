@@ -73,8 +73,7 @@ export class User extends Document<Types.ObjectId> implements IUser {
   @Prop({ type: Number, default: null })
   partnerId!: number | null;
 
-
-  @Prop({ type: [String], default: [] })
+  @Prop({ type: [String], default: [], required: false })
   tags!: string[];
 }
 

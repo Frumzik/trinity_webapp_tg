@@ -260,7 +260,7 @@ export default function Index() {
                 bgImageUrl={Tile3}
                 rightImageUrl={Card4}
                 enabled
-                to="/practice"
+                to="/store/practices"
                 className={"left-block-color-blue"}
               />
 
