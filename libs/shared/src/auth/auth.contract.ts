@@ -127,6 +127,22 @@ export class AuthLoginTgRequestDto {
   pin!: string;
 }
 
+@ApiExtraModels()
+export class AuthLoginPromoTgRequestDto {
+  @ApiProperty({ enum: AuthType, example: AuthType.PROMO_TG })
+  @IsEnum(AuthType)
+  type!: AuthType.PROMO_TG;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  tgId!: number;
+
+  @ApiProperty({ example: '1234' })
+  @IsString()
+  @MinLength(4)
+  pin!: string;
+}
+
 export class AuthLoginResponseDto {
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
