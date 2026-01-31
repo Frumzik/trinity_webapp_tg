@@ -6,6 +6,7 @@ import HelpIcon from '../../assets/icons/help.svg';
 import './topbarlk.scss';
 import { useGetUserQuery } from '../../shared/api/user.api';
 import { getTelegramUser } from '../../shared/telegram/telegram';
+import { useAuthedUserQuery } from '../../shared/lib/hooks/useAuthedUser';
 
 type Props = {
   balance?: string;
@@ -31,7 +32,7 @@ export default function TopBar({
   left,
   right,
 }: Props) {
-  const { data } = useGetUserQuery({ populate: true });
+  const { data } = useAuthedUserQuery({ populate: true });
   const u = data?.data;
   const tg = getTelegramUser();
 

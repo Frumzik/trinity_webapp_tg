@@ -4,53 +4,58 @@ import { FooterTabProvider } from './footer-tab'
 import { useAppSelector } from './store'
 import AuthGate from './AuthGate'
 
-import HomePage from '../pages/home'
-import ProgressPage from '../pages/progress'
-import FilmsPage from '../pages/films'
-import PolicyPage from '../pages/policy'
-import PracticePage from '../pages/practice'
-import AcademyPage from '../pages/academy'
-import WorkshopPage from '../pages/workshop'
-import StorePage from '../pages/store'
-import BillingHistoryPage from '../pages/billing/history'
-import WalletPage from '../pages/billing/wallet'
-import WithdrawPage from '../pages/billing/withdraw'
-import BillingSettingsPage from '../pages/billing/settings'
-import ProfilePage from '../pages/profile'
-import SupportPage from '../pages/support'
-import SecurityList from '../pages/security/index'
-import ViewPage from '../pages/profile/view/index'
-import AccountPage from '../pages/profile/account'
-import ChangePinPage from '../pages/security/change-pin'
-import ResetPinRequestPage from '../pages/security/reset-pin-request'
-import ResetPinConfirmPage from '../pages/security/reset-pin-confirm'
-import ProductsPage from '../pages/products'
-import EventsPage from '../pages/events'
-import { Index as FavoritesPage } from '../pages/favorites'
-import { Index as GiftsPage } from '../pages/gifts'
-import AboutPage from '../pages/about'
-import MarketingPage from '../pages/marketing'
-import DetailingPage from '../pages/detailing'
-import MaterialsPage from '../pages/materials'
-import PreviewPage from '../pages/preview'
-import LevelsPage from '../pages/levels'
-import LevelPage from '../pages/level'
-import PlayerScreen from '../pages/practisePlayer'
-import ExitConfirm from '../pages/session/ExitConfirm'
-import SessionComplete from '../pages/session/SessionComplete'
-import GoalsPage from '../pages/goals'
-import NotificationsPage from '../pages/notifications'
-import SubscriptionPage from '../pages/billing/subscription'
-import FaqPage from '../pages/faq'
-import HealthLabPage from '../pages/healthLab'
-import PinCreatePage from '../pages/pin/create'
-import PinLoginPage from '../pages/pin/login'
-import TrainingPage from '../pages/training'
-import LessonTextPage from "../pages/level/text-level"
-import EntryPage from "../pages/entry"
+import HomePage from '../pages/home';
+import ProgressPage from '../pages/progress';
+import FilmsPage from '../pages/films';
+import PolicyPage from '../pages/policy';
+import PracticePage from '../pages/practice';
+import AcademyPage from '../pages/academy';
+import WorkshopPage from '../pages/workshop';
+import StorePage from '../pages/store';
+import BillingHistoryPage from '../pages/billing/history';
+import WalletPage from '../pages/billing/wallet';
+import WithdrawPage from '../pages/billing/withdraw';
+import BillingSettingsPage from '../pages/billing/settings';
+import ProfilePage from '../pages/profile';
+import SupportPage from '../pages/support';
+import SecurityList from '../pages/security/index';
+import ViewPage from '../pages/profile/view/index';
+import AccountPage from '../pages/profile/account';
+import ChangePinPage from '../pages/security/change-pin';
+import ResetPinRequestPage from '../pages/security/reset-pin-request';
+import ResetPinConfirmPage from '../pages/security/reset-pin-confirm';
+import ProductsPage from '../pages/products';
+import EventsPage from '../pages/events';
+import { Index as FavoritesPage } from '../pages/favorites';
+import { Index as GiftsPage } from '../pages/gifts';
+import AboutPage from '../pages/about';
+import MarketingPage from '../pages/marketing';
+import DetailingPage from '../pages/detailing';
+import MaterialsPage from '../pages/materials';
+import PreviewPage from '../pages/preview';
+import LevelsPage from '../pages/levels';
+import LevelPage from '../pages/level';
+import PlayerScreen from '../pages/practisePlayer';
+import ExitConfirm from '../pages/session/ExitConfirm';
+import SessionComplete from '../pages/session/SessionComplete';
+import GoalsPage from '../pages/goals';
+import NotificationsPage from '../pages/notifications';
+import SubscriptionPage from '../pages/billing/subscription';
+import FaqPage from '../pages/faq';
+import HealthLabPage from '../pages/healthLab';
+import PinCreatePage from '../pages/pin/create';
+import PinLoginPage from '../pages/pin/login';
+import PinChangePage from '../pages/pin/change/change-pin';
+import TrainingPage from '../pages/training';
+import LessonTextPage from '../pages/level/text-level';
+import EntryPage from '../pages/entry';
 import TrainingLevelsIndex from '../pages/training-levels';
 import TransfersPage from '../pages/billing/transfer/index';
 import ReserveFund from '../pages/reserve-fund';
+import StoreNode from '../pages/store/StoreNode';
+import StoreLayout from '../pages/store/StoreLayout';
+import StoreContact from '../pages/store/StoreContact';
+import StorePreviewPage from "../pages/store/StoreItemPreview"
 
 const wrap = (node: React.ReactNode) => <FooterTabProvider>{node}</FooterTabProvider>
 
@@ -68,8 +73,9 @@ export const router = createBrowserRouter([
         element: <App />,
         children: [
           { index: true, element: wrap(<EntryPage />) },
-          { path: 'pin/create', element: wrap(<PinCreatePage />) },
-          { path: 'pin/login', element: wrap(<PinLoginPage />) },
+          { path: 'pin/create', element: <PinCreatePage /> },
+          { path: 'pin/login', element: <PinLoginPage /> },
+          { path: 'pin/change', element: <PinChangePage /> },
 
           {
             element: <PrivateRoute />,
