@@ -5,13 +5,15 @@ import TextField from '../../../shared/ui/forms/TextField'
 import './change-pin.scss'
 import { useUpdatePinMutation } from '../../../shared/api/user.api'
 import { usePromoSetPinMutation } from '../../../shared/api/auth.api'
-import { useAppSelector } from '../../../app/store'
+import { useAppSelector, useAppDispatch } from '../../../app/store'
 import { useAppNavigate } from '../../../shared/lib/hooks/useAppNavigate'
+import { sessionActions } from '../../../entities/session/model/session.slice'
 
 const onlyDigits = (s: string) => s.replace(/\D+/g, '').slice(0, 4)
 
 export default function ChangePinPage() {
   const navigate = useAppNavigate()
+  const dispatch = useAppDispatch() // ✅
   const token = useAppSelector(s => s.session.token)
 
   const tgUser = useMemo(() => {
@@ -25,7 +27,14 @@ export default function ChangePinPage() {
 
   const [updatePin, upd] = useUpdatePinMutation()
   const [promoSetPin, promo] = usePromoSetPinMutation()
-
+  const pickToken = (x: any): string | null =>
+    x?.access_token ||
+    x?.accessToken ||
+    x?.token ||
+    x?.data?.access_token ||
+    x?.data?.accessToken ||
+    x?.data?.token ||
+    null;
   const isLoading = upd.isLoading || promo.isLoading
 
   const onSave = async () => {
@@ -42,6 +51,7 @@ export default function ChangePinPage() {
     }
 
     try {
+      // 1) Пользователь уже в системе (есть токен) -> просто обновляем PIN
       if (token) {
         await updatePin({ pin: pin1 }).unwrap()
         setPin1('')
@@ -51,15 +61,29 @@ export default function ChangePinPage() {
         return
       }
 
+      // 2) Пользователь без токена -> создаём PIN через PROMO_TG и сразу логиним
       if (!tgUser?.id) {
         navigate('/pin/login', { replace: true })
         return
       }
 
-      await promoSetPin({ type: 'PROMO_TG', tgId: tgUser.id, pin: pin1 }).unwrap()
-      setPin1('')
-      setPin2('')
-      navigate('/pin/login', { replace: true })
+      const res: any = await promoSetPin({ type: 'PROMO_TG', tgId: tgUser.id, pin: pin1 }).unwrap();
+      const newToken = pickToken(res);
+
+      if (!newToken) {
+        setError('Сервер не вернул токен после установки PIN');
+        return;
+      }
+      dispatch(sessionActions.setToken(newToken));
+      dispatch(sessionActions.setTgUser({ id: tgUser.id, username: tgUser.username }));
+
+      localStorage.setItem('access_token', newToken);
+      localStorage.setItem('tgId', String(tgUser.id));
+
+      setPin1('');
+      setPin2('');
+
+      navigate('/', { replace: true });
     } catch {
       setError('Не удалось обновить PIN. Попробуйте ещё раз')
     }
@@ -67,7 +91,7 @@ export default function ChangePinPage() {
 
   return (
     <div className="sp">
-      <TopBar title={token ? 'Безопасность' : 'Придумайте PIN'} />
+      <TopBar title={token ? 'Безопасность' : 'Придумайте PIN'} hideBackButton/>
       <main className="sp__main">
         <TextField
           label="Новый PIN-код"
