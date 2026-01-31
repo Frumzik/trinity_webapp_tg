@@ -270,7 +270,7 @@ export default function SupportPage() {
               style={{ display: "flex", gap: "11px" }}
             >
               <div
-                onClick={() => nav("/store/practices")}
+                onClick={() => nav("/practice")}
                 style={{ flex: 1 }}
               >
                 <ReferralsCard

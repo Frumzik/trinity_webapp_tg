@@ -46,12 +46,9 @@ export const learningApi = createApi({
   baseQuery: baseQueryWithAuth,
   tagTypes: ['Learning'],
   endpoints: (b) => ({
-    getTrainingTree: b.query({
-      query: (args) => ({
-        url: "/learning/training",
-        params: args?.depth != null ? { depth: args.depth } : undefined,
-      }),
-      providesTags: ["Learning"],
+    getTrainingTree: b.query<GetTrainingTreeRes, void>({
+      query: () => ({ url: '/learning/training' }),
+      providesTags: ['Learning'],
     }),
 
     getUserTrainingById: b.query<GetUserTrainingRes, { id: number; populate?: boolean }>({
