@@ -83,30 +83,28 @@ export class BotService implements OnModuleInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendWelcomeMessage(ctx: any) {
     return await ctx.reply(
-      `✨ <strong>Дорогой Единомышленник!</strong>
+      `<b>✨ Добро пожаловать в Пространство ТРИНИТИ 💟</b>
 
-Добро пожаловать в <strong>Пространство ТРИНИТИ</strong> 🌟
+Мы рады, что вы здесь. Ваша трансформация начинается прямо сейчас. 🧬
 
-📖 <strong>Первый и самый важный шаг</strong> — обязательно ознакомься с Полным Руководством Пространства, чтобы легко и уверенно войти в процесс:
-<a href="https://teletype.in/@trinity_light/trinity_guide" target="_blank">https://teletype.in/@trinity_light/trinity_guide</a>
+<b>📲 Как войти в приложение:</b>
+Нажмите большую кнопку «ОТКРЫТЬ» в левом нижнем углу этого чата. ↙️
 
-Чтобы быть в потоке всех событий и возможностей, обязательно подпишись на наши официальные ресурсы:
+<b>📖 С чего начать:</b>
+Первый и самый важный шаг — откройте <a href="https://teletype.in/@trinity_light/trinity_guide">Полное Руководство Пространства</a>. Это ваш надежный путеводитель, который поможет легко и уверенно войти в процесс.
 
-📢 <strong>Информационный Канал:</strong>
-<a href="https://t.me/trinity_channel" target="_blank">https://t.me/trinity_channel</a>
+Чтобы быть в потоке всех событий и возможностей, присоединяйтесь к нашим официальным ресурсам:
 
-💭 <strong>Чат Сообщества:</strong>
-<a href="https://t.me/trinity_space" target="_blank">https://t.me/trinity_space</a>
+<b>📢 Информационный Канал:</b> <a href="https://t.me/trinity_channel">t.me/trinity_channel</a>
 
-💞 <strong>Канал Откликов:</strong>
-<a href="https://t.me/trinity_hearts" target="_blank">https://t.me/trinity_hearts</a>
+<b>💭 Чат Сообщества:</b> <a href="https://t.me/trinity_space">t.me/trinity_space</a>
 
-Если у тебя появятся вопросы — мы всегда рядом:
-🫶🏼 <strong>Помощь и Поддержка:</strong>
-<a href="https://t.me/trinity_light" target="_blank">https://t.me/trinity_light</a>
+<b>💞 Канал Откликов:</b> <a href="https://t.me/trinity_hearts">t.me/trinity_hearts</a>
 
-✨ Благодарим тебя за доверие и выбор Пути вместе с <strong>ТРИНИТИ</strong> 💜
-`,
+Если появятся вопросы — мы всегда рядом и готовы помочь. 🫶🏼 
+<b>Помощь и Поддержка:</b> <a href="https://t.me/trinity_light">t.me/trinity_light</a>
+
+✨ <i>Благодарим за доверие и выбор Пути вместе с ТРИНИТИ 💟</i>`,
       {
         parse_mode: 'HTML',
       }
