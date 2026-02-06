@@ -466,7 +466,7 @@ export default function TrainingLevelsIndex() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="1 USDT = 1 OM"
+            rateText="1 OM = 1 USDT"
             title={levelNodes.length ? `${group} уровень` : "Ступени"}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}

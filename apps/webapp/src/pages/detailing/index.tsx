@@ -9,8 +9,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetReferralsLevelsQuery } from '../../shared/api/referrals.api';
 import { useGetUserQuery } from '../../shared/api/user.api';
 import SubscriptionRequiredModal from '../../widgets/flexible-modal/subscription-required-modal';
-
-const getReferralEarn = (r: any) => Number(r.earn ?? 0);
+import { Virtuoso } from 'react-virtuoso';
 
 const formatName = (r: any) => {
   const u =
@@ -39,7 +38,7 @@ const pickAppUserId = (u?: any) => {
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [subModalOpen, setSubModalOpen] = useState(false); // модалка подписки
+  const [subModalOpen, setSubModalOpen] = useState(false);
   const location = useLocation();
   const nav = useNavigate();
 
@@ -57,17 +56,13 @@ const Index = () => {
     return type && type !== 'free';
   }, [u]);
 
-  const {
-    data: levelsData,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetReferralsLevelsQuery();
+  const { data: levelsData, isLoading, isError, refetch } =
+    useGetReferralsLevelsQuery();
 
   const current = useMemo(() => {
-    const list = levelsData ?? [];
+    const list = (levelsData as any) ?? [];
     return (
-      list.find((x) => x.level === level) || {
+      list.find((x: any) => x.level === level) || {
         level,
         totalEarn: 0,
         referrals: [] as any[],
@@ -75,11 +70,23 @@ const Index = () => {
     );
   }, [levelsData, level]);
 
+  const openTgChatByHandle = (handle: string) => {
+    const username = handle.replace(/^@/, '').trim();
+    if (!username) return;
+
+    const url = `https://t.me/${encodeURIComponent(username)}`;
+
+    const tg = (window as any)?.Telegram?.WebApp;
+    if (tg?.openTelegramLink) {
+      tg.openTelegramLink(url);
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const inviteHref = useMemo(() => {
     const appUserId = pickAppUserId(u);
     const BOT_USERNAME = 'TrinitySpaceBot';
-    const WEBAPP_SHORT_NAME = 'app';
-
     const botDeepLink = `https://t.me/${BOT_USERNAME}?start=${appUserId}`;
     const share = new URL('https://t.me/share/url');
     share.searchParams.set('url', botDeepLink);
@@ -95,6 +102,29 @@ const Index = () => {
       setSubModalOpen(true);
     }
   };
+
+  const referrals = (current?.referrals ?? []) as any[];
+  const count = referrals.length;
+
+  const MAX_VH = 50;
+  const VIRT_AFTER = 80;
+  const useVirtual = count > VIRT_AFTER;
+
+  const Row = (r: any) => (
+    <div className="wrapRow" key={r.id}>
+      <div className="row">
+        <span
+          className="row__title row__title--link"
+          onClick={() => openTgChatByHandle(formatName(r))}
+          role="button"
+          tabIndex={0}
+        >
+          {formatName(r)}
+        </span>
+        <span className="row__count">{formatOM(r.earn)}</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="app">
@@ -121,6 +151,7 @@ const Index = () => {
           </div>
 
           {isLoading && <div style={{ padding: 16 }}>Загрузка…</div>}
+
           {isError && (
             <div style={{ padding: 16 }}>
               Не удалось загрузить.{' '}
@@ -129,18 +160,47 @@ const Index = () => {
           )}
 
           {!isLoading && !isError && (
-            <div className="list">
-              {current.referrals.length === 0 && (
-                <div style={{ padding: 16, opacity: 0.7 }}>Пока пусто</div>
-              )}
+            <>
+              {count === 0 ? (
+                <div
 
-              {current.referrals.map((r, i) => (
-                <div className="row" key={r.id ?? r.userId ?? i}>
-                  <span className="row__title">{formatName(r)}</span>
-                  <span className="row__count">{formatOM(r.earn)}</span>
+                  style={{ color: "#FFF",   textAlign: 'center', opacity: 0.7 }}
+                >
+                  Пока нет пользователей
                 </div>
-              ))}
-            </div>
+              ) : useVirtual ? (
+                <div className="list" style={{ height: `${MAX_VH}vh` }}>
+                  <Virtuoso
+                    style={{ height: '100%' }}
+                    data={referrals}
+                    itemContent={(i, r) => (
+                      <div className="wrapRow">
+                        <div className="row">
+                          <span
+                            className="row__title row__title--link"
+                            onClick={() =>
+                              openTgChatByHandle(formatName(r))
+                            }
+                            role="button"
+                            tabIndex={0}
+                          >
+                            {formatName(r)}
+                          </span>
+                          <span className="row__count">{formatOM(r.earn)}</span>
+                        </div>
+                      </div>
+                    )}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="list"
+                  style={{ maxHeight: `${MAX_VH}vh`, overflowY: 'auto' }}
+                >
+                  {referrals.map((r: any) => Row(r))}
+                </div>
+              )}
+            </>
           )}
         </section>
 

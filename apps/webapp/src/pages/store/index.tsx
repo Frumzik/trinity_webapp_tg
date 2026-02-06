@@ -193,7 +193,7 @@ export default function Index() {
         open={modalOpen}
         lockedLevels={lockedLevels}
         defaultSelectedId={selected?.trainingId}
-        rateText="1 USDT = 1 OM"
+        rateText="1 OM = 1 USDT"
         InfoIcon={(props) => <img src={Info} {...props} />}
         onClose={() => setModalOpen(false)}
         onPurchase={(_p) => {
