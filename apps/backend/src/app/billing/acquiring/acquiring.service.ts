@@ -177,55 +177,76 @@ export class AcquiringService {
   // -------------------------
   // 7. Вывод средств
   // -------------------------
-  async withdraw(userId: number, address: string, amount: string) {
+  async withdraw(
+    userId: number,
+    username: string | undefined,
+    address: string | undefined,
+    amount: string
+  ) {
     try {
-      const user = await this.usersService.find({ userId });
+      if (address) {
+        const user = await this.usersService.find({ userId });
 
-      if (!user) {
-        throw new NotFoundException('Пользователь не найден');
-      }
-
-      let account;
-
-      // Проверяем кошелек
-      try {
-        account = await this.getAccount(userId.toString());
-
-        if (user.address != account.address) {
-          await this.usersService.bindAddress({ userId }, account.address);
+        if (!user) {
+          throw new NotFoundException('Пользователь не найден');
         }
-      } catch (err: any) {
-        // Если кошелька нет — создаём
-        if (err?.response?.status === 404) {
-          account = await this.createAccount(userId.toString());
-          await this.usersService.bindAddress({ userId }, account.address);
+
+        let account;
+
+        // Проверяем кошелек
+        try {
+          account = await this.getAccount(userId.toString());
+
+          if (user.address != account.address) {
+            await this.usersService.bindAddress({ userId }, account.address);
+          }
+        } catch (err: any) {
+          // Если кошелька нет — создаём
+          if (err?.response?.status === 404) {
+            account = await this.createAccount(userId.toString());
+            await this.usersService.bindAddress({ userId }, account.address);
+          } else {
+            throw err;
+          }
+        }
+
+        const sum = +amount - this.withdrawComission;
+
+        if (user.balance < sum) {
+          throw new Error('Недостаточный баланс');
+        }
+
+        if (sum <= 0) {
+          throw new Error(
+            `Вывод не может быть меньше ${this.withdrawComission} ОМ`
+          );
+        }
+
+        const toUser = await this.usersService.find({ address });
+
+        if (user.address == toUser?.address) {
+          throw new Error('Нельзя перевести самому себе');
+        }
+
+        if (toUser) {
+          await this.withdrawToUser(user, toUser, +amount);
         } else {
-          throw err;
+          await this.withrawToAddress(user, address, sum);
         }
-      }
+      } else if (username) {
+        const user = await this.usersService.find({ userId });
 
-      const sum = +amount - this.withdrawComission;
+        if (!user) {
+          throw new NotFoundException('Пользователь не найден');
+        }
 
-      if (user.balance < sum) {
-        throw new Error('Недостаточный баланс');
-      }
+        const toUser = await this.usersService.find({ username });
 
-      if (sum <= 0) {
-        throw new Error(
-          `Вывод не может быть меньше ${this.withdrawComission} ОМ`
-        );
-      }
+        if (!toUser) {
+          throw new NotFoundException('Пользователь не найден');
+        }
 
-      const toUser = await this.usersService.find({ address });
-
-      if (user.address == toUser?.address) {
-        throw new Error('Нельзя перевести самому себе');
-      }
-
-      if (toUser) {
         await this.withdrawToUser(user, toUser, +amount);
-      } else {
-        await this.withrawToAddress(user, address, sum);
       }
 
       return { created: true };
