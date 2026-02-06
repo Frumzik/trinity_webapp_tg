@@ -1,13 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Types } from 'mongoose';
 import { WithdrawType } from './acquiring.interface.js';
 import { FundType } from '../funds/funds.interface.js';
 
 export class AcquiringWithdrawRequestDto {
   @IsString()
+  @IsOptional()
+  @ApiProperty({ example: '@asdf' })
+  username?: string;
+
+  @IsString()
+  @IsOptional()
   @ApiProperty({ example: '0xadsf123r41dasdf' })
-  address!: string;
+  address?: string;
 
   @IsString()
   @ApiProperty({ example: '10.5' })
@@ -64,11 +76,11 @@ export class WithdrawCreateRequestDto {
   @IsNumber()
   @ApiProperty()
   withdrawId!: number;
-  
+
   @IsEnum(WithdrawType)
   @ApiProperty()
   type!: WithdrawType;
-  
+
   @ApiPropertyOptional()
   user?: Types.ObjectId;
 
