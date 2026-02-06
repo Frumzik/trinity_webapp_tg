@@ -505,7 +505,7 @@ export default function Index() {
             open={modalOpen}
             lockedLevels={purchaseLevels}
             defaultSelectedId={clickedId}
-            rateText="1 USDT = 1 OM"
+            rateText="1 OM = 1 USDT"
             title={`${group} уровень`}
             onClose={() => setModalOpen(false)}
             onPurchase={purchase}
