@@ -93,7 +93,7 @@ export class AcquiringController {
     @Body() dto: AcquiringWithdrawRequestDto
   ) {
     // Выполняем вывод
-    return await this.acquiringService.withdraw(userId, dto.address, dto.amount);
+    return await this.acquiringService.withdraw(userId, dto.username, dto.address, dto.amount);
   }
 
   // -------------------------
