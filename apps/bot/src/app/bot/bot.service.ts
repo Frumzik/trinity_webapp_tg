@@ -91,7 +91,7 @@ export class BotService implements OnModuleInit {
 Нажмите большую кнопку <b>«ОТКРЫТЬ»</b> в левом нижнем углу данного чата. ↙️
 
 <b>📖 С чего начать:</b>
-ервый и самый важный шаг — откройте Полное Руководство Пространства. Это ваш надежный путеводитель, который поможет легко и уверенно войти в процесс: <a href="https://teletype.in/@trinity_light/trinity_guide">https://teletype.in/@trinity_light/trinity_guide</a>
+Первый и самый важный шаг — откройте Полное Руководство Пространства. Это ваш надежный путеводитель, который поможет легко и уверенно войти в процесс: <a href="https://teletype.in/@trinity_light/trinity_guide">https://teletype.in/@trinity_light/trinity_guide</a>
 
 Чтобы быть в потоке всех событий и возможностей, присоединяйтесь к нашим официальным ресурсам:
 
