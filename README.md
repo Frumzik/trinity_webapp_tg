@@ -1,90 +1,136 @@
 # Trinity
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Telegram WebApp-приложение, запущенное через бота **[@TrinitySpaceBot](https://t.me/TrinitySpaceBot)**.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+Проект представляет собой финансовую Telegram WebApp-платформу с административной панелью управления.  
+Приложение работает в production и обслуживает **40 000+ пользователей**.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Разработка велась командой:
+- 1 Backend Developer
+- 1 Frontend Developer (WebApp + Admin Panel)
 
-## Finish your CI setup
+---
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/0QwaXnALW7)
+## 📦 Структура проекта
 
+Проект построен как **NX Monorepo** и включает:
 
-## Generate a library
+```text
+apps/
+  web/        → Telegram WebApp
+  api/        → Backend (REST API)
+  admin/      → Административная панель
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+libs/
+  shared/     → Общие утилиты и модули
+  ui/         → UI-компоненты
+  api/        → RTK Query сервисы
 ```
 
-## Run tasks
+Поддерживаются два окружения:
 
-To build the library use:
+- **test** — тестовая среда (отдельная база данных)
+- **production** — продакшен среда (отдельная база данных)
 
-```sh
-npx nx build pkg1
+---
+
+## 🚀 Запуск проекта
+
+### 1. Установка зависимостей
+
+```bash
+npm install
 ```
 
-To run any task with Nx use:
+### 2. Запуск всего приложения сразу Frontend-Backend
 
-```sh
-npx nx <target> <project-name>
+```bash
+npx nx run-many --target=serve --all
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### 3. Запуск Backend
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
+```bash
+npx nx run backend:serve
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+### 4. Запуск Frontend
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```bash
+npx nx run frontend:serve
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+После запуска сервисы будут доступны по локальным адресам, указанным в конфигурации NX.
 
-```sh
-npx nx sync:check
-```
+---
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+## 🧩 Основные функции WebApp
 
+- Авторизация через Telegram
+- PIN-код для защиты аккаунта
+- Просмотр баланса
+- Получение депозитного адреса
+- Вывод средств
+- Внутренние переводы между пользователями
+- История операций
+- Управление профилем
+- Работа с подписками
+- Большая реферальная система
+- Уведомления
+- Обработка ошибок и статусов операций
+- Прохождения уроков в видео/аудио/текстовом форматах
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Install Nx Console
+## 🛠 Основные функции Admin Panel
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+- Управление пользователями
+- Просмотр и управление транзакциями
+- Управление балансами
+- Блокировка и разблокировка пользователей
+- Управление подписками
+- Просмотр статистики
+- Модерация данных
+- Создание уроков/тренингов
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Useful links
+## ⚙️ Технологический стек
 
-Learn more:
+### Frontend
+- React
+- TypeScript
+- Redux Toolkit
+- RTK Query
+- SCSS
+- Telegram WebApp SDK
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Backend
+- Node.js
+- REST API
+- JWT
+- MongoDB
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Инфраструктура
+- NX Monorepo
+- Separate test / production environments
+- Separate databases for each environment
+
+---
+
+## 📊 Масштаб проекта
+
+- 40 000+ пользователей
+- Production-ready архитектура
+- Финансовые операции в реальном времени
+- Отдельные базы данных для test и production
+
+---
+
+## 🔐 Безопасность
+
+- Telegram-based authentication
+- JWT токены
+- PIN-защита аккаунта
+- Role-based access (User / Admin)
+- Изоляция окружений
