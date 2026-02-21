@@ -1,6 +1,6 @@
 # Trinity
 
-🇬🇧 English | [🇷🇺 Русский](README.ru.md)
+🇬🇧 English | [🇷🇺 Русский](read.ru.md)
 
 Telegram WebApp application launched via **[@TrinitySpaceBot](https://t.me/TrinitySpaceBot)**.
 
