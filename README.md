@@ -1,130 +1,132 @@
 # Trinity
 
-Telegram WebApp-приложение, запущенное через бота **[@TrinitySpaceBot](https://t.me/TrinitySpaceBot)**.
+🇬🇧 English | [🇷🇺 Русский](README.ru.md)
 
-Проект представляет собой финансовую Telegram WebApp-платформу с административной панелью управления.  
-Приложение работает в production и обслуживает **40 000+ пользователей**.
+Telegram WebApp application launched via **[@TrinitySpaceBot](https://t.me/TrinitySpaceBot)**.
 
-Разработка велась командой:
+The project is a financial Telegram WebApp platform with an administrative management panel.  
+The application is running in production and serves **40,000+ users**.
+
+Development team:
 - 1 Backend Developer
 - 1 Frontend Developer (WebApp + Admin Panel)
 
 ---
 
-## 📦 Структура проекта
+## 📦 Project Structure
 
-Проект построен как **NX Monorepo** и включает:
+The project is built as an **NX Monorepo** and includes:
 
 ```text
 apps/
   web/        → Telegram WebApp
   api/        → Backend (REST API)
-  admin/      → Административная панель
+  admin/      → Administrative Panel
 
 libs/
-  shared/     → Общие утилиты и модули
-  ui/         → UI-компоненты
-  api/        → RTK Query сервисы
+  shared/     → Shared utilities and modules
+  ui/         → UI components
+  api/        → RTK Query services
 ```
 
-Поддерживаются два окружения:
+Two environments are supported:
 
-- **test** — тестовая среда (отдельная база данных)
-- **production** — продакшен среда (отдельная база данных)
+- **test** — testing environment (separate database)
+- **production** — production environment (separate database)
 
 ---
 
-## 🚀 Запуск проекта
+## 🚀 Running the Project
 
-### 1. Установка зависимостей
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Запуск всего приложения сразу Frontend-Backend
+### 2. Run the entire application (Frontend + Backend)
 
 ```bash
 npx nx run-many --target=serve --all
 ```
 
-### 3. Запуск Backend
+### 3. Run Backend only
 
 ```bash
 npx nx run backend:serve
 ```
 
-### 4. Запуск Frontend
+### 4. Run Frontend only
 
 ```bash
 npx nx run frontend:serve
 ```
 
-После запуска сервисы будут доступны по локальным адресам, указанным в конфигурации NX.
+After запуск services will be available at the local addresses defined in the NX configuration.
 
 ---
 
-## 🔐 Локальная авторизация (Development)
+## 🔐 Local Authorization (Development)
 
-Для локального тестирования авторизации необходимо вручную передать параметры Telegram в URL.
+For local authorization testing, Telegram parameters must be manually passed in the URL.
 
-Откройте приложение по адресу:
+Open the application:
 
 ```
-http://localhost:4203/?tgId=ВАШ_ID&username=ВАШ_USERNAME
+http://localhost:4203/?tgId=YOUR_ID&username=YOUR_USERNAME
 ```
 
-Пример:
+Example:
 
 ```
 http://localhost:4203/?tgId=123456789&username=ivan_tg
 ```
 
-### ⚙️ Как это работает
+### ⚙️ How It Works
 
-- Если пользователя с указанным `tgId` нет в базе данных, система автоматически создаст нового пользователя.
-- Вам будет предложено **ввести PIN-код дважды** для его подтверждения.
-- После успешного создания PIN-кода пользователь будет автоматически авторизован.
+- If a user with the provided `tgId` does not exist in the database, a new user will be automatically created.
+- You will be prompted to **enter a PIN code twice** for confirmation.
+- After successful PIN creation, the user will be automatically authenticated.
 
-### ⏳ Срок действия PIN-кода
+### ⏳ PIN Expiration
 
-- PIN-код действует **3 часа**.
-- По истечении времени потребуется повторная авторизация.
-
----
-
-## 🧩 Основные функции WebApp
-
-- Авторизация через Telegram
-- PIN-код для защиты аккаунта
-- Просмотр баланса
-- Получение депозитного адреса
-- Вывод средств
-- Внутренние переводы между пользователями
-- История операций
-- Управление профилем
-- Работа с подписками
-- Большая реферальная система
-- Уведомления
-- Обработка ошибок и статусов операций
-- Прохождения уроков в видео/аудио/текстовом форматах
+- The PIN code is valid for **3 hours**.
+- After expiration, re-authentication is required.
 
 ---
 
-## 🛠 Основные функции Admin Panel
+## 🧩 Core WebApp Features
 
-- Управление пользователями
-- Просмотр и управление транзакциями
-- Управление балансами
-- Блокировка и разблокировка пользователей
-- Управление подписками
-- Просмотр статистики
-- Модерация данных
-- Создание уроков/тренингов
+- Telegram-based authentication
+- PIN-based account protection
+- Balance overview
+- Deposit address generation
+- Withdrawals
+- Internal user-to-user transfers
+- Transaction history
+- Profile management
+- Subscription management
+- Advanced referral system
+- Notifications
+- Error and operation status handling
+- Lessons in video / audio / text formats
 
 ---
 
-## ⚙️ Технологический стек
+## 🛠 Admin Panel Features
+
+- User management
+- Transaction monitoring and management
+- Balance control
+- User blocking / unblocking
+- Subscription management
+- Statistics dashboard
+- Data moderation
+- Lesson / training creation
+
+---
+
+## ⚙️ Tech Stack
 
 ### Frontend
 - React
@@ -140,26 +142,26 @@ http://localhost:4203/?tgId=123456789&username=ivan_tg
 - JWT
 - MongoDB
 
-### Инфраструктура
+### Infrastructure
 - NX Monorepo
 - Separate test / production environments
-- Separate databases for each environment
+- Separate databases per environment
 
 ---
 
-## 📊 Масштаб проекта
+## 📊 Project Scale
 
-- 40 000+ пользователей
-- Production-ready архитектура
-- Финансовые операции в реальном времени
-- Отдельные базы данных для test и production
+- 40,000+ active users
+- Production-ready architecture
+- Real-time financial operations
+- Environment isolation (test / production)
 
 ---
 
-## 🔐 Безопасность
+## 🔐 Security
 
 - Telegram-based authentication
-- JWT токены
-- PIN-защита аккаунта
-- Role-based access (User / Admin)
-- Изоляция окружений
+- JWT tokens
+- PIN-based account protection
+- Role-based access control (User / Admin)
+- Environment isolation
